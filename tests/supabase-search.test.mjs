@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createHandler,decodeImage,normalizeMatches} from '../supabase/functions/image-search/index.ts';
+import {createHandler,decodeImage,normalizeMatches,searchQuery} from '../supabase/functions/image-search/index.ts';
 const origin='https://sosohanlab.github.io';
 const env={SERPAPI_API_KEY:'PRIVATE-provider-key',SUPABASE_URL:'https://test-project.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'PRIVATE-server-role'};
 const photo='data:image/jpeg;base64,'+Buffer.from([255,216,255,224,0,1]).toString('base64');
@@ -13,8 +13,9 @@ function setup(override={}){
     if(String(url).includes('/rpc/todak_search_cache_get'))return json(override.cache??null);
     if(String(url).includes('/rpc/todak_search_reserve'))return override.reserveResponse||json(override.reserve||{allowed:true});
     if(String(url).includes('/rpc/todak_search_cache_put'))return json(null);
+    if(String(url)==='https://encrypted-tbn0.gstatic.com/qa.jpg')return new Response(new Uint8Array([137,80,78,71]),{headers:{'Content-Type':'image/png'}});
     if(url==='https://serpapi.com/image')return override.uploadResponse||json({image_id:'uploaded-photo-id'});
-    if(String(url).startsWith('https://serpapi.com/search.json?'))return json({visual_matches:[{title:'판매 상품',link:'https://shop.example/bowl',thumbnail:'https://shop.example/photo.jpg',price:{value:'₩20,000'}}]});
+    if(String(url).startsWith('https://serpapi.com/search.json?'))return json({visual_matches:[{title:'도자기 볼',link:'https://shop.example/bowl',thumbnail:'https://shop.example/photo.jpg',price:{value:'₩20,000'}}]});
     throw Error('unexpected call');
   }});
   return {handler,calls};
@@ -43,7 +44,7 @@ test('DB outage fails closed rather than using an unbounded memory counter',asyn
 test('actual image upload ID drives search; keys and raw IP never returned',async()=>{
   const {handler,calls}=setup();const r=await handler(request());assert.equal(r.status,200);const body=await r.json();assert.equal(body.matches.length,1);assert.equal(body.method,'image');
   const upload=calls.find(c=>c.url==='https://serpapi.com/image');assert.equal(upload.options.body.get('api_key'),env.SERPAPI_API_KEY);assert.equal(upload.options.body.get('image').size,6);
-  const search=calls.find(c=>c.url.startsWith('https://serpapi.com/search.json?'));const params=new URL(search.url).searchParams;assert.equal(params.get('image_id'),'uploaded-photo-id');assert.equal(params.has('q'),false);
+  const search=calls.find(c=>c.url.startsWith('https://serpapi.com/search.json?'));const params=new URL(search.url).searchParams;assert.equal(params.get('image_id'),'uploaded-photo-id');assert.equal(params.get('q'),'도자기');
   const reserve=JSON.parse(calls[1].options.body);assert.match(reserve.p_client_hash,/^[a-f0-9]{64}$/);assert.equal(reserve.p_month_limit,200);assert.equal(reserve.p_day_limit,20);assert.equal(reserve.p_client_day_limit,5);
   assert(!JSON.stringify(body).includes('PRIVATE'));assert(!JSON.stringify(reserve).includes('192.0.2.1'));
 });
@@ -55,4 +56,17 @@ test('editorial and unsafe results never presented as products',()=>{
 });
 test('unconfigured secrets return a clear status without upstream calls',async()=>{
   const handler=createHandler({env:()=>undefined,fetch:()=>{throw Error('must not call');},now:Date.now});const r=await handler(request());assert.equal(r.status,503);assert.equal((await r.json()).error,'search_not_configured');
+});
+
+test('image search context includes validated category and both dimensions',()=>{
+  const q=searchQuery({category:'파스타볼',style:'분청',diameterCm:19,heightCm:8});assert(q.includes('파스타볼'));assert(q.includes('19cm'));assert(q.includes('높이 8cm'));assert.equal(searchQuery(null),'도자기');assert(!searchQuery({category:'<script>',diameterCm:-10,heightCm:Infinity}).includes('<'));
+});
+test('different context produces a different result cache key for the same image',async()=>{
+ const a=setup(),b=setup();await a.handler(request());await b.handler(new Request('https://test-project.supabase.co/functions/v1/image-search',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({image:photo,context:{category:'파스타볼',diameterCm:19,heightCm:8}})}));assert.notEqual(JSON.parse(a.calls[0].options.body).p_digest,JSON.parse(b.calls[0].options.body).p_digest);assert(new URL(b.calls.find(c=>c.url.startsWith('https://serpapi.com/search.json?')).url).searchParams.get('q').includes('19cm'));
+});
+test('comparison image uses a cached provider thumbnail without a paid search',async()=>{
+ const {handler,calls}=setup({cache:{matches:[{image:'https://encrypted-tbn0.gstatic.com/qa.jpg'}]}});const r=await handler(new Request('https://test-project.supabase.co/functions/v1/image-search',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({action:'comparison-image',cacheKey:'a'.repeat(64),index:0})}));assert.equal(r.status,200);assert((await r.json()).image.startsWith('data:image/png;base64,'));assert.equal(calls.length,2);assert(!calls.some(c=>c.url.includes('serpapi.com')));
+});
+test('comparison image cannot request arbitrary/private hosts',async()=>{
+ const {handler,calls}=setup({cache:{matches:[{image:'https://127.0.0.1/private'}]}});const r=await handler(new Request('https://test-project.supabase.co/functions/v1/image-search',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({action:'comparison-image',cacheKey:'a'.repeat(64),index:0})}));assert.equal(r.status,422);assert.equal(calls.length,1);
 });

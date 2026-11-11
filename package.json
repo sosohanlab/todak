@@ -2,7 +2,7 @@
   "name": "todak-local-revision",
   "private": true,
   "scripts": {
-    "test": "python -m unittest discover -s tests -v && node --test tests/supabase-search.test.mjs tests/supabase-limits.test.cjs && node tests/dom.cjs && node tests/dom.cjs --mobile",
+    "test": "python -m unittest discover -s tests -v && node --test tests/supabase-search.test.mjs tests/supabase-limits.test.cjs && node tests/dom.cjs && node tests/dom.cjs --mobile && node tests/review.cjs && node tests/review.cjs --mobile",
     "start": "python server.py",
     "refresh-assets": "python tools/refresh_assets.py"
   },

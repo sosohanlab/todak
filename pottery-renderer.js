@@ -1,6 +1,12 @@
 /* 토닥 완성작 전용 PBR renderer. Three.js r160, MIT. No generated replacement images. */
 (function(){
 'use strict';
+// Keep light pottery separated from the backdrop in every render/export.
+window.TodakBackdrop=function(color,mode){
+  var light=(.2126*color[0]+.7152*color[1]+.0722*color[2])/255,t=Math.max(0,Math.min(1,(light-.69)/.22));t=t*t*(3-2*t);
+  var normal={studio:[224,216,206],warm:[233,220,198],dark:[65,74,67]},contrast={studio:[163,151,137],warm:[184,160,130],dark:[65,74,67]},key=normal[mode]?mode:'studio';
+  return {rgb:normal[key].map(function(v,i){return Math.round(v+(contrast[key][i]-v)*t);}),woodTint:1-t*.12};
+};
 var T=window.THREE;
 if(!T){window.TodakPhoto={available:false};return;}
 var renderer,scene,camera,pot,floor,environment,signature='',materials=[],textures=[],lost=false;
@@ -33,7 +39,8 @@ function init(){
     var key=new T.DirectionalLight(0xfff2de,3.1);key.position.set(-16,28,20);key.castShadow=true;
     key.shadow.mapSize.set(low?1024:2048,low?1024:2048);Object.assign(key.shadow.camera,{left:-30,right:30,top:35,bottom:-30,near:1,far:100});key.shadow.normalBias=.025;key.shadow.bias=-.00015;key.shadow.radius=5;scene.add(key);
     var fill=new T.DirectionalLight(0xe4edff,.8);fill.position.set(18,12,-9);scene.add(fill);
-    floor=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.MeshStandardMaterial({color:0xe4d9ca,roughness:.92}));floor.rotation.x=-Math.PI/2;floor.position.y=-.025;floor.receiveShadow=true;scene.add(floor);
+    floor=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.MeshBasicMaterial({color:0xe4d9ca}));floor.rotation.x=-Math.PI/2;floor.position.y=-.025;floor.receiveShadow=false;scene.add(floor);
+    var receiver=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.ShadowMaterial({opacity:.2}));receiver.rotation.x=-Math.PI/2;receiver.position.y=-.018;receiver.receiveShadow=true;scene.add(receiver);
     var c=canvas(128,128),g=c.getContext('2d'),grad=g.createRadialGradient(64,64,0,64,64,64);grad.addColorStop(0,'rgba(30,24,17,.42)');grad.addColorStop(.45,'rgba(30,24,17,.14)');grad.addColorStop(1,'rgba(30,24,17,0)');g.fillStyle=grad;g.fillRect(0,0,128,128);
     var contact=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial({map:new T.CanvasTexture(c),transparent:true,depthWrite:false,opacity:.8}));contact.name='contact';contact.rotation.x=-Math.PI/2;contact.position.y=.002;scene.add(contact);
     var wood=canvas(512,512),wx=wood.getContext('2d'),wi=wx.createImageData(512,512);
@@ -87,8 +94,8 @@ function configure(d,width,height){
   camera.left=-W/scale/2;camera.right=W/scale/2;camera.top=HC/scale/2;camera.bottom=-HC/scale/2;camera.near=.1;camera.far=500;
   camera.position.set(x,aim+60*.32,60*cos);camera.lookAt(x,aim,0);camera.updateProjectionMatrix();
   pot.rotation.y=-d.rotation;
-  var colors={studio:0xe6dfd5,warm:0xe9dcc6,dark:0x414a43};scene.background=new T.Color(colors[d.background]||colors.studio);floor.material.color.copy(scene.background);
-  var map=d.background==='warm'?woodTexture:null;if(floor.material.map!==map){floor.material.map=map;floor.material.needsUpdate=true;}if(map)floor.material.color.set(0xffffff);
+  var backdrop=window.TodakBackdrop(d.color,d.background);scene.background=new T.Color().setRGB(backdrop.rgb[0]/255,backdrop.rgb[1]/255,backdrop.rgb[2]/255,T.SRGBColorSpace);floor.material.color.copy(scene.background);
+  var map=d.background==='warm'?woodTexture:null;if(floor.material.map!==map){floor.material.map=map;floor.material.needsUpdate=true;}if(map)floor.material.color.setRGB(backdrop.woodTint,backdrop.woodTint,backdrop.woodTint);
   renderer.setSize(width,height,false);renderer.render(scene,camera);
 }
 window.TodakPhoto={available:true,render:function(d){if(!init()||lost)return null;try{if(signature!==d.key){rebuild(d);signature=d.key;}configure(d,d.pixelWidth,d.pixelHeight);return renderer.domElement;}catch(e){console.warn('토닥 렌더링 오류',e);return null;}},export:function(d,size,aspect){if(!init())return null;var r=0;for(var i=0;i<=64;i++)r=Math.max(r,d.rAt(i/64));var ratio=aspect||1,w=Math.round(size*Math.min(1,ratio)),h=Math.round(size/Math.max(1,ratio)),sc=Math.min(h/(d.height*1.5),w/(r*2.8));return this.render(Object.assign({},d,{width:w,canvasHeight:h,pixelWidth:w,pixelHeight:h,scale:sc,cx:w/2,base:h/2+d.height*.45*sc,rotation:d.rotation}));}};

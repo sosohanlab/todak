@@ -1,5 +1,7 @@
 # 토닥 · Supabase 이미지 검색 연결
 
+이미 연결했다면 Secrets·SQL을 다시 만들 필요는 없습니다. 최신 `supabase/functions/image-search/index.ts`로 함수 코드를 교체하고 **Deploy updates**만 실행하면 사진+종류·크기 검색과 비교 카드용 썸네일 가져오기가 적용됩니다. 웹사이트와 함수 배포는 별개입니다.
+
 토닥 화면은 GitHub Pages에 두고, 검색 요청만 Supabase Edge Functions에서 처리합니다. 별도 Python 호스팅은 필요 없습니다. 이 파일은 설정 안내이며 실제 프로젝트 생성·배포·Secrets 등록은 아직 하지 않았습니다.
 
 ## 1. Supabase 프로젝트 만들기

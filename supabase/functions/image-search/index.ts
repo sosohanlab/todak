@@ -11,6 +11,14 @@ function safeUrl(value:unknown):string|null {
   if(typeof value!=='string')return null;
   try{const u=new URL(value);return u.protocol==='https:'&&u.hostname?u.href:null;}catch{return null;}
 }
+export function searchQuery(context:unknown):string {
+  if(!context||typeof context!=="object")return "도자기";
+  const c=context as Json;
+  const text=(v:unknown)=>typeof v==='string'?v.replace(/[^\p{L}\p{N} ()·-]/gu,' ').trim().slice(0,40):'';
+  const dimension=(v:unknown)=>typeof v==='number'&&Number.isFinite(v)&&v>=1&&v<=100?Math.round(v):0;
+  const diameter=dimension(c.diameterCm),height=dimension(c.heightCm);
+  return ['도자기',text(c.style),text(c.category),diameter?diameter+'cm':'',height?'높이 '+height+'cm':''].filter(Boolean).join(' ').slice(0,160);
+}
 export function normalizeMatches(payload:Json):Match[]{
   const rows=Array.isArray(payload.visual_matches)?payload.visual_matches:[],seen=new Set<string>(),out:Match[]=[];
   for(const value of rows){
@@ -19,6 +27,8 @@ export function normalizeMatches(payload:Json):Match[]{
     let price=row.price;
     if(price&&typeof price==='object')price=(price as Json).value??(price as Json).extracted_value;
     if(!url||!image||typeof row.title!=='string'||!row.title.trim()||!price||seen.has(url))continue;
+    if(/PTFE|호스|환기|아크릴|실리콘|플라스틱|스테인리스|멜라민|hose|tubing|plastic/i.test(row.title))continue;
+    if(!/도자|분청|청자|백자|그릇|접시|볼|보울|공기|면기|파스타|화병|머그|컵|찻잔|잔|ceramic|pottery|porcelain|stoneware|bowl|vase|mug|plate|saucer|cup|dish/i.test(row.title))continue;
     if(typeof price!=='string'&&typeof price!=='number')continue;
     seen.add(url);out.push({url,image,title:row.title.slice(0,250),source:String(row.source||new URL(url).hostname).slice(0,100),price:String(price).slice(0,80)});
     if(out.length===8)break;
@@ -74,7 +84,24 @@ export function createHandler(deps:Dependencies){
       }catch{throw new SearchError(503,'search_limits_unavailable');}
     };
     try{
-      const input=await boundedJson(req),image=decodeImage(input.image),imageHash=await digest(image);
+      const input=await boundedJson(req);
+      if(input.action==='comparison-image'){
+        if(typeof input.cacheKey!=='string'||!/^[a-f0-9]{64}$/.test(input.cacheKey)||!Number.isInteger(input.index)||Number(input.index)<0||Number(input.index)>7)throw new SearchError(400,'invalid_request');
+        const cached=await rpc('todak_search_cache_get',{p_digest:input.cacheKey}) as Json|null;
+        const match=Array.isArray(cached?.matches)?cached.matches[Number(input.index)] as Match:undefined;
+        if(!match)throw new SearchError(410,'comparison_expired');
+        const url=new URL(match.image);
+        if(!['gstatic.com','googleusercontent.com','serpapi.com'].some(host=>url.hostname===host||url.hostname.endsWith('.'+host))||url.protocol!=='https:')throw new SearchError(422,'comparison_image_unsupported');
+        const remote=await deps.fetch(url.href,{signal:abort.signal,redirect:'error'});
+        const mime=(remote.headers.get('content-type')||'').split(';')[0];
+        if(!remote.ok||!['image/png','image/jpeg','image/webp'].includes(mime)||!remote.body)throw new SearchError(422,'comparison_image_unsupported');
+        const reader=remote.body.getReader(),parts:Uint8Array[]=[];let size=0;
+        while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>1_000_000){await reader.cancel();throw new SearchError(413,'image_too_large');}parts.push(value);}
+        let binary='';for(const part of parts)for(let i=0;i<part.length;i+=8192)binary+=String.fromCharCode(...part.subarray(i,i+8192));
+        return reply(200,{image:'data:'+mime+';base64,'+btoa(binary)});
+      }
+      const image=decodeImage(input.image),query=searchQuery(input.context);
+      const imageHash=await digest(new TextEncoder().encode('ceramic-v2:'+await digest(image)+':'+query));
       const cached=await rpc('todak_search_cache_get',{p_digest:imageHash});
       if(cached&&typeof cached==='object'&&Array.isArray((cached as Json).matches))return reply(200,cached as Json);
       // IP is an extra throttle, not an identity. An unavailable IP falls into a shared bucket.
@@ -90,11 +117,11 @@ export function createHandler(deps:Dependencies){
       const upload=await deps.fetch('https://serpapi.com/image',{method:'POST',body:form,signal:abort.signal});
       if(!upload.ok)throw new SearchError(502,'search_unavailable');
       const uploaded=await upload.json();if(typeof uploaded.image_id!=='string'||uploaded.error)throw new SearchError(502,'search_unavailable');
-      const query=new URLSearchParams({engine:'google_lens',type:'visual_matches',image_id:uploaded.image_id,api_key:apiKey,hl:'ko',country:'kr'});
-      const search=await deps.fetch('https://serpapi.com/search.json?'+query,{signal:abort.signal});
+      const params=new URLSearchParams({engine:'google_lens',type:'visual_matches',image_id:uploaded.image_id,api_key:apiKey,hl:'ko',country:'kr',q:query});
+      const search=await deps.fetch('https://serpapi.com/search.json?'+params,{signal:abort.signal});
       if(!search.ok)throw new SearchError(502,'search_unavailable');
       const payload=await search.json();if(payload.error)throw new SearchError(502,'search_unavailable');
-      const result={matches:normalizeMatches(payload),method:'image',checked_at:Math.floor(deps.now()/1000)};
+      const result={matches:normalizeMatches(payload),method:'image',query_used:query,cacheKey:imageHash,checked_at:Math.floor(deps.now()/1000)};
       // A result is still usable if writing the cache fails. Never retry the paid search.
       try{await rpc('todak_search_cache_put',{p_digest:imageHash,p_result:result});}catch{/* quota already counted */}
       return reply(200,result);
