@@ -36,11 +36,11 @@ function init(){
     renderer.domElement.addEventListener('webglcontextrestored',function(){lost=false;signature='';});
     scene=new T.Scene();camera=new T.OrthographicCamera();pot=new T.Group();scene.add(pot);
     scene.add(new T.HemisphereLight(0xfff5df,0x918274,1.5));
-    var key=keyLight=new T.DirectionalLight(0xfff2de,2.1);key.position.set(-16,28,20);key.castShadow=true;
+    var key=keyLight=new T.DirectionalLight(0xfff2de,2.1);key.position.set(-10,32,12);key.castShadow=true;
     key.shadow.mapSize.set(low?1024:2048,low?1024:2048);Object.assign(key.shadow.camera,{left:-30,right:30,top:35,bottom:-30,near:1,far:100});key.shadow.normalBias=.025;key.shadow.bias=-.00015;key.shadow.radius=8;scene.add(key);
     var fill=new T.DirectionalLight(0xe4edff,.8);fill.position.set(18,12,-9);scene.add(fill);
     floor=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.MeshStandardMaterial({color:0xe4d9ca,roughness:.92}));floor.rotation.x=-Math.PI/2;floor.position.y=-.025;floor.receiveShadow=false;scene.add(floor);
-    var receiver=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.ShadowMaterial({opacity:.2}));receiver.rotation.x=-Math.PI/2;receiver.position.y=-.018;receiver.receiveShadow=true;scene.add(receiver);
+    var receiver=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.ShadowMaterial({opacity:.10}));receiver.rotation.x=-Math.PI/2;receiver.position.y=-.018;receiver.receiveShadow=true;scene.add(receiver);
     var c=canvas(128,128),g=c.getContext('2d'),grad=g.createRadialGradient(64,64,0,64,64,64);grad.addColorStop(0,'rgba(30,24,17,.42)');grad.addColorStop(.45,'rgba(30,24,17,.14)');grad.addColorStop(1,'rgba(30,24,17,0)');g.fillStyle=grad;g.fillRect(0,0,128,128);
     var contact=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial({map:new T.CanvasTexture(c),transparent:true,depthWrite:false,opacity:.8}));contact.name='contact';contact.rotation.x=-Math.PI/2;contact.position.y=.002;scene.add(contact);
     var wood=canvas(512,512),wx=wood.getContext('2d'),wi=wx.createImageData(512,512);
@@ -48,14 +48,18 @@ function init(){
     woodTexture=new T.CanvasTexture(wood);woodTexture.colorSpace=T.SRGBColorSpace;woodTexture.wrapS=woodTexture.wrapT=T.RepeatWrapping;woodTexture.repeat.set(40,40);
     room=new T.Group();scene.add(room);
     function box(w,h,z,x,y,depth,color){var m=new T.Mesh(new T.BoxGeometry(w,h,z),new T.MeshStandardMaterial({color:color,roughness:.86}));m.position.set(x,y,depth);m.castShadow=true;m.receiveShadow=true;room.add(m);return m;}
-    var wall=box(180,90,1,0,45,-16,0xd6cbbb);wall.name='wall';
+    var wall=box(240,100,1,0,50,-36,0xd6cbbb);wall.name='wall';
     var plaster=canvas(256,256),px=plaster.getContext('2d'),pi=px.createImageData(256,256);
     for(var j=0;j<256*256;j++){var tone=238+noise(j%256,j/256|0)*15;pi.data[j*4]=pi.data[j*4+1]=pi.data[j*4+2]=tone;pi.data[j*4+3]=255;}px.putImageData(pi,0,0);
     var plasterMap=new T.CanvasTexture(plaster);plasterMap.wrapS=plasterMap.wrapT=T.RepeatWrapping;plasterMap.repeat.set(6,3);wall.material.map=plasterMap;wall.material.bumpMap=plasterMap;wall.material.bumpScale=.03;
-    box(1.1,45,2,-20,22,-14,0xece4d5);box(1.1,45,2,-6,22,-14,0xece4d5);box(15,1.1,2,-13,22,-14,0xece4d5);
-    box(18,1.4,7,-13,1,-13,0xc6b398);
-    var windowPane=new T.Mesh(new T.PlaneGeometry(28,45),new T.MeshBasicMaterial({color:0xf5eee0}));windowPane.position.set(-25,24,-15);room.add(windowPane);
-    var frame=box(17,22,1,23,15,-14,0x8c775c);frame.name='frame';box(15,20,1.2,23,15,-13.8,0xe9dfc9);
+    // Window remains off to the side; it frames the light rather than dominating the photo.
+    var windowFrame=new T.Group();windowFrame.name='window';room.add(windowFrame);
+    function windowBar(w,h,x,y){var m=new T.Mesh(new T.BoxGeometry(w,h,.6),new T.MeshStandardMaterial({color:0xd6ccba,roughness:.9}));m.position.set(x,y,-34);m.castShadow=false;windowFrame.add(m);}
+    var pane=new T.Mesh(new T.PlaneGeometry(12,21),new T.MeshBasicMaterial({color:0xeee8da}));pane.position.set(-22,14,-34.5);windowFrame.add(pane);
+    windowBar(.35,22,-28,14);windowBar(.35,22,-16,14);windowBar(12,.35,-22,14);windowBar(14,.6,-22,3);
+    // A shallow niche and its ledge, not an oversized empty picture frame.
+    var niche=box(8,10,.5,19,10,-34,0x7b8576);niche.name='niche';
+    var ledge=box(10,.45,2,19,4.8,-32.5,0xb8aa93);ledge.name='ledge';
     makeEnvironment();return true;
   }catch(e){console.warn('토닥: 3D를 사용할 수 없어 기본 보기로 표시합니다.',e);window.TodakPhoto.available=false;return false;}
 }
@@ -106,8 +110,10 @@ function configure(d,width,height){
   pot.rotation.y=-d.rotation;
   var backdrop=window.TodakBackdrop(d.color,d.background);scene.background=new T.Color().setRGB(backdrop.rgb[0]/255,backdrop.rgb[1]/255,backdrop.rgb[2]/255,T.SRGBColorSpace);floor.material.color.copy(scene.background);
   var map=d.background==='warm'?woodTexture:null;if(floor.material.map!==map){floor.material.map=map;floor.material.needsUpdate=true;}if(map)floor.material.color.setRGB(backdrop.woodTint,backdrop.woodTint,backdrop.woodTint);
-  room.visible=!d.transparent;room.children.forEach(function(o,i){o.visible=d.background==='warm'||i===0||d.background==='dark'&&i>=6;});
-  room.getObjectByName('wall').material.color.set(d.background==='dark'?0x536154:(d.background==='warm'?0xd6cbbb:0xbab0a2));
+  room.visible=!d.transparent;
+  // Keep background architecture proportional to the actual vessel, including tiny pieces.
+  var roomScale=Math.max(.45,Math.min(1.6,d.height/12));room.scale.set(roomScale,roomScale,roomScale);room.children.forEach(function(o){o.visible=o.name==='wall'||d.background==='warm'&&o.name==='window'||d.background==='dark'&&(o.name==='niche'||o.name==='ledge');});
+  room.getObjectByName('wall').material.color.set(d.background==='dark'?0x778071:(d.background==='warm'?0xd6cbbb:0xbab0a2));
   keyLight.shadow.radius=8;
   floor.visible=!d.transparent;
   scene.getObjectByName('contact').visible=!d.transparent;
