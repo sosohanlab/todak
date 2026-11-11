@@ -39,6 +39,21 @@ for(const preset of ['lump','bowl','cup','vase'])for(const side of [-1,1])for(co
  setGesture(v.CX+side*original[row]*v.SV,v.BASE-h*t*v.SV);q.ptr.x+=side*direction*.45*v.SV;for(let i=0;i<30;i++)q.touch(16);
  assert(direction*(q.st.radii[row]-original[row])>.3,preset+' shape must both widen and narrow');assert.equal(q.st.floor,floor);assert.equal(q.st.height,h);
 }
+// A continuous shaping stroke follows the finger vertically, preserving each passed region.
+for(const side of [-1,1])for(const direction of [-1,1]){
+ q.preset('cup');q.tool('shape');const v=q.view(),outside=q.st.radii.slice(),height=q.st.height,floor=q.st.floor;
+ const heldContour=q.data().rAt(.22)+direction*.7;const startRow=Math.round(q.N*.22);setGesture(v.CX+side*outside[startRow]*v.SV,v.BASE-height*.22*v.SV);q.ptr.x+=side*direction*.7*v.SV;
+ for(let step=0;step<=70;step++){const t=.22+step/70*.58;q.ptr.y=v.BASE-height*t*v.SV;for(let frame=0;frame<4;frame++)q.touch(16);}
+ for(const t of [.3,.5,.72]){const j=Math.round(t*(q.N-1));assert(Math.abs(q.st.radii[j]-heldContour)<.18,'shaping must carry the held contour along the full upward drag path');}
+ assert.equal(q.st.floor,floor);assert.equal(q.st.height,height);
+}
+// Holding a wide lower contour and dragging straight upward must also widen the neck.
+for(const side of [-1,1]){
+ q.preset('vase');q.tool('shape');const v=q.view(),outer=q.st.radii.slice(),floor=q.st.floor,h=q.st.height,start=.3,j0=Math.round(start*(q.N-1));
+ setGesture(v.CX+side*outer[j0]*v.SV,v.BASE-h*start*v.SV);
+ for(let step=0;step<=60;step++){q.ptr.y=v.BASE-h*(start+step/60*.55)*v.SV;for(let frame=0;frame<4;frame++)q.touch(16);}
+ const neck=Math.round(.78*(q.N-1));assert(q.st.radii[neck]>outer[neck]+.5,'straight upward dragging must carry the held contour');assert.equal(q.st.floor,floor);
+}
 q.preset('lump');q.tool('shape');let vv=q.view(),f0=q.st.floor;setGesture(vv.CX+.4*vv.SV,vv.BASE-q.st.height*.9*vv.SV);q.ptr.y+=3*vv.SV;for(let i=0;i<20;i++)q.touch(16);assert.equal(q.st.floor,f0,'shape vertical dragging must not dig');
 // The same inside/thickness tool can dig solid clay and refill it without changing the outside.
 q.tool('thick');const fixedOutside=q.st.radii.slice(),fixedHeight=q.st.height;setGesture(vv.CX,vv.BASE-q.st.height*vv.SV);q.ptr.y+=3*vv.SV;for(let i=0;i<30;i++)q.touch(16);assert(q.st.floor<f0-2.8,'inside tool must dig solid clay');assert.deepEqual(q.st.radii,fixedOutside);assert.equal(q.st.height,fixedHeight);

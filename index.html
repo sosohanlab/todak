@@ -1112,14 +1112,15 @@ function touchClay(dt){
       var startX=ptr.sx==null?ptr.x:ptr.sx,startY=ptr.sy==null?ptr.y:ptr.sy;
       var startT=(BASE-startY)/(h*SV),startD=Math.abs(startX-CX)/SV;
       ptr.shapeInvalid=startT<-.05||startT>1.1||startD>rAt(clamp(startT,0,1))+1;
-      ptr.w0=st.radii.slice();ptr.shapeInner=st.inner.slice();ptr.shapeRow=clamp(startT,0,1)*(N-1);ptr.shapeSide=startX<CX?-1:1;
+      ptr.w0=st.radii.slice();ptr.shapeInner=st.inner.slice();ptr.shapeWeights=Array(N).fill(0);ptr.shapeSide=startX<CX?-1:1;ptr.shapeOffset=startD-rAt(clamp(startT,0,1));
     }
     if(ptr.shapeInvalid)return 0;
-    var drag=(ptr.x-(ptr.sx==null?ptr.x:ptr.sx))*ptr.shapeSide/SV;
+    var surfaceRadius=(ptr.x-CX)*ptr.shapeSide/SV-ptr.shapeOffset;
     for(j=0;j<N;j++){
-      dist=(j-ptr.shapeRow)*rowH;if(Math.abs(dist)>F*2.2)continue;
+      dist=(j-row)*rowH;if(Math.abs(dist)>F*2.2)continue;
       var weight=Math.exp(-dist*dist/(F*F*1.4));
-      var targetRadius=clamp(ptr.w0[j]+drag*weight,j<2?Math.min(2,ptr.w0[j]):RMIN,RMAX);
+      ptr.shapeWeights[j]=Math.max(ptr.shapeWeights[j],weight);weight=ptr.shapeWeights[j];
+      var targetRadius=clamp(ptr.w0[j]+(surfaceRadius-ptr.w0[j])*weight,j<2?Math.min(2,ptr.w0[j]):RMIN,RMAX);
       var before=st.radii[j];st.radii[j]+=(targetRadius-before)*k;
       if(j*rowH>=st.floor&&st.floor<h-.05){st.inner[j]=clamp(ptr.shapeInner[j]+st.radii[j]-ptr.w0[j],.3,Math.max(.3,st.radii[j]-MINW));}
       if(st.inner[j]>st.radii[j]-MINW)st.inner[j]=Math.max(.3,st.radii[j]-MINW);
