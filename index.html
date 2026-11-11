@@ -435,11 +435,11 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 #card{border-radius:8px;box-shadow:0 10px 35px #29342720}
 
 .searchIn{max-width:760px;width:calc(100% - 28px);padding:24px;border-radius:20px;background:#faf8f2}
-.searchIn .shelfHead{align-items:flex-start}.searchIn h2{font-size:23px;margin:5px 0 12px;line-height:1.45}.searchIn small{color:#7d887a}
+.searchIn{position:relative;box-sizing:border-box}.searchIn .shelfHead{align-items:flex-start;justify-content:space-between;padding-right:72px}.searchIn .shelfHead>div{min-width:0;flex:1}.searchIn #closeSearch{position:absolute;right:20px;top:20px;margin:0;min-width:52px;min-height:44px;padding:8px 12px;flex:none;z-index:2}.searchIn h2{font-size:23px;margin:5px 0 12px;line-height:1.45}.searchIn small{color:#7d887a}
 .searchIn #searchPreview{height:280px;object-fit:contain;background:#d0c6b9;margin:12px 0}
 .searchIn .visualSearch>p{line-height:1.7}.compareChoice{width:100%;font:inherit;font-size:12px;border:1px solid #b8c4b2;background:#f1f4ec;color:#34533c;border-radius:8px;padding:10px 6px;margin-top:8px;cursor:pointer}
 #cardModes{margin-bottom:15px}#cardModes button:disabled{opacity:.45;cursor:default}
-@media(max-width:600px){.searchIn{padding:18px 16px}.searchIn h2{font-size:19px}}
+@media(max-width:600px){.searchIn{padding:18px 16px}.searchIn #closeSearch{right:14px;top:14px}.searchIn .shelfHead{padding-right:60px}.searchIn h2{font-size:19px}}
 
 .viewSwitch{display:flex;border:1px solid #bbc3b6;border-radius:10px;padding:3px;background:#e9ece4;gap:3px;margin:10px 0}.viewSwitch button{flex:1;border:0;background:transparent;padding:10px 8px;border-radius:7px;color:#53604e}.viewSwitch button[aria-pressed=true]{background:#fff;color:#233c2b;box-shadow:0 2px 5px #24332220;font-weight:600}
 #secBtn[aria-pressed=true]{background:#203f30;color:#fff;border:2px solid #fff}#p-done{gap:10px}#p-done .verdict strong{font-size:24px}#p-done .kiln{padding:10px 12px}#p-done #kilnLine,#doneNote,#vLine{display:none}#p-done #photoHelp{font-size:12px;line-height:1.6}#scoreDetail{margin:0;padding:7px 10px}.moreTools{border-top:1px solid #d4d8cd;padding-top:12px}.moreTools summary{cursor:pointer;color:#53644f;font-size:13px}.moreTools .actions{margin-top:10px}#stamps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.stampChoice{display:grid;justify-items:center;padding:9px 3px;font-size:11px;gap:4px;min-width:0}.stampChoice svg{width:40px;height:40px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}.stampChoice[aria-pressed=true]{background:#244431;border-color:#244431;color:white}.stage[data-stage=done] #cv{cursor:grab}.stage[data-stage=done] #cv:active{cursor:grabbing}
@@ -800,7 +800,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 
 <script src="vendor/three.min.js?v=170c6789f432"></script>
 <script src="config.js?v=523e84644e38"></script>
-<script src="pottery-renderer.js?v=65ab71137ac2"></script>
+<script src="pottery-renderer.js?v=ee8f1bb7c4ee"></script>
 <script>
 
 (function(){
