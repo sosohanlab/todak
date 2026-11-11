@@ -1,0 +1,6 @@
+project_id = "todak"
+
+# Intentionally public: no user account is required. The function enforces shared DB quotas.
+# Never expose the service_role key or SERPAPI_API_KEY in the browser.
+[functions.image-search]
+verify_jwt = false

@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>토닥 · 온라인 도자기 공방</title>
 <meta name="description" content="화면에서 도자기를 빚고, 꾸미고, 가마에 구워 보는 공방 놀이. 본을 따라 빚는 도전도 있어요.">
@@ -12,13 +13,13 @@
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="https://sosohanlab.github.io/todak/">
 <link rel="canonical" href="https://sosohanlab.github.io/todak/">
-<meta property="og:image" content="https://sosohanlab.github.io/todak/og.png">
-<meta name="twitter:image" content="https://sosohanlab.github.io/todak/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:image" content="https://sosohanlab.github.io/todak/og.png?v=668cdd561855">
+<meta name="twitter:image" content="https://sosohanlab.github.io/todak/og.png?v=668cdd561855">
+<meta property="og:image:width" content="1731">
+<meta property="og:image:height" content="909">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest?v=547f334bff93">
+<link rel="apple-touch-icon" href="icon-180.png?v=3ac1d9008497">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="토닥">
@@ -409,6 +410,17 @@ html[lang=en] .chip{font-size:13.5px}
 .shelfDetail .actions{margin-top:10px}
 .shelfDetail .ghost{min-height:40px;padding:8px 11px;font-size:13.5px}
 @media (max-width:380px){h1{font-size:21px}.steps{font-size:11px}}
+
+.searchPrivacy{font-size:12px;color:var(--muted)}
+#searchPreview{width:100%;max-height:220px;object-fit:contain;border-radius:8px;background:#e6dfd5}
+#imageMatches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.productMatch{display:flex;flex-direction:column;gap:5px;color:var(--ink);text-decoration:none;font-size:13px;min-width:0}
+.productMatch img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff;border-radius:8px}
+.productMatch small{color:var(--muted)}
+#shelfGrid{padding:14px 8px 26px;gap:24px 14px}
+.piece{position:relative;padding-bottom:20px;background:transparent}
+.piece::after{content:"";position:absolute;left:-7px;right:-7px;bottom:0;height:9px;background:linear-gradient(#c3a17b,#9c7653);box-shadow:0 6px 9px #34271320}
+.piece img{border-radius:8px;box-shadow:0 8px 16px #453a2a19}
 </style>
 </head>
 <body>
@@ -619,7 +631,7 @@ html[lang=en] .chip{font-size:13.5px}
           <div class="actions"><button type="button" class="primary" id="openKiln" hidden>가마 문 열기</button></div>
           <p id="fireTitle" style="font-weight:600;color:var(--ink)">불 때는 중</p>
           <div class="bar"><i id="fireBar"></i></div>
-          <p>1250℃까지 올려 구워요.</p>
+          <p id="fireCaption">불이 색을 만드는 중이에요.</p>
         </div>
       </section>
 
@@ -640,13 +652,34 @@ html[lang=en] .chip{font-size:13.5px}
         <div class="actions">
           <button type="button" class="primary" id="openCard">카드로 저장 · 공유</button>
         </div>
-        <div hidden><button type="button" id="reGlaze"></button><button type="button" id="otherCh"></button></div>
+        <div class="field">
+          <p id="photoHelp">끌어서 360° 돌려 보고, 휠이나 두 손가락으로 확대해요.</p>
+          <span class="label">어디에 놓아 볼까요?</span>
+          <div class="chips" id="photoScenes">
+            <button type="button" class="chip" data-scene="studio" aria-pressed="true">스튜디오</button>
+            <button type="button" class="chip" data-scene="warm" aria-pressed="false">따뜻한 창가</button>
+            <button type="button" class="chip" data-scene="dark" aria-pressed="false">작은 갤러리</button>
+          </div>
+        </div>
+        <div class="actions"><button type="button" class="ghost" id="savePhoto">작품 사진 저장</button><button type="button" class="ghost" id="resetPhoto">보기 초기화</button></div>
+        <div class="actions"><button type="button" class="ghost" id="reGlaze">이 모양에 다른 유약 입히기</button></div>
+        <div hidden><button type="button" id="otherCh"></button></div>
         <div hidden><button type="button" id="again">하나 더 빚기</button><button type="button" id="toHome"></button></div>
         <p class="tip" id="doneNote">진열장에 올려 뒀어요.</p>
         <p id="vLine"></p>
         <details class="fold">
-          <summary>닮은 제품 찾아보기</summary>
+          <summary>이 작품과 닮은 도자기 찾기</summary>
           <div class="in">
+            <div class="visualSearch">
+              <p>내 작품의 형태와 색으로 실제 판매 상품을 찾아봐요.</p>
+              <p class="searchPrivacy">검색을 누르면 작품 사진이 외부 이미지 검색 서비스로 전송돼요.</p>
+              <img id="searchPreview" alt="검색에 사용할 내 작품 사진" hidden>
+              <button type="button" class="primary" id="searchImage">내 작품 이미지로 찾기</button>
+              <p id="searchStatus" role="status" aria-live="polite"></p>
+              <div id="imageMatches"></div>
+              <div id="lensFallback" hidden><p>자동 검색을 사용할 수 없어요. 작품 사진을 저장한 뒤 Google Lens에 올려 검색할 수 있어요.</p><div class="actions"><button type="button" class="ghost" id="saveSearchImage">검색용 사진 저장</button><a class="linkbtn" href="https://lens.google/" target="_blank" rel="noopener noreferrer">Google Lens 열기</a></div></div>
+            </div>
+            <details class="fold"><summary>검색어로도 찾아보기</summary><div class="in">
             <div class="query">검색어 <q id="vQuery" data-keep></q></div>
             <div class="shops">
               <a class="linkbtn main" id="lNaver" target="_blank" rel="noopener noreferrer">네이버쇼핑에서 보기</a>
@@ -658,6 +691,7 @@ html[lang=en] .chip{font-size:13.5px}
               <span class="label">다른 검색어로 보기</span>
               <div class="more" id="more" data-keep></div>
             </div>
+            </div></details>
           </div>
         </details>
       </section>
@@ -756,6 +790,9 @@ html[lang=en] .chip{font-size:13.5px}
   </div>
 </main>
 
+<script src="vendor/three.min.js?v=170c6789f432"></script>
+<script src="config.js?v=67b8679a41ec"></script>
+<script src="pottery-renderer.js?v=f965b1bbaec1"></script>
 <script>
 
 (function(){
@@ -818,6 +855,7 @@ var dpr=1, spin=0, rot=0, rotTarget=0, fireStart=0, fireU=0, dirty=true, lastT=0
 var wob=0, wet=0, inten=0, lastVib=0, touched=false, tool="shape";
 var dTool="brush", dPig="blue", dColor=[122,63,160], dStamp="flower", dRing=false;
 var dSizeV={brush:0.35,carve:0.35,erase:0.4,stamp:0.4,move:0.35};
+var photoScene="studio";
 var Z=1, photoOn=true; /* 꾸미기 확대 배율, 완성 화면 실사 보기 */
 var ptr={down:false,x:0,y:0,sx:0,sy:0,lx:0,mode:null,decided:false,h0:0,mouse:false,contact:false,changed:false,pathR:null,paint:false,rotating:false,last:null};
 
@@ -1452,7 +1490,16 @@ function innerGrad(c,k){
   g.addColorStop(0,css(c,k*0.5)); g.addColorStop(0.55,css(c,k*0.8)); g.addColorStop(1,css(c,k*1.02));
   return g;
 }
+function photoData(){
+  compose();
+  return {key:[texVer,st.height,st.radii.join(','),st.inner.join(','),st.floor,st.glaze,(st.customC||[]).join(','),st.glaze2,st.dip,st.fx,st.finish,kilnSig()].join('|'),glazeId:st.glaze,height:st.height,floor:st.floor,rAt:rAt,innerAt:innerAt,color:glaze().c,inside:st.dip?byId(GLAZES,st.glaze2).c:glaze().c,finish:st.finish,overlay:fin.c,carve:hasCarve?carve.c:null,rotation:rot,background:photoScene,width:W,canvasHeight:HC,pixelWidth:cv.width,pixelHeight:cv.height,scale:SV,cx:CX,base:BASE};
+}
 function drawPhoto(){
+  if(window.TodakPhoto&&TodakPhoto.available){
+    var rendered=TodakPhoto.render(photoData());
+    if(rendered){ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(rendered,0,0,cv.width,cv.height);return;}
+    $("photoHelp").textContent="이 기기에서는 기본 보기로 보여 드려요.";
+  }
   var key=[rot.toFixed(3),SV.toFixed(2),texVer,st.glaze,(st.customC||"")+"",st.glaze2,st.dip,st.fx,st.finish,dpr,st.height.toFixed(2),kilnSig(),W,HC].join("|");
   if(key!==pvKey){pvKey=key; renderPhotoBody();}
   var gloss=st.finish==="gloss", ci=st.dip?byId(GLAZES,st.glaze2).c:glaze().c;
@@ -1462,7 +1509,8 @@ function drawPhoto(){
   ctx.setTransform(dpr,0,0,dpr,0,0);
   /* 배경: 이음매 없는 촬영 배경지 */
   var bg=ctx.createLinearGradient(0,0,0,HC);
-  bg.addColorStop(0,"#C9C5BE"); bg.addColorStop(0.5,"#E2DFD9"); bg.addColorStop(0.72,"#ECEAE5"); bg.addColorStop(1,"#D3CFC8");
+  var palette={studio:["#C9C5BE","#E2DFD9","#ECEAE5","#D3CFC8"],warm:["#D6C2A8","#EADCC7","#F5EAD6","#C5A581"],dark:["#303635","#454D49","#606A62","#373E39"]}[photoScene];
+  [0,0.5,0.72,1].forEach(function(stop,i){bg.addColorStop(stop,palette[i]);});
   ctx.fillStyle=bg; ctx.fillRect(0,0,W,HC);
   var rvp=revealing?revealP():1, kFade=revealing?1-clamp((rvp-0.62)/0.38,0,1):0;
   if(kFade>0){kilnBack(kFade); ctx.setTransform(dpr,0,0,dpr,0,0);}
@@ -1746,7 +1794,7 @@ cv.addEventListener("pointerdown",function(e){
   }
   pos(e);
   pts[e.pointerId]={x:ptr.x,y:ptr.y};
-  if(st.stage==="deco"&&nPts()===2){
+  if((st.stage==="deco"||st.stage==="done")&&nPts()===2){
     /* 두 손가락: 확대하고 옮긴다. 첫 손가락이 찍은 점은 되돌린다 */
     if(ptr.paint){ptr.paint=false; undoDeco();}
     ptr.rotating=false;
@@ -1778,6 +1826,8 @@ cv.addEventListener("pointerdown",function(e){
     e.preventDefault();
   }else{
     ptr.rotating=true;
+    try{cv.setPointerCapture(e.pointerId);}catch(_){}
+    e.preventDefault();
   }
   hideHint();
 });
@@ -1817,7 +1867,7 @@ function endDrag(e){
 cv.addEventListener("pointerup",endDrag);
 cv.addEventListener("pointercancel",endDrag);
 ["touchstart","touchmove"].forEach(function(ev){
-  cv.addEventListener(ev,function(e){if((st.stage==="throw"||st.stage==="deco")&&e.cancelable){e.preventDefault();}},{passive:false});
+  cv.addEventListener(ev,function(e){if((st.stage==="throw"||st.stage==="deco"||st.stage==="done")&&e.cancelable){e.preventDefault();}},{passive:false});
 });
 function turned(){if(st.stage==="done"){setTimeout(function(){cardDirty=true;},700);}}
 $("rotL").addEventListener("click",function(){rotTarget+=Math.PI/4; dirty=true; turned();});
@@ -1893,6 +1943,7 @@ function setStage(s){
 }
 function link(base,q){return base+encodeURIComponent(q);}
 function buildResult(){
+  if(window.resetVisualSearch)window.resetVisualSearch();
   var o=classify(), g=glaze(), bits=[], kl=KILN[(st.kiln&&st.kiln.type)||"plain"];
   $("vName").textContent=o.full;
   if(o.adj)bits.push(o.adj+" 모양");
@@ -2053,7 +2104,11 @@ $("backThrow").addEventListener("click",function(){setStage("throw");});
 $("toGlaze").addEventListener("click",function(){setStage("glaze");});
 $("backDeco").addEventListener("click",function(){setStage("deco");});
 $("toFire").addEventListener("click",function(){st.curId=null; setStage("fire");});
-$("reGlaze").addEventListener("click",function(){setStage("glaze");});
+$("reGlaze").addEventListener("click",function(){
+  st.curId=null; st.kiln=null; kilnKey=""; setStage("glaze");
+  toast("모양과 무늬는 그대로예요. 다른 색으로 한 점 더 만들어 봐요");
+});
+pick("photoScenes",function(d){photoScene=d.scene; photoOn=true; $("viewToggle").textContent="물레에서 보기"; press("photoScenes","scene",photoScene); cardDirty=true; dirty=true;});
 $("again").addEventListener("click",function(){
   applyPreset("lump"); clearDeco(); decoHist.length=0; st.name=""; st.kiln=null; st.curId=null; st.touches=0; st.falls=0; rot=rotTarget=0; markPreset("lump"); syncControls(); setStage("throw");
 });
@@ -2397,6 +2452,10 @@ function drawScene(){
 var cardC=$("card"), cardX=cardC.getContext("2d"), cardDirty=false, pendingShelf=false, dl=null;
 function photoCrop(target,dx,dy,dw,dh){
   /* 화면에서 작품 둘레(가로 360·세로 430 눈금)만 잘라 온다 */
+  if(window.TodakPhoto&&TodakPhoto.available){
+    var image=TodakPhoto.export(photoData(),Math.min(2048,Math.max(dw,dh)),dw/dh);
+    if(image){target.drawImage(image,0,0,image.width,image.height,dx,dy,dw,dh);dirty=true;return;}
+  }
   var sx=(CX0-180)*dpr, sy=(BASE0-366)*dpr, sw=360*dpr, sh=430*dpr, oy=0;
   if(sy<0){oy=-sy/sh*dh; sh+=sy; sy=0;}
   if(sx<0)sx=0;
@@ -3051,7 +3110,7 @@ function fireUI(){
   $("kilnTip").innerHTML=tip;
   $("doWipe").disabled=wiped||fstep!=="prep"; $("doWipe").textContent=wiped?"✓ 굽을 닦았어요":"굽 닦기";
   $("doLoad").disabled=fstep!=="prep"; $("doClose").disabled=fstep!=="loaded";
-  $("openKiln").hidden=true;
+  $("openKiln").hidden=fstep!=="ready";
   $("temp").hidden=fstep!=="firing";
   $("sheetTitle").textContent=pick?"가마 고르기":(prep?"가마에 넣기":(fstep==="firing"?"불 때는 중":"다 구워졌어요"));
   var nb=$("nextBtn"), label={pick:"이 가마로 →",prep:(wiped?"가마에 넣고 굽기 →":"굽 닦기")}[fstep];
@@ -3066,10 +3125,11 @@ function fireNext(){
     else{fstep="loading"; fT=now;}
   }
   else if(fstep==="loaded"){fstep="closing"; fT=now;}
-  else if(fstep==="cooling"){openKilnNow(); return;}
+  else if(fstep==="ready"){openKilnNow(); return;}
   fireUI();
 }
 function openKilnNow(){
+  if(fstep!=="ready")return;
   rollKiln(40); fireU=1; fireDone=true; doorA=0;
   revealPending=true; setStage("done");
 }
@@ -3080,15 +3140,17 @@ function fireTick(){
   else if(fstep==="closing"){doorA=1-clamp((now-fT)/900,0,1); if(doorA<=0){doorA=0; fstep="firing"; fT=now; fireUI();}}
   else if(fstep==="firing"){
     u=clamp((now-fT)/(st.kilnType==="wood"?6400:5200),0,1);
-    kilnTemp=20+1230*(u*u*(3-2*u)); kilnHeat=clamp((kilnTemp-150)/1100,0,1); fireU=0.55*u;
+    var peak={low:1100,mid:1200,high:1250}[st.fire]||1200;
+    kilnTemp=20+(peak-20)*(u*u*(3-2*u)); kilnHeat=clamp((kilnTemp-150)/1100,0,1); fireU=0.55*u;
     $("temp").textContent=Math.round(kilnTemp)+"℃";
-    $("fireTitle").textContent=kilnTemp<200?"남은 물기를 날리는 중":(kilnTemp<600?"천천히 올리는 중. 흙이 가장 예민한 구간이에요":(kilnTemp<1150?"유약이 녹기 시작해요":"1250℃. 유약이 유리처럼 녹았어요"));
+    $("fireTitle").textContent=kilnTemp<200?"남은 물기를 날리는 중":(kilnTemp<600?"천천히 올리는 중. 흙이 가장 예민한 구간이에요":(kilnTemp<1150?"유약이 녹기 시작해요":Math.round(peak)+"℃. 유약이 유리처럼 녹았어요"));
     $("fireBar").style.width=(u*100).toFixed(1)+"%";
     if(u>=1){fstep="cooling"; fT=now; fireUI();}
   }else if(fstep==="cooling"){
     c=clamp((now-fT)/1400,0,1); kilnHeat=clamp(1-c*1.2,0,1); fireU=0.55+0.45*c;
-    $("fireTitle").textContent="다 구워졌어요. 가마를 열어요";
-    if(c>=1){kilnHeat=0; stageEl.style.setProperty("--heat","0"); openKilnNow(); return;}
+    kilnTemp=({low:1100,mid:1200,high:1250}[st.fire]||1200)*(1-c)+40*c;
+    $("fireTitle").textContent="조금만 기다려요. 작품을 식히고 있어요";
+    if(c>=1){kilnHeat=0; stageEl.style.setProperty("--heat","0"); fstep="ready"; kilnTemp=40; fireUI(); $("fireTitle").textContent="어떤 빛으로 나왔을까요?"; $("fireCaption").textContent="가마 문을 눌러 첫 작품을 만나 보세요."; return;}
     $("fireBar").style.width="100%";
   }
   stageEl.style.setProperty("--heat",(kilnHeat*0.2).toFixed(3));
@@ -3148,7 +3210,7 @@ $("kilnGo").addEventListener("click",function(){if(fstep==="pick")fireNext();});
 $("doWipe").addEventListener("click",function(){if(fstep==="prep"&&!wiped){wiped=true; wipeT=performance.now(); toast("굽의 유약을 닦았어요"); fireUI();}});
 $("doLoad").addEventListener("click",function(){if(fstep==="prep"){fstep="loading"; fT=performance.now(); fireUI();}});
 $("doClose").addEventListener("click",function(){if(fstep==="loaded")fireNext();});
-$("openKiln").addEventListener("click",function(){if(fstep==="cooling")openKilnNow();});
+$("openKiln").addEventListener("click",function(){if(fstep==="ready")openKilnNow();});
 $("backGlaze").addEventListener("click",function(){setStage("glaze");});
 $("nextBtn").addEventListener("click",function(){if(st.stage==="fire"&&performance.now()-fireEnterT>350)fireNext();});
 
@@ -3156,6 +3218,7 @@ $("nextBtn").addEventListener("click",function(){if(st.stage==="fire"&&performan
 function fireBegin(){
   fireEnterT=performance.now();
   st.kilnType="electric";
+  $("fireCaption").textContent="불이 색을 만드는 중이에요.";
   fstep="prep"; loadA=0; doorA=1; wiped=true; wipeT=0; fireU=0; kilnHeat=0; kilnTemp=20; fireDone=false; st.kiln=null; kilnKey="";
   fireUI();
 }
@@ -3228,6 +3291,7 @@ function drawBoard(v){
 }
 cv.addEventListener("pointerdown",function(e){
   if(st.stage!=="fire")return;
+  if(fstep==="ready"){openKilnNow(); e.preventDefault(); return;}
   var p=cpos(e), g=kilnGeo();
   if(fstep==="prep"){
     var hw=rAt(0.5)*SV*0.5+34, hh=st.height*SV*0.5+34;
@@ -3432,7 +3496,7 @@ var SITE={name:"토닥",url:"https://sosohanlab.github.io/todak/",contact:""};
 })();
 /* ---------- 꾸미기 확대: 컴퓨터는 마우스 휠, 폰은 두 손가락 ---------- */
 cv.addEventListener("wheel",function(e){
-  if(st.stage!=="deco")return;
+  if(st.stage!=="deco"&&st.stage!=="done")return;
   e.preventDefault();
   var r=cv.getBoundingClientRect();
   setZoom(Z*Math.exp(-e.deltaY*0.0016),(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*HC/r.height);
@@ -3448,6 +3512,49 @@ cv.addEventListener("wheel",function(e){
   setStage=function(s){base(s); $("nextAlt").hidden=!(s==="done"&&st.target&&TARGETS[st.target]);};
   $("nextAlt").addEventListener("click",function(){$("otherCh").click();});
 })();
+/* Finished-photo controls and honest image-based search (never fabricated products). */
+(function(){
+  var controller=null,searchEpoch=0,lastSearchImage=null;
+  function imageCanvas(size,neutral){
+    var d=photoData();if(neutral)d.background='studio';
+    var result=window.TodakPhoto&&TodakPhoto.available?TodakPhoto.export(d,size):null;
+    var out=document.createElement('canvas');out.width=out.height=size;
+    if(result)out.getContext('2d').drawImage(result,0,0,size,size);
+    else{drawPhoto();photoCrop(out.getContext('2d'),0,0,size,size);}
+    dirty=true;return out;
+  }
+  function saveImage(c,name){c.toBlob(function(blob){if(!blob){toast('사진을 만들지 못했어요');return;}var a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(url);},5000);},'image/png');}
+  $('savePhoto').addEventListener('click',function(){saveImage(imageCanvas(2048,false),'토닥-작품사진.png');});
+  $('resetPhoto').addEventListener('click',function(){Z=1;CX=CX0;BASE=BASE0;SV=S0*V;rot=rotTarget=0;dirty=cardDirty=true;});
+  $('saveSearchImage').addEventListener('click',function(){saveImage(lastSearchImage||imageCanvas(896,true),'토닥-이미지검색.png');});
+  window.resetVisualSearch=function(){searchEpoch++;if(controller)controller.abort();controller=null;lastSearchImage=null;$('imageMatches').textContent='';$('searchStatus').textContent='';$('searchPreview').hidden=true;$('lensFallback').hidden=true;$('searchImage').disabled=false;};
+  function safeUrl(value){try{var u=new URL(value);return u.protocol==='https:'?u.href:null;}catch(_){return null;}}
+  $('searchImage').addEventListener('click',async function(){
+    if(controller)controller.abort();controller=new AbortController();var epoch=++searchEpoch;
+    var timeout=setTimeout(function(){if(epoch===searchEpoch&&controller)controller.abort();},45000);
+    var btn=this;btn.disabled=true;$('imageMatches').textContent='';$('lensFallback').hidden=true;
+    lastSearchImage=imageCanvas(896,true);var image=lastSearchImage.toDataURL('image/jpeg',.86);
+    if(image.length>650000)image=lastSearchImage.toDataURL('image/jpeg',.65);
+    $('searchPreview').src=image;$('searchPreview').hidden=false;$('searchStatus').textContent='내 작품을 닮은 도자기를 찾고 있어요…';
+    try{
+      var endpoint=(window.TODAK_CONFIG&&TODAK_CONFIG.searchEndpoint)||'';
+      if(!endpoint){var missing=new Error('not_configured');missing.searchCode='search_not_configured';throw missing;}
+      var response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:image}),signal:controller.signal});
+      var data;try{data=await response.json();}catch(_){throw Error('unavailable');}
+      if(!response.ok){var failure=new Error('unavailable');failure.searchCode=data.error;throw failure;}if(epoch!==searchEpoch)return;
+      if(!Array.isArray(data.matches))throw Error('invalid');
+      var matches=data.matches.filter(function(m){return m&&safeUrl(m.url)&&safeUrl(m.image)&&m.title;}).slice(0,8);
+      $('searchStatus').textContent=matches.length?'이미지로 찾은 판매 상품 후보예요. 닮은 정도와 현재 판매 여부는 판매처에서 확인해 주세요.':'아직 닮은 판매 상품을 찾지 못했어요. 사진의 각도를 바꿔 다시 찾아보세요.';
+      matches.forEach(function(m){var a=document.createElement('a'),im=document.createElement('img'),title=document.createElement('strong'),source=document.createElement('small');a.className='productMatch';a.href=safeUrl(m.url);a.target='_blank';a.rel='noopener noreferrer';im.src=safeUrl(m.image);im.alt=m.title;im.loading='lazy';title.textContent=m.title;source.textContent=[m.source,m.price].filter(Boolean).join(' · ');a.append(im,title,source);$('imageMatches').appendChild(a);});
+    }catch(e){
+      if(epoch!==searchEpoch)return;
+      var messages={search_not_configured:'자동 이미지 검색을 준비 중이에요.',monthly_limit:'이번 달 이미지 검색을 모두 사용했어요. 다음 달에 다시 찾아주세요.',daily_limit:'오늘의 이미지 검색을 모두 사용했어요. 내일 다시 찾아주세요.',client_limit:'잠시 쉬었다가 다시 검색해 주세요. 하루 검색 횟수에는 제한이 있어요.',invalid_image:'검색용 사진을 만들지 못했어요. 다시 시도해 주세요.',image_too_large:'작품 사진이 너무 커요. 잠시 뒤 다시 시도해 주세요.'};
+      $('searchStatus').textContent=messages[e.searchCode]||'지금은 자동 이미지 검색에 연결할 수 없어요.';$('lensFallback').hidden=false;
+    }
+    finally{clearTimeout(timeout);if(epoch===searchEpoch){btn.disabled=false;controller=null;}}
+  });
+})();
+
 if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
 })();
 
