@@ -483,6 +483,16 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
  .searchIn{max-height:calc(100dvh - 24px)}
 }
 
+
+/* View mode belongs to the work area, independent of the tool-panel scroll. */
+.stageViewSwitch{display:none;position:absolute;z-index:4;left:calc((100% - 440px)/2);top:152px;bottom:auto;transform:translateX(-50%);width:300px;max-width:calc(100% - 24px);margin:0;box-shadow:0 3px 12px #26332918}
+.stage[data-stage="throw"]~.stageViewSwitch{display:flex}
+.stageViewSwitch button{min-height:40px;font-size:13px;padding:8px 10px;white-space:nowrap}
+@media(max-width:759px){
+ .stageViewSwitch{left:0;right:0;top:auto;bottom:var(--tool-panel-height,64px);transform:none;width:100%;max-width:none;height:48px;padding:4px 12px;border-radius:0;border-left:0;border-right:0;background:#f5f5ee;box-shadow:none}
+ .stageViewSwitch button{min-height:38px;font-size:13px}
+}
+
 </style>
 </head>
 <body>
@@ -521,6 +531,8 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
     <div class="toast" id="toast" role="status"></div>
   </section>
 
+  <div class="viewSwitch stageViewSwitch" role="group" aria-label="도자기 보기"><button type="button" id="solidView" aria-pressed="true">입체 보기</button><button type="button" id="sectionView" aria-pressed="false">단면 · 벽 두께</button></div>
+
   <aside class="sheet" id="sheet" aria-label="조작판">
     <div class="sheetHead">
       <button type="button" id="sheetToggle" aria-expanded="false" aria-controls="sheetBody">펼치기</button>
@@ -539,7 +551,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
             <button type="button" class="chip" data-t="sponge" aria-pressed="false">매끈하게</button>
             <button type="button" class="chip" id="undo">↩ 되돌리기</button>
           </div>
-          <div class="viewSwitch" role="group" aria-label="도자기 보기"><button type="button" id="solidView" aria-pressed="true">입체 보기</button><button type="button" id="sectionView" aria-pressed="false">단면 · 벽 두께</button></div><p class="tip" id="toolTip" aria-live="polite"></p>
+          <p class="tip" id="toolTip" aria-live="polite"></p>
           <div class="rangehead"><label class="label" for="hsize">손끝 크기</label><output id="hsizeOut" for="hsize"></output></div>
           <input type="range" id="hsize" min="0" max="100" step="1" value="60">
         </div>
@@ -3547,7 +3559,9 @@ cv.addEventListener("wheel",function(e){
 var workspaceLayoutHeight=-1,workspaceLayoutWidth=-1;
 function layoutWorkspace(){
  var mobile=window.innerWidth<760,box=$('sheet').getBoundingClientRect();
- var reserve=mobile?Math.round(box.height):0;
+ var panelHeight=mobile?Math.round(box.height):0;
+ var reserve=panelHeight+(mobile&&st.stage==='throw'?48:0);
+ stageEl.parentElement.style.setProperty('--tool-panel-height',panelHeight+'px');
  if(reserve===workspaceLayoutHeight&&window.innerWidth===workspaceLayoutWidth)return;
  workspaceLayoutHeight=reserve;workspaceLayoutWidth=window.innerWidth;
  stageEl.style.bottom=reserve+'px';resize();
