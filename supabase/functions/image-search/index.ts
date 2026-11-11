@@ -27,7 +27,7 @@ export function normalizeMatches(payload:Json):Match[]{
     let price=row.price;
     if(price&&typeof price==='object')price=(price as Json).value??(price as Json).extracted_value;
     if(!url||!image||typeof row.title!=='string'||!row.title.trim()||!price||seen.has(url))continue;
-    if(/PTFE|호스|환기|아크릴|실리콘|플라스틱|스테인리스|멜라민|hose|tubing|plastic/i.test(row.title))continue;
+    if(/PTFE|호스|환기|아크릴|실리콘|플라스틱|스테인리스|멜라민|hose|tubing|plastic|acrylic|silicone|stainless|steel/i.test(row.title))continue;
     if(!/도자|분청|청자|백자|그릇|접시|볼|보울|공기|면기|파스타|화병|머그|컵|찻잔|잔|ceramic|pottery|porcelain|stoneware|bowl|vase|mug|plate|saucer|cup|dish/i.test(row.title))continue;
     if(typeof price!=='string'&&typeof price!=='number')continue;
     seen.add(url);out.push({url,image,title:row.title.slice(0,250),source:String(row.source||new URL(url).hostname).slice(0,100),price:String(price).slice(0,80)});

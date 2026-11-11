@@ -2020,7 +2020,7 @@ var DTIPS={
 };
 var RTIPS=["손이 지나간 자리에 그려져요.","한 곳에 대면 그 높이로 한 바퀴 줄이 생겨요."];
 function showTips(){
-  $("toolTip").innerHTML=TIPS[tool]; $("dToolTip").innerHTML=DTIPS[dTool]; $("ringTip").innerHTML=RTIPS[dRing?1:0];
+  $("toolTip").innerHTML=tool==="thick"&&st.height-st.floor<=.05?"아직 속이 없는 흙이에요. 먼저 모양 잡기로 가운데를 눌러 속을 파 주세요.":TIPS[tool]; $("dToolTip").innerHTML=DTIPS[dTool]; $("ringTip").innerHTML=RTIPS[dRing?1:0];
 }
 
 /* ---------- 조작 ---------- */
