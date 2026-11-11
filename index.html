@@ -460,7 +460,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 .stageToolbar .corner[hidden]{display:none}
 .viewMenu{position:relative}.viewMenu>summary{list-style:none;cursor:pointer;min-height:42px;padding:8px 12px;background:#fffdf5eb;border:1px solid #bdc6b7;border-radius:10px;font-size:12px;font-weight:600}.viewMenu>summary::-webkit-details-marker{display:none}.viewMenu[open]>summary{background:#e9eee4}.viewMenuBody{position:absolute;top:48px;left:0;min-width:170px;display:grid;gap:8px;padding:10px;border:1px solid #bdc6b7;background:#faf8f2;box-shadow:0 8px 24px #27312625;border-radius:12px}.viewMenuBody .corner{width:100%}.turnButtons{display:flex;gap:6px}
 .stage[data-stage=throw] #hint{display:none}
-#tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:visible}#tools .chip{min-height:44px}#tools #undo{grid-column:1/-1;font-size:12px;background:transparent;min-height:36px;border-width:1px}
+#tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;overflow:visible}#tools .chip{min-height:44px;min-width:0;font-size:12px;padding:8px 5px}#tools #undo{grid-column:1/-1;font-size:12px;background:transparent;min-height:36px;border-width:1px}
 @media(max-width:759px){
  .sheet{width:100%;max-width:none;left:0;right:0;bottom:0;transform:none;border:1px solid #bec4b6;border-bottom:0;border-radius:18px 18px 0 0;height:auto;max-height:calc(100dvh - 160px);padding-bottom:env(safe-area-inset-bottom);transition:none;box-shadow:0 -6px 24px #29342720}
  .sheet.open{height:56vh;height:56dvh;max-height:calc(100dvh - 160px)}
@@ -535,8 +535,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
           <span class="label">지금 할 일</span>
           <div class="chips" id="tools">
             <button type="button" class="chip" data-t="shape" aria-pressed="true">모양 잡기</button>
-            <button type="button" class="chip" data-t="hollow" aria-pressed="false">속 파기</button>
-            <button type="button" class="chip" data-t="thick" aria-pressed="false">두께 조절</button>
+            <button type="button" class="chip" data-t="thick" aria-pressed="false">속·두께 조절</button>
             <button type="button" class="chip" data-t="sponge" aria-pressed="false">매끈하게</button>
             <button type="button" class="chip" id="undo">↩ 되돌리기</button>
           </div>
@@ -544,7 +543,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
           <div class="rangehead"><label class="label" for="hsize">손끝 크기</label><output id="hsizeOut" for="hsize"></output></div>
           <input type="range" id="hsize" min="0" max="100" step="1" value="60">
         </div>
-        <p>파란 ↕ 를 끌면 키가 바뀌어요.</p>
+        <p id="heightHelp">모양 잡기의 ↕ 손잡이로 높이를 바꿔요.</p>
         <div class="field" id="f-presets">
           <span class="label">시작 모양</span>
           <div class="chips" id="presets">
@@ -848,7 +847,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 var N=56, W=360, HC=430, CX=180, BASE=366, CX0=180, BASE0=366, S0=11, TILT=0.26, TWO=6.283185307;
 var HMIN=3, HMAX=26, RMIN=1.2, RMAX=13.5, MINW=0.35; /* cm */
 var V=1, SV=S0; /* 화면 배율: 작은 작품은 크게 당겨 보여 준다 */
-var TOOLS={shape:{f:1.1,sm:0.05},hollow:{f:1.1,sm:0.05},thick:{f:1.1,sm:0.05},sponge:{f:1.6,sm:0}};
+var TOOLS={shape:{f:1.1,sm:0.05},thick:{f:1.1,sm:0.05},sponge:{f:1.6,sm:0}};
 var CLAY=[166,148,130], DRY=[186,170,152], RAW=[232,229,222], GLOW=[255,150,58];
 var GLAZES=[
   {id:"baekja",name:"백자",kw:"백자",c:[238,236,228]},
@@ -1085,7 +1084,7 @@ function updateReadout(){
 function touchClay(dt){
   var h=st.height, t=(BASE-ptr.y)/(h*SV);
   ptr.contact=false; ptr.maxD=0;
-  if(t<-0.12)return 0;
+  if(tool!=="thick"&&t<-0.12)return 0;
   var d=clamp(Math.abs(ptr.x-CX)/SV,0.3,RMAX), row=clamp(t,0,1)*(N-1), rowH=h/(N-1);
   var F=TOOLS[tool].f, SM=TOOLS[tool].sm, k=1-Math.exp(-dt/42);
   var moved=0, sumB=0, sumA=0, j, dist, surf, delta, hj, outerMoved=false;
@@ -1108,29 +1107,50 @@ function touchClay(dt){
     }
     return ptr.contact?Math.max(moved,0.005):0;
   }
+  if(tool==="shape"){
+    if(ptr.w0==null){
+      var startX=ptr.sx==null?ptr.x:ptr.sx,startY=ptr.sy==null?ptr.y:ptr.sy;
+      var startT=(BASE-startY)/(h*SV),startD=Math.abs(startX-CX)/SV;
+      ptr.shapeInvalid=startT<-.05||startT>1.1||startD>rAt(clamp(startT,0,1))+1;
+      ptr.w0=st.radii.slice();ptr.shapeInner=st.inner.slice();ptr.shapeRow=clamp(startT,0,1)*(N-1);ptr.shapeSide=startX<CX?-1:1;
+    }
+    if(ptr.shapeInvalid)return 0;
+    var drag=(ptr.x-(ptr.sx==null?ptr.x:ptr.sx))*ptr.shapeSide/SV;
+    for(j=0;j<N;j++){
+      dist=(j-ptr.shapeRow)*rowH;if(Math.abs(dist)>F*2.2)continue;
+      var weight=Math.exp(-dist*dist/(F*F*1.4));
+      var targetRadius=clamp(ptr.w0[j]+drag*weight,j<2?Math.min(2,ptr.w0[j]):RMIN,RMAX);
+      var before=st.radii[j];st.radii[j]+=(targetRadius-before)*k;
+      if(j*rowH>=st.floor&&st.floor<h-.05){st.inner[j]=clamp(ptr.shapeInner[j]+st.radii[j]-ptr.w0[j],.3,Math.max(.3,st.radii[j]-MINW));}
+      if(st.inner[j]>st.radii[j]-MINW)st.inner[j]=Math.max(.3,st.radii[j]-MINW);
+      delta=Math.abs(st.radii[j]-before);moved+=delta;ptr.maxD=Math.max(ptr.maxD,delta);
+      if(delta>.0001){ptr.contact=true;grooves[j]=Math.min(1,grooves[j]+delta*.25);}
+    }
+    return moved;
+  }
   if(tool==="thick"){
-    if(t>1.1)return 0;
     var hfT=(BASE-ptr.y)/SV;
-    if(st.height-st.floor<=0.05)return 0;       /* 아직 속을 안 팠으면 할 게 없다 */
+    var solid=st.height-st.floor<=0.05;
     if(ptr.w0==null){
       ptr.w0=[]; ptr.wg=[]; ptr.d0=Math.abs((ptr.sx==null?ptr.x:ptr.sx)-CX)/SV; ptr.hf0=(BASE-(ptr.sy==null?ptr.y:ptr.sy))/SV; ptr.fl0=st.floor;
       for(j=0;j<N;j++){ptr.w0[j]=st.radii[j]-st.inner[j]; ptr.wg[j]=0;}
       var startT=clamp(ptr.hf0/h,0,1), iw=innerAt(startT), j0=Math.min(N-1,Math.ceil(st.floor/rowH)), pad=clamp(14/SV,0.3,0.9);
       /* 벽보다 바닥에 더 가까운 곳을 잡았으면 바닥을 조절한다 */
       var floorDistance=Math.abs(ptr.hf0-st.floor), wallDistance=Math.min(Math.abs(ptr.d0-iw),Math.abs(ptr.d0-rAt(startT)));
-      ptr.tf=floorDistance<=pad&&ptr.d0<=innerAt(st.floor/h)+pad&&floorDistance<=Math.abs(ptr.d0-iw)+0.12;
+      ptr.tf=solid?(floorDistance<=pad*2&&ptr.d0<=rAt(1)-MINW):(floorDistance<=pad&&ptr.d0<=innerAt(st.floor/h)+pad&&floorDistance<=Math.abs(ptr.d0-iw)+0.12);
       ptr.invalidThickness=ptr.hf0<-.1||ptr.hf0>h+.2||(!ptr.tf&&(ptr.hf0<st.floor-.1||wallDistance>pad*2));
       $("toolTip").textContent=ptr.invalidThickness?"단면의 벽이나 바닥 가까이에서 잡아 주세요.":(ptr.tf?"바닥을 잡았어요. 위로 끌면 두껍게, 아래로 끌면 얇게 돼요.":"벽을 잡았어요. 바깥으로 끌면 얇게, 안으로 끌면 두껍게 돼요.");
-      ptr.wRef=clamp(st.radii[j0]-st.inner[j0],MINW,2);
+      ptr.wRef=solid?.6:clamp(st.radii[j0]-st.inner[j0],MINW,2);
     }
     if(ptr.invalidThickness)return 0;
     if(ptr.tf){
-      var nfT=clamp(ptr.fl0+(hfT-ptr.hf0),0.5,h-0.3), nf=st.floor+(nfT-st.floor)*k;
+      var nfT=clamp(ptr.fl0+(hfT-ptr.hf0),0.5,h), nf=st.floor+(nfT-st.floor)*k;
       if(Math.abs(nf-st.floor)>0.0005){
         if(nf<st.floor){
           /* 새로 드러난 속벽은 바로 위 벽과 같은 두께로 */
-          for(j=0;j<N;j++){if(j*rowH>=nf-rowH&&j*rowH<st.floor){st.inner[j]=Math.max(0.4,st.radii[j]-ptr.wRef);}}
+          for(j=0;j<N;j++){if(j*rowH>=nf-rowH&&j*rowH<=st.floor){st.inner[j]=Math.max(0.4,st.radii[j]-ptr.wRef);}}
         }
+        if(nfT===h&&h-nf<.02)nf=h;
         moved+=Math.abs(nf-st.floor)*0.7; st.floor=nf; ptr.contact=true;
       }
       return moved;
@@ -1147,90 +1167,9 @@ function touchClay(dt){
     }
     return moved;
   }
-  if(ptr.mode===null){
-    if(t>1.02){if(d<st.radii[N-1]-0.2){ptr.mode="inside";}else{if(t>1.12)return 0; ptr.mode="in";}}
-    else{ptr.mode=(d<rAt(t)-0.35)?"inside":"in";}
-  }
-  if(tool==="hollow"&&ptr.mode!=="inside")return 0;
-  if(tool==="shape"&&ptr.mode==="inside"&&(BASE-ptr.y)/SV<st.floor-.01){$("toolTip").textContent="속을 더 파려면 ‘속 파기’를 선택해 주세요.";return 0;}
-  for(j=0;j<N;j++)sumB+=st.radii[j];
-
-  if(ptr.mode==="in"){
-    /* 바깥에서 누르기: 둥근 손끝이 닿은 만큼 벽이 들어간다 */
-    if(t>1.12)return 0;
-    var dd=Math.max(d,RMIN);
-    for(j=0;j<N;j++){
-      dist=(j-row)*rowH;
-      if(Math.abs(dist)>F*1.9)continue;
-      surf=dd+dist*dist/(2*F);
-      if(st.radii[j]<=surf)continue;
-      delta=(surf-st.radii[j])*k;
-      st.radii[j]=clamp(st.radii[j]+delta,j<2?2:RMIN,RMAX);
-      if(st.inner[j]>st.radii[j]-MINW)st.inner[j]=Math.max(0.3,st.radii[j]-MINW);
-      moved+=Math.abs(delta); grooves[j]=Math.min(1,grooves[j]+Math.abs(delta)*1.6+0.01);
-      if(Math.abs(delta)>ptr.maxD){ptr.maxD=Math.abs(delta);}
-      ptr.contact=true; outerMoved=true;
-    }
-  }else{
-    /* 속: 손끝이 바깥벽에서 떨어진 거리가 곧 '남길 벽 두께'다. 그래서 파 내려가도 벽이 고른 두께로 남는다 */
-    if(t>1)return 0;
-    var hf=clamp((BASE-ptr.y)/SV,0.6,h), rOut=rAt(clamp(t,0,1)), q, target;
-    var wF=clamp(rOut-d,MINW,Math.max(MINW,rOut-0.7)), pushing=d>rOut-MINW;
-    var digging=hf<st.floor-0.01;
-    if(ptr.floor0==null){
-      ptr.floor0=st.floor; ptr.w0=[];
-      for(j=0;j<N;j++){ptr.w0[j]=Math.max(MINW,st.radii[j]-st.inner[j]);}
-      ptr.off=(hf>=st.floor)?Math.max(0,d-innerAt(clamp(t,0,1))):0;
-    }
-    var dE=d-ptr.off, keep;
-    /* 속에서 위아래로 손만 옮기는 동안에는 벽을 긁지 않는다 (파 내려갈 때는 예외) */
-    var travel=!digging&&Math.abs(ptr.vy||0)>1.5*Math.abs(ptr.vx||0)&&Math.abs(ptr.vy||0)>0.4;
-    if(digging){
-      /* 파 내려가는 동안에는 처음 잡은 두께(더 얇게 밀면 그 두께)를 끝까지 지킨다 */
-      if(ptr.wall==null||wF<ptr.wall){ptr.wall=wF;}
-      wF=ptr.wall;
-      var nf=st.floor+(hf-st.floor)*k;
-      moved+=(st.floor-nf)*0.7; st.floor=nf; ptr.contact=true;
-    }
-    for(j=0;j<N&&!travel;j++){
-      hj=j*rowH;
-      if(hj<st.floor-rowH)continue;
-      dist=(j-row)*rowH; q=dist*dist/(2*F); target=0;
-      if(digging&&hj<=ptr.floor0+rowH){target=Math.max(0.7,st.radii[j]-wF);}       /* 이번에 파 내려온 구간: 벽 두께를 고르게 */
-      else if(Math.abs(dist)<=F*1.9){target=dE-q;}    /* 둥근 손끝이 닿은 둘레만 */
-      /* 지킬 벽 두께: 이번에 판 구간은 팔 때 잡은 두께, 이미 파여 있던 구간은 원래 두께 */
-      keep=(hj<=ptr.floor0+rowH)?(ptr.wall!=null?ptr.wall:MINW):ptr.w0[j];
-      if(digging&&hj<=ptr.floor0+rowH){keep=MINW;}
-      target=Math.min(target,RMAX-keep);
-      if(st.inner[j]<target){
-        delta=(target-st.inner[j])*k;
-        st.inner[j]+=delta; moved+=delta*0.6; ptr.contact=true;
-        if(st.inner[j]>st.radii[j]-keep){
-          /* 속에서 밀면 벽 두께는 그대로, 바깥으로 벌어진다 */
-          var nr=Math.min(RMAX,st.inner[j]+keep);
-          if(Math.abs(nr-st.radii[j])>ptr.maxD){ptr.maxD=Math.abs(nr-st.radii[j]);}
-          st.inner[j]=nr-keep; moved+=Math.abs(nr-st.radii[j]); st.radii[j]=nr;
-          grooves[j]=Math.min(1,grooves[j]+0.02); outerMoved=true;
-        }
-      }
-    }
-  }
-  if(ptr.contact){
-    var span=Math.ceil(F*1.9/rowH)+1, a=Math.max(1,Math.floor(row)-span), b=Math.min(N-2,Math.ceil(row)+span);
-    if(SM>0){
-      for(j=a;j<=b;j++){
-        if(outerMoved)st.radii[j]+=SM*k*((st.radii[j-1]+st.radii[j+1])/2-st.radii[j]);
-        if(ptr.mode==="inside"&&j*rowH>st.floor)st.inner[j]+=SM*k*((st.inner[j-1]+st.inner[j+1])/2-st.inner[j]);
-        if(st.inner[j]>st.radii[j]-MINW)st.inner[j]=Math.max(0.3,st.radii[j]-MINW);
-      }
-    }
-    if(outerMoved){
-      for(j=0;j<N;j++)sumA+=st.radii[j];
-      setHeight(st.height*Math.pow(sumB/sumA,0.6));
-    }
-  }
   return moved;
 }
+
 function sculptStep(dt,ts){
   var moved=0;
   if(ptr.down&&ptr.decided&&st.stage==="throw"){
@@ -1741,7 +1680,7 @@ function draw(){
     ctx.strokeStyle="rgba(58,38,22,.28)"; ctx.lineWidth=1.2;
     ctx.beginPath(); if(secOn){ctx.moveTo(CX-tr,ty+2.5);ctx.lineTo(CX+tr,ty+2.5);}else{ctx.ellipse(CX,ty+2.5,tr,tr*TILT,0,0.12,Math.PI-0.12);} ctx.stroke();
   }
-  if(throwing&&!(ptr.down&&ptr.mode!=="pull")){
+  if(throwing&&tool==="shape"&&!(ptr.down&&ptr.mode!=="pull")){
     var hp=handlePos(), act=ptr.down&&ptr.mode==="pull";
     ctx.strokeStyle="rgba(31,63,168,.55)"; ctx.lineWidth=1.5; ctx.setLineDash([3,3]);
     ctx.beginPath(); ctx.moveTo(hp.x-17,hp.y); ctx.lineTo(CX+rAt(1)*SV,hp.y); ctx.stroke(); ctx.setLineDash([]);
@@ -1826,7 +1765,7 @@ function hoverCursor(e){
   if(st.stage!=="throw"){if(cv.style.cursor){cv.style.cursor="";} return;}
   if(ptr.down)return;
   var rect=cv.getBoundingClientRect(), x=(e.clientX-rect.left)*W/rect.width, y=(e.clientY-rect.top)*HC/rect.height;
-  var hp=handlePos(), hx=x-hp.x, hy=y-hp.y, c=(hx*hx+hy*hy<30*30)?"ns-resize":(nearClay(x,y)?"grab":"default");
+  var hp=handlePos(), hx=x-hp.x, hy=y-hp.y, c=(tool==="shape"&&hx*hx+hy*hy<30*30)?"ns-resize":(nearClay(x,y)?"grab":"default");
   if(cv.style.cursor!==c){cv.style.cursor=c;}
 }
 function hideHint(){if(!touched){touched=true; $("hint").classList.add("gone");}}
@@ -1855,8 +1794,8 @@ cv.addEventListener("pointerdown",function(e){
   ptr.down=true; ptr.sx=ptr.x; ptr.sy=ptr.y; ptr.lx=ptr.x; ptr.ly=ptr.y; ptr.mouse=(e.pointerType==="mouse");
   ptr.dipping=false; ptr.panning=false; ptr.paint=false; ptr.rotating=false; ptr.last=null; ptr.vx=0; ptr.vy=0; ptr.wall=null;
   if(st.stage==="throw"){
-    var hp0=handlePos(), onH=(ptr.x-hp0.x)*(ptr.x-hp0.x)+(ptr.y-hp0.y)*(ptr.y-hp0.y)<900;
-    if(st.target&&touchLeft()<=0&&(tool==="shape"||tool==="hollow"||onH)){
+    var hp0=handlePos(), onH=tool==="shape"&&(ptr.x-hp0.x)*(ptr.x-hp0.x)+(ptr.y-hp0.y)*(ptr.y-hp0.y)<900;
+    if(st.target&&touchLeft()<=0&&(tool==="shape"||onH)){
       ptr.down=false; delete pts[e.pointerId];
       toast("모양 잡기를 다 썼어요. 두께 조절과 매끈하게는 더 할 수 있어요");
       return;
@@ -1864,7 +1803,7 @@ cv.addEventListener("pointerdown",function(e){
     ptr.mode=null; ptr.h0=st.height; ptr.changed=false; ptr.pathR=null; ptr.floor0=null; ptr.w0=null; ptr.off=0; ptr.smoothSide=null; ptr.invalidThickness=false; pushHist();
     ptr.decided=true;
     var hp=handlePos(), hx=ptr.x-hp.x, hy=ptr.y-hp.y;
-    if(hx*hx+hy*hy<30*30){ptr.mode="pull";}
+    if(tool==="shape"&&hx*hx+hy*hy<30*30){ptr.mode="pull";}
     try{cv.setPointerCapture(e.pointerId);}catch(_){}
     e.preventDefault();
   }else if(st.stage==="deco"){
@@ -1914,7 +1853,7 @@ function endDrag(e){
   if(e&&pts[e.pointerId])delete pts[e.pointerId];
   if(nPts()<2)pinch=null;
   if(st.stage==="throw"&&ptr.down&&!ptr.changed&&Math.abs(st.height-ptr.h0)<0.01){hist.pop();}
-  else if(st.stage==="throw"&&ptr.down&&st.target&&(tool==="shape"||tool==="hollow"||ptr.mode==="pull")){st.touches=(st.touches||0)+1; updateReadout();}
+  else if(st.stage==="throw"&&ptr.down&&st.target&&(tool==="shape"||ptr.mode==="pull")){st.touches=(st.touches||0)+1; updateReadout();}
   if(ptr.paint){updateReadout();}
   if(st.stage==="done"&&ptr.rotating){cardDirty=true;}
   ptr.dipping=false; ptr.panning=false; ptr.down=false; ptr.contact=false; ptr.paint=false; ptr.rotating=false;
@@ -1983,7 +1922,7 @@ function setStage(s){
   setSheet(true);
   $("sheetBody").scrollTop=0;
   if(s==="deco"){$("hintText").textContent="도자기 위에 바로 그려 보세요"; touched=false; $("hint").classList.remove("gone");}
-  if(s==="throw"){$("hintText").textContent=tool==="hollow"?"입구 가운데를 누르고 아래로 끌어 속을 파요":"옆면을 좌우로 끌어 모양을 바꿔요"; ghostShow();}
+  if(s==="throw"){$("hintText").textContent=tool==="thick"?"바닥을 아래로 끌면 파이고 위로 끌면 채워져요":"옆면을 좌우로 끌어 모양을 바꿔요"; ghostShow();}
   ptr.down=false; drops.length=0; wob=0; if(s!=="throw"){hist.length=0;}
   if(s!=="fire")stageEl.style.setProperty("--heat","0");
   if(s==="fire"){fireBegin();}
@@ -2031,9 +1970,8 @@ function buildResult(){
 
 /* ---------- 도구 설명: 고른 도구가 무엇을 바꾸는지 바로 아래에 보여 준다 ---------- */
 var TIPS={
-  shape:"<b>옆면</b>을 좌우로 끌어 너비를 바꿔요. 위의 ↕ 손잡이로 높이를 조절해요.",
-  hollow:"<b>입구 가운데</b>를 누르고 아래로 끌어 속을 파요. 이미 파인 그릇은 안쪽 바닥을 아래로 끌어요.",
-  thick:"<b>벽</b>은 바깥으로 끌면 얇게, 안으로 끌면 두껍게. <b>바닥</b>은 아래로 끌면 얇게, 위로 끌면 두껍게.",
+  shape:"<b>옆면을 잡고</b> 바깥으로 끌면 넓게, 안쪽으로 끌면 좁게 돼요. 속 깊이는 바뀌지 않아요. ↕ 손잡이는 높이를 바꿔요.",
+  thick:"<b>바닥</b>을 아래로 끌면 파이고, 위로 끌면 채워져요. <b>벽</b>을 좌우로 끌어 두께를 조절해요. 바깥 너비·높이는 그대로예요.",
   sponge:"단면에서 <b>안쪽 벽이나 바깥쪽 벽을 문질러</b> 고르게 다듬어요. 바닥 높이는 바뀌지 않아요."
 };
 var DTIPS={
@@ -2045,7 +1983,8 @@ var DTIPS={
 };
 var RTIPS=["손이 지나간 자리에 그려져요.","한 곳에 대면 그 높이로 한 바퀴 줄이 생겨요."];
 function showTips(){
-  $("toolTip").innerHTML=tool==="thick"&&st.height-st.floor<=.05?"아직 속이 없는 흙이에요. 먼저 ‘속 파기’를 선택해 가운데를 아래로 끌어 주세요.":TIPS[tool]; $("dToolTip").innerHTML=DTIPS[dTool]; $("ringTip").innerHTML=RTIPS[dRing?1:0];
+  $("heightHelp").hidden=tool!=="shape";
+  $("toolTip").innerHTML=tool==="thick"&&st.height-st.floor<=.05?"흙의 윗면 가운데를 잡고 아래로 끌어 속을 파세요. 바깥 너비·높이는 바뀌지 않아요.":TIPS[tool]; $("dToolTip").innerHTML=DTIPS[dTool]; $("ringTip").innerHTML=RTIPS[dRing?1:0];
 }
 
 /* ---------- 조작 ---------- */

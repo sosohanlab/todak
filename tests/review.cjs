@@ -33,9 +33,23 @@ for(const id of Object.keys(q.targets)){
  const g=q.sectionData();assert(Math.abs(g.floorY-(g.bottomY-q.st.floor*v.SV))<1e-8);assert(Math.abs(g.inner[0][1]-g.floorY)<1e-8);for(const row of g.inner)assert(row[2]>=.119999);
  q.section();checks.push(id);
 }
-// Explicit shape and hollow tools must never describe or perform opposite actions.
-q.preset('lump');q.tool('shape');let vv=q.view(),f0=q.st.floor;setGesture(vv.CX+.4*vv.SV,vv.BASE-q.st.height*.7*vv.SV);for(let i=0;i<20;i++)q.touch(16);assert.equal(q.st.floor,f0,'shape must not silently hollow the clay');
-q.tool('hollow');setGesture(vv.CX+.4*vv.SV,vv.BASE-q.st.height*.7*vv.SV);for(let i=0;i<25;i++)q.touch(16);assert(q.st.floor<f0-.2,'explicit hollow tool must dig the clay');q.tool('shape');
+// Shape changes width in either direction and on either side, without digging.
+for(const preset of ['lump','bowl','cup','vase'])for(const side of [-1,1])for(const direction of [-1,1]){
+ q.preset(preset);q.tool('shape');const v=q.view(),h=q.st.height,floor=q.st.floor,row=32,t=row/(q.N-1),original=q.st.radii.slice();
+ setGesture(v.CX+side*original[row]*v.SV,v.BASE-h*t*v.SV);q.ptr.x+=side*direction*.45*v.SV;for(let i=0;i<30;i++)q.touch(16);
+ assert(direction*(q.st.radii[row]-original[row])>.3,preset+' shape must both widen and narrow');assert.equal(q.st.floor,floor);assert.equal(q.st.height,h);
+}
+q.preset('lump');q.tool('shape');let vv=q.view(),f0=q.st.floor;setGesture(vv.CX+.4*vv.SV,vv.BASE-q.st.height*.9*vv.SV);q.ptr.y+=3*vv.SV;for(let i=0;i<20;i++)q.touch(16);assert.equal(q.st.floor,f0,'shape vertical dragging must not dig');
+// The same inside/thickness tool can dig solid clay and refill it without changing the outside.
+q.tool('thick');const fixedOutside=q.st.radii.slice(),fixedHeight=q.st.height;setGesture(vv.CX,vv.BASE-q.st.height*vv.SV);q.ptr.y+=3*vv.SV;for(let i=0;i<30;i++)q.touch(16);assert(q.st.floor<f0-2.8,'inside tool must dig solid clay');assert.deepEqual(q.st.radii,fixedOutside);assert.equal(q.st.height,fixedHeight);
+const dugFloor=q.st.floor;setGesture(vv.CX,vv.BASE-dugFloor*vv.SV);q.ptr.y-=2*vv.SV;for(let i=0;i<30;i++)q.touch(16);assert(q.st.floor>dugFloor+1.8,'inside tool must refill upward');assert.deepEqual(q.st.radii,fixedOutside);assert.equal(q.st.height,fixedHeight);
+setGesture(vv.CX,vv.BASE-q.st.floor*vv.SV);q.ptr.y-=fixedHeight*vv.SV;for(let i=0;i<40;i++)q.touch(16);assert.equal(q.st.floor,fixedHeight,'inside can refill completely');assert.deepEqual(q.st.radii,fixedOutside);
+for(const preset of ['bowl','cup','vase']){
+ q.preset(preset);q.tool('thick');const v=q.view(),outer=q.st.radii.slice(),height=q.st.height,t=.8;
+ setGesture(v.CX+q.inner(t)*v.SV,v.BASE-height*t*v.SV);q.ptr.x+=20*v.SV;for(let i=0;i<30;i++)q.touch(16);assert.deepEqual(q.st.radii,outer,preset+' wall drag must not widen the outside');assert.equal(q.st.height,height);
+}
+assert.equal(w.document.querySelector('[data-t=hollow]'),null);assert(w.document.querySelector('[data-t=thick]').textContent.includes('속·두께'));
+q.tool('shape');
 for(const name of ['lump','bowl','cup','vase']){q.preset(name);const g=q.sectionData();assert.equal(g.hollow,name!=='lump');q.section();}
 ideal('cup');const good=q.score();q.st.radii=q.st.radii.map(r=>r*1.1);assert(q.score()<=good-20,'10% shape drift must cost points');
 ideal('cup');for(let j=5;j<q.N-2;j++)q.st.inner[j]+=(j%2?.18:-.18);assert(q.score()<=85,'deep interior ripples cannot score 90+');
