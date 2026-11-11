@@ -18,6 +18,12 @@ w.eval(main);const q=w.qa;
 q.free();
 function ideal(id){const T=q.targets[id];q.st.target=id;q.st.height=T.h;q.st.floor=id==='goblet'||id==='highstem'?T.h*.6:.8;q.st.radii=Array.from({length:q.N},(_,i)=>T.f(i/(q.N-1)));q.st.inner=q.st.radii.map(r=>Math.max(.3,r-.8));}
 function setGesture(x,y){Object.assign(q.ptr,{sx:x,sy:y,x:x,y:y,w0:null,mode:null,floor0:null,smoothSide:null,invalidThickness:false,contact:false,maxD:0});}
+const doc=w.document;w.innerWidth=390;q.stage('throw');
+function outsideEvent(type,x,y,target=doc.body){const e=new w.Event(type,{bubbles:true});Object.assign(e,{pointerId:99,clientX:x,clientY:y});target.dispatchEvent(e);}
+outsideEvent('pointerdown',20,200,doc.getElementById('sectionView'));outsideEvent('pointerup',20,200,doc.getElementById('sectionView'));assert(!doc.getElementById('sheet').classList.contains('open'),'mobile outside tap collapses tools');
+q.stage('throw');outsideEvent('pointerdown',20,200);outsideEvent('pointerup',20,240);assert(doc.getElementById('sheet').classList.contains('open'),'dragging must not collapse tools');
+outsideEvent('pointerdown',20,200,doc.getElementById('sheetBody'));outsideEvent('pointerup',20,200,doc.getElementById('sheetBody'));assert(doc.getElementById('sheet').classList.contains('open'),'inside selection keeps tools open');
+w.innerWidth=1280;outsideEvent('pointerdown',20,200);outsideEvent('pointerup',20,200);assert(doc.getElementById('sheet').classList.contains('open'),'desktop tools remain open');
 const checks=[];
 for(const id of Object.keys(q.targets)){
  ideal(id);const clean=q.score();assert(clean>=97,id+' ideal '+clean);
@@ -46,6 +52,14 @@ for(const side of [-1,1])for(const direction of [-1,1]){
  for(let step=0;step<=70;step++){const t=.22+step/70*.58;q.ptr.y=v.BASE-height*t*v.SV;for(let frame=0;frame<4;frame++)q.touch(16);}
  for(const t of [.3,.5,.72]){const j=Math.round(t*(q.N-1));assert(Math.abs(q.st.radii[j]-heldContour)<.18,'shaping must carry the held contour along the full upward drag path');}
  assert.equal(q.st.floor,floor);assert.equal(q.st.height,height);
+}
+// A fast upward stroke must fill skipped pointer samples and settle along its whole path.
+q.preset('cup');q.tool('shape');{
+ const v=q.view(),h=q.st.height,outer=q.st.radii.slice(),j0=Math.round(.2*(q.N-1));
+ setGesture(v.CX+outer[j0]*v.SV,v.BASE-h*.2*v.SV);q.ptr.x+=v.SV;q.touch(16);
+ q.ptr.y=v.BASE-h*.85*v.SV;q.touch(16);
+ for(let i=0;i<20;i++)q.touch(16);
+ for(const t of [.3,.5,.7]){const j=Math.round(t*(q.N-1));assert(Math.abs(q.st.radii[j]-(outer[j0]+1))<.05,'fast upward stroke must stay continuous');}
 }
 // Holding a wide lower contour and dragging straight upward must also widen the neck.
 for(const side of [-1,1]){

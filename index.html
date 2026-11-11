@@ -489,7 +489,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 .stage[data-stage="throw"]~.stageViewSwitch{display:flex}
 .stageViewSwitch button{min-height:40px;font-size:13px;padding:8px 10px;white-space:nowrap}
 @media(max-width:759px){
- .stageViewSwitch{left:0;right:0;top:auto;bottom:var(--tool-panel-height,64px);transform:none;width:100%;max-width:none;height:48px;padding:4px 12px;border-radius:0;border-left:0;border-right:0;background:#f5f5ee;box-shadow:none}
+ .stageViewSwitch{left:50%;right:auto;top:122px;bottom:auto;transform:translateX(-50%);width:300px;max-width:calc(100% - 24px);height:46px;padding:4px;border-radius:14px;background:#f5f5ee;box-shadow:0 3px 12px #26332918}
  .stageViewSwitch button{min-height:38px;font-size:13px}
 }
 
@@ -992,7 +992,7 @@ function fitV(){
   var rMax=0, h=st.height, rTop=st.radii[N-1], i, T=(st.stage==="throw"&&st.target)?TARGETS[st.target]:null;
   for(i=0;i<N;i++){if(st.radii[i]>rMax)rMax=st.radii[i];}
   if(T){h=Math.max(h,T.h); for(i=0;i<=10;i++){rMax=Math.max(rMax,T.f(i/10));} rTop=Math.max(rTop,T.f(1));}
-  var mobileView=stageEl.clientWidth<760,topRoom=mobileView?120*W/(stageEl.clientWidth||360):118;
+  var mobileView=stageEl.clientWidth<760,topRoom=mobileView?176*W/(stageEl.clientWidth||360):118;
   var roomH=Math.max(90,BASE0-topRoom), roomW=Math.max(110,Math.min(150,CX0-34));
   if(st.stage==="fire"){roomH=Math.max(110,BASE0-215); roomW=Math.max(50,Math.min(availW()/2,W/2)-128);}  /* 가마 전체가 보이게 물러선다 */
   return clamp(Math.min(roomH/(h+rTop*TILT),roomW/rMax)/S0,0.6,1.6);
@@ -1124,13 +1124,15 @@ function touchClay(dt){
       var startX=ptr.sx==null?ptr.x:ptr.sx,startY=ptr.sy==null?ptr.y:ptr.sy;
       var startT=(BASE-startY)/(h*SV),startD=Math.abs(startX-CX)/SV;
       ptr.shapeInvalid=startT<-.05||startT>1.1||startD>rAt(clamp(startT,0,1))+1;
-      ptr.w0=st.radii.slice();ptr.shapeInner=st.inner.slice();ptr.shapeWeights=Array(N).fill(0);ptr.shapeSide=startX<CX?-1:1;ptr.shapeOffset=startD-rAt(clamp(startT,0,1));
+      ptr.w0=st.radii.slice();ptr.shapeInner=st.inner.slice();ptr.shapeWeights=Array(N).fill(0);ptr.shapeSide=startX<CX?-1:1;ptr.shapeOffset=startD-rAt(clamp(startT,0,1));ptr.shapeLastRow=clamp(startT,0,1)*(N-1);
     }
     if(ptr.shapeInvalid)return 0;
     var surfaceRadius=(ptr.x-CX)*ptr.shapeSide/SV-ptr.shapeOffset;
     for(j=0;j<N;j++){
-      dist=(j-row)*rowH;if(Math.abs(dist)>F*2.2)continue;
-      var weight=Math.exp(-dist*dist/(F*F*1.4));
+      var nearestRow=clamp(j,Math.min(row,ptr.shapeLastRow),Math.max(row,ptr.shapeLastRow));
+      dist=(j-nearestRow)*rowH;
+      var weight=Math.abs(dist)>F*2.2?0:Math.exp(-dist*dist/(F*F*1.4));
+      if(!weight&&!ptr.shapeWeights[j])continue;
       ptr.shapeWeights[j]=Math.max(ptr.shapeWeights[j],weight);weight=ptr.shapeWeights[j];
       var targetRadius=clamp(ptr.w0[j]+(surfaceRadius-ptr.w0[j])*weight,j<2?Math.min(2,ptr.w0[j]):RMIN,RMAX);
       var before=st.radii[j];st.radii[j]+=(targetRadius-before)*k;
@@ -1139,6 +1141,7 @@ function touchClay(dt){
       delta=Math.abs(st.radii[j]-before);moved+=delta;ptr.maxD=Math.max(ptr.maxD,delta);
       if(delta>.0001){ptr.contact=true;grooves[j]=Math.min(1,grooves[j]+delta*.25);}
     }
+    ptr.shapeLastRow=row;
     return moved;
   }
   if(tool==="thick"){
@@ -1890,17 +1893,20 @@ function soundStart(){
     var len=ac.sampleRate*2, buf=ac.createBuffer(1,len,ac.sampleRate), data=buf.getChannelData(0), last=0;
     for(var i=0;i<len;i++){var w=Math.random()*2-1; last=(last+0.03*w)/1.03; data[i]=last*3.2;}
     var src=ac.createBufferSource(); src.buffer=buf; src.loop=true;
-    nFilt=ac.createBiquadFilter(); nFilt.type="bandpass"; nFilt.frequency.value=420; nFilt.Q.value=0.7;
+    nFilt=ac.createBiquadFilter(); nFilt.type="lowpass"; nFilt.frequency.value=320; nFilt.Q.value=0.45;
     nGain=ac.createGain(); nGain.gain.value=0;
     src.connect(nFilt); nFilt.connect(nGain); nGain.connect(ac.destination); src.start();
+    var motor=ac.createOscillator(),motorGain=ac.createGain();
+    motor.type="sine";motor.frequency.value=72;motorGain.gain.value=.16;
+    motor.connect(motorGain);motorGain.connect(nGain);motor.start();
     return true;
   }catch(_){ac=null; return false;}
 }
 function soundTick(){
   if(!ac||!nGain)return;
   var on=soundOn&&st.stage==="throw";
-  nGain.gain.setTargetAtTime(on?(0.035+0.5*inten):0,ac.currentTime,0.06);
-  nFilt.frequency.setTargetAtTime(380+900*inten,ac.currentTime,0.08);
+  nGain.gain.setTargetAtTime(on?(0.045+0.32*inten):0,ac.currentTime,0.14);
+  nFilt.frequency.setTargetAtTime(260+300*inten,ac.currentTime,0.18);
 }
 $("sound").addEventListener("click",function(){
   if(!soundOn){
@@ -3560,7 +3566,7 @@ var workspaceLayoutHeight=-1,workspaceLayoutWidth=-1;
 function layoutWorkspace(){
  var mobile=window.innerWidth<760,box=$('sheet').getBoundingClientRect();
  var panelHeight=mobile?Math.round(box.height):0;
- var reserve=panelHeight+(mobile&&st.stage==='throw'?48:0);
+ var reserve=panelHeight;
  stageEl.parentElement.style.setProperty('--tool-panel-height',panelHeight+'px');
  if(reserve===workspaceLayoutHeight&&window.innerWidth===workspaceLayoutWidth)return;
  workspaceLayoutHeight=reserve;workspaceLayoutWidth=window.innerWidth;
@@ -3571,6 +3577,17 @@ if(window.ResizeObserver){var sheetObserver=new ResizeObserver(layoutWorkspace);
 window.addEventListener('resize',layoutWorkspace);
 $('sheet').addEventListener('transitionend',layoutWorkspace);
 $('viewMenu').addEventListener('toggle',function(){dirty=true;});
+// Collapse only on a tap outside the mobile tools; dragging the clay stays uninterrupted.
+var sheetOutsideTap=null;
+document.addEventListener('pointerdown',function(e){
+ sheetOutsideTap=window.innerWidth<760&&$('sheet').classList.contains('open')&&!e.target.closest('#sheet,[role=dialog],.drawer,.modal,.overlay')?{id:e.pointerId,x:e.clientX,y:e.clientY}:null;
+},true);
+document.addEventListener('pointerup',function(e){
+ var tap=sheetOutsideTap;sheetOutsideTap=null;
+ if(tap&&tap.id===e.pointerId&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)<8)setSheet(false);
+});
+document.addEventListener('pointercancel',function(){sheetOutsideTap=null;});
+
 
 if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
 })();
