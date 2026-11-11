@@ -706,7 +706,6 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
       <button type="button" class="bigBtn alt" id="goChallenge"><b>도전하기</b><span>본을 따라 빚어요. 횟수 제한이 있고, 흙이 무너져요</span></button>
       <button type="button" class="bigBtn plain" id="goShelf"><b>내 진열장</b><span id="homeShelfN">구운 작품 0점</span></button>
       <button type="button" class="ghost" id="homeClose" hidden>하던 작업으로 돌아가기</button>
-      <button type="button" class="textBtn" id="howBtn">처음이에요 · 10초 안내 보기</button>
       <p class="homeFoot"><span id="footSave">로그인 없이 바로 써요. 구운 작품은 이 기기에만 저장돼요.</span><span id="footStat" hidden> 더 나은 사이트를 위해 방문 통계를 수집해요.</span><br>
         © 2026 토닥<a id="contactA" target="_blank" rel="noopener" hidden>문의</a><button type="button" id="addHome" hidden>홈 화면에 추가</button><button type="button" id="langBtn" data-keep>English</button></p>
       <p class="homeFoot" id="addHomeTip" hidden></p>
@@ -725,18 +724,6 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
         <button type="button" class="chip" data-bm="1" aria-pressed="false">본 외워서 (5초만 보여줌)</button>
       </div>
       <div class="chGrid" id="chGrid"></div>
-    </div>
-  </div>
-  <div class="overlay" id="howto" hidden>
-    <div class="howBox" role="dialog" aria-labelledby="howH">
-      <h2 id="howH">이렇게 빚어요</h2>
-      <ol class="howSteps">
-        <li><i>1</i><div><b>빚기</b><span>돌아가는 흙 가운데를 눌러 속을 파요. 밖에서 밀면 좁아지고, 속에서 바깥으로 밀면 두께는 그대로 넓어져요.</span></div></li>
-        <li><i>2</i><div><b>꾸미기</b><span>붓으로 그리거나 무늬를 새겨요. 건너뛰어도 돼요.</span></div></li>
-        <li><i>3</i><div><b>유약</b><span>색과 불 세기를 골라요.</span></div></li>
-        <li><i>4</i><div><b>굽기</b><span>가마에 넣으면 불이 구워 줘요. 불 세기와 벽 두께에 따라 결과가 달라져요.</span></div></li>
-      </ol>
-      <button type="button" class="primary" id="howGo">빚으러 가기</button>
     </div>
   </div>
   <div class="overlay" id="chRules" hidden>
@@ -3357,24 +3344,7 @@ if(hot&&hot.snapshot){
 var SITE={name:"토닥",url:"https://sosohanlab.github.io/todak/",contact:""};
 (function(){
   var solo=!(window.claude&&typeof window.claude.use==="function");
-  var seen=false, pending=null, defer=null;
-  try{seen=localStorage.getItem("todak.seen")==="1";}catch(_){}
-  function openHow(btn){
-    pending=btn||null; $("howGo").textContent=pending?"빚으러 가기":"알겠어요";
-    $("howto").hidden=false; $("howGo").focus();
-  }
-  /* 처음 온 사람이 시작 버튼을 누르면 안내를 한 번 먼저 보여 준다 */
-  document.addEventListener("click",function(e){
-    var b=e.target&&e.target.closest?e.target.closest("#goFree,#goChallenge"):null;
-    if(!b||seen)return;
-    e.stopPropagation(); e.preventDefault(); openHow(b);
-  },true);
-  $("howGo").addEventListener("click",function(){
-    seen=true; try{localStorage.setItem("todak.seen","1");}catch(_){}
-    $("howto").hidden=true;
-    if(pending){var b=pending; pending=null; b.click();}
-  });
-  $("howBtn").addEventListener("click",function(){openHow(null);});
+  var defer=null;
 
   if(!solo){$("footSave").textContent="로그인 없이 바로 써요. 구운 작품은 내 진열장에 모여요.";}
   if(SITE.contact){
