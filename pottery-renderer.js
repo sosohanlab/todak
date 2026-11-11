@@ -10,7 +10,7 @@ window.TodakBackdrop=function(color,mode){
 var T=window.THREE;
 if(!T){window.TodakPhoto={available:false};return;}
 var renderer,scene,camera,pot,floor,environment,signature='',materials=[],textures=[],lost=false;
-var woodTexture;
+var woodTexture,room,keyLight;
 var low=matchMedia('(pointer:coarse)').matches;
 function canvas(w,h){var c=document.createElement('canvas');c.width=w;c.height=h;return c;}
 function noise(x,y){var n=Math.sin(x*127.1+y*311.7)*43758.5453;return n-Math.floor(n);}
@@ -29,23 +29,33 @@ function makeEnvironment(){
 function init(){
   if(renderer)return !lost;
   try{
-    renderer=new T.WebGLRenderer({antialias:true,alpha:false,preserveDrawingBuffer:true,powerPreference:low?'low-power':'high-performance'});
+    renderer=new T.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true,powerPreference:low?'low-power':'high-performance'});
     renderer.setPixelRatio(1);renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;
     renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
     renderer.domElement.addEventListener('webglcontextlost',function(e){e.preventDefault();lost=true;});
     renderer.domElement.addEventListener('webglcontextrestored',function(){lost=false;signature='';});
     scene=new T.Scene();camera=new T.OrthographicCamera();pot=new T.Group();scene.add(pot);
     scene.add(new T.HemisphereLight(0xfff5df,0x918274,1.5));
-    var key=new T.DirectionalLight(0xfff2de,3.1);key.position.set(-16,28,20);key.castShadow=true;
-    key.shadow.mapSize.set(low?1024:2048,low?1024:2048);Object.assign(key.shadow.camera,{left:-30,right:30,top:35,bottom:-30,near:1,far:100});key.shadow.normalBias=.025;key.shadow.bias=-.00015;key.shadow.radius=5;scene.add(key);
+    var key=keyLight=new T.DirectionalLight(0xfff2de,2.1);key.position.set(-16,28,20);key.castShadow=true;
+    key.shadow.mapSize.set(low?1024:2048,low?1024:2048);Object.assign(key.shadow.camera,{left:-30,right:30,top:35,bottom:-30,near:1,far:100});key.shadow.normalBias=.025;key.shadow.bias=-.00015;key.shadow.radius=8;scene.add(key);
     var fill=new T.DirectionalLight(0xe4edff,.8);fill.position.set(18,12,-9);scene.add(fill);
-    floor=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.MeshBasicMaterial({color:0xe4d9ca}));floor.rotation.x=-Math.PI/2;floor.position.y=-.025;floor.receiveShadow=false;scene.add(floor);
+    floor=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.MeshStandardMaterial({color:0xe4d9ca,roughness:.92}));floor.rotation.x=-Math.PI/2;floor.position.y=-.025;floor.receiveShadow=false;scene.add(floor);
     var receiver=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.ShadowMaterial({opacity:.2}));receiver.rotation.x=-Math.PI/2;receiver.position.y=-.018;receiver.receiveShadow=true;scene.add(receiver);
     var c=canvas(128,128),g=c.getContext('2d'),grad=g.createRadialGradient(64,64,0,64,64,64);grad.addColorStop(0,'rgba(30,24,17,.42)');grad.addColorStop(.45,'rgba(30,24,17,.14)');grad.addColorStop(1,'rgba(30,24,17,0)');g.fillStyle=grad;g.fillRect(0,0,128,128);
     var contact=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial({map:new T.CanvasTexture(c),transparent:true,depthWrite:false,opacity:.8}));contact.name='contact';contact.rotation.x=-Math.PI/2;contact.position.y=.002;scene.add(contact);
     var wood=canvas(512,512),wx=wood.getContext('2d'),wi=wx.createImageData(512,512);
     for(var yy=0;yy<512;yy++)for(var xx=0;xx<512;xx++){var ii=(yy*512+xx)*4,v=3*Math.sin(yy*.22+Math.sin(xx*.013)*2)+(noise(xx,yy)-.5)*5;wi.data[ii]=204+v;wi.data[ii+1]=180+v;wi.data[ii+2]=147+v;wi.data[ii+3]=255;}wx.putImageData(wi,0,0);
     woodTexture=new T.CanvasTexture(wood);woodTexture.colorSpace=T.SRGBColorSpace;woodTexture.wrapS=woodTexture.wrapT=T.RepeatWrapping;woodTexture.repeat.set(40,40);
+    room=new T.Group();scene.add(room);
+    function box(w,h,z,x,y,depth,color){var m=new T.Mesh(new T.BoxGeometry(w,h,z),new T.MeshStandardMaterial({color:color,roughness:.86}));m.position.set(x,y,depth);m.castShadow=true;m.receiveShadow=true;room.add(m);return m;}
+    var wall=box(180,90,1,0,45,-16,0xd6cbbb);wall.name='wall';
+    var plaster=canvas(256,256),px=plaster.getContext('2d'),pi=px.createImageData(256,256);
+    for(var j=0;j<256*256;j++){var tone=238+noise(j%256,j/256|0)*15;pi.data[j*4]=pi.data[j*4+1]=pi.data[j*4+2]=tone;pi.data[j*4+3]=255;}px.putImageData(pi,0,0);
+    var plasterMap=new T.CanvasTexture(plaster);plasterMap.wrapS=plasterMap.wrapT=T.RepeatWrapping;plasterMap.repeat.set(6,3);wall.material.map=plasterMap;wall.material.bumpMap=plasterMap;wall.material.bumpScale=.03;
+    box(1.1,45,2,-20,22,-14,0xece4d5);box(1.1,45,2,-6,22,-14,0xece4d5);box(15,1.1,2,-13,22,-14,0xece4d5);
+    box(18,1.4,7,-13,1,-13,0xc6b398);
+    var windowPane=new T.Mesh(new T.PlaneGeometry(28,45),new T.MeshBasicMaterial({color:0xf5eee0}));windowPane.position.set(-25,24,-15);room.add(windowPane);
+    var frame=box(17,22,1,23,15,-14,0x8c775c);frame.name='frame';box(15,20,1.2,23,15,-13.8,0xe9dfc9);
     makeEnvironment();return true;
   }catch(e){console.warn('토닥: 3D를 사용할 수 없어 기본 보기로 표시합니다.',e);window.TodakPhoto.available=false;return false;}
 }
@@ -63,11 +73,11 @@ function rebuild(d){
   // Bare clay only at the foot; preserve painted/carved decorations everywhere else.
   g.fillStyle='#bba081';g.fillRect(0,size-6,size,6);
   var bump=canvas(512,512),bg=bump.getContext('2d'),im=bg.createImageData(512,512);
-  for(var j=0;j<512*512;j++){var xx=j%512,yy=j/512|0,vv=128+(noise(xx,yy)-.5)*30+Math.sin(yy*.65)*8;im.data[j*4]=im.data[j*4+1]=im.data[j*4+2]=vv;im.data[j*4+3]=255;}bg.putImageData(im,0,0);
+  for(var j=0;j<512*512;j++){var xx=j%512,yy=j/512|0,vv=128+(noise(xx,yy)-.5)*30+Math.sin(yy*.65)*1.5;im.data[j*4]=im.data[j*4+1]=im.data[j*4+2]=vv;im.data[j*4+3]=255;}bg.putImageData(im,0,0);
   if(d.carve){bg.globalAlpha=.38;bg.drawImage(d.carve,0,0,512,512);}
   var map=tex(c,true),micro=tex(bump,false),gloss=d.finish==='gloss';
-  var outer=new T.MeshPhysicalMaterial({map:map,metalness:0,roughness:gloss?.27:.72,clearcoat:gloss?.8:.08,clearcoatRoughness:gloss?.19:.5,ior:1.46,bumpMap:micro,bumpScale:gloss?.014:.025,envMapIntensity:gloss?.8:.45});
-  var inside=outer.clone();inside.map=null;inside.color.setRGB(d.inside[0]/255,d.inside[1]/255,d.inside[2]/255,T.SRGBColorSpace);inside.roughness+=.08;
+  var outer=new T.MeshPhysicalMaterial({map:map,metalness:0,roughness:gloss?.36:.76,clearcoat:gloss?.48:.08,clearcoatRoughness:gloss?.32:.5,ior:1.46,bumpMap:micro,bumpScale:gloss?.014:.025,envMapIntensity:gloss?.8:.45});
+  var inside=outer.clone(),innerCanvas=canvas(64,256),ix=innerCanvas.getContext('2d');ix.fillStyle='rgb('+d.inside.join(',')+')';ix.fillRect(0,0,64,256);if(d.dipDepth&&d.dipColor){ix.fillStyle='rgb('+d.dipColor.join(',')+')';ix.fillRect(0,0,64,256*d.dipDepth);}inside.map=tex(innerCanvas,true);inside.roughness+=.08;
   var clay=new T.MeshStandardMaterial({color:0xbda185,roughness:.95,bumpMap:micro,bumpScale:.02});materials.push(outer,inside,clay);
   var points=[new T.Vector2(0,0)],n=128,H=d.height,outerStart=1;
   for(var a=0;a<=n;a++)points.push(new T.Vector2(d.rAt(a/n),H*a/n));
@@ -90,13 +100,20 @@ function rebuild(d){
   var contact=scene.getObjectByName('contact'),r=d.rAt(0);contact.scale.set(r*2.8,r*2.8,1);
 }
 function configure(d,width,height){
-  var scale=d.scale,W=d.width,HC=d.canvasHeight,cos=Math.sqrt(1-.32*.32),aim=(d.base-HC/2)/(scale*cos),x=(W/2-d.cx)/scale;
+  var scale=d.scale,W=d.width,HC=d.canvasHeight; if(d.framed!==false){var radius=0;for(var f=0;f<=32;f++)radius=Math.max(radius,d.rAt(f/32));var VW=d.viewWidth||W,VH=d.viewHeight||HC;scale=Math.min(VH/(d.height*1.85),VW/(radius*3.8))*(d.zoom||1);d=Object.assign({},d,{scale:scale,cx:VW*.5+(d.panX||0),base:VH*.52+d.height*scale*.43+(d.panY||0)});} var cos=Math.sqrt(1-.32*.32),aim=(d.base-HC/2)/(scale*cos),x=(W/2-d.cx)/scale;
   camera.left=-W/scale/2;camera.right=W/scale/2;camera.top=HC/scale/2;camera.bottom=-HC/scale/2;camera.near=.1;camera.far=500;
   camera.position.set(x,aim+60*.32,60*cos);camera.lookAt(x,aim,0);camera.updateProjectionMatrix();
   pot.rotation.y=-d.rotation;
   var backdrop=window.TodakBackdrop(d.color,d.background);scene.background=new T.Color().setRGB(backdrop.rgb[0]/255,backdrop.rgb[1]/255,backdrop.rgb[2]/255,T.SRGBColorSpace);floor.material.color.copy(scene.background);
   var map=d.background==='warm'?woodTexture:null;if(floor.material.map!==map){floor.material.map=map;floor.material.needsUpdate=true;}if(map)floor.material.color.setRGB(backdrop.woodTint,backdrop.woodTint,backdrop.woodTint);
+  room.visible=!d.transparent;room.children.forEach(function(o,i){o.visible=d.background==='warm'||i===0||d.background==='dark'&&i>=6;});
+  room.getObjectByName('wall').material.color.set(d.background==='dark'?0x536154:(d.background==='warm'?0xd6cbbb:0xbab0a2));
+  keyLight.shadow.radius=8;
+  floor.visible=!d.transparent;
+  scene.getObjectByName('contact').visible=!d.transparent;
+  scene.children.forEach(function(o){if(o.material&&o.material.type==='ShadowMaterial')o.visible=!d.transparent;});
+  if(d.transparent){scene.background=null;renderer.setClearColor(0x000000,0);}
   renderer.setSize(width,height,false);renderer.render(scene,camera);
 }
-window.TodakPhoto={available:true,render:function(d){if(!init()||lost)return null;try{if(signature!==d.key){rebuild(d);signature=d.key;}configure(d,d.pixelWidth,d.pixelHeight);return renderer.domElement;}catch(e){console.warn('토닥 렌더링 오류',e);return null;}},export:function(d,size,aspect){if(!init())return null;var r=0;for(var i=0;i<=64;i++)r=Math.max(r,d.rAt(i/64));var ratio=aspect||1,w=Math.round(size*Math.min(1,ratio)),h=Math.round(size/Math.max(1,ratio)),sc=Math.min(h/(d.height*1.5),w/(r*2.8));return this.render(Object.assign({},d,{width:w,canvasHeight:h,pixelWidth:w,pixelHeight:h,scale:sc,cx:w/2,base:h/2+d.height*.45*sc,rotation:d.rotation}));}};
+window.TodakPhoto={available:true,render:function(d){if(!init()||lost)return null;try{if(signature!==d.key){rebuild(d);signature=d.key;}configure(d,d.pixelWidth,d.pixelHeight);return renderer.domElement;}catch(e){console.warn('토닥 렌더링 오류',e);return null;}},export:function(d,size,aspect){if(!init())return null;var r=0;for(var i=0;i<=64;i++)r=Math.max(r,d.rAt(i/64));var ratio=aspect||1,w=Math.round(size*Math.min(1,ratio)),h=Math.round(size/Math.max(1,ratio)),sc=Math.min(h/(d.height*1.5),w/(r*2.8));return this.render(Object.assign({},d,{viewWidth:w,viewHeight:h,zoom:1,panX:0,panY:0,width:w,canvasHeight:h,pixelWidth:w,pixelHeight:h,scale:sc,cx:w/2,base:h/2+d.height*.45*sc,rotation:d.rotation}));}};
 })();

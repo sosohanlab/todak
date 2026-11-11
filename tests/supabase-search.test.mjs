@@ -44,25 +44,25 @@ test('DB outage fails closed rather than using an unbounded memory counter',asyn
 test('actual image upload ID drives search; keys and raw IP never returned',async()=>{
   const {handler,calls}=setup();const r=await handler(request());assert.equal(r.status,200);const body=await r.json();assert.equal(body.matches.length,1);assert.equal(body.method,'image');
   const upload=calls.find(c=>c.url==='https://serpapi.com/image');assert.equal(upload.options.body.get('api_key'),env.SERPAPI_API_KEY);assert.equal(upload.options.body.get('image').size,6);
-  const search=calls.find(c=>c.url.startsWith('https://serpapi.com/search.json?'));const params=new URL(search.url).searchParams;assert.equal(params.get('image_id'),'uploaded-photo-id');assert.equal(params.get('q'),'도자기');
+  const search=calls.find(c=>c.url.startsWith('https://serpapi.com/search.json?'));const params=new URL(search.url).searchParams;assert.equal(params.get('image_id'),'uploaded-photo-id');assert.equal(params.has('q'),false);
   const reserve=JSON.parse(calls[1].options.body);assert.match(reserve.p_client_hash,/^[a-f0-9]{64}$/);assert.equal(reserve.p_month_limit,200);assert.equal(reserve.p_day_limit,20);assert.equal(reserve.p_client_day_limit,5);
   assert(!JSON.stringify(body).includes('PRIVATE'));assert(!JSON.stringify(reserve).includes('192.0.2.1'));
 });
 test('upstream upload failure causes no second paid search or automatic retry',async()=>{
   const {handler,calls}=setup({uploadResponse:json({error:'SECRET-error'},500)});const r=await handler(request());assert.equal(r.status,502);assert.equal(calls.length,3);assert(!JSON.stringify(await r.json()).includes('SECRET-error'));
 });
-test('editorial and unsafe results never presented as products',()=>{
-  assert.deepEqual(normalizeMatches({visual_matches:[{title:'blog',link:'https://example.com',thumbnail:'https://example.com/image'},{title:'unsafe',link:'javascript:alert(1)',thumbnail:'https://example.com/image',price:'10'}]}),[]);
+test('unexpected objects and nonshopping matches are retained, unsafe links rejected',()=>{
+ const matches=normalizeMatches({visual_matches:[{title:'환기 호스',link:'https://example.com',thumbnail:'https://example.com/image'},{title:'unsafe',link:'javascript:alert(1)',thumbnail:'https://example.com/image',price:'10'}]});assert.equal(matches.length,1);assert.equal(matches[0].title,'환기 호스');
 });
 test('unconfigured secrets return a clear status without upstream calls',async()=>{
   const handler=createHandler({env:()=>undefined,fetch:()=>{throw Error('must not call');},now:Date.now});const r=await handler(request());assert.equal(r.status,503);assert.equal((await r.json()).error,'search_not_configured');
 });
 
-test('image search context includes validated category and both dimensions',()=>{
-  const q=searchQuery({category:'파스타볼',style:'분청',diameterCm:19,heightCm:8});assert(q.includes('파스타볼'));assert(q.includes('19cm'));assert(q.includes('높이 8cm'));assert.equal(searchQuery(null),'도자기');assert(!searchQuery({category:'<script>',diameterCm:-10,heightCm:Infinity}).includes('<'));
+test('image search ignores category and dimensions',()=>{
+  assert.equal(searchQuery({category:'파스타볼',style:'분청',diameterCm:19,heightCm:8}),'');assert.equal(searchQuery(null),'');
 });
-test('different context produces a different result cache key for the same image',async()=>{
- const a=setup(),b=setup();await a.handler(request());await b.handler(new Request('https://test-project.supabase.co/functions/v1/image-search',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({image:photo,context:{category:'파스타볼',diameterCm:19,heightCm:8}})}));assert.notEqual(JSON.parse(a.calls[0].options.body).p_digest,JSON.parse(b.calls[0].options.body).p_digest);assert(new URL(b.calls.find(c=>c.url.startsWith('https://serpapi.com/search.json?')).url).searchParams.get('q').includes('19cm'));
+test('context never affects image search or cache identity',async()=>{
+ const a=setup(),b=setup();await a.handler(request());await b.handler(new Request('https://test-project.supabase.co/functions/v1/image-search',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({image:photo,context:{category:'파스타볼',diameterCm:19,heightCm:8}})}));assert.equal(JSON.parse(a.calls[0].options.body).p_digest,JSON.parse(b.calls[0].options.body).p_digest);assert.equal(new URL(b.calls.find(c=>c.url.startsWith('https://serpapi.com/search.json?')).url).searchParams.has('q'),false);
 });
 test('comparison image uses a cached provider thumbnail without a paid search',async()=>{
  const {handler,calls}=setup({cache:{matches:[{image:'https://encrypted-tbn0.gstatic.com/qa.jpg'}]}});const r=await handler(new Request('https://test-project.supabase.co/functions/v1/image-search',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({action:'comparison-image',cacheKey:'a'.repeat(64),index:0})}));assert.equal(r.status,200);assert((await r.json()).image.startsWith('data:image/png;base64,'));assert.equal(calls.length,2);assert(!calls.some(c=>c.url.includes('serpapi.com')));

@@ -11,14 +11,7 @@ function safeUrl(value:unknown):string|null {
   if(typeof value!=='string')return null;
   try{const u=new URL(value);return u.protocol==='https:'&&u.hostname?u.href:null;}catch{return null;}
 }
-export function searchQuery(context:unknown):string {
-  if(!context||typeof context!=="object")return "도자기";
-  const c=context as Json;
-  const text=(v:unknown)=>typeof v==='string'?v.replace(/[^\p{L}\p{N} ()·-]/gu,' ').trim().slice(0,40):'';
-  const dimension=(v:unknown)=>typeof v==='number'&&Number.isFinite(v)&&v>=1&&v<=100?Math.round(v):0;
-  const diameter=dimension(c.diameterCm),height=dimension(c.heightCm);
-  return ['도자기',text(c.style),text(c.category),diameter?diameter+'cm':'',height?'높이 '+height+'cm':''].filter(Boolean).join(' ').slice(0,160);
-}
+export function searchQuery(_context:unknown):string { return ""; }
 export function normalizeMatches(payload:Json):Match[]{
   const rows=Array.isArray(payload.visual_matches)?payload.visual_matches:[],seen=new Set<string>(),out:Match[]=[];
   for(const value of rows){
@@ -26,11 +19,8 @@ export function normalizeMatches(payload:Json):Match[]{
     const row=value as Json,url=safeUrl(row.link),image=safeUrl(row.thumbnail);
     let price=row.price;
     if(price&&typeof price==='object')price=(price as Json).value??(price as Json).extracted_value;
-    if(!url||!image||typeof row.title!=='string'||!row.title.trim()||!price||seen.has(url))continue;
-    if(/PTFE|호스|환기|아크릴|실리콘|플라스틱|스테인리스|멜라민|hose|tubing|plastic|acrylic|silicone|stainless|steel/i.test(row.title))continue;
-    if(!/도자|분청|청자|백자|그릇|접시|볼|보울|공기|면기|파스타|화병|머그|컵|찻잔|잔|ceramic|pottery|porcelain|stoneware|bowl|vase|mug|plate|saucer|cup|dish/i.test(row.title))continue;
-    if(typeof price!=='string'&&typeof price!=='number')continue;
-    seen.add(url);out.push({url,image,title:row.title.slice(0,250),source:String(row.source||new URL(url).hostname).slice(0,100),price:String(price).slice(0,80)});
+    if(!url||!image||typeof row.title!=='string'||!row.title.trim()||seen.has(url))continue;
+    seen.add(url);out.push({url,image,title:row.title.slice(0,250),source:String(row.source||new URL(url).hostname).slice(0,100),price:price==null?"":String(price).slice(0,80)});
     if(out.length===8)break;
   }
   return out;
@@ -101,7 +91,7 @@ export function createHandler(deps:Dependencies){
         return reply(200,{image:'data:'+mime+';base64,'+btoa(binary)});
       }
       const image=decodeImage(input.image),query=searchQuery(input.context);
-      const imageHash=await digest(new TextEncoder().encode('ceramic-v2:'+await digest(image)+':'+query));
+      const imageHash=await digest(new TextEncoder().encode('image-only-v3:'+await digest(image)+':'+query));
       const cached=await rpc('todak_search_cache_get',{p_digest:imageHash});
       if(cached&&typeof cached==='object'&&Array.isArray((cached as Json).matches))return reply(200,cached as Json);
       // IP is an extra throttle, not an identity. An unavailable IP falls into a shared bucket.
@@ -117,7 +107,7 @@ export function createHandler(deps:Dependencies){
       const upload=await deps.fetch('https://serpapi.com/image',{method:'POST',body:form,signal:abort.signal});
       if(!upload.ok)throw new SearchError(502,'search_unavailable');
       const uploaded=await upload.json();if(typeof uploaded.image_id!=='string'||uploaded.error)throw new SearchError(502,'search_unavailable');
-      const params=new URLSearchParams({engine:'google_lens',type:'visual_matches',image_id:uploaded.image_id,api_key:apiKey,hl:'ko',country:'kr',q:query});
+      const params=new URLSearchParams({engine:'google_lens',type:'visual_matches',image_id:uploaded.image_id,api_key:apiKey,hl:'ko',country:'kr'});
       const search=await deps.fetch('https://serpapi.com/search.json?'+params,{signal:abort.signal});
       if(!search.ok)throw new SearchError(502,'search_unavailable');
       const payload=await search.json();if(payload.error)throw new SearchError(502,'search_unavailable');
