@@ -6,7 +6,7 @@
 <title>토닥 · 온라인 도자기 공방</title>
 <meta name="description" content="화면에서 도자기를 빚고, 꾸미고, 가마에 구워 보는 공방 놀이. 본을 따라 빚는 도전도 있어요.">
 <meta property="og:title" content="토닥 · 온라인 도자기 공방">
-<meta property="og:description" content="흙을 토닥, 마음도 토닥. 빚고, 꾸미고, 가마에 굽는 도자기 공방 놀이">
+<meta property="og:description" content="흙을 토닥토닥. 빚고, 꾸미고, 가마에 굽는 도자기 공방 놀이">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="토닥">
 <meta property="og:locale" content="ko_KR">
@@ -33,6 +33,99 @@ if(location.hostname==="sosohanlab.github.io"){
     })(window, document, "clarity", "script", "zbuhjg2kso");
     document.addEventListener("DOMContentLoaded",function(){var f=document.getElementById("footStat"); if(f){f.hidden=false;}});
 }
+</script>
+<script>
+/* 영어 화면: 브라우저 언어가 한국어가 아니면 영어로 보여 준다. 첫 화면 아래 버튼으로 바꿀 수 있다 */
+(function(){
+  var lang=null;
+  try{lang=localStorage.getItem("todak.lang");}catch(_){}
+  if(lang!=="ko"&&lang!=="en"){lang=/^ko/i.test(navigator.language||"ko")?"ko":"en";}
+  window.TODAK_LANG=lang;
+  document.addEventListener("DOMContentLoaded",function(){
+    var b=document.getElementById("langBtn");
+    if(b){
+      b.textContent=lang==="en"?"한국어":"English";
+      b.addEventListener("click",function(){try{localStorage.setItem("todak.lang",lang==="en"?"ko":"en");}catch(_){ } location.reload();});
+    }
+  });
+  if(lang!=="en")return;
+  document.documentElement.lang="en";
+  var D={"토닥": "Todak", "온라인 도자기 공방": "Online pottery studio", "도자기 공방": "Pottery studio", "흙을 토닥토닥.": "Pat the clay into shape.", "빚고, 꾸미고, 가마에 구워 보는 곳": "Throw, decorate and fire your own pot", "자유롭게 빚기": "Free play", "마음 가는 대로 만들어요. 무너지지 않아요": "Make whatever you like. Nothing collapses", "도전하기": "Challenge", "본을 따라 빚어요. 횟수 제한이 있고, 흙이 무너져요": "Copy a model. Limited moves, and the clay can collapse", "내 진열장": "My shelf", "구운 작품 #점": "# fired pieces", "구운 작품": "Fired pieces", "하던 작업으로 돌아가기": "Back to my pot", "처음이에요 · #초 안내 보기": "New here? #-second guide", "로그인 없이 바로 써요. 구운 작품은 이 기기에만 저장돼요.": "No sign-in needed. Your pots are saved on this device only.", "로그인 없이 바로 써요. 구운 작품은 내 진열장에 모여요.": "No sign-in needed. Your pots are kept on your shelf.", "더 나은 사이트를 위해 방문 통계를 수집해요.": "We collect visit statistics to improve the site.", "© # 토닥": "© # Todak", "문의": "Contact", "홈 화면에 추가": "Add to home screen", "앱 설치": "Install app", "브라우저 메뉴(⋮)에서 '홈 화면에 추가' 또는 '앱 설치'를 골라요.": "Open the browser menu (⋮) and choose 'Add to Home screen' or 'Install app'.", "사파리 아래쪽 공유 버튼을 누르고 '홈 화면에 추가'를 골라요.": "Tap the Share button in Safari, then 'Add to Home Screen'.", "이렇게 빚어요": "How it works", "빚기": "Throw", "꾸미기": "Decorate", "유약": "Glaze", "굽기": "Fire", "완성": "Done", "# 빚기": "# Throw", "# 꾸미기": "# Decorate", "# 유약": "# Glaze", "# 굽기": "# Fire", "# 완성": "# Done", "돌아가는 흙 가운데를 눌러 속을 파요. 밖에서 밀면 좁아지고, 속에서 바깥으로 밀면 두께는 그대로 넓어져요.": "Press the middle of the spinning clay to hollow it. Push from outside to narrow it, from inside to widen it.", "돌아가는 흙 가운데를 눌러 속을 파고, 옆을 밀어 모양을 잡아요.": "Press the middle of the spinning clay to hollow it, then push the sides into shape.", "붓으로 그리거나 무늬를 새겨요. 건너뛰어도 돼요.": "Paint with a brush or carve patterns. You can skip this.", "색과 불 세기를 골라요.": "Pick a colour and a heat level.", "가마에 넣으면 불이 구워 줘요. 불 세기와 벽 두께에 따라 결과가 달라져요.": "Put it in the kiln and the fire does the rest. Heat and wall thickness decide the result.", "빚으러 가기": "Start throwing", "알겠어요": "Got it", "시작하기": "Start", "닫기": "Close", "뒤로": "Back", "≡ 처음 화면": "≡ Home", "처음 화면으로": "Home", "벽 두께 보기": "Show wall thickness", "벽 두께 끄기": "Hide wall thickness", "소리 켜기": "Sound on", "소리 켜짐": "Sound is on", "소리를 켤 수 없어요": "Can't play sound", "진열장": "Shelf", "진열장 #": "Shelf #", "물레에서 보기": "View on wheel", "실사로 보기": "View as photo", "왼쪽으로 돌리기": "Turn left", "오른쪽으로 돌리기": "Turn right", "접기": "Hide", "펼치기": "Show", "조작판": "Controls", "공방의 물레 위에 놓인 도자기": "A pot on the studio wheel", "꾸미러 가기": "Decorate", "꾸미러 가기 →": "Decorate →", "유약 바르러 가기": "Glaze", "유약 바르기 →": "Glaze →", "가마에 넣기": "To the kiln", "가마에 넣기 →": "To the kiln →", "가마에 넣고 굽기 →": "Load and fire →", "하나 더 빚기": "Make another", "다시 도전": "Try again", "다른 도전": "Other challenges", "지금 할 일": "What to do", "모양 잡기": "Shape", "두께 조절": "Thickness", "매끈하게": "Smooth", "↩ 되돌리기": "↩ Undo", "밖에서 밀면 좁게, 속에서 밀면 넓게.": "Push from outside to narrow, from inside to widen.", "가운데를 눌러 내리면 속이 파여요.": "Press the middle and drag down to hollow it.", "벽": "Wall", "바닥": "Bottom", "은 바깥으로 끌면 얇게, 안으로 끌면 두껍게.": ": drag outward to thin it, inward to thicken it.", "은 아래로 끌면 얇게, 위로 끌면 두껍게.": ": drag down to thin it, up to thicken it.", "문질러서 울퉁불퉁한 곳을 펴요.": "Rub to smooth out bumps.", "손끝 크기": "Fingertip size", "좁게": "Narrow", "가는 홈": "fine groove", "보통": "Medium", "손가락": "finger", "넓게": "Wide", "손바닥": "palm", "파란 ↕ 를 끌면 키가 바뀌어요.": "Drag the blue ↕ to change the height.", "시작 모양": "Start from", "흙덩이": "Lump", "그릇": "Bowl", "컵": "Cup", "병": "Bottle", "흙 가운데를 누르고 아래로 끌어 속을 파 보세요": "Press the middle of the clay and drag down to hollow it", "입지름 #cm · 높이 #cm · 속 깊이 #cm": "Rim # cm · Height # cm · Depth # cm", "입지름 #cm": "rim # cm", "높이 #cm": "height # cm", "약 #ml": "about # ml", "지금은": "Looks like:", "에 가까워요": "", "반으로 잘라 본 모습이에요. 주황이 흙 벽, 빨강은 너무 얇은 벽": "Cut in half: orange is clay, red is too thin", "가장 얇은 곳 #mm": "thinnest # mm", "가장 얇은 곳": "thinnest", "도전": "Challenge", "도전 고르기": "Pick a challenge", "명장 도전": "Master challenge", "명장 도전 통과!": "Master challenge passed!", "본과 똑같이 빚어요. 모양 잡기 횟수가 정해져 있고, 잘못 빚으면 흙이 주저앉아요.": "Match the model. Shaping moves are limited, and careless work makes the clay collapse.", "본 보면서": "Model visible", "본 외워서 (#초만 보여줌)": "From memory (shown for # s)", "모양 잡기 #번": "# shaping moves", "내 최고 #점": "best # pts", "아직 안 해 봤어요": "not tried yet", "어려움 #단계": "difficulty #", "파란 점선 본과 똑같이 빚어요.": "Match the blue dotted model.", "파란 점선 본에 맞춰 빚어요.": "Match the blue dotted model.", "안에 끝내요. 한 번 대고 떼면 #번이에요.": "max. One touch-and-release counts as #.", "두께 조절과 매끈하게는 세지 않아요.": "Thickness and Smooth don't count.", "본은 처음 #초만 보여요.": "The model is shown for the first # seconds only.", "되돌리기가 없고, #점을 넘겨야 통과예요.": ": no undo, and you need over # points to pass.", "이럴 때 흙이 주저앉아요": "The clay collapses when", "벽이 너무 얇을 때": "The wall is too thin", "두께 조절을 누르면 얇은 곳이 빨갛게 보여요.": "Tap Thickness to see thin spots in red.", "옆으로 너무 벌렸을 때": "It flares out too far", "높은 곳일수록 위험해요.": "Riskier the higher up it is.", "가는 목 위가 무거울 때": "A thin neck carries too much", "화면에": "If", "⚠ 흔들려요": "⚠ Wobbling", "가 뜨면 바로 손을 떼요.": " appears, let go right away.", "처음부터 다시": "Restart", "그만두기": "Quit", "규칙 보기": "Rules", "되돌리기 없음": "no undo", "#점 통과": "pass at #", "#점을 넘겨야 통과예요.": "You need over # points to pass.", "남음": "left", "남음 · 거칠어요 −#점": "left · rough −# pts", "· 모양 잡기": "· shaping moves", "#번": "#", "외워서 빚는 중 · 점수는 가마에서": "from memory · score comes after firing", "벽이 얇아요": "wall too thin", "옆으로 너무 뻗었어요": "flaring too far", "목이 가늘어요": "neck too thin", "흙이 주저앉았어요! 되돌리기로 물릴 수 있어요": "The clay collapsed! Undo brings it back", "모양 잡기를 다 썼어요. 두께 조절과 매끈하게는 더 할 수 있어요": "No shaping moves left. Thickness and Smooth still work", "명장 도전에서는 되돌릴 수 없어요": "No undo in the master challenge", "도전을 그만뒀어요. 이제 자유롭게 빚어요": "Challenge ended. Free play now", "도전은 흙덩이에서 시작해요. 도전을 껐어요": "Challenges start from a lump. Challenge ended", "따라 빚기": "Copy", "외워서 빚기": "From memory", "본과 거의 똑같아요.": "Almost identical.", "꽤 닮았어요.": "Pretty close.", "느낌은 살렸어요.": "You got the feel.", "자기만의 길을 갔네요.": "You went your own way.", "표면이 거칠어 −#점": "rough surface −# pts", "#점": "# pts", "점": "pts", "도구": "Tool", "붓": "Brush", "조각칼": "Carve", "도장": "Stamp", "지우개": "Eraser", "고른 색으로 그려요.": "Paint with the chosen colour.", "선을 새겨요. 구우면 짙은 선이 돼요.": "Carve a line. It turns dark after firing.", "누르면 모양이 하나 찍혀요.": "Tap to stamp one shape.", "그림과 새긴 선을 지워요.": "Erase paint and carved lines.", "물감": "Paint", "도장 모양": "Stamp shape", "꽃": "Flower", "잎": "Leaf", "별": "Star", "물결": "Wave", "굵기·크기": "Size", "굵기 #mm": "Width # mm", "크기 #mm": "Size # mm", "굵기": "Width", "크기": "Size", "긋는 법": "Stroke", "자유롭게": "Freehand", "한 바퀴 띠": "Full band", "손이 지나간 자리에 그려져요.": "Paints where your finger goes.", "한 곳에 대면 그 높이로 한 바퀴 줄이 생겨요.": "Touch once to draw a band all the way round.", "빈 곳을 끌면 돌아가요. 마우스 휠로 확대해요. 건너뛰어도 돼요.": "Drag empty space to turn. Scroll to zoom. You can skip this.", "빈 곳을 끌면 돌아가요. 두 손가락으로 확대해요. 건너뛰어도 돼요.": "Drag empty space to turn. Pinch to zoom. You can skip this.", "빈 곳을 끌면 돌아가요. 건너뛰어도 돼요.": "Drag empty space to turn. You can skip this.", "모두 지우기": "Clear all", "다시 빚기": "Back to throwing", "도자기 위에 바로 그려 보세요": "Draw right on the pot", "직접 고르기": "Custom", "직접": "Custom", "청화": "Cobalt", "철화": "Iron brown", "녹색": "Green", "백토": "White slip", "먹": "Ink", "유약 고르기": "Choose a glaze", "바탕 색": "Base colour", "색 더 보기": "More colours", "표면": "Finish", "반짝이게": "Glossy", "보송하게": "Matte", "🎲 아무거나": "🎲 Surprise me", "효과 더하기": "Add effects", "위쪽에 다른 색 입히기": "Second colour on top", "안 함": "None", "입구만": "Rim only", "절반까지": "Top half", "덧입힐 색": "Second colour", "무늬": "Pattern", "없음": "None", "점박이": "Speckled", "잔금": "Crackle", "불 세기": "Heat", "약한 불": "Low", "보통 불": "Medium", "센 불": "High", "안전해요. 색은 순하게 나와요.": "Safe. Colours come out soft.", "가끔 유약이 흘러요.": "The glaze sometimes runs.", "색이 깊어지지만 금이 가기 쉬워요.": "Deeper colour, but it cracks more easily.", "벽이 얇아서 금이 가기 쉬워요.": "Thin walls: likely to crack.", "벽이 얇아서 조심해야 해요.": "Thin walls: be careful.", "다시 꾸미기": "Back to decorating", "유약을 골랐어요": "Glaze picked", "작품을 누르면 가마에 들어가요.": "Tap your pot to load it into the kiln.", "작품을 누르면 가마에 들어가요": "Tap your pot to load it into the kiln", "불 때는 중": "Firing", "다 구워졌어요": "Fired", "다 구워졌어요. 가마를 열어요": "Done. Opening the kiln", "#℃까지 올려 구워요.": "Fired up to #℃.", "남은 물기를 날리는 중": "Drying off the last moisture", "천천히 올리는 중. 흙이 가장 예민한 구간이에요": "Heating slowly. The clay is at its most fragile", "유약이 녹기 시작해요": "The glaze starts to melt", "#℃. 유약이 유리처럼 녹았어요": "#℃. The glaze has melted like glass", "가마에서 꺼냈어요. 당신이 빚은 건": "Out of the kiln. You made a", "카드로 저장 · 공유": "Save / share as a card", "진열장에 올려 뒀어요.": "Placed on your shelf.", "작품 카드": "Pot card", "작품 이름 (카드에 들어가요)": "Name your pot (shown on the card)", "예: 첫 물레, 비 오는 날의 그릇": "e.g. First throw, Rainy-day bowl", "이미지로 저장": "Save image", "공유하기": "Share", "링크 복사": "Copy link", "링크를 복사했어요": "Link copied", "카드를 저장했어요": "Card saved", "카드를 만들지 못했어요": "Couldn't make the card", "지금은 저장할 수 없어요": "Can't save right now", "공유 창을 열지 못했어요": "Couldn't open sharing", "복사하지 못했어요. 주소창의 주소를 복사해 주세요": "Couldn't copy. Please copy the address bar", "사이트를 올린 뒤에 쓸 수 있어요": "Available once the site is online", "이름 없는 그릇": "Untitled pot", "금으로 메우기": "Mend with gold", "금으로 메웠어요": "Mended with gold", "곱게 잘 구워졌어요": "Fired beautifully", "안전하게 잘 구워졌어요": "Fired safely", "센 불을 견뎌 냈어요": "Survived the high heat", "유약이 흘러내렸어요": "The glaze ran", "작은 점이 앉았어요": "Tiny pinholes appeared", "대박! 가마가 색을 바꿔 놨어요": "Jackpot! The kiln changed the colour", "금이 갔어요": "It cracked", "유약이 고르게 녹아, 고른 색 그대로 나왔어요.": "The glaze melted evenly and kept its colour.", "약한 불로 구워서 고른 색 그대로, 조금 순하게 나왔어요.": "Low heat kept the colour, a little softer.", "위험을 걸고 센 불로 구웠는데 무사히 나왔어요. 색이 한층 깊어졌어요.": "You risked high heat and it came out fine, with deeper colour.", "뜨거운 불에 유약이 녹아 아래로 흘렀어요. 흐른 자국은 이 그릇에만 있는 무늬예요.": "The hot fire made the glaze run. Those drips are a pattern only this pot has.", "가마 속 재와 공기 방울이 남긴 자국이에요. 손으로 만든 그릇이라는 표시죠.": "Marks left by ash and air bubbles in the kiln: a sign it was made by hand.", "불길이 닿은 자리마다 색이 달라졌어요. 똑같이는 두 번 다시 못 만드는 한 점이에요.": "The colour shifted wherever the flames touched. One of a kind.", "불을 못 견디고 갈라졌어요.": "It couldn't take the heat and cracked.", "얇게 빚은 벽이 불을 못 견뎠어요.": "The thin wall couldn't take the heat.", "센 불에 건 내기가 통했어요.": "Your bet on high heat paid off.", "센 불이라 유약이 많이 녹았어요.": "High heat melted a lot of glaze.", "깨진 자리를 옻으로 붙이고 금가루를 입혔어요. 흠을 숨기지 않고 무늬로 삼는 수리법이에요.": "The crack was joined with lacquer and dusted with gold: a repair that turns a flaw into a pattern.", "약한 불로 구웠어요.": "Fired on low heat.", "보통 불로 구웠어요.": "Fired on medium heat.", "센 불로 구웠어요.": "Fired on high heat.", "아직 비어 있어요. 구운 작품이 여기에 차례로 놓이고, 공방 벽 선반에도 올라가요.": "Empty for now. Fired pots line up here and on the studio wall shelf.", "이 모양으로 다시 빚기": "Throw this shape again", "진열장에서 치우기": "Remove from shelf", "정말 치울까요? 한 번 더": "Really remove? Tap again", "유광": "glossy", "무광": "matte", "덧입힘": "dipped", "속을 파지 않은 흙덩이예요. 책상 위 누름돌이나 장식으로 딱이죠.": "A solid lump of clay. Perfect as a paperweight or ornament.", "식탁에서 제일 자주 손이 가는 크기예요.": "The size you reach for most at the table.", "한 손에 쏙 들어오는 밥 한 공기.": "A bowl of rice that fits in one hand.", "따뜻한 국 한 그릇 담기 좋은 품이에요.": "Just right for a bowl of warm soup.", "라면 한 봉지가 넉넉히 들어가겠어요.": "Roomy enough for a pack of ramen.", "접시와 그릇 사이. 국물 자작한 요리에 딱 좋아요.": "Between a plate and a bowl. Great for saucy dishes.", "한 상 차림의 주인공. 파스타도 생선구이도 넉넉히 담겨요.": "The star of the table. Holds pasta or grilled fish with room to spare.", "간장 한 숟갈, 와사비 조금. 작아도 없으면 아쉬운 그릇.": "A spoon of soy sauce, a dab of wasabi. Small but missed when it's gone.", "한 모금이면 끝나는 작은 잔이에요.": "A tiny cup, gone in one sip.", "진한 커피 한 잔이 딱 들어가요.": "Holds exactly one strong coffee.", "두 손으로 감싸 쥐고 차 한 모금.": "Wrap both hands around it and sip some tea.", "손잡이는 없지만 그게 멋이에요. 물도 커피도 좋아요.": "No handle, and that's the charm. Good for water or coffee.", "둥글고 흰 것이 꼭 보름달 같네요.": "Round and white, just like a full moon.", "배가 불룩한 넉넉한 항아리예요.": "A generous jar with a round belly.", "목이 길고 좁아요. 술 한 병 담아 기울이기 좋은 모양.": "A long, narrow neck: made for pouring a drink.", "목이 살짝 좁아 꽃 몇 송이가 예쁘게 서겠어요.": "The slightly narrow neck holds a few flowers nicely.", "꽃 한 송이면 충분한 작은 병이에요.": "A small bottle that needs just one flower.", "꽃 한 다발을 툭 꽂아도, 수저를 꽂아도 어울려요.": "Drop in a bunch of flowers, or spoons and chopsticks.", "가마 고르기": "Choose a kiln", "전기 가마": "Electric kiln", "가스 가마": "Gas kiln", "장작 가마": "Wood kiln", "이 가마로 굽기": "Fire in this kiln", "이 가마로 →": "Use this kiln →", "가마 문 열기": "Open the kiln", "굽 닦기": "Wipe the foot", "유약 다시 고르기": "Change glaze", "가마 선반에 올렸어요": "Placed on the kiln shelf", "닮은 제품 찾아보기": "Find similar products", "번": " moves", "선반에 붙었어요": "Stuck to the shelf", "굽의 유약을 닦지 않아 선반에 눌어붙었어요. 떼어 내다가 굽이 상했어요.": "Glaze on the foot stuck to the shelf and the foot was damaged.", "본은 #초만 보여주고 사라져요": "model shown for # s only", "#점을 넘겨야 통과": "pass above # pts", "외워서 빚는 중": "from memory", "점수는 가마에서": "score after firing", "외워서 빚는 중 · 점수는 가마에서 · 모양 잡기": "from memory · score after firing · shaping moves", "위험을 걸고 센 불로 구웠는데 무사히 나왔어요.": "You risked high heat and it came out fine.", "색이 한층 깊어졌어요.": "The colour is deeper.", "뜨거운 불에 유약이 녹아 아래로 흘렀어요.": "The hot fire made the glaze run.", "흐른 자국은 이 그릇에만 있는 무늬예요.": "Those drips are a pattern only this pot has.", "가마 속 재와 공기 방울이 남긴 자국이에요.": "Marks left by ash and air bubbles in the kiln.", "손으로 만든 그릇이라는 표시죠.": "A sign it was made by hand.", "불길이 닿은 자리마다 색이 달라졌어요.": "The colour shifted wherever the flames touched.", "똑같이는 두 번 다시 못 만드는 한 점이에요.": "One of a kind.", "깨진 자리를 옻으로 붙이고 금가루를 입혔어요.": "The crack was joined with lacquer and dusted with gold.", "흠을 숨기지 않고 무늬로 삼는 수리법이에요.": "A repair that turns a flaw into a pattern.", "검색어": "Search", "다른 검색어로 보기": "Other searches"}, Wd={"삿갓 면기": "conical noodle bowl", "일자 컵": "straight cup", "높은 굽다리 잔": "tall footed cup", "굽다리 잔": "footed cup", "삼단 호리병": "triple gourd bottle", "물결 병": "wave bottle", "나팔 화병": "trumpet vase", "미니 화병": "mini vase", "원통 화병": "cylinder vase", "큰 접시": "large plate", "소스 종지": "sauce dish", "목이 긴": "long-necked", "새김 무늬": "carved", "청화백자": "blue-and-white porcelain", "달항아리": "moon jar", "항아리": "jar", "호리병": "gourd bottle", "주병": "wine bottle", "매병": "maebyeong vase", "장구": "hourglass vase", "등잔대": "lamp stand", "나팔": "trumpet vase", "화병": "vase", "국그릇": "soup bowl", "밥공기": "rice bowl", "면기": "noodle bowl", "파스타볼": "pasta bowl", "앞접시": "side plate", "접시": "plate", "종지": "small dish", "소주잔": "soju cup", "에스프레소잔": "espresso cup", "찻잔": "teacup", "오브제": "object", "컵": "cup", "병": "bottle", "그릇": "bowl", "흙덩이": "lump", "일자": "straight", "주름": "ribbed", "삿갓": "conical", "오목": "deep", "오므린": "closed-in", "잘록한": "waisted", "둥근": "round", "넓은": "wide", "직각": "squared", "평": "flat", "림": "rimmed", "수제": "handmade", "투톤": "two-tone", "핸드페인팅": "hand-painted", "스페클": "speckled", "음각": "carved", "빙열": "crackle", "점박이": "speckled", "잔금": "crackle", "덧입힘": "dipped", "유광": "glossy", "무광": "matte", "모양": "shape", "백자": "white porcelain", "유백": "ivory", "분청": "buncheong", "회백": "grey-white", "청자": "celadon", "옥색": "jade", "하늘": "sky blue", "청록": "teal", "코발트": "cobalt", "남색": "navy", "올리브": "olive", "녹유": "green", "겨자": "mustard", "황토": "ochre", "살구": "apricot", "연분홍": "pink", "진사": "copper red", "자주": "plum", "연보라": "lavender", "갈유": "brown", "천목": "tenmoku", "흑유": "black", "토닥": "Todak", "도전": "Challenge", "명장 도전": "Master challenge", "따라 빚기": "Copy", "외워서 빚기": "From memory"}, WK=Object.keys(Wd).sort(function(a,b){return b.length-a.length;});
+  var HAN=/[가-힣]/, cache={};
+  function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
+  function words(c){
+    /* 이름·꾸밈말을 낱말 단위로 */
+    var out=c, i;
+    for(i=0;i<WK.length;i++){if(out.indexOf(WK[i])>=0){out=out.split(WK[i]).join(" "+Wd[WK[i]]+" ");}}
+    return out.replace(/\s+/g," ").trim();
+  }
+  function name(c){var e=exact(c); return e!=null?e:words(c);}
+  function exact(c){
+    var nums=[], key=c.replace(/\d+(\.\d+)?/g,function(m){nums.push(m); return "#";}), e=D[key], i=0;
+    if(e==null)return null;
+    return e.replace(/#/g,function(){return nums[i++];});
+  }
+  var RX=[
+    [/^(.+) 닮음 (\d+)%$/,function(m){return cap(name(m[1]))+" match "+m[2]+"%";}],
+    [/^⚠ 흔들려요: (.+)$/,function(m){return "⚠ Wobbling: "+one(m[1]);}],
+    [/^(.+) \(외워서\)$/,function(m){return cap(name(m[1]))+" (from memory)";}],
+    [/^(본과 거의 똑같아요\.|꽤 닮았어요\.|느낌은 살렸어요\.|자기만의 길을 갔네요\.) 모양 잡기 (\d+)번(?:, (\d+)번 무너뜨림)?$/,function(m){return one(m[1])+" "+m[2]+" shaping moves"+(m[3]?", collapsed "+m[3]+"×":"");}],
+    [/^(따라|외워서) 빚기 (.+) (\d+)점$/,function(m){return (m[1]==="따라"?"Copy":"From memory")+": "+name(m[2])+" "+m[3]+" pts";}],
+    [/^(.+) (\d+)점$/,function(m){return cap(name(m[1]))+" · "+m[2]+" pts";}],
+    [/^(.+) 모양$/,function(m){return cap(name(m[1]))+" shape";}],
+    [/^센 불에 (.+)$/,function(m){var s=one(m[1]); return "On high heat: "+s.charAt(0).toLowerCase()+s.slice(1);}],
+    [/^토닥에서 빚은 '(.+)'$/,function(m){return "'"+m[1]+"', made on Todak";}]
+  ];
+  function one(c){
+    /* 한 조각: 사전 → 규칙 → 문장 나누기 → 낱말 */
+    var e=exact(c), i, m, parts;
+    if(e!=null)return e;
+    for(i=0;i<RX.length;i++){m=c.match(RX[i][0]); if(m)return RX[i][1](m);}
+    parts=c.split(/(?<=[.!?]) /);
+    if(parts.length>1){return parts.map(one).join(" ");}
+    e=cap(words(c));
+    return HAN.test(e)?c:e;   /* 반쯤만 바뀐 문장은 그대로 둔다 */
+  }
+  function T(s){
+    if(!s||!HAN.test(s))return s;
+    if(cache[s]!=null)return cache[s];
+    var lead=s.match(/^[\s·]*/)[0], tail=s.match(/[\s·]*$/)[0], c=s.slice(lead.length,s.length-tail.length), r;
+    if(!c){return s;}
+    r=exact(s.trim());
+    if(r==null){r=c.split(" · ").map(one).join(" · "); r=lead+r+tail;}
+    else{r=s.match(/^\s*/)[0]+r+s.match(/\s*$/)[0];}
+    cache[s]=r; return r;
+  }
+  window.TODAK_T=T;
+  var skip=function(n){var p=n.nodeType===1?n:n.parentElement; return !p||p.closest("[data-keep],script,style")||p.isContentEditable;};
+  function fix(n){
+    if(n.nodeType===3){
+      if(HAN.test(n.nodeValue)&&!skip(n)){var t=T(n.nodeValue); if(t!==n.nodeValue){n.nodeValue=t;}}
+    }else if(n.nodeType===1){
+      if(skip(n))return;
+      ["placeholder","aria-label","title"].forEach(function(a){var v=n.getAttribute&&n.getAttribute(a); if(v&&HAN.test(v)){n.setAttribute(a,T(v));}});
+      for(var c=n.firstChild;c;c=c.nextSibling){fix(c);}
+    }
+  }
+  /* 캔버스에 쓰는 글자(카드, 두께 표시)도 같이 */
+  var P=CanvasRenderingContext2D.prototype, ft=P.fillText, mt=P.measureText;
+  P.fillText=function(t,x,y,w){return w===undefined?ft.call(this,T(String(t)),x,y):ft.call(this,T(String(t)),x,y,w);};
+  P.measureText=function(t){return mt.call(this,T(String(t)));};
+  document.addEventListener("DOMContentLoaded",function(){
+    document.title="Todak · Online pottery studio";
+    fix(document.body);
+    new MutationObserver(function(ms){
+      for(var i=0;i<ms.length;i++){
+        var m=ms[i];
+        if(m.type==="characterData"){fix(m.target);}
+        else if(m.type==="attributes"){var v=m.target.getAttribute(m.attributeName); if(v&&HAN.test(v)&&!skip(m.target)){m.target.setAttribute(m.attributeName,T(v));}}
+        else{for(var j=0;j<m.addedNodes.length;j++){fix(m.addedNodes[j]);}}
+      }
+    }).observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["placeholder","aria-label","title"]});
+    /* 한국 쇼핑몰 링크는 영어 화면에서 숨긴다 */
+    var shop=document.getElementById("lNaver"); if(shop&&shop.closest("details")){shop.closest("details").hidden=true;}
+  });
+})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -70,7 +163,7 @@ body{
   opacity:var(--heat,0);mix-blend-mode:multiply;
 }
 canvas{display:block}
-#cv{width:100%;height:100%;touch-action:none;cursor:grab}
+#cv{width:100%;height:100%;touch-action:none;cursor:default}
 .stage[data-stage="deco"] #cv{cursor:crosshair}
 .stage[data-stage="glaze"] #cv,.stage[data-stage="done"] #cv{cursor:ew-resize}
 .stage[data-stage="fire"] #cv{cursor:default}
@@ -116,14 +209,16 @@ h1{font-family:var(--display);font-weight:700;font-size:24px;line-height:1;margi
   display:grid;grid-template-rows:auto minmax(0,1fr);
   transition:height .25s ease;box-shadow:0 -8px 24px rgba(40,26,12,.28);
 }
-.sheet.open{height:min(68%,600px)}
+.sheet.open{height:auto;max-height:min(68%,600px)}
 .sheetHead{display:flex;align-items:center;gap:8px;padding:8px 10px 6px}
 .sheetHead h2{flex:1;min-width:0;font-size:17px}
 #sheetToggle{background:#fff;border:1.5px solid #6B5239;border-bottom-width:3px;border-radius:10px;min-height:38px;padding:4px 10px;font-size:13px;color:var(--ink);font-weight:600}
+#nextAlt{background:#fff;color:var(--ink);border:1.5px solid #6B5239;border-bottom-width:3px;border-radius:12px;min-height:40px;padding:5px 11px;font-weight:600;font-size:14px}
+#nextAlt[hidden]{display:none}
 #nextBtn{background:var(--cobalt);color:#fff;border:1.5px solid #14297A;border-bottom-width:4px;border-radius:12px;min-height:40px;padding:5px 14px;font-weight:700;font-size:14.5px}
 #nextBtn:hover{background:#17307F}
 #nextBtn:active,#sheetToggle:active,.chip:active{transform:translateY(2px)}
-.sheetBody{overflow-y:auto;overflow-x:hidden;padding:2px 12px 20px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.sheetBody{overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#B39C80 transparent;padding:2px 12px 16px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .sheet:not(.open) .sheetBody{overflow:hidden}
 #tools,#dtools{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
 #tools::-webkit-scrollbar,#dtools::-webkit-scrollbar{display:none}
@@ -132,7 +227,10 @@ h1{font-family:var(--display);font-weight:700;font-size:24px;line-height:1;margi
 @media (min-width:760px){
   /* 넓은 화면: 도구 상자는 오른쪽 위 빈 곳에 둔다 */
   .sheet{left:auto;right:14px;top:14px;bottom:auto;transform:none;width:410px;height:124px;border:2px solid #6B5239;border-radius:16px;box-shadow:0 8px 24px rgba(40,26,12,.28)}
-  .sheet.open{height:min(calc(100% - 28px),640px)}
+  .sheet.open{height:auto;max-height:calc(100% - 28px)}
+  /* 접으면 제목 줄만 남긴다 (중간에 잘려 보이지 않게) */
+  .sheet:not(.open){height:auto}
+  .sheet:not(.open) .sheetBody{display:none}
   #shelfBtn{right:436px;top:14px}
   #sound{right:436px;top:58px}
   .hud{right:540px}
@@ -195,6 +293,17 @@ details.fold>summary::after{content:"＋";font-weight:400}
 details.fold[open]>summary::after{content:"－"}
 details.fold>.in{padding:4px 12px 14px;display:grid;gap:14px}
 
+.scoreBox{display:flex;gap:14px;align-items:center;padding:12px 16px;background:var(--cobalt);color:#fff;border-radius:10px}
+.scoreBox[hidden]{display:none}
+.scoreBox>b{font-family:var(--display);font-size:48px;line-height:1;white-space:nowrap}
+.scoreBox>b small{font-size:18px;margin-left:2px}
+.scoreBox strong{display:block;font-size:15px}
+.scoreBox div span{display:block;font-size:13px;line-height:1.45;opacity:.92}
+.moreLinks{margin:-4px 0 0;display:flex;gap:6px;flex-wrap:wrap}
+.moreLinks .textBtn{justify-self:auto;padding:8px 6px}
+.moreLinks .textBtn[hidden]{display:none}
+.cardIn{max-width:430px}
+.cardIn #card{width:auto;max-width:100%;max-height:52vh}
 .verdict{display:grid;gap:3px;border-left:3px solid var(--cobalt);padding-left:12px}
 .verdict small{font-size:13px;color:var(--muted)}
 .verdict strong{font-family:var(--display);font-size:27px;line-height:1.2;color:var(--cobalt)}
@@ -233,7 +342,12 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
 .homeFoot[hidden]{display:none}
 .homeFoot a,.homeFoot button{background:none;border:0;padding:6px 0 6px 12px;margin-left:10px;border-left:1px solid var(--line);font:inherit;color:var(--cobalt);text-decoration:underline;text-underline-offset:3px;border-radius:0}
 .homeFoot a[hidden],.homeFoot button[hidden]{display:none}
-#howto{z-index:11}
+html[lang=en] .homeTitle{font-size:64px}
+html[lang=en] .chip{font-size:13.5px}
+#howto,#chRules{z-index:11}
+.crLead{margin:0;font-size:14.5px;line-height:1.55}
+.crHead{font-size:15px;margin-top:2px}
+.chInfo .textBtn{min-height:40px;padding:6px 4px}
 .howBox{width:100%;max-width:400px;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:22px 20px 20px;display:grid;gap:16px;box-shadow:0 18px 40px rgba(20,30,54,.22)}
 .howBox h2{font-family:var(--display);font-weight:700;font-size:26px;line-height:1.2;margin:0;color:var(--cobalt)}
 .howSteps{list-style:none;margin:0;padding:0;display:grid;gap:13px}
@@ -320,7 +434,7 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
     </div>
     <div class="hint" id="hint"><span id="hintText">흙 가운데를 누르고 아래로 끌어 속을 파 보세요</span></div>
     <button type="button" class="corner" id="menuBtn">≡ 처음 화면</button>
-    <button type="button" class="corner" id="secBtn" aria-pressed="false">단면 보기</button>
+    <button type="button" class="corner" id="secBtn" aria-pressed="false">벽 두께 보기</button>
     <button type="button" class="corner" id="rotL" aria-label="왼쪽으로 돌리기" hidden>◀</button>
     <button type="button" class="corner" id="rotR" aria-label="오른쪽으로 돌리기" hidden>▶</button>
     <button type="button" class="corner" id="viewToggle" hidden>물레에서 보기</button>
@@ -334,23 +448,25 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
     <div class="sheetHead">
       <button type="button" id="sheetToggle" aria-expanded="false">펼치기</button>
       <h2 id="sheetTitle">빚기</h2>
+      <button type="button" id="nextAlt" hidden>다른 도전</button>
       <button type="button" id="nextBtn">꾸미러 가기 →</button>
     </div>
     <div class="sheetBody" id="sheetBody">
 
       <section class="panel" id="p-throw">
         <div class="field">
-          <span class="label">도구</span>
+          <span class="label">지금 할 일</span>
           <div class="chips" id="tools">
-            <button type="button" class="chip" data-t="palm" aria-pressed="false">손바닥</button>
-            <button type="button" class="chip" data-t="finger" aria-pressed="true">손가락</button>
-            <button type="button" class="chip" data-t="tip" aria-pressed="false">나무칼</button>
-            <button type="button" class="chip" data-t="sponge" aria-pressed="false">스펀지</button>
+            <button type="button" class="chip" data-t="shape" aria-pressed="true">모양 잡기</button>
+            <button type="button" class="chip" data-t="thick" aria-pressed="false">두께 조절</button>
+            <button type="button" class="chip" data-t="sponge" aria-pressed="false">매끈하게</button>
             <button type="button" class="chip" id="undo">↩ 되돌리기</button>
           </div>
           <p class="tip" id="toolTip" aria-live="polite"></p>
+          <div class="rangehead"><label class="label" for="hsize">손끝 크기</label><output id="hsizeOut" for="hsize"></output></div>
+          <input type="range" id="hsize" min="0" max="100" step="1" value="60">
         </div>
-        <p>가운데를 눌러 속을 파고, 옆을 밀어 모양을 잡아요. 입구 옆 파란 ↕ 동그라미로 키를 바꿔요.</p>
+        <p>파란 ↕ 를 끌면 키가 바뀌어요.</p>
         <div class="field" id="f-presets">
           <span class="label">시작 모양</span>
           <div class="chips" id="presets">
@@ -362,35 +478,14 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
         </div>
         <div class="chInfo" id="chInfo" hidden>
           <b id="chName"></b>
-          <span>파란 점선 본에 맞춰 빚어요. 한 번 대고 떼면 손길 1번이에요.</span>
-          <details class="fold" open>
-            <summary>흙이 주저앉는 조건</summary>
-            <div class="in">
-            <ol class="rules">
-              <li><b>얇은 벽 위에 흙이 많을 때</b> 벽이 4.5mm보다 얇은 곳 위로 흙이 높이 쌓이면 위험해요. 가장 얇은 벽 위로 8cm가 한계예요. <i>단면 보기를 켜면 얇은 벽이 빨갛게 보여요.</i></li>
-              <li><b>받침 없이 옆으로 너무 뻗었을 때</b> 위로 1cm 갈 때 옆으로 1.2cm 넘게 벌어지는 구간이 합쳐 3cm쯤 되면 한계예요. 높은 곳일수록 위험하고, 바닥 근처(접시·면기)는 너그러워요.</li>
-              <li><b>가는 목 위가 무거울 때</b> 잘록한 곳이 가늘수록, 그 위에 흙이 많을수록 위험해요. 굽다리 잔은 다리 반지름 1.5cm가 아슬아슬하고 1.2cm면 주저앉아요.</li>
-            </ol>
-            <p class="rulesNote">한계의 70%부터 <b>⚠ 흔들려요</b>와 이유가 뜨고, 한계를 넘긴 채 0.7초쯤 지나면 주저앉아요. 급하게 밀면 표면이 울퉁불퉁해져요.</p>
-            </div>
-          </details>
+          <span>파란 점선 본에 맞춰 빚어요.</span>
           <div class="actions">
             <button type="button" class="ghost" id="chRestart">처음부터 다시</button>
-            <button type="button" class="ghost" id="chQuit">도전 그만두기</button>
+            <button type="button" class="ghost" id="chQuit">그만두기</button>
+            <button type="button" class="textBtn" id="chRulesBtn">규칙 보기</button>
           </div>
         </div>
-        <details class="fold">
-          <summary>빚는 법 자세히</summary>
-          <div class="in">
-            <ul class="moves">
-              <li><b>바깥에서 안으로</b><span>누른 자리가 잘록해지고, 밀린 흙만큼 키가 자라요</span></li>
-              <li><b>가운데를 누르고 아래로</b><span>손가락이 내려간 깊이만큼 속이 파여요. 흙덩이는 이것부터 해요</span></li>
-              <li><b>속에서 바깥으로</b><span>속이 넓어지고 벽이 얇아지다가, 더 밀면 바깥까지 벌어져요</span></li>
-              <li><b>벽이 너무 얇으면</b><span>가마에서 금이 갈 수 있어요</span></li>
-            </ul>
-          </div>
-        </details>
-        <div class="actions"><button type="button" class="primary" id="toDeco">꾸미러 가기</button></div>
+        <div hidden><button type="button" id="toDeco">꾸미러 가기</button></div>
       </section>
 
       <section class="panel" id="p-deco" hidden>
@@ -401,7 +496,6 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
             <button type="button" class="chip" data-d="carve" aria-pressed="false">조각칼</button>
             <button type="button" class="chip" data-d="stamp" aria-pressed="false">도장</button>
             <button type="button" class="chip" data-d="erase" aria-pressed="false">지우개</button>
-            <button type="button" class="chip" data-d="move" aria-pressed="false">옮기기</button>
             <button type="button" class="chip" id="dUndo">↩ 되돌리기</button>
           </div>
           <p class="tip" id="dToolTip" aria-live="polite"></p>
@@ -426,30 +520,21 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
             <span class="sizeDot" aria-hidden="true"><i id="sizeDot"></i></span>
           </div>
         </div>
-        <details class="fold">
-          <summary>더 세밀하게 (확대·빙 둘러 띠)</summary>
-          <div class="in">
-            <div class="field">
-              <div class="rangehead"><label class="label" for="zoom">확대</label><output id="zoomOut" for="zoom">1.0배</output></div>
-              <input type="range" id="zoom" min="1" max="3" step="0.05" value="1">
-              <p class="tip">두 손가락을 벌려도 확대돼요. 확대한 뒤에는 <b>옮기기</b> 도구로 끌어서 보고 싶은 곳으로 옮겨요.</p>
-            </div>
-            <div class="field" id="f-ring">
-              <span class="label">긋는 법</span>
-              <div class="chips" id="ring">
-                <button type="button" class="chip" data-r="0" aria-pressed="true">손으로 자유롭게</button>
-                <button type="button" class="chip" data-r="1" aria-pressed="false">물레 돌려 빙 둘러 띠</button>
-              </div>
-              <p class="tip" id="ringTip" aria-live="polite"></p>
-            </div>
+        <div hidden><input type="range" id="zoom" min="1" max="3" step="0.05" value="1"><output id="zoomOut"></output></div>
+        <div class="field" id="f-ring">
+          <span class="label">긋는 법</span>
+          <div class="chips" id="ring">
+            <button type="button" class="chip" data-r="0" aria-pressed="true">자유롭게</button>
+            <button type="button" class="chip" data-r="1" aria-pressed="false">한 바퀴 띠</button>
           </div>
-        </details>
-        <p>빈 곳을 좌우로 끌거나 ◀ ▶ 를 누르면 도자기가 돌아요. 안 꾸미고 넘어가도 돼요.</p>
+          <p class="tip" id="ringTip" aria-live="polite"></p>
+        </div>
+        <p id="decoHelp">빈 곳을 끌면 돌아가요. 건너뛰어도 돼요.</p>
         <div class="actions">
           <button type="button" class="ghost" id="dClear">모두 지우기</button>
           <button type="button" class="ghost" id="backThrow">다시 빚기</button>
-          <button type="button" class="primary" id="toGlaze">유약 바르러 가기</button>
         </div>
+        <div hidden><button type="button" id="toGlaze">유약 바르러 가기</button></div>
       </section>
 
       <section class="panel" id="p-glaze" hidden>
@@ -464,16 +549,16 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
         <div class="field">
           <span class="label">표면</span>
           <div class="chips" id="finish">
-            <button type="button" class="chip" data-f="gloss">반짝이게 (유광)</button>
-            <button type="button" class="chip" data-f="matte">보송하게 (무광)</button>
-            <button type="button" class="chip" id="lucky">🎲 운에 맡기기</button>
+            <button type="button" class="chip" data-f="gloss">반짝이게</button>
+            <button type="button" class="chip" data-f="matte">보송하게</button>
+            <button type="button" class="chip" id="lucky">🎲 아무거나</button>
           </div>
         </div>
         <details class="fold">
-          <summary>효과 더하기 (덧입히기·결)</summary>
+          <summary>효과 더하기</summary>
           <div class="in">
             <div class="field">
-              <span class="label">위쪽을 한 번 더 담그기</span>
+              <span class="label">위쪽에 다른 색 입히기</span>
               <div class="chips" id="dip">
                 <button type="button" class="chip" data-dip="" aria-pressed="true">안 함</button>
                 <button type="button" class="chip" data-dip="rim" aria-pressed="false">입구만</button>
@@ -485,17 +570,17 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
               <div class="dots" id="dots"></div>
             </div>
             <div class="field">
-              <span class="label">결</span>
+              <span class="label">무늬</span>
               <div class="chips" id="fx">
-                <button type="button" class="chip" data-x="none">민무늬</button>
+                <button type="button" class="chip" data-x="none">없음</button>
                 <button type="button" class="chip" data-x="speckle">점박이</button>
-                <button type="button" class="chip" data-x="crackle">잔금 (빙열)</button>
+                <button type="button" class="chip" data-x="crackle">잔금</button>
               </div>
             </div>
           </div>
         </details>
         <div class="field">
-          <span class="label">불 세기 (내가 거는 내기)</span>
+          <span class="label">불 세기</span>
           <div class="chips" id="fire">
             <button type="button" class="chip" data-fr="low">약한 불</button>
             <button type="button" class="chip" data-fr="mid">보통 불</button>
@@ -505,8 +590,8 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
         </div>
         <div class="actions">
           <button type="button" class="ghost" id="backDeco">다시 꾸미기</button>
-          <button type="button" class="primary" id="toFire">가마에 넣기</button>
         </div>
+        <div hidden><button type="button" id="toFire">가마에 넣기</button></div>
       </section>
 
       <section class="panel" id="p-fire" hidden>
@@ -527,28 +612,22 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
           </div>
         </div>
         <div class="panel" id="fs-prep" hidden>
-          <div class="field">
-            <span class="label">가마에 넣는 순서</span>
-            <div class="chips">
-              <button type="button" class="chip" id="doWipe" hidden>굽 닦기</button>
-              <button type="button" class="chip" id="doLoad">가마에 넣기</button>
-              <button type="button" class="chip" id="doClose">문 닫고 불 때기</button>
-            </div>
-          </div>
-          <ol class="rules">
-            <li><b>가마에 넣기</b> 판 위의 작품을 손으로 끌어서 가마 속 선반(파란 점선)에 올려요. 버튼을 눌러도 돼요.</li>
-            <li><b>문 닫고 불 때기</b> 가마 문을 누르면 닫히고 불이 올라가요.</li>
-          </ol>
+          <div hidden><button type="button" id="doWipe"></button><button type="button" id="doLoad"></button><button type="button" id="doClose"></button></div>
+          <p>작품을 누르면 가마에 들어가요.</p>
         </div>
         <div class="panel" id="fs-fire" hidden>
           <div class="actions"><button type="button" class="primary" id="openKiln" hidden>가마 문 열기</button></div>
           <p id="fireTitle" style="font-weight:600;color:var(--ink)">불 때는 중</p>
           <div class="bar"><i id="fireBar"></i></div>
-          <p>1250℃까지 올렸다가 식혀요. 실제로는 굽는 데 하루, 식히는 데 또 하루가 걸려요. <b>식는 동안 언제 열지는 내가 정해요.</b> 100℃ 아래까지 기다리면 안전하고, 일찍 열수록 금이 가기 쉬워요.</p>
+          <p>1250℃까지 올려 구워요.</p>
         </div>
       </section>
 
       <section class="panel" id="p-done" hidden>
+        <div class="scoreBox" id="scoreBox" hidden>
+          <b><span id="scoreNum">0</span><small>점</small></b>
+          <div><strong id="scoreHead"></strong><span id="scoreSub"></span></div>
+        </div>
         <div class="verdict">
           <small>가마에서 꺼냈어요. 당신이 빚은 건</small>
           <strong id="vName">백자 컵</strong>
@@ -558,27 +637,17 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
           <b id="kilnTitle"></b><span id="kilnLine"></span>
           <button type="button" class="chip" id="kintsugi" hidden>금으로 메우기</button>
         </div>
-        <p id="scoreLine" class="tip" hidden></p>
-        <canvas id="card" width="1080" height="1500" role="img" aria-label="작품 카드"></canvas>
-        <div class="field">
-          <label class="label" for="title">작품 이름 (카드에 들어가요)</label>
-          <input type="text" id="title" maxlength="16" placeholder="예: 첫 물레, 비 오는 날의 그릇" autocomplete="off">
-        </div>
         <div class="actions">
-          <button type="button" class="primary" id="saveCard" hidden>카드 이미지로 저장</button>
-          <button type="button" class="ghost" id="shareBtn" hidden>공유하기</button>
-          <button type="button" class="ghost" id="copyLink" hidden>링크 복사</button>
-          <button type="button" class="ghost" id="again">하나 더 빚기</button>
-          <button type="button" class="ghost" id="reGlaze">유약 다시 고르기</button>
-          <button type="button" class="ghost" id="otherCh" hidden>다른 도전 고르기</button>
-          <button type="button" class="ghost" id="toHome">처음 화면으로</button>
+          <button type="button" class="primary" id="openCard">카드로 저장 · 공유</button>
         </div>
-        <p class="tip" id="doneNote">진열장에 올려 뒀어요. 오른쪽 위 <b>진열장</b>에서 볼 수 있어요.</p>
+        <div hidden><button type="button" id="reGlaze"></button><button type="button" id="otherCh"></button></div>
+        <div hidden><button type="button" id="again">하나 더 빚기</button><button type="button" id="toHome"></button></div>
+        <p class="tip" id="doneNote">진열장에 올려 뒀어요.</p>
         <p id="vLine"></p>
         <details class="fold">
           <summary>닮은 제품 찾아보기</summary>
           <div class="in">
-            <div class="query">검색어 <q id="vQuery"></q></div>
+            <div class="query">검색어 <q id="vQuery" data-keep></q></div>
             <div class="shops">
               <a class="linkbtn main" id="lNaver" target="_blank" rel="noopener noreferrer">네이버쇼핑에서 보기</a>
               <a class="linkbtn" id="lCoupang" target="_blank" rel="noopener">쿠팡에서 보기</a>
@@ -587,7 +656,7 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
             <div class="query">네이버쇼핑이 안 열리면 <a id="lNaverSearch" target="_blank" rel="noopener noreferrer">네이버 검색으로 보기</a></div>
             <div class="field">
               <span class="label">다른 검색어로 보기</span>
-              <div class="more" id="more"></div>
+              <div class="more" id="more" data-keep></div>
             </div>
           </div>
         </details>
@@ -600,14 +669,14 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
       <div class="homeMark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#1F3FA8"/><g transform="translate(6.4 7.4) scale(.8)"><path d="M25 15h14v4c9 3 14 10 14 18 0 9-5 15-13 17H24c-8-2-13-8-13-17 0-8 5-15 14-18z" fill="#F6F8F5"/><path d="M46.9 13.1l1-5.9M49.5 14.5l4.3-4.3M50.9 17.1l5.9-1" fill="none" stroke="#F6F8F5" stroke-width="3" stroke-linecap="round"/></g></svg></div>
       <p class="homeEyebrow">온라인 도자기 공방</p>
       <h1 class="homeTitle">토닥</h1>
-      <p class="homeSub">흙을 토닥, 마음도 토닥.<br>빚고, 꾸미고, 가마에 구워 보는 곳</p>
+      <p class="homeSub">흙을 토닥토닥.<br>빚고, 꾸미고, 가마에 구워 보는 곳</p>
       <button type="button" class="bigBtn" id="goFree"><b>자유롭게 빚기</b><span>마음 가는 대로 만들어요. 무너지지 않아요</span></button>
-      <button type="button" class="bigBtn alt" id="goChallenge"><b>도전하기</b><span>본을 따라 빚어요. 손길 제한, 흙이 무너져요</span></button>
+      <button type="button" class="bigBtn alt" id="goChallenge"><b>도전하기</b><span>본을 따라 빚어요. 횟수 제한이 있고, 흙이 무너져요</span></button>
       <button type="button" class="bigBtn plain" id="goShelf"><b>내 진열장</b><span id="homeShelfN">구운 작품 0점</span></button>
       <button type="button" class="ghost" id="homeClose" hidden>하던 작업으로 돌아가기</button>
       <button type="button" class="textBtn" id="howBtn">처음이에요 · 10초 안내 보기</button>
       <p class="homeFoot"><span id="footSave">로그인 없이 바로 써요. 구운 작품은 이 기기에만 저장돼요.</span><span id="footStat" hidden> 더 나은 사이트를 위해 방문 통계를 수집해요.</span><br>
-        © 2026 토닥<a id="contactA" target="_blank" rel="noopener" hidden>문의</a><button type="button" id="addHome" hidden>홈 화면에 추가</button></p>
+        © 2026 토닥<a id="contactA" target="_blank" rel="noopener" hidden>문의</a><button type="button" id="addHome" hidden>홈 화면에 추가</button><button type="button" id="langBtn" data-keep>English</button></p>
       <p class="homeFoot" id="addHomeTip" hidden></p>
     </div>
   </div>
@@ -618,18 +687,7 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
         <h2>도전 고르기</h2>
         <button type="button" class="ghost" id="chBack" style="min-height:40px;padding:6px 12px">뒤로</button>
       </div>
-      <p class="chRule">흙덩이에서 시작해 본과 똑같이 빚어요. 손길 횟수가 정해져 있고(한 번 대고 떼면 1번), 점수는 옆선·키·속 깊이로 매겨요.</p>
-      <details class="fold" open>
-        <summary>흙이 주저앉는 조건 (알고 조심해요)</summary>
-        <div class="in">
-            <ol class="rules">
-              <li><b>얇은 벽 위에 흙이 많을 때</b> 벽이 4.5mm보다 얇은 곳 위로 흙이 높이 쌓이면 위험해요. 가장 얇은 벽 위로 8cm가 한계예요. <i>단면 보기를 켜면 얇은 벽이 빨갛게 보여요.</i></li>
-              <li><b>받침 없이 옆으로 너무 뻗었을 때</b> 위로 1cm 갈 때 옆으로 1.2cm 넘게 벌어지는 구간이 합쳐 3cm쯤 되면 한계예요. 높은 곳일수록 위험하고, 바닥 근처(접시·면기)는 너그러워요.</li>
-              <li><b>가는 목 위가 무거울 때</b> 잘록한 곳이 가늘수록, 그 위에 흙이 많을수록 위험해요. 굽다리 잔은 다리 반지름 1.5cm가 아슬아슬하고 1.2cm면 주저앉아요.</li>
-            </ol>
-            <p class="rulesNote">한계의 70%부터 <b>⚠ 흔들려요</b>와 이유가 뜨고, 한계를 넘긴 채 0.7초쯤 지나면 주저앉아요. 급하게 밀면 표면이 울퉁불퉁해져요.</p>
-        </div>
-      </details>
+      <p class="chRule">본과 똑같이 빚어요. 모양 잡기 횟수가 정해져 있고, 잘못 빚으면 흙이 주저앉아요.</p>
       <div class="chips" id="tmode">
         <button type="button" class="chip" data-bm="0" aria-pressed="true">본 보면서</button>
         <button type="button" class="chip" data-bm="1" aria-pressed="false">본 외워서 (5초만 보여줌)</button>
@@ -641,16 +699,50 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
     <div class="howBox" role="dialog" aria-labelledby="howH">
       <h2 id="howH">이렇게 빚어요</h2>
       <ol class="howSteps">
-        <li><i>1</i><div><b>빚기</b><span>돌아가는 흙 가운데를 눌러 속을 파고, 옆을 밀어 모양을 잡아요.</span></div></li>
+        <li><i>1</i><div><b>빚기</b><span>돌아가는 흙 가운데를 눌러 속을 파요. 밖에서 밀면 좁아지고, 속에서 바깥으로 밀면 두께는 그대로 넓어져요.</span></div></li>
         <li><i>2</i><div><b>꾸미기</b><span>붓으로 그리거나 무늬를 새겨요. 건너뛰어도 돼요.</span></div></li>
         <li><i>3</i><div><b>유약</b><span>색과 불 세기를 골라요.</span></div></li>
-        <li><i>4</i><div><b>굽기</b><span>가마에 넣고, 문을 언제 열지 직접 정해요. 너무 일찍 열면 금이 가요.</span></div></li>
+        <li><i>4</i><div><b>굽기</b><span>가마에 넣으면 불이 구워 줘요. 불 세기와 벽 두께에 따라 결과가 달라져요.</span></div></li>
       </ol>
       <button type="button" class="primary" id="howGo">빚으러 가기</button>
     </div>
   </div>
+  <div class="overlay" id="chRules" hidden>
+    <div class="howBox" role="dialog" aria-labelledby="crName">
+      <h2 id="crName"></h2>
+      <p class="crLead">파란 점선 본과 똑같이 빚어요.<br><b>모양 잡기 <span id="crN"></span>번</b> 안에 끝내요. 한 번 대고 떼면 1번이에요.<br>두께 조절과 매끈하게는 세지 않아요.</p>
+      <p class="crLead" id="crBlind" hidden><b>본은 처음 5초만 보여요.</b></p>
+      <p class="crLead" id="crMaster" hidden><b>명장 도전</b> 되돌리기가 없고, 85점을 넘겨야 통과예요.</p>
+      <b class="crHead">이럴 때 흙이 주저앉아요</b>
+      <ol class="howSteps">
+        <li><i>1</i><div><b>벽이 너무 얇을 때</b><span>두께 조절을 누르면 얇은 곳이 빨갛게 보여요.</span></div></li>
+        <li><i>2</i><div><b>옆으로 너무 벌렸을 때</b><span>높은 곳일수록 위험해요.</span></div></li>
+        <li><i>3</i><div><b>가는 목 위가 무거울 때</b></div></li>
+      </ol>
+      <p class="crLead">화면에 <b>⚠ 흔들려요</b>가 뜨면 바로 손을 떼요.</p>
+      <button type="button" class="primary" id="crGo">시작하기</button>
+    </div>
+  </div>
   <div id="targets" hidden></div>
 
+  <div class="drawer" id="cardDlg" hidden>
+    <div class="drawerIn cardIn" role="dialog" aria-label="작품 카드">
+      <div class="shelfHead">
+        <h2>작품 카드</h2>
+        <button type="button" class="ghost" id="cardClose" style="min-height:40px;padding:6px 12px">닫기</button>
+      </div>
+      <canvas id="card" width="1080" height="1500" role="img" aria-label="작품 카드"></canvas>
+      <div class="field">
+        <label class="label" for="title">작품 이름 (카드에 들어가요)</label>
+        <input type="text" id="title" maxlength="16" placeholder="예: 첫 물레, 비 오는 날의 그릇" autocomplete="off">
+      </div>
+      <div class="actions">
+        <button type="button" class="primary" id="saveCard" hidden>이미지로 저장</button>
+        <button type="button" class="ghost" id="shareBtn" hidden>공유하기</button>
+        <button type="button" class="ghost" id="copyLink" hidden>링크 복사</button>
+      </div>
+    </div>
+  </div>
   <div class="drawer" id="drawer" hidden>
     <div class="drawerIn" role="dialog" aria-label="내 진열장">
       <div class="shelfHead">
@@ -671,7 +763,7 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border:1px solid var(
 var N=56, W=360, HC=430, CX=180, BASE=366, CX0=180, BASE0=366, S0=11, TILT=0.26, TWO=6.283185307;
 var HMIN=3, HMAX=26, RMIN=1.2, RMAX=13.5, MINW=0.35; /* cm */
 var V=1, SV=S0; /* 화면 배율: 작은 작품은 크게 당겨 보여 준다 */
-var TOOLS={palm:{f:2.6,sm:0.1},finger:{f:1.1,sm:0.05},tip:{f:0.3,sm:0},sponge:{f:1.6,sm:0}};
+var TOOLS={shape:{f:1.1,sm:0.05},thick:{f:1.1,sm:0.05},sponge:{f:1.6,sm:0}};
 var CLAY=[166,148,130], DRY=[186,170,152], RAW=[232,229,222], GLOW=[255,150,58];
 var GLAZES=[
   {id:"baekja",name:"백자",kw:"백자",c:[238,236,228]},
@@ -723,7 +815,7 @@ var grooves=[], marks=[], drops=[], hist=[];
 var cv=document.getElementById("cv"), ctx=cv.getContext("2d");
 var stageEl=document.getElementById("stage");
 var dpr=1, spin=0, rot=0, rotTarget=0, fireStart=0, fireU=0, dirty=true, lastT=0;
-var wob=0, wet=0, inten=0, lastVib=0, touched=false, tool="finger";
+var wob=0, wet=0, inten=0, lastVib=0, touched=false, tool="shape";
 var dTool="brush", dPig="blue", dColor=[122,63,160], dStamp="flower", dRing=false;
 var dSizeV={brush:0.35,carve:0.35,erase:0.4,stamp:0.4,move:0.35};
 var Z=1, photoOn=true; /* 꾸미기 확대 배율, 완성 화면 실사 보기 */
@@ -904,7 +996,7 @@ function updateReadout(){
 /* ---------- 빚기: 바깥 밀기 / 속 파기·넓히기 ---------- */
 function touchClay(dt){
   var h=st.height, t=(BASE-ptr.y)/(h*SV);
-  ptr.contact=false;
+  ptr.contact=false; ptr.maxD=0;
   if(t<-0.12)return 0;
   var d=clamp(Math.abs(ptr.x-CX)/SV,0.3,RMAX), row=clamp(t,0,1)*(N-1), rowH=h/(N-1);
   var F=TOOLS[tool].f, SM=TOOLS[tool].sm, k=1-Math.exp(-dt/42);
@@ -918,6 +1010,41 @@ function touchClay(dt){
       grooves[j]*=Math.exp(-dt/260); ptr.contact=true;
     }
     return ptr.contact?0.03:0;
+  }
+  if(tool==="thick"){
+    if(t>1.1)return 0;
+    var hfT=(BASE-ptr.y)/SV;
+    if(st.height-st.floor<=0.05)return 0;       /* 아직 속을 안 팠으면 할 게 없다 */
+    if(ptr.w0==null){
+      ptr.w0=[]; ptr.wg=[]; ptr.d0=d; ptr.hf0=hfT; ptr.fl0=st.floor;
+      for(j=0;j<N;j++){ptr.w0[j]=st.radii[j]-st.inner[j]; ptr.wg[j]=0;}
+      var iw=innerAt(clamp(t,0,1)), j0=Math.min(N-1,Math.ceil(st.floor/rowH));
+      /* 벽보다 바닥에 더 가까운 곳을 잡았으면 바닥을 조절한다 */
+      ptr.tf=(d<iw&&Math.abs(hfT-st.floor)<Math.abs(iw-d))||t<=st.floor/h;
+      ptr.wRef=clamp(st.radii[j0]-st.inner[j0],MINW,2);
+    }
+    if(ptr.tf){
+      var nfT=clamp(ptr.fl0+(hfT-ptr.hf0),0.5,h-0.3), nf=st.floor+(nfT-st.floor)*k;
+      if(Math.abs(nf-st.floor)>0.0005){
+        if(nf<st.floor){
+          /* 새로 드러난 속벽은 바로 위 벽과 같은 두께로 */
+          for(j=0;j<N;j++){if(j*rowH>=nf-rowH&&j*rowH<st.floor){st.inner[j]=Math.max(0.4,st.radii[j]-ptr.wRef);}}
+        }
+        moved+=Math.abs(nf-st.floor)*0.7; st.floor=nf; ptr.contact=true;
+      }
+      return moved;
+    }
+    var dl=d-ptr.d0, reach=F*1.9+0.6, wNow, wT, g;
+    for(j=0;j<N;j++){
+      if(j*rowH<st.floor-0.01)continue;
+      dist=Math.abs((j-row)*rowH);
+      if(dist<reach){g=1-(dist/reach)*(dist/reach); if(g>ptr.wg[j]){ptr.wg[j]=g;}}
+      if(ptr.wg[j]<=0)continue;
+      wT=clamp(ptr.w0[j]-dl*ptr.wg[j],MINW,Math.max(MINW,st.radii[j]-0.5));
+      wNow=st.radii[j]-st.inner[j]; delta=(wT-wNow)*k;
+      if(Math.abs(delta)>0.0004){st.inner[j]=st.radii[j]-(wNow+delta); moved+=Math.abs(delta)*0.6; ptr.contact=true;}
+    }
+    return moved;
   }
   if(ptr.mode===null){
     if(t>1.02){if(d<st.radii[N-1]-0.2){ptr.mode="inside";}else{if(t>1.12)return 0; ptr.mode="in";}}
@@ -938,6 +1065,7 @@ function touchClay(dt){
       st.radii[j]=clamp(st.radii[j]+delta,j<2?2:RMIN,RMAX);
       if(st.inner[j]>st.radii[j]-MINW)st.inner[j]=Math.max(0.3,st.radii[j]-MINW);
       moved+=Math.abs(delta); grooves[j]=Math.min(1,grooves[j]+Math.abs(delta)*1.6+0.01);
+      if(Math.abs(delta)>ptr.maxD){ptr.maxD=Math.abs(delta);}
       ptr.contact=true; outerMoved=true;
     }
   }else{
@@ -946,7 +1074,12 @@ function touchClay(dt){
     var hf=clamp((BASE-ptr.y)/SV,0.6,h), rOut=rAt(clamp(t,0,1)), q, target;
     var wF=clamp(rOut-d,MINW,Math.max(MINW,rOut-0.7)), pushing=d>rOut-MINW;
     var digging=hf<st.floor-0.01;
-    if(ptr.floor0==null){ptr.floor0=st.floor;}
+    if(ptr.floor0==null){
+      ptr.floor0=st.floor; ptr.w0=[];
+      for(j=0;j<N;j++){ptr.w0[j]=Math.max(MINW,st.radii[j]-st.inner[j]);}
+      ptr.off=(hf>=st.floor)?Math.max(0,d-innerAt(clamp(t,0,1))):0;
+    }
+    var dE=d-ptr.off, keep;
     /* 속에서 위아래로 손만 옮기는 동안에는 벽을 긁지 않는다 (파 내려갈 때는 예외) */
     var travel=!digging&&Math.abs(ptr.vy||0)>1.5*Math.abs(ptr.vx||0)&&Math.abs(ptr.vy||0)>0.4;
     if(digging){
@@ -961,15 +1094,19 @@ function touchClay(dt){
       if(hj<st.floor-rowH)continue;
       dist=(j-row)*rowH; q=dist*dist/(2*F); target=0;
       if(digging&&hj<=ptr.floor0+rowH){target=Math.max(0.7,st.radii[j]-wF);}       /* 이번에 파 내려온 구간: 벽 두께를 고르게 */
-      else if(Math.abs(dist)<=F*1.9){target=pushing?(d-q):(st.radii[j]-wF-q);}    /* 둥근 손끝이 닿은 둘레만 */
-      target=Math.min(target,RMAX-MINW);
+      else if(Math.abs(dist)<=F*1.9){target=dE-q;}    /* 둥근 손끝이 닿은 둘레만 */
+      /* 지킬 벽 두께: 이번에 판 구간은 팔 때 잡은 두께, 이미 파여 있던 구간은 원래 두께 */
+      keep=(hj<=ptr.floor0+rowH)?(ptr.wall!=null?ptr.wall:MINW):ptr.w0[j];
+      if(digging&&hj<=ptr.floor0+rowH){keep=MINW;}
+      target=Math.min(target,RMAX-keep);
       if(st.inner[j]<target){
         delta=(target-st.inner[j])*k;
         st.inner[j]+=delta; moved+=delta*0.6; ptr.contact=true;
-        if(st.inner[j]>st.radii[j]-MINW){
-          /* 속에서 밀면 벽이 얇아지다가 바깥으로 벌어진다 */
-          var nr=Math.min(RMAX,st.inner[j]+MINW);
-          st.inner[j]=nr-MINW; moved+=Math.abs(nr-st.radii[j]); st.radii[j]=nr;
+        if(st.inner[j]>st.radii[j]-keep){
+          /* 속에서 밀면 벽 두께는 그대로, 바깥으로 벌어진다 */
+          var nr=Math.min(RMAX,st.inner[j]+keep);
+          if(Math.abs(nr-st.radii[j])>ptr.maxD){ptr.maxD=Math.abs(nr-st.radii[j]);}
+          st.inner[j]=nr-keep; moved+=Math.abs(nr-st.radii[j]); st.radii[j]=nr;
           grooves[j]=Math.min(1,grooves[j]+0.02); outerMoved=true;
         }
       }
@@ -1005,7 +1142,7 @@ function sculptStep(dt,ts){
       wob=Math.min(0.32,wob+moved*0.05);
       if(moved>0.004){
         ptr.changed=true;
-        if(st.target&&moved>0.11&&ptr.mode!=="pull"){rough();}
+        if(st.target&&tool==="shape"&&ptr.maxD>0.06&&ptr.mode!=="pull"){rough();}
         if(Math.random()<0.55&&drops.length<40&&ptr.mode!=="pull"){
           var side=ptr.x<CX?-1:1;
           drops.push({x:ptr.x,y:ptr.y,vx:side*(0.6+Math.random()*1.8),vy:-0.4-Math.random()*1.6,life:1});
@@ -1416,6 +1553,12 @@ function draw(){
   /* 몸통: 얇은 원판을 아래에서 위로 쌓는다. 막 만진 흙은 살짝 휘청인다 */
   var hpx=st.height*SV, g1=bodyGrad(look.c,look.gloss);
   var y,t,r,n=0,xo,sw=Math.sin(spin*1.4);
+  var cutR=throwing&&secOn;
+  if(cutR){
+    /* 오른쪽 절반에서 입구 가운데 선 아래는 그리지 않는다 = 앞쪽 오른쪽 조각을 떼어 냄 */
+    ctx.save(); ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.beginPath(); ctx.rect(0,0,CX,HC); ctx.rect(CX,0,W-CX,BASE-hpx); ctx.clip();
+  }
   for(y=0;y<=hpx;y+=1.5){
     t=y/hpx; r=rAt(t)*SV; xo=spinning?wob*SV*t*sw:0;
     disc(CX+xo,BASE-y,r,r*TILT,g1);
@@ -1477,6 +1620,7 @@ function draw(){
     }
     ctx.restore();
   }
+  if(cutR){ctx.restore();}
   ctx.setTransform(dpr,0,0,dpr,0,0);
 
   if(throwing&&secOn){drawSection(); ctx.setTransform(dpr,0,0,dpr,0,0);}
@@ -1517,7 +1661,7 @@ function draw(){
     ctx.beginPath(); ctx.arc(dp.x,dp.y,1.2+1.6*dp.life,0,TWO); ctx.fill();
   }
   /* 마우스로 할 때는 손가락을 그려 준다 (손으로 만질 땐 진짜 손가락이 있으니까) */
-  if(throwing&&ptr.down&&ptr.mouse&&ptr.mode!=="pull"&&ctx.roundRect){
+  if(throwing&&ptr.down&&ptr.mouse&&ptr.mode!=="pull"&&ctx.roundRect&&(ptr.contact||nearClay(ptr.x,ptr.y))){
     ctx.fillStyle="rgba(214,190,170,.95)"; ctx.strokeStyle="rgba(120,96,78,.6)"; ctx.lineWidth=1;
     ctx.beginPath();
     if(ptr.mode==="inside"){ctx.roundRect(ptr.x-8,ptr.y-110,16,118,8);}
@@ -1575,6 +1719,19 @@ function pos(e){
   var rect=cv.getBoundingClientRect();
   ptr.x=(e.clientX-rect.left)*W/rect.width; ptr.y=(e.clientY-rect.top)*HC/rect.height;
 }
+function nearClay(x,y){
+  /* 흙에 손이 닿을 만한 자리인가 (흙 둘레 1.5cm 안, 입구 바로 위까지) */
+  var t=(BASE-y)/(st.height*SV);
+  if(t<-0.12||t>1.15)return false;
+  return Math.abs(x-CX)/SV<rAt(clamp(t,0,1))+1.5;
+}
+function hoverCursor(e){
+  if(st.stage!=="throw"){if(cv.style.cursor){cv.style.cursor="";} return;}
+  if(ptr.down)return;
+  var rect=cv.getBoundingClientRect(), x=(e.clientX-rect.left)*W/rect.width, y=(e.clientY-rect.top)*HC/rect.height;
+  var hp=handlePos(), hx=x-hp.x, hy=y-hp.y, c=(hx*hx+hy*hy<30*30)?"ns-resize":(nearClay(x,y)?"grab":"default");
+  if(cv.style.cursor!==c){cv.style.cursor=c;}
+}
 function hideHint(){if(!touched){touched=true; $("hint").classList.add("gone");}}
 var pts={}, pinch=null;
 function nPts(){return Object.keys(pts).length;}
@@ -1601,12 +1758,13 @@ cv.addEventListener("pointerdown",function(e){
   ptr.down=true; ptr.sx=ptr.x; ptr.sy=ptr.y; ptr.lx=ptr.x; ptr.ly=ptr.y; ptr.mouse=(e.pointerType==="mouse");
   ptr.paint=false; ptr.rotating=false; ptr.last=null; ptr.vx=0; ptr.vy=0; ptr.wall=null;
   if(st.stage==="throw"){
-    if(st.target&&touchLeft()<=0){
+    var hp0=handlePos(), onH=(ptr.x-hp0.x)*(ptr.x-hp0.x)+(ptr.y-hp0.y)*(ptr.y-hp0.y)<900;
+    if(st.target&&touchLeft()<=0&&(tool==="shape"||onH)){
       ptr.down=false; delete pts[e.pointerId];
-      toast("손길을 다 썼어요. 되돌리거나 이대로 꾸미러 가요");
+      toast("모양 잡기를 다 썼어요. 두께 조절과 매끈하게는 더 할 수 있어요");
       return;
     }
-    ptr.mode=null; ptr.h0=st.height; ptr.changed=false; ptr.pathR=null; ptr.floor0=null; pushHist();
+    ptr.mode=null; ptr.h0=st.height; ptr.changed=false; ptr.pathR=null; ptr.floor0=null; ptr.w0=null; ptr.off=0; pushHist();
     ptr.decided=true;
     var hp=handlePos(), hx=ptr.x-hp.x, hy=ptr.y-hp.y;
     if(hx*hx+hy*hy<30*30){ptr.mode="pull";}
@@ -1623,6 +1781,7 @@ cv.addEventListener("pointerdown",function(e){
   }
   hideHint();
 });
+cv.addEventListener("pointermove",hoverCursor);
 cv.addEventListener("pointermove",function(e){
   if(!pts[e.pointerId]&&!ptr.down)return;
   var ox=ptr.x, oy=ptr.y;
@@ -1650,7 +1809,7 @@ function endDrag(e){
   if(e&&pts[e.pointerId])delete pts[e.pointerId];
   if(nPts()<2)pinch=null;
   if(st.stage==="throw"&&ptr.down&&!ptr.changed&&Math.abs(st.height-ptr.h0)<0.01){hist.pop();}
-  else if(st.stage==="throw"&&ptr.down&&st.target){st.touches=(st.touches||0)+1; updateReadout();}
+  else if(st.stage==="throw"&&ptr.down&&st.target&&(tool==="shape"||ptr.mode==="pull")){st.touches=(st.touches||0)+1; updateReadout();}
   if(ptr.paint){updateReadout();}
   if(st.stage==="done"&&ptr.rotating){cardDirty=true;}
   ptr.down=false; ptr.contact=false; ptr.paint=false; ptr.rotating=false;
@@ -1698,7 +1857,7 @@ $("sound").addEventListener("click",function(){
 /* ---------- 화면 전환 ---------- */
 function setStage(s){
   st.stage=s;
-  stageEl.dataset.stage=s;
+  stageEl.dataset.stage=s; cv.style.cursor="";
   ORDER.forEach(function(k){$("p-"+k).hidden=(k!==s);});
   var idx=ORDER.indexOf(s);
   Array.prototype.forEach.call($("steps").children,function(li,i){
@@ -1751,14 +1910,14 @@ function buildResult(){
   $("kilnLine").textContent=kt.l;
   $("kintsugi").hidden=!(st.kiln&&st.kiln.type==="crack"&&!gold);
   /* 따라 빚기 점수 */
-  var sl=$("scoreLine");
+  var sb=$("scoreBox");
   if(st.target&&TARGETS[st.target]){
-    var sc=score(), best=Math.max(store.best[bestKey()]||0,sc);
-    sl.hidden=false;
-    sl.innerHTML="<b>"+(st.blind?"외워서 빚기":"따라 빚기")+" · "+TARGETS[st.target].name+" "+sc+"점</b> "+(sc>=90?"본과 거의 똑같아요.":(sc>=75?"꽤 닮았어요.":(sc>=50?"느낌은 살렸어요.":"자기만의 길을 갔네요.")))+" 손길 "+(st.touches||0)+"번"+(st.falls?", "+st.falls+"번 무너뜨림":"")+" (내 최고 "+best+"점)";
-    if(TARGETS[st.target].master){sl.innerHTML+=(sc>=85?" <b style=\"color:#A8451A\">명장 도전 통과!</b>":" <b>85점을 넘겨야 통과예요.</b>");}
+    var sc=score(), best=Math.max(store.best[bestKey()]||0,sc), TT=TARGETS[st.target];
+    sb.hidden=false; $("scoreNum").textContent=sc;
+    $("scoreHead").textContent=(st.blind?"외워서 빚기":"따라 빚기")+" · "+TT.name;
+    $("scoreSub").innerHTML=(sc>=90?"본과 거의 똑같아요.":(sc>=75?"꽤 닮았어요.":(sc>=50?"느낌은 살렸어요.":"자기만의 길을 갔네요.")))+" 모양 잡기 "+(st.touches||0)+"번"+(st.falls?", "+st.falls+"번 무너뜨림":"")+(roughPts()>0?" · <b>표면이 거칠어 −"+roughPts()+"점</b>":"")+" · 내 최고 "+best+"점"+(TT.master?(sc>=85?"<br><b>명장 도전 통과!</b>":"<br><b>85점을 넘겨야 통과예요.</b>"):"");
     if(best!==store.best[bestKey()]){store.best[bestKey()]=best; storeBest();}
-  }else{sl.hidden=true;}
+  }else{sb.hidden=true;}
   var q=o.query;
   $("vQuery").textContent=q;
   /* 네이버쇼핑: 폰이면 모바일 주소, 컴퓨터면 PC 주소 */
@@ -1787,19 +1946,18 @@ function buildResult(){
 
 /* ---------- 도구 설명: 고른 도구가 무엇을 바꾸는지 바로 아래에 보여 준다 ---------- */
 var TIPS={
-  palm:"<b>손바닥</b> 넓은 면을 한꺼번에 밀어요. 배를 불리거나 전체를 좁힐 때처럼 큰 모양을 잡을 때 써요. 자국이 완만하게 남아요.",
-  finger:"<b>손가락</b> 손가락 한 마디만큼만 눌려요. 허리나 목을 잘록하게 만들 때, 속을 팔 때 쓰는 기본 도구예요.",
-  tip:"<b>나무칼</b> 아주 가늘게 눌려요. 줄 홈, 입술 턱, 굽처럼 작은 굴곡을 낼 때 써요. 주변을 다듬지 않아 자국이 또렷하게 남고, 줄을 여러 개 내면 '주름' 모양으로 읽혀요.",
-  sponge:"<b>스펀지</b> 모양은 바꾸지 않고, 울퉁불퉁한 곳과 손자국만 매끈하게 펴 줘요. 다른 도구로 만진 뒤 마무리할 때 써요."
+  shape:"밖에서 밀면 좁게, 속에서 밀면 넓게. <b>가운데를 눌러 내리면 속이 파여요.</b>",
+  thick:"<b>벽</b>은 바깥으로 끌면 얇게, 안으로 끌면 두껍게. <b>바닥</b>은 아래로 끌면 얇게, 위로 끌면 두껍게.",
+  sponge:"문질러서 울퉁불퉁한 곳을 펴요."
 };
 var DTIPS={
-  brush:"<b>붓</b> 고른 물감으로 그림을 그려요. 유약을 바르면 뿌옇게 숨었다가, 구우면 선명하게 드러나요.",
-  carve:"<b>조각칼</b> 색 없이 선을 새겨요. 흙에서는 그늘진 선으로 보이고, 구우면 그 자리에 유약이 고여 유약 색보다 짙은 선이 돼요.",
-  stamp:"<b>도장</b> 한 번 누르면 고른 모양이 물감 색으로 하나 찍혀요. 끌어도 하나만 찍혀요.",
-  erase:"<b>지우개</b> 문지른 자리의 그림과 새긴 선을 모두 지워요. 흙 모양은 그대로예요.",
-  move:"<b>옮기기</b> 아무것도 그리지 않아요. 좌우로 끌면 도자기가 돌고, 확대한 상태에서 위아래로 끌면 보는 위치가 움직여요."
+  brush:"고른 색으로 그려요.",
+  carve:"선을 새겨요. 구우면 짙은 선이 돼요.",
+  stamp:"누르면 모양이 하나 찍혀요.",
+  erase:"그림과 새긴 선을 지워요.",
+  move:""
 };
-var RTIPS=["<b>자유롭게</b> 손이 지나간 자리에만 그려져요.","<b>빙 둘러 띠</b> 한 곳에 대기만 해도 그 높이로 한 바퀴 줄이 생겨요. 위아래로 끌면 띠가 두꺼워져요."];
+var RTIPS=["손이 지나간 자리에 그려져요.","한 곳에 대면 그 높이로 한 바퀴 줄이 생겨요."];
 function showTips(){
   $("toolTip").innerHTML=TIPS[tool]; $("dToolTip").innerHTML=DTIPS[dTool]; $("ringTip").innerHTML=RTIPS[dRing?1:0];
 }
@@ -1879,6 +2037,9 @@ $("presets").addEventListener("click",function(e){
 });
 $("tools").addEventListener("click",function(e){
   var b=e.target.closest("button"); if(!b||b.id)return; tool=b.dataset.t; press("tools","t",tool); showTips();
+  /* 두께 조절을 고르면 반으로 자른 모습이 저절로 켜지고, 다른 일을 고르면 꺼진다 */
+  if(tool==="thick"){if(!secOn){secAuto=true; setSec(true,true);}}
+  else if(secAuto){secAuto=false; setSec(false,true);}
 });
 $("undo").addEventListener("click",function(){
   if(st.target&&TARGETS[st.target]&&TARGETS[st.target].master){toast("명장 도전에서는 되돌릴 수 없어요"); return;}
@@ -1914,15 +2075,26 @@ var TARGETS={
   trumpet:{name:"나팔 화병",h:24,f:function(t){return 2.1+3.4*Math.exp(-Math.pow(t-0.2,2)/0.02)+5.6*Math.pow(Math.max(0,(t-0.55)/0.45),2.2);}},
   janggu:{name:"장구",h:16,f:function(t){return 2.8+4.6*Math.pow(Math.abs(2*t-1),1.6);}}
 };
+function roughPts(){
+  /* 표면이 얼마나 울퉁불퉁한가: 이웃한 굴곡이 들쭉날쭉 엇갈리는 정도만 잰다(완만한 곡선은 0). 심하면 30점까지 깎는다 */
+  if(!TARGETS[st.target])return 0;
+  var s=0, j, a, b=null;
+  for(j=1;j<N-1;j++){
+    a=st.radii[j]-(st.radii[j-1]+st.radii[j+1])/2;
+    if(b!==null&&a*b<0){s+=Math.sqrt(-a*b);}
+    b=a;
+  }
+  return Math.round(clamp((s/(N-3)-0.004)*900,0,30));
+}
 function score(){
-  /* 깐깐한 채점: 옆선의 평균 오차, 가장 크게 어긋난 곳, 키, 속 깊이를 모두 본다 */
+  /* 깐깐한 채점: 옆선의 평균 오차, 가장 크게 어긋난 곳, 키, 속 깊이, 그리고 표면이 매끈한지를 모두 본다 */
   var T=TARGETS[st.target]; if(!T)return null;
   var e=0, m=0, mx=0, i, t, rt, dv;
   for(i=0;i<40;i++){t=i/39; rt=T.f(t); dv=Math.abs(rAt(t)-rt); e+=dv; m+=rt; if(dv>mx)mx=dv;}
   m/=40; e/=40;
   var depth=(st.height-st.floor)/st.height, need=st.target==="plate"?0.45:0.7;
   var pen=2.2*(e/m)+0.5*(mx/m)+1.0*Math.abs(st.height-T.h)/T.h+(depth<need?0.18*(1-depth/need):0);
-  return Math.round(100*clamp(1-pen,0,1));
+  return Math.max(0,Math.round(100*clamp(1-pen,0,1))-roughPts());
 }
 var ghostUntil=0;
 function ghostShow(){ghostUntil=performance.now()+5000;}
@@ -1991,12 +2163,8 @@ function kilnText(){
   return {t:t,l:FIRE_NAME[f]+"로 구웠어요. "+l};
 }
 function fireTipUpdate(){
-  var tips={
-    low:"<b>약한 불</b> 고른 색 그대로 안전하게 나와요. 놀랄 일은 거의 없어요.",
-    mid:"<b>보통 불</b> 가끔 유약이 흐르거나 작은 점이 앉아요.",
-    high:"<b>센 불</b> 색이 한층 깊어지고 대박 색이 나올 수 있어요. 대신 유약이 흐르거나 금이 갈 수 있어요."
-  }, thin=wallThin(), h=tips[st.fire]||tips.mid;
-  if(thin>0.25){h+=" <b>지금 벽의 "+Math.round(thin*100)+"%가 얇아요.</b> "+(st.fire==="low"?"약한 불이면 대체로 버텨요.":"불이 셀수록 금이 가기 쉬워요.");}
+  var tips={low:"안전해요. 색은 순하게 나와요.",mid:"가끔 유약이 흘러요.",high:"색이 깊어지지만 금이 가기 쉬워요."}, thin=wallThin(), h=tips[st.fire]||tips.mid;
+  if(thin>0.25){h+=" <b>벽이 얇아서 "+(st.fire==="low"?"조심해야 해요.":"금이 가기 쉬워요.")+"</b>";}
   $("fireTip").innerHTML=h;
 }
 /* 구운 색: 센 불은 깊어지고 약한 불은 순해진다 */
@@ -2114,7 +2282,7 @@ function buildKiln(){
   }
 }
 function kilnHint(){
-  $("hintText").textContent=kilnText().t; $("hint").classList.remove("gone");
+  $("hintText").textContent=(st.target&&TARGETS[st.target])?(TARGETS[st.target].name+" "+score()+"점"):kilnText().t; $("hint").classList.remove("gone");
   clearTimeout(kilnHint.tm); kilnHint.tm=setTimeout(function(){$("hint").classList.add("gone");},3800);
 }
 $("kintsugi").addEventListener("click",function(){
@@ -2395,7 +2563,7 @@ function stress(){
       w=st.radii[j]-st.inner[j]; wsum+=w; wc++;
       if(w<0.45){s1=Math.max(s1,((0.45-w)/0.1)*((st.height-j*rowH)/8));}   /* 얇은 벽 위에 흙이 많이 얹힘 */
     }
-    if(j>0){dr=st.radii[j]-st.radii[j-1]; if(dr>1.2*rowH)reach+=(dr-1.2*rowH)*clamp(j*rowH/4,0.3,1.5);} /* 받침 없이 옆으로 뻗은 길이 */
+    if(j>0){dr=(st.radii[j]-st.radii[Math.max(0,j-3)])/Math.min(3,j); if(dr>1.2*rowH)reach+=(dr-1.2*rowH)*clamp(j*rowH/4,0.3,1.5);} /* 받침 없이 옆으로 뻗은 길이 */
     if(j>1&&j<N-3){s3=Math.max(s3,above[j]/(st.radii[j]*st.radii[j]*28));}    /* 가는 목 위의 무게 */
   }
   var s2=reach/3*((wc&&wsum/wc<0.6)?1:0.8), m=Math.max(s1,s2,s3);
@@ -2432,7 +2600,7 @@ function rough(){
   wob=Math.min(0.32,wob+0.06);
 }
 function challengeBadge(){
-  return " · 손길 <b>"+touchLeft()+"번</b> 남음"+(stressNow>=0.7?" · <b style=\"color:#C0392B\">⚠ 흔들려요: "+stressCause+"</b>":"");
+  return " · 모양 잡기 <b>"+touchLeft()+"번</b> 남음"+(roughPts()>=3?" · 거칠어요 −"+roughPts()+"점":"")+(stressNow>=0.7?" · <b style=\"color:#C0392B\">⚠ 흔들려요: "+stressCause+"</b>":"");
 }
 
 /* ---------- 처음 화면, 도전 고르기 (도전은 따로 들어간다) ---------- */
@@ -2445,7 +2613,7 @@ function freshClay(){
 }
 function closeOverlays(){$("home").hidden=true; $("chSel").hidden=true;}
 function startFree(){st.target=""; setSec(false); freshClay(); closeOverlays(); syncControls(); setStage("throw");}
-function startChallenge(id){st.target=id; setSec(true); freshClay(); closeOverlays(); syncControls(); setStage("throw");}
+function startChallenge(id){st.target=id; freshClay(); closeOverlays(); syncControls(); setStage("throw");}
 function showHome(canClose){
   $("homeShelfN").textContent="구운 작품 "+store.items.length+"점";
   $("homeClose").hidden=!canClose; $("chSel").hidden=true; $("home").hidden=false;
@@ -2467,7 +2635,7 @@ function renderChSel(){
     var T=TARGETS[id], b=document.createElement("button"), cnv=document.createElement("canvas"), nm=document.createElement("b"), stars=document.createElement("i"), n=document.createElement("small"), best=document.createElement("small");
     b.type="button"; b.className="chCard"; cnv.width=168; cnv.height=200; miniOutline(cnv,T);
     nm.textContent=T.name; stars.textContent="★★★".slice(0,CH_LV[id]); stars.setAttribute("aria-label","어려움 "+CH_LV[id]+"단계");
-    n.textContent="손길 "+T.n+"번";
+    n.textContent="모양 잡기 "+T.n+"번";
     var bv=store.best[id+(st.blind?"_b":"")];
     best.className="best"; best.textContent=bv!=null?("내 최고 "+bv+"점"):"아직 안 해 봤어요";
     b.appendChild(cnv); b.appendChild(nm); b.appendChild(stars); b.appendChild(n); b.appendChild(best);
@@ -2478,7 +2646,7 @@ function renderChSel(){
 function modeUI(){
   var ch=!!(st.target&&TARGETS[st.target]);
   $("f-presets").hidden=ch; $("chInfo").hidden=!ch; $("otherCh").hidden=!ch;
-  if(ch){$("chName").textContent="도전 · "+TARGETS[st.target].name+(st.blind?" (외워서)":"")+" · 손길 "+TARGETS[st.target].n+"번";}
+  if(ch){$("chName").textContent="도전 · "+TARGETS[st.target].name+(st.blind?" (외워서)":"")+" · 모양 잡기 "+TARGETS[st.target].n+"번";}
   $("modeChip").textContent=ch?("도전 · "+TARGETS[st.target].name):"자유롭게 빚기";
   $("again").textContent=ch?"다시 도전":"하나 더 빚기";
 }
@@ -2496,25 +2664,75 @@ $("tmode").addEventListener("click",function(){setTimeout(renderChSel,0);});
 
 /* ---------- 단면 보기: 오른쪽 반을 잘라 벽 두께와 속을 보여 준다. 얇은 벽은 빨갛게 ---------- */
 var secOn=false;
-function setSec(on){secOn=!!on; $("secBtn").setAttribute("aria-pressed",String(secOn)); dirty=true;}
-$("secBtn").addEventListener("click",function(){setSec(!secOn);});
+var secAuto=false;
+function setSec(on,quiet){secOn=!!on; $("secBtn").setAttribute("aria-pressed",String(secOn)); $("secBtn").textContent=secOn?"벽 두께 끄기":"벽 두께 보기"; if(secOn&&!quiet){toast("반으로 잘라 본 모습이에요. 주황이 흙 벽, 빨강은 너무 얇은 벽");} dirty=true;}
+$("secBtn").addEventListener("click",function(){secAuto=false; setSec(!secOn);});
 $("menuBtn").addEventListener("click",function(){showHome(true);});
 function drawSection(){
-  var hpx=st.height*SV, ft=st.floor/st.height, i, t, ro, ri, thin, n=140, hollow=st.height-st.floor>0.05;
-  ctx.setTransform(dpr,0,0,dpr,0,0);
+  /* 오른쪽 반을 세로로 잘라 보여 준다: 잘린 흙(벽·바닥)은 빗금 친 주황, 속은 그늘진 안쪽 벽, 너무 얇은 벽은 빨강 */
+  var hpx=st.height*SV, ft=clamp(st.floor/st.height,0,1), hollow=st.height-st.floor>0.05, M=90, i, t, ro, ri, x, y, g;
+  var out=[], inn=[], minW=99, minT=0;
+  for(i=0;i<=M;i++){t=i/M; out.push([CX+rAt(t)*SV,BASE-t*hpx]);}
   if(hollow){
-    ctx.fillStyle="rgba(250,246,238,.9)"; ctx.beginPath(); ctx.moveTo(CX,BASE-ft*hpx);
-    for(i=0;i<=60;i++){t=ft+(1-ft)*i/60; ctx.lineTo(CX+innerAt(t)*SV,BASE-t*hpx);}
+    for(i=0;i<=M;i++){
+      t=ft+(1-ft)*i/M; ro=rAt(t); ri=Math.min(innerAt(t),ro-0.12);
+      inn.push([CX+ri*SV,BASE-t*hpx,ro-ri,CX+ro*SV]);
+      if(i>2&&ro-ri<minW){minW=ro-ri; minT=i;}
+    }
+  }
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.lineJoin="round";
+  if(hollow){
+    /* 속: 잘린 틈으로 보이는 안쪽 벽 */
+    g=ctx.createLinearGradient(CX,0,CX+rAt(1)*SV,0);
+    g.addColorStop(0,"rgb(206,192,176)"); g.addColorStop(1,"rgb(150,132,116)");
+    ctx.fillStyle=g; ctx.beginPath(); ctx.moveTo(CX,BASE-ft*hpx);
+    for(i=0;i<=M;i++){ctx.lineTo(inn[i][0],inn[i][1]);}
     ctx.lineTo(CX,BASE-hpx); ctx.closePath(); ctx.fill();
+    var rfl=inn[0][0]-CX;
+    if(rfl>2){
+      ctx.fillStyle="rgba(226,214,198,.9)"; ctx.beginPath(); ctx.moveTo(CX,BASE-ft*hpx);
+      ctx.ellipse(CX,BASE-ft*hpx,rfl,rfl*TILT,0,-Math.PI/2,0); ctx.closePath(); ctx.fill();
+    }
   }
-  for(i=0;i<n;i++){
-    t=(i+0.5)/n; ro=rAt(t)*SV; ri=(hollow&&t>=ft)?innerAt(t)*SV:0;
-    thin=ri>0&&(rAt(t)-innerAt(t))<0.45;
-    ctx.fillStyle=thin?"rgba(206,48,38,.95)":"rgba(96,72,54,.92)";
-    ctx.fillRect(CX+ri,BASE-(i+1)/n*hpx,Math.max(1.5,ro-ri),hpx/n+0.7);
+  /* 잘린 흙 */
+  var body=new Path2D(); body.moveTo(CX,BASE);
+  for(i=0;i<=M;i++){body.lineTo(out[i][0],out[i][1]);}
+  if(hollow){for(i=M;i>=0;i--){body.lineTo(inn[i][0],inn[i][1]);} body.lineTo(CX,BASE-ft*hpx);}
+  else{body.lineTo(CX,BASE-hpx);}
+  body.closePath();
+  ctx.fillStyle="rgb(196,124,82)"; ctx.fill(body);
+  ctx.save(); ctx.clip(body);
+  ctx.strokeStyle="rgba(255,236,214,.34)"; ctx.lineWidth=1;
+  ctx.beginPath();
+  for(x=-hpx-20;x<RMAX*SV+20;x+=6){ctx.moveTo(CX+x,BASE+4); ctx.lineTo(CX+x+hpx+8,BASE-hpx-4);}
+  ctx.stroke();
+  /* 너무 얇은 벽은 빨갛게 */
+  if(hollow){
+    ctx.fillStyle="rgb(214,52,40)";
+    for(i=0;i<M;i++){
+      if(inn[i][2]<0.45||inn[i+1][2]<0.45){
+        ctx.beginPath(); ctx.moveTo(inn[i][0],inn[i][1]+0.5); ctx.lineTo(inn[i][3]+1,inn[i][1]+0.5);
+        ctx.lineTo(inn[i+1][3]+1,inn[i+1][1]-0.5); ctx.lineTo(inn[i+1][0],inn[i+1][1]-0.5); ctx.closePath(); ctx.fill();
+      }
+    }
   }
-  ctx.strokeStyle="rgba(31,63,168,.6)"; ctx.lineWidth=1.2; ctx.setLineDash([4,4]);
-  ctx.beginPath(); ctx.moveTo(CX,BASE); ctx.lineTo(CX,BASE-hpx-8); ctx.stroke(); ctx.setLineDash([]);
+  ctx.restore();
+  ctx.strokeStyle="rgba(70,40,24,.9)"; ctx.lineWidth=1.4; ctx.stroke(body);
+  /* 자른 자리 표시와 가장 얇은 곳 */
+  ctx.strokeStyle="rgba(31,63,168,.55)"; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(CX,BASE+2); ctx.lineTo(CX,BASE-hpx-10); ctx.stroke(); ctx.setLineDash([]);
+  if(hollow&&minW<90){
+    var lab="가장 얇은 곳 "+Math.round(minW*10)+"mm", px=inn[minT][3], py=inn[minT][1], tw, bx, thin=minW<0.45;
+    ctx.font="600 11px 'IBM Plex Sans KR',sans-serif"; tw=ctx.measureText(lab).width+12;
+    bx=Math.min(px+12,W-tw-4);
+    ctx.strokeStyle=thin?"rgb(214,52,40)":"rgba(70,40,24,.9)"; ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.moveTo(px-inn[minT][2]*SV/2,py); ctx.lineTo(bx,py); ctx.stroke();
+    ctx.fillStyle=thin?"rgb(214,52,40)":"rgba(255,252,246,.96)";
+    ctx.beginPath(); if(ctx.roundRect){ctx.roundRect(bx,py-10,tw,20,5);}else{ctx.rect(bx,py-10,tw,20);} ctx.fill();
+    if(!thin){ctx.stroke();}
+    ctx.fillStyle=thin?"#fff":"rgb(60,36,22)"; ctx.textBaseline="middle"; ctx.textAlign="left"; ctx.fillText(lab,bx+6,py+0.5);
+  }
   ctx.setTransform(1,0,0,1,0,0);
 }
 
@@ -2554,7 +2772,7 @@ var blindPref=false;
   modeUI=function(){
     baseMode();
     var T=TARGETS[st.target];
-    if(T&&T.master){$("chName").textContent="명장 도전 · "+T.name+" · 손길 "+T.n+"번 · 되돌리기 없음 · 85점 통과"; $("modeChip").textContent="명장 도전 · "+T.name;}
+    if(T&&T.master){$("chName").textContent="명장 도전 · "+T.name+" · 모양 잡기 "+T.n+"번 · 되돌리기 없음 · 85점 통과"; $("modeChip").textContent="명장 도전 · "+T.name;}
   };
 })();
 $("tmode").addEventListener("click",function(e){var b=e.target.closest("button"); if(b){blindPref=b.dataset.bm==="1";}},true);
@@ -2833,10 +3051,10 @@ function fireUI(){
   $("kilnTip").innerHTML=tip;
   $("doWipe").disabled=wiped||fstep!=="prep"; $("doWipe").textContent=wiped?"✓ 굽을 닦았어요":"굽 닦기";
   $("doLoad").disabled=fstep!=="prep"; $("doClose").disabled=fstep!=="loaded";
-  $("openKiln").hidden=fstep!=="cooling";
-  $("temp").hidden=!(fstep==="firing"||fstep==="cooling");
-  $("sheetTitle").textContent=pick?"가마 고르기":(prep?"가마에 넣기":(fstep==="firing"?"불 때는 중":"식히는 중"));
-  var nb=$("nextBtn"), label={pick:"이 가마로 →",prep:(wiped?"가마에 넣기 →":"굽 닦기"),loaded:"문 닫고 불 때기 →",cooling:"가마 문 열기"}[fstep];
+  $("openKiln").hidden=true;
+  $("temp").hidden=fstep!=="firing";
+  $("sheetTitle").textContent=pick?"가마 고르기":(prep?"가마에 넣기":(fstep==="firing"?"불 때는 중":"다 구워졌어요"));
+  var nb=$("nextBtn"), label={pick:"이 가마로 →",prep:(wiped?"가마에 넣고 굽기 →":"굽 닦기")}[fstep];
   nb.hidden=!label; if(label){nb.textContent=label;}
   dirty=true;
 }
@@ -2852,13 +3070,13 @@ function fireNext(){
   fireUI();
 }
 function openKilnNow(){
-  rollKiln(kilnTemp); fireU=1; fireDone=true; doorA=0;
+  rollKiln(40); fireU=1; fireDone=true; doorA=0;
   revealPending=true; setStage("done");
 }
 function fireTick(){
   /* 굽기 단계의 시간 흐름 */
   var now=performance.now(), u, c;
-  if(fstep==="loading"){loadA=clamp((now-fT)/1000,0,1); if(loadA>=1){fstep="loaded"; fireUI();}}
+  if(fstep==="loading"){loadA=clamp((now-fT)/1300,0,1); if(loadA>=1){fstep="closing"; fT=now+250; fireUI();}}
   else if(fstep==="closing"){doorA=1-clamp((now-fT)/900,0,1); if(doorA<=0){doorA=0; fstep="firing"; fT=now; fireUI();}}
   else if(fstep==="firing"){
     u=clamp((now-fT)/(st.kilnType==="wood"?6400:5200),0,1);
@@ -2868,10 +3086,9 @@ function fireTick(){
     $("fireBar").style.width=(u*100).toFixed(1)+"%";
     if(u>=1){fstep="cooling"; fT=now; fireUI();}
   }else if(fstep==="cooling"){
-    c=(now-fT)/1000; kilnTemp=35+1215*Math.exp(-c/2.6); kilnHeat=clamp((kilnTemp-150)/1100,0,1);
-    fireU=0.55+0.45*clamp(1-(kilnTemp-35)/1215,0,1);
-    $("temp").textContent="식히는 중 "+Math.round(kilnTemp)+"℃";
-    $("fireTitle").textContent=kilnTemp>100?"아직 뜨거워요. 지금 열면 찬 공기에 금이 갈 수 있어요":"충분히 식었어요. 이제 열어도 안전해요";
+    c=clamp((now-fT)/1400,0,1); kilnHeat=clamp(1-c*1.2,0,1); fireU=0.55+0.45*c;
+    $("fireTitle").textContent="다 구워졌어요. 가마를 열어요";
+    if(c>=1){kilnHeat=0; stageEl.style.setProperty("--heat","0"); openKilnNow(); return;}
     $("fireBar").style.width="100%";
   }
   stageEl.style.setProperty("--heat",(kilnHeat*0.2).toFixed(3));
@@ -2982,7 +3199,7 @@ function kilnText(){
   var baseUI=fireUI;
   fireUI=function(){
     baseUI();
-    if(fstep==="prep"){$("nextBtn").textContent="가마에 넣기 →";}
+    if(fstep==="prep"){$("nextBtn").textContent="가마에 넣고 굽기 →";}
   };
 })();
 
@@ -3014,10 +3231,9 @@ cv.addEventListener("pointerdown",function(e){
   var p=cpos(e), g=kilnGeo();
   if(fstep==="prep"){
     var hw=rAt(0.5)*SV*0.5+34, hh=st.height*SV*0.5+34;
-    if(Math.abs(p.x-CX)<hw&&p.y>BASE+40-hh&&p.y<BASE+70){
-      fdrag={ox:p.x,oy:p.y-40}; dragOff={x:0,y:40};
-      try{cv.setPointerCapture(e.pointerId);}catch(_){}
-      $("hint").classList.add("gone"); e.preventDefault(); dirty=true;
+    var onPiece=Math.abs(p.x-CX)<hw&&p.y>BASE+40-hh&&p.y<BASE+70, onKiln=p.x>g.x0-20&&p.x<g.x1+20&&p.y>g.top-20&&p.y<g.bot+20;
+    if((onPiece||onKiln)&&performance.now()-fireEnterT>350){
+      $("hint").classList.add("gone"); fireNext(); e.preventDefault();
     }
   }else if(fstep==="loaded"){
     if(p.x>g.x0-40&&p.x<g.x1+40&&p.y>g.top-40&&p.y<g.bot+40){fireNext();}
@@ -3041,7 +3257,7 @@ cv.addEventListener("pointercancel",dropPiece);
   var baseUI=fireUI;
   fireUI=function(){
     baseUI();
-    var h=$("hint"), msg={prep:"작품을 끌어서 가마 선반에 올려요",loaded:"가마 문을 눌러 닫아요"}[fstep];
+    var h=$("hint"), msg={prep:"작품을 누르면 가마에 들어가요"}[fstep];
     if(st.stage==="fire"&&msg){h.hidden=false; $("hintText").textContent=msg; h.classList.remove("gone");}
     else if(st.stage==="fire"){h.hidden=true;}
   };
@@ -3175,6 +3391,62 @@ var SITE={name:"토닥",url:"https://sosohanlab.github.io/todak/",contact:""};
       tip.hidden=false;
     });
   }
+})();
+
+/* ---------- 손끝 크기: 좁게(가는 홈) ↔ 넓게(큰 모양) ---------- */
+(function(){
+  var el=$("hsize");
+  function apply(){
+    var v=+el.value/100, f=0.3*Math.pow(2.6/0.3,v), sm=0.1*Math.pow(v,1.36);
+    TOOLS.shape.f=f; TOOLS.shape.sm=sm; TOOLS.thick.f=f; TOOLS.thick.sm=0;
+    TOOLS.sponge.f=Math.max(0.8,f*1.45);
+    $("hsizeOut").textContent=v<0.25?"좁게 · 가는 홈":(v<0.75?"보통 · 손가락":"넓게 · 손바닥");
+  }
+  el.addEventListener("input",apply); apply();
+})();
+
+/* ---------- 작품 카드 창: 눌렀을 때만 뜬다 ---------- */
+(function(){
+  var dlg=$("cardDlg");
+  $("openCard").addEventListener("click",function(){dlg.hidden=false; cardDirty=true; dirty=true;});
+  $("cardClose").addEventListener("click",function(){dlg.hidden=true;});
+  dlg.addEventListener("click",function(e){if(e.target===dlg){dlg.hidden=true;}});
+})();
+
+/* ---------- 도전을 시작할 때 규칙을 한 번 보여 준다 ---------- */
+(function(){
+  var base=startChallenge, last="";
+  function show(){
+    var T=TARGETS[st.target]; if(!T)return;
+    $("crName").textContent=T.name; $("crN").textContent=T.n;
+    $("crBlind").hidden=!st.blind; $("crMaster").hidden=!T.master;
+    $("chRules").hidden=false; $("crGo").focus();
+  }
+  startChallenge=function(id){
+    base(id); secAuto=false; setSec(false,true);
+    var key=id+(st.blind?"_b":"");
+    if(key!==last){last=key; show();}
+  };
+  $("crGo").addEventListener("click",function(){$("chRules").hidden=true; if(st.blind){ghostShow(); dirty=true;}});
+  $("chRulesBtn").addEventListener("click",show);
+})();
+/* ---------- 꾸미기 확대: 컴퓨터는 마우스 휠, 폰은 두 손가락 ---------- */
+cv.addEventListener("wheel",function(e){
+  if(st.stage!=="deco")return;
+  e.preventDefault();
+  var r=cv.getBoundingClientRect();
+  setZoom(Z*Math.exp(-e.deltaY*0.0016),(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*HC/r.height);
+},{passive:false});
+(function(){
+  var touch=("ontouchstart" in window)||navigator.maxTouchPoints>0;
+  $("decoHelp").textContent="빈 곳을 끌면 돌아가요. "+(touch?"두 손가락으로 확대해요.":"마우스 휠로 확대해요.")+" 건너뛰어도 돼요.";
+})();
+
+/* ---------- 완성 화면 위쪽의 '다른 도전' 버튼 ---------- */
+(function(){
+  var base=setStage;
+  setStage=function(s){base(s); $("nextAlt").hidden=!(s==="done"&&st.target&&TARGETS[st.target]);};
+  $("nextAlt").addEventListener("click",function(){$("otherCh").click();});
 })();
 if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
 })();
