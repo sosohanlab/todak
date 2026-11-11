@@ -33,6 +33,9 @@ for(const id of Object.keys(q.targets)){
  const g=q.sectionData();assert(Math.abs(g.floorY-(g.bottomY-q.st.floor*v.SV))<1e-8);assert(Math.abs(g.inner[0][1]-g.floorY)<1e-8);for(const row of g.inner)assert(row[2]>=.119999);
  q.section();checks.push(id);
 }
+// Explicit shape and hollow tools must never describe or perform opposite actions.
+q.preset('lump');q.tool('shape');let vv=q.view(),f0=q.st.floor;setGesture(vv.CX+.4*vv.SV,vv.BASE-q.st.height*.7*vv.SV);for(let i=0;i<20;i++)q.touch(16);assert.equal(q.st.floor,f0,'shape must not silently hollow the clay');
+q.tool('hollow');setGesture(vv.CX+.4*vv.SV,vv.BASE-q.st.height*.7*vv.SV);for(let i=0;i<25;i++)q.touch(16);assert(q.st.floor<f0-.2,'explicit hollow tool must dig the clay');q.tool('shape');
 for(const name of ['lump','bowl','cup','vase']){q.preset(name);const g=q.sectionData();assert.equal(g.hollow,name!=='lump');q.section();}
 ideal('cup');const good=q.score();q.st.radii=q.st.radii.map(r=>r*1.1);assert(q.score()<=good-20,'10% shape drift must cost points');
 ideal('cup');for(let j=5;j<q.N-2;j++)q.st.inner[j]+=(j%2?.18:-.18);assert(q.score()<=85,'deep interior ripples cannot score 90+');

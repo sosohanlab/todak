@@ -447,6 +447,42 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 @media(min-width:760px){.stage[data-stage=done]~.sheet{max-height:88%;width:400px}#p-done .actions{gap:7px}#p-done button{font-size:13px;padding:10px 12px}}
 
 .dipControl{position:relative;padding:12px;background:#e9eee5;border-radius:10px}.dipControl label{display:flex;justify-content:space-between}.dipControl input{width:100%;accent-color:#345b3f}#dipHandle{touch-action:none;padding:10px 20px;background:#345b3f;color:white;border:0;border-radius:8px}
+
+/* A constrained flex child is the scroll viewport; the header never scrolls away. */
+.app{height:100vh;height:100dvh}
+.sheet{display:flex;flex-direction:column;overflow:hidden}
+.sheetHead{flex:none;min-width:0;border-bottom:1px solid #dedfd5;background:#faf8f2;position:relative;z-index:1}
+.sheetBody{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;touch-action:pan-y;padding-bottom:max(24px,env(safe-area-inset-bottom));scroll-padding-block:12px;-webkit-overflow-scrolling:touch}
+.sheet:not(.open) .sheetBody{display:none}
+.sheetBody:focus-visible{outline:2px solid #244431;outline-offset:-3px}
+.stageToolbar{position:absolute;z-index:5;top:100px;left:10px;display:flex;align-items:flex-start;gap:6px;pointer-events:auto}
+.stageToolbar .corner{position:static;min-height:42px;font-size:12px;padding:6px 10px}
+.stageToolbar .corner[hidden]{display:none}
+.viewMenu{position:relative}.viewMenu>summary{list-style:none;cursor:pointer;min-height:42px;padding:8px 12px;background:#fffdf5eb;border:1px solid #bdc6b7;border-radius:10px;font-size:12px;font-weight:600}.viewMenu>summary::-webkit-details-marker{display:none}.viewMenu[open]>summary{background:#e9eee4}.viewMenuBody{position:absolute;top:48px;left:0;min-width:170px;display:grid;gap:8px;padding:10px;border:1px solid #bdc6b7;background:#faf8f2;box-shadow:0 8px 24px #27312625;border-radius:12px}.viewMenuBody .corner{width:100%}.turnButtons{display:flex;gap:6px}
+.stage[data-stage=throw] #hint{display:none}
+#tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:visible}#tools .chip{min-height:44px}#tools #undo{grid-column:1/-1;font-size:12px;background:transparent;min-height:36px;border-width:1px}
+@media(max-width:759px){
+ .sheet{width:100%;max-width:none;left:0;right:0;bottom:0;transform:none;border:1px solid #bec4b6;border-bottom:0;border-radius:18px 18px 0 0;height:auto;max-height:calc(100dvh - 160px);padding-bottom:env(safe-area-inset-bottom);transition:none;box-shadow:0 -6px 24px #29342720}
+ .sheet.open{height:56vh;height:56dvh;max-height:calc(100dvh - 160px)}
+ .sheetHead{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:7px;padding:10px 12px}
+ #sheetToggle{min-height:44px;padding:6px;font-size:12px;border:1px solid #bdc6b7;border-radius:9px;box-shadow:none}
+ .sheetHead h2{font-size:15px;margin:0}
+ #nextBtn{min-height:44px;font-size:13px;max-width:155px;white-space:normal;line-height:1.35;padding:8px 10px}
+ #nextAlt{grid-column:2/4;justify-self:end;font-size:12px;min-height:36px}
+ .sheetBody{padding:12px 14px max(24px,env(safe-area-inset-bottom));scrollbar-width:auto}
+ #dtools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible;gap:6px}#dtools .chip{min-width:0;min-height:44px;font-size:12px;padding:7px 3px}
+ #dtools #dUndo{grid-column:1/-1}
+ .swatches{grid-template-columns:repeat(5,minmax(0,1fr))}.swatch{min-width:0}
+ .stageToolbar{top:72px;left:8px;right:8px;gap:6px}.viewMenuBody{left:auto;right:0}
+ .stageToolbar #secBtn{display:none}
+ .stageToolbar .corner,.viewMenu>summary{min-height:38px;font-size:11px;padding:7px 9px}
+ .stageToolbar .viewMenu{margin-left:auto}.stageToolbar .viewMenuBody{position:fixed;top:116px;right:8px;left:auto;max-height:calc(100dvh - 180px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain}
+ .hud{left:8px;right:8px}.readout{font-size:10px;gap:4px}.readout span{padding:2px 6px}#guess{display:none}
+ .hint{top:140px;font-size:12px}
+ .drawerIn{min-height:0;max-height:calc(100dvh - 24px);overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+ .searchIn{max-height:calc(100dvh - 24px)}
+}
+
 </style>
 </head>
 <body>
@@ -471,31 +507,35 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
       </div>
     </div>
     <div class="hint" id="hint"><span id="hintText">흙 가운데를 누르고 아래로 끌어 속을 파 보세요</span></div>
-    <button type="button" class="corner" id="menuBtn">≡ 처음 화면</button>
-    <button type="button" class="corner" id="secBtn" aria-pressed="false">벽 두께 보기</button>
-    <button type="button" class="corner" id="rotL" aria-label="왼쪽으로 돌리기" hidden>◀</button>
-    <button type="button" class="corner" id="rotR" aria-label="오른쪽으로 돌리기" hidden>▶</button>
-    <button type="button" class="corner" id="viewToggle" hidden>물레에서 보기</button>
-    <button type="button" class="corner" id="shelfBtn">진열장 <span id="shelfN">0</span></button>
-    <button type="button" class="corner" id="sound" aria-pressed="false">소리 켜기</button>
+    <nav class="stageToolbar" aria-label="공방 메뉴">
+      <button type="button" class="corner" id="menuBtn">처음 화면</button>
+      <button type="button" class="corner" id="shelfBtn">진열장 <span id="shelfN">0</span></button>
+      <details class="viewMenu" id="viewMenu"><summary>보기 · 소리</summary><div class="viewMenuBody">
+        <button type="button" class="corner" id="secBtn" aria-pressed="false">벽 두께 보기</button>
+        <div class="turnButtons"><button type="button" class="corner" id="rotL" aria-label="왼쪽으로 돌리기" hidden>◀</button><button type="button" class="corner" id="rotR" aria-label="오른쪽으로 돌리기" hidden>▶</button></div>
+        <button type="button" class="corner" id="viewToggle" hidden>물레에서 보기</button>
+        <button type="button" class="corner" id="sound" aria-pressed="false">소리 켜기</button>
+      </div></details>
+    </nav>
     <div class="temp" id="temp" hidden></div>
     <div class="toast" id="toast" role="status"></div>
   </section>
 
   <aside class="sheet" id="sheet" aria-label="조작판">
     <div class="sheetHead">
-      <button type="button" id="sheetToggle" aria-expanded="false">펼치기</button>
+      <button type="button" id="sheetToggle" aria-expanded="false" aria-controls="sheetBody">펼치기</button>
       <h2 id="sheetTitle">빚기</h2>
       <button type="button" id="nextAlt" hidden>다른 도전</button>
       <button type="button" id="nextBtn">꾸미러 가기 →</button>
     </div>
-    <div class="sheetBody" id="sheetBody">
+    <div class="sheetBody" id="sheetBody" tabindex="0" role="region" aria-label="제작 도구 · 위아래로 스크롤">
 
       <section class="panel" id="p-throw">
         <div class="field">
           <span class="label">지금 할 일</span>
           <div class="chips" id="tools">
             <button type="button" class="chip" data-t="shape" aria-pressed="true">모양 잡기</button>
+            <button type="button" class="chip" data-t="hollow" aria-pressed="false">속 파기</button>
             <button type="button" class="chip" data-t="thick" aria-pressed="false">두께 조절</button>
             <button type="button" class="chip" data-t="sponge" aria-pressed="false">매끈하게</button>
             <button type="button" class="chip" id="undo">↩ 되돌리기</button>
@@ -808,7 +848,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 var N=56, W=360, HC=430, CX=180, BASE=366, CX0=180, BASE0=366, S0=11, TILT=0.26, TWO=6.283185307;
 var HMIN=3, HMAX=26, RMIN=1.2, RMAX=13.5, MINW=0.35; /* cm */
 var V=1, SV=S0; /* 화면 배율: 작은 작품은 크게 당겨 보여 준다 */
-var TOOLS={shape:{f:1.1,sm:0.05},thick:{f:1.1,sm:0.05},sponge:{f:1.6,sm:0}};
+var TOOLS={shape:{f:1.1,sm:0.05},hollow:{f:1.1,sm:0.05},thick:{f:1.1,sm:0.05},sponge:{f:1.6,sm:0}};
 var CLAY=[166,148,130], DRY=[186,170,152], RAW=[232,229,222], GLOW=[255,150,58];
 var GLAZES=[
   {id:"baekja",name:"백자",kw:"백자",c:[238,236,228]},
@@ -941,7 +981,8 @@ function fitV(){
   var rMax=0, h=st.height, rTop=st.radii[N-1], i, T=(st.stage==="throw"&&st.target)?TARGETS[st.target]:null;
   for(i=0;i<N;i++){if(st.radii[i]>rMax)rMax=st.radii[i];}
   if(T){h=Math.max(h,T.h); for(i=0;i<=10;i++){rMax=Math.max(rMax,T.f(i/10));} rTop=Math.max(rTop,T.f(1));}
-  var roomH=Math.max(150,BASE0-118), roomW=Math.max(110,Math.min(150,CX0-34));
+  var mobileView=stageEl.clientWidth<760,topRoom=mobileView?120*W/(stageEl.clientWidth||360):118;
+  var roomH=Math.max(90,BASE0-topRoom), roomW=Math.max(110,Math.min(150,CX0-34));
   if(st.stage==="fire"){roomH=Math.max(110,BASE0-215); roomW=Math.max(50,Math.min(availW()/2,W/2)-128);}  /* 가마 전체가 보이게 물러선다 */
   return clamp(Math.min(roomH/(h+rTop*TILT),roomW/rMax)/S0,0.6,1.6);
 }
@@ -1110,6 +1151,8 @@ function touchClay(dt){
     if(t>1.02){if(d<st.radii[N-1]-0.2){ptr.mode="inside";}else{if(t>1.12)return 0; ptr.mode="in";}}
     else{ptr.mode=(d<rAt(t)-0.35)?"inside":"in";}
   }
+  if(tool==="hollow"&&ptr.mode!=="inside")return 0;
+  if(tool==="shape"&&ptr.mode==="inside"&&(BASE-ptr.y)/SV<st.floor-.01){$("toolTip").textContent="속을 더 파려면 ‘속 파기’를 선택해 주세요.";return 0;}
   for(j=0;j<N;j++)sumB+=st.radii[j];
 
   if(ptr.mode==="in"){
@@ -1405,7 +1448,7 @@ function resize(){
   /* 물레 자리: 폰은 아래 조작판 위, 컴퓨터는 오른쪽 조작판을 뺀 가운데 */
   var oldX=CX0, oldB=BASE0;
   CX0=W/2;
-  BASE0=(cw>=760)?HC-66:HC-126/k-44;
+  BASE0=(cw>=760)?HC-66:HC-35;
   if(BASE0<300)BASE0=Math.min(HC-60,300);
   if(Z<=1&&st.stage!=="done"){CX=CX0; BASE=BASE0;}else{CX+=CX0-oldX; BASE+=BASE0-oldB;}
   ovKey=""; pvKey=""; bgKey=""; dirty=true;
@@ -1497,7 +1540,7 @@ function innerGrad(c,k){
 function photoData(){
   compose();
   var wide=stageEl.clientWidth>=760,unit=W/(stageEl.clientWidth||360),sheetH=$('sheet').getBoundingClientRect().height||126;
-  var viewWidth=wide?Math.max(W*.45,W-440*unit):W,viewHeight=wide?HC:Math.max(HC*.48,HC-sheetH*unit);
+  var viewWidth=wide?Math.max(W*.45,W-440*unit):W,viewHeight=HC;
   return {viewWidth:viewWidth,viewHeight:viewHeight,key:[texVer,st.height,st.radii.join(','),st.inner.join(','),st.floor,st.glaze,(st.customC||[]).join(','),st.glaze2,st.dip,st.dipDepth,st.fx,st.finish,kilnSig()].join('|'),glazeId:st.glaze,height:st.height,floor:st.floor,rAt:rAt,innerAt:innerAt,color:glaze().c,dipDepth:st.dip?(typeof st.dipDepth==="number"?st.dipDepth:(st.dip==="half"?.5:.2)):0,dipColor:byId(GLAZES,st.glaze2).c,inside:glaze().c,finish:st.finish,overlay:fin.c,carve:hasCarve?carve.c:null,rotation:rot,zoom:Z,panX:CX-CX0,panY:BASE-BASE0,background:photoScene,width:W,canvasHeight:HC,pixelWidth:cv.width,pixelHeight:cv.height,scale:SV,cx:CX,base:BASE};
 }
 function drawPhoto(){
@@ -1813,7 +1856,7 @@ cv.addEventListener("pointerdown",function(e){
   ptr.dipping=false; ptr.panning=false; ptr.paint=false; ptr.rotating=false; ptr.last=null; ptr.vx=0; ptr.vy=0; ptr.wall=null;
   if(st.stage==="throw"){
     var hp0=handlePos(), onH=(ptr.x-hp0.x)*(ptr.x-hp0.x)+(ptr.y-hp0.y)*(ptr.y-hp0.y)<900;
-    if(st.target&&touchLeft()<=0&&(tool==="shape"||onH)){
+    if(st.target&&touchLeft()<=0&&(tool==="shape"||tool==="hollow"||onH)){
       ptr.down=false; delete pts[e.pointerId];
       toast("모양 잡기를 다 썼어요. 두께 조절과 매끈하게는 더 할 수 있어요");
       return;
@@ -1871,7 +1914,7 @@ function endDrag(e){
   if(e&&pts[e.pointerId])delete pts[e.pointerId];
   if(nPts()<2)pinch=null;
   if(st.stage==="throw"&&ptr.down&&!ptr.changed&&Math.abs(st.height-ptr.h0)<0.01){hist.pop();}
-  else if(st.stage==="throw"&&ptr.down&&st.target&&(tool==="shape"||ptr.mode==="pull")){st.touches=(st.touches||0)+1; updateReadout();}
+  else if(st.stage==="throw"&&ptr.down&&st.target&&(tool==="shape"||tool==="hollow"||ptr.mode==="pull")){st.touches=(st.touches||0)+1; updateReadout();}
   if(ptr.paint){updateReadout();}
   if(st.stage==="done"&&ptr.rotating){cardDirty=true;}
   ptr.dipping=false; ptr.panning=false; ptr.down=false; ptr.contact=false; ptr.paint=false; ptr.rotating=false;
@@ -1937,10 +1980,10 @@ function setStage(s){
   $("hint").hidden=(s==="glaze"||s==="fire");
   $("sheetTitle").textContent=STAGE_NAME[s];
   $("nextBtn").hidden=(s==="fire"); if(s==="glaze"){fireTipUpdate();} $("nextBtn").textContent=(s==="done"&&st.target)?"다시 도전":(NEXT_LABEL[s]||""); modeUI();
-  setSheet(s==="done"||stageEl.clientWidth>=760);
+  setSheet(true);
   $("sheetBody").scrollTop=0;
   if(s==="deco"){$("hintText").textContent="도자기 위에 바로 그려 보세요"; touched=false; $("hint").classList.remove("gone");}
-  if(s==="throw"){$("hintText").textContent="흙 가운데를 누르고 아래로 끌어 속을 파 보세요"; ghostShow();}
+  if(s==="throw"){$("hintText").textContent=tool==="hollow"?"입구 가운데를 누르고 아래로 끌어 속을 파요":"옆면을 좌우로 끌어 모양을 바꿔요"; ghostShow();}
   ptr.down=false; drops.length=0; wob=0; if(s!=="throw"){hist.length=0;}
   if(s!=="fire")stageEl.style.setProperty("--heat","0");
   if(s==="fire"){fireBegin();}
@@ -1988,7 +2031,8 @@ function buildResult(){
 
 /* ---------- 도구 설명: 고른 도구가 무엇을 바꾸는지 바로 아래에 보여 준다 ---------- */
 var TIPS={
-  shape:"밖에서 밀면 좁게, 속에서 밀면 넓게. <b>가운데를 눌러 내리면 속이 파여요.</b>",
+  shape:"<b>옆면</b>을 좌우로 끌어 너비를 바꿔요. 위의 ↕ 손잡이로 높이를 조절해요.",
+  hollow:"<b>입구 가운데</b>를 누르고 아래로 끌어 속을 파요. 이미 파인 그릇은 안쪽 바닥을 아래로 끌어요.",
   thick:"<b>벽</b>은 바깥으로 끌면 얇게, 안으로 끌면 두껍게. <b>바닥</b>은 아래로 끌면 얇게, 위로 끌면 두껍게.",
   sponge:"단면에서 <b>안쪽 벽이나 바깥쪽 벽을 문질러</b> 고르게 다듬어요. 바닥 높이는 바뀌지 않아요."
 };
@@ -2001,7 +2045,7 @@ var DTIPS={
 };
 var RTIPS=["손이 지나간 자리에 그려져요.","한 곳에 대면 그 높이로 한 바퀴 줄이 생겨요."];
 function showTips(){
-  $("toolTip").innerHTML=tool==="thick"&&st.height-st.floor<=.05?"아직 속이 없는 흙이에요. 먼저 모양 잡기로 가운데를 눌러 속을 파 주세요.":TIPS[tool]; $("dToolTip").innerHTML=DTIPS[dTool]; $("ringTip").innerHTML=RTIPS[dRing?1:0];
+  $("toolTip").innerHTML=tool==="thick"&&st.height-st.floor<=.05?"아직 속이 없는 흙이에요. 먼저 ‘속 파기’를 선택해 가운데를 아래로 끌어 주세요.":TIPS[tool]; $("dToolTip").innerHTML=DTIPS[dTool]; $("ringTip").innerHTML=RTIPS[dRing?1:0];
 }
 
 /* ---------- 조작 ---------- */
@@ -2161,7 +2205,11 @@ function bestKey(id,blind){return (id||st.target)+((blind==null?st.blind:blind)?
 function setSheet(open){
   $("sheet").classList.toggle("open",!!open);
   $("sheetToggle").setAttribute("aria-expanded",String(!!open));
-  $("sheetToggle").textContent=open?"접기":"펼치기";
+  $("sheetToggle").textContent=open?"도구 접기":"도구 열기";
+  $("sheetBody").setAttribute("aria-hidden",String(!open));
+  if(!open&&$("sheetBody").contains(document.activeElement))$("sheetToggle").focus();
+  if(typeof layoutWorkspace==="function")layoutWorkspace();
+  dirty=true;
 }
 $("sheetToggle").addEventListener("click",function(){setSheet(!$("sheet").classList.contains("open"));});
 $("nextBtn").addEventListener("click",function(){
@@ -3554,6 +3602,21 @@ cv.addEventListener("wheel",function(e){
  var dipStart=null;$('dipHandle').addEventListener('pointerdown',function(e){dipStart={y:e.clientY,d:st.dipDepth||.2};this.setPointerCapture(e.pointerId);e.preventDefault();});$('dipHandle').addEventListener('pointermove',function(e){if(dipStart)depth(dipStart.d+(e.clientY-dipStart.y)/180);});function endDip(){dipStart=null;}$('dipHandle').addEventListener('pointerup',endDip);$('dipHandle').addEventListener('pointercancel',endDip);
 
 })();
+
+
+var workspaceLayoutHeight=-1,workspaceLayoutWidth=-1;
+function layoutWorkspace(){
+ var mobile=window.innerWidth<760,box=$('sheet').getBoundingClientRect();
+ var reserve=mobile?Math.round(box.height):0;
+ if(reserve===workspaceLayoutHeight&&window.innerWidth===workspaceLayoutWidth)return;
+ workspaceLayoutHeight=reserve;workspaceLayoutWidth=window.innerWidth;
+ stageEl.style.bottom=reserve+'px';resize();
+ if(typeof st!=='undefined'&&st.radii){V=fitV();SV=S0*V*Z;}dirty=true;
+}
+if(window.ResizeObserver){var sheetObserver=new ResizeObserver(layoutWorkspace);sheetObserver.observe($('sheet'));}
+window.addEventListener('resize',layoutWorkspace);
+$('sheet').addEventListener('transitionend',layoutWorkspace);
+$('viewMenu').addEventListener('toggle',function(){dirty=true;});
 
 if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
 })();
