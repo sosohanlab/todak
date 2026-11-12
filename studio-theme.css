@@ -69,3 +69,10 @@ input[type=range],input[type=checkbox]{accent-color:var(--cobalt)}
 .stageToolbar{align-items:center}.viewMenu>summary{display:flex;align-items:center;justify-content:center;box-sizing:border-box;height:44px;line-height:1}
 .stageToolbar .rotationControls{position:static;inset:auto;transform:none;flex:0 0 auto;width:auto!important;gap:6px;align-items:center;justify-content:flex-start}
 .stageToolbar .rotationControls .corner{width:42px;height:42px;min-height:42px;border-radius:10px}
+
+
+/* Keep result labels centred with matching horizontal space. */
+.stageToolbar .resultViewDock button{box-sizing:border-box;flex:1 1 0;min-width:0;padding:7px 12px;text-align:center;white-space:nowrap;display:flex;align-items:center;justify-content:center}
+.stageToolbar #openKiln{flex:0 0 auto;white-space:nowrap;min-height:42px;padding:8px 14px;background:var(--cobalt);color:#fff;border-color:var(--cobalt)}
+.stage:not([data-stage="fire"]) #openKiln{display:none!important}
+#openKiln[hidden]{display:none!important}

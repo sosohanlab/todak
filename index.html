@@ -499,7 +499,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 <link rel="stylesheet" href="market.css?v=f96055eea7d1">
 <link rel="stylesheet" href="shop.css?v=2a36d87a785c">
 <link rel="stylesheet" href="brand.css?v=e6836a19c0e4">
-<link rel="stylesheet" href="studio-theme.css?v=59c2d26c7244">
+<link rel="stylesheet" href="studio-theme.css?v=8ff5f273ca00">
 <script src="photo-backgrounds.js?v=dfb7ef3d38ad"></script>
 <link rel="stylesheet" href="tutorial.css?v=8cb600446369">
 <link rel="stylesheet" href="shelf-display.css?v=f20566bc0ec0">
@@ -560,6 +560,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
         <button type="button" class="corner" id="sound" aria-pressed="false">소리 켜기</button>
       </div></details>
     <div class="rotationControls" aria-label="도자기 회전"><button type="button" class="corner" id="rotL" aria-label="왼쪽으로 돌리기" hidden>◀</button><button type="button" class="corner" id="rotR" aria-label="오른쪽으로 돌리기" hidden>▶</button></div>
+      <button type="button" class="primary corner" id="openKiln" hidden>가마 문 열기</button>
       <div class="resultViewDock" aria-label="완성 작품 보기"><button type="button" class="corner" id="viewToggle" hidden>물레에서 보기</button><button type="button" class="corner" id="finishedPhoto" aria-pressed="true">완성 사진</button></div>
       <div class="viewDock"><div class="viewSwitch stageViewSwitch" role="group" aria-label="도자기 보기"><button type="button" id="solidView" aria-pressed="true">입체 보기</button><button type="button" id="sectionView" aria-pressed="false">단면 · 벽 두께</button></div></div>
     </nav>
@@ -741,7 +742,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
           <p>작품을 누르면 가마에 들어가요.</p>
         </div>
         <div class="panel" id="fs-fire" hidden>
-          <div class="actions"><button type="button" class="primary" id="openKiln" hidden>가마 문 열기</button></div>
+          
           <p id="fireTitle" style="font-weight:600;color:var(--ink)">불 때는 중</p>
           <div class="bar"><i id="fireBar"></i></div>
           <p id="fireCaption">불이 색을 만드는 중이에요.</p>
@@ -1210,7 +1211,7 @@ function touchClay(dt){
       if(Math.abs(d-(inside?innerAt(j/(N-1)):st.radii[j]))>1.6)continue;
       var next=previous[j]+0.55*k*((previous[j-1]+previous[j+1])/2-previous[j]);
       if(inside){next=Math.max(previous[j],Math.min(next,innerLimitAt(j/(N-1),wallLimit())));st.inner[j]=next;}
-      else{next=Math.min(previous[j],Math.max(next,j*rowH>=st.floor?st.inner[j]+wallLimit():(st.target?RMIN:.025)));st.radii[j]=next;grooves[j]*=Math.exp(-dt/260);}
+      else{next=Math.min(previous[j],Math.max(next,j*rowH>=st.floor?st.inner[j]+wallLimit():.025));st.radii[j]=next;grooves[j]*=Math.exp(-dt/260);}
       moved+=Math.abs(next-previous[j]);ptr.contact=true;
     }
     // Smoothing only touches the selected surface; never shrink the whole cavity.
@@ -1234,7 +1235,7 @@ function touchClay(dt){
         var travel=row-ptr.shapeLastRow;
         var progress=Math.abs(travel)>.001?clamp((nearestRow-ptr.shapeLastRow)/travel,0,1):1;
         var localRadius=ptr.shapeLastRadius+(surfaceRadius-ptr.shapeLastRadius)*progress;
-        ptr.shapeTargets[j]=clamp(ptr.w0[j]+(localRadius-ptr.w0[j])*weight,j<2?Math.min(2,ptr.w0[j]):(st.target?RMIN:.025),RMAX);
+        ptr.shapeTargets[j]=clamp(ptr.w0[j]+(localRadius-ptr.w0[j])*weight,j<2?Math.min(2,ptr.w0[j]):.025,RMAX);
         ptr.shapeWeights[j]=weight;
       }
       var targetRadius=ptr.shapeTargets[j];
@@ -4203,4 +4204,5 @@ if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
 
 </body>
 </html>
+
 
