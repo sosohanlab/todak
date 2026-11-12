@@ -1,0 +1,79 @@
+/* Shared visual language from the existing Todak studio. Scope: preview extensions only. */
+.community,.market{--todak-panel:#faf8f2;--todak-border:#c7c9bf;--todak-soft:#eeefea;background:var(--todak-panel);color:var(--ink);font-family:var(--body)}
+.community::backdrop,.market::backdrop{background:#141e3666;backdrop-filter:blur(8px)}
+.community h2,.community h3,.market h2,.mk-brand>span{font-family:var(--display);color:var(--ink)}
+.community .cm-head,.market .mk-header,.market .mk-footer{background:var(--todak-panel);border-color:#e1dfd6}
+.community .cm-head small{color:var(--muted);letter-spacing:.4px;font-size:11px}
+.community .cm-close,.market .mk-icon{color:var(--ink);background:#fff;border-color:var(--todak-border);border-radius:9px}
+.community .cm-primary{background:var(--cobalt);border-color:var(--cobalt);color:#fff;border-radius:10px;box-shadow:none;font-weight:600}
+.community .cm-primary:hover{background:#17307f}
+.community .cm-ghost{color:var(--ink);background:#fff;border-color:var(--todak-border);border-radius:9px;box-shadow:none;font-weight:500}
+.community .cm-ghost:hover,.market button:hover{border-color:var(--cobalt)}
+.community .cm-intro h3,.community .cm-info h3,.community .shop-intro{font-family:var(--display);color:var(--cobalt)}
+.community .cm-intro p,.community .cm-info p,.community .mk-rank-description,.community .photo-render-explain{color:var(--muted)}
+.community .cm-note,.community .cm-challenge,.community .cm-result,.community .mk-rank-original{background:var(--todak-soft);border-color:var(--line);color:var(--muted);border-radius:9px}
+.community .cm-challenge h4,.community .cm-result h4{color:var(--ink)}
+.community .cm-tabs button{background:#fff;color:var(--ink);border-color:var(--todak-border);border-radius:9px;font-weight:500}
+.community .cm-tabs button[aria-pressed=true]{color:#fff;background:var(--cobalt);border-color:#14297a}
+.community .cm-sort,.community .cm-author,.community .cm-foot,.community .cm-facts,.community .cm-creator,.community .cm-family p{color:var(--muted)}
+.community .cm-title,.community .cm-facts b,.community .shop-item h4,.community .mk-rank-person b{color:var(--ink)}
+.community .cm-tag,.community .cm-avatar{background:#f1f4ff;color:var(--cobalt)}
+.community .cm-like{color:var(--muted)}
+.community .cm-like[aria-pressed=true]{color:#c55552}
+.community .cm-art,.community .cm-view,.community .cm-form-preview{background:#e6e0d6}
+.community .cm-form-preview,.community .cm-check,.community .cm-check small{color:var(--muted)}
+.community.cm-form input:not([type=checkbox]),.community.cm-form select,.community.cm-form textarea{border-color:var(--todak-border);border-radius:8px;color:var(--ink);background:#fff}
+.community .cm-check{background:var(--todak-soft);border-color:var(--line)}
+.community input[type=checkbox]{accent-color:var(--cobalt)}
+.community .cm-back,.community .mk-rank-row button{color:var(--cobalt)}
+.community .cm-family,.community .mk-rank-row,.community .shop-demo{border-color:#e1dfd6}
+.community .mk-rank-score{color:var(--cobalt)}
+.community .mk-rank-score small,.community .mk-rank-person small,.community .mk-rank-original small{color:var(--muted)}
+.community .mk-new-tag{background:#eef1fa;color:var(--cobalt)}
+.community .shop-wallet,.community .shop-earn b{color:var(--cobalt)}
+.community .shop-earn{color:var(--muted)}
+.community .shop-earn span{background:var(--todak-soft)}
+.community .shop-item{background:#fff;border-color:var(--todak-border);border-radius:10px}
+.community .shop-item[data-active=true]{border-color:var(--cobalt);box-shadow:0 0 0 1px var(--cobalt)}
+.community .shop-item p,.community .shop-demo small,.community .shop-demo b,.community .shop-message{color:var(--muted)}
+.community .shop-item button{background:#fff;border-color:var(--todak-border);color:var(--ink);border-radius:9px}
+.community .shop-item[data-active=true] button{background:var(--cobalt);border-color:var(--cobalt);color:#fff}
+.community .quality-grid figcaption,.community .render-status{color:var(--muted)}
+.market .mk-brand>span{color:var(--cobalt);border-color:var(--line)}
+.market .mk-brand h2{color:var(--ink);font-weight:700}
+.market .mk-brand small,.market .mk-preview,.market .mk-footer p,.market .mk-controls{color:var(--muted)}
+.market .mk-location,.market .mk-route button,.market .mk-help,.market .mk-near,.market .mk-minimap,.market .mk-hall-menu{background:#faf8f2f5;border-color:var(--todak-border);color:var(--ink);border-radius:10px;box-shadow:0 5px 18px #141e3610}
+.market .mk-dot{background:var(--cobalt)}
+.market .mk-location small,.market .mk-help,.market .mk-hall-menu small,.market .mk-minimap span{color:var(--muted)}
+.market .mk-route button:first-child{color:var(--cobalt);border-color:var(--cobalt);background:#f4f6ff}
+.market .mk-route span{color:var(--cobalt)}
+.market .mk-hall-menu label,.market .mk-hall-menu select{color:var(--ink)}
+.market .mk-hall-menu select{background:#fff;border-color:var(--todak-border);border-radius:8px}
+.market .mk-hall-menu button,.market .mk-near em{color:var(--cobalt)}
+.market .mk-near small{color:var(--muted)}
+.market .mk-near b{color:var(--ink)}
+.market .mk-key,.market .mk-footer-actions button{background:#fff;color:var(--ink);border-color:var(--todak-border);border-radius:9px}
+.market .mk-footer-actions button:last-child{background:var(--cobalt);border-color:var(--cobalt);color:#fff}
+.market .points-pill{background:#fff;border-color:var(--cobalt);color:var(--cobalt);border-radius:9px;font-family:var(--body)}
+.community :focus-visible,.market button:focus-visible,.market select:focus-visible{outline:2px solid var(--cobalt);outline-offset:3px}
+#drawer.shelf-upgrade-glass .drawerIn,#drawer.shelf-upgrade-museum .drawerIn{background:#faf8f2;color:var(--ink)}
+
+/* Only shelf provenance labels. */
+.piece .piece-mode{display:block;margin:2px 8px 10px;font-size:11px;line-height:1.5;color:#1f3fa8;text-align:center}.cm-origin{font-size:13px!important;font-weight:600;color:#1f3fa8!important}
+
+/* Folded throwing tools stay reachable without reopening the panel. */
+.quick-tools{display:none;flex:none;padding:8px 10px;gap:6px;background:#faf8f2;border-top:1px solid #dedfd5}
+.stage[data-stage="throw"]~.sheet:not(.open) .quick-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.quick-tools button{font:600 12px 'IBM Plex Sans KR',sans-serif;min-height:42px;min-width:0;padding:6px 3px;border:1px solid #c8cbc1;border-radius:9px;background:white;color:#141e36;white-space:nowrap}
+.quick-tools button[aria-pressed="true"]{background:#1f3fa8;color:white;border-color:#1f3fa8}
+
+.quick-tool-hint{grid-column:1/-1;font-size:11px;line-height:1.6;color:#5b6577;text-align:center}
+
+/* The view controls share the navigation flow; no viewport-centre positioning. */
+.stageToolbar{flex-wrap:wrap;align-content:flex-start;max-width:calc(100% - 20px)}
+.viewDock{display:none;flex:0 0 100%;min-width:0}
+.stage[data-stage="throw"] .viewDock{display:block}
+.stage .stageViewSwitch{position:static;left:auto;right:auto;top:auto;bottom:auto;transform:none;margin:2px 0 0;width:300px;max-width:100%;height:auto;min-height:44px;box-sizing:border-box;border-radius:10px;padding:3px;box-shadow:none}
+.stage[data-stage="throw"] .stageViewSwitch{display:flex}
+.home-shop{position:absolute;right:max(16px,env(safe-area-inset-right));top:max(16px,env(safe-area-inset-top));width:auto!important;margin:0!important;font:500 12px 'IBM Plex Sans KR',sans-serif;padding:9px 12px;border:1px solid #c8cbc1;border-radius:10px;background:#faf8f2;color:#141e36;z-index:2}
+@media(max-width:480px){.home-shop{right:12px;top:12px;font-size:11px;padding:8px 10px}}

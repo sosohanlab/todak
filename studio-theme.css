@@ -1,0 +1,71 @@
+/* Presentation only. Use the shared gallery palette; preserve tool layout and behavior. */
+:root{--paper:#faf8f2;--porcelain:#faf8f2;--ink:#141e36;--cobalt:#1f3fa8;--line:#c7c9bf;--muted:#5b6577;--celadon:#a7b6cc;--ui-soft:#eeefea;--ui-white:#fff;--ui-shadow:0 8px 28px #141e3612}
+body{background:#e5e0d7;color:var(--ink)}
+button,input,select,textarea,summary{font-family:var(--body)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--cobalt);outline-offset:3px}
+.overlay{background:rgba(250,248,242,.96);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.homeTitle,.homeBtn{color:var(--cobalt);text-shadow:none}
+.homeEyebrow,.homeSub,.homeFoot,.chRule,.rulesNote{color:var(--muted)}
+.bigBtn{border:1px solid var(--cobalt);border-radius:10px;box-shadow:none;font-family:var(--body)}
+.bigBtn b{font-family:var(--display);font-weight:700}
+.bigBtn.alt{background:#fff;border-color:var(--cobalt);color:var(--ink)}
+.bigBtn.alt b{color:var(--cobalt)}
+.bigBtn.plain{background:#fff;color:var(--ink);border-color:var(--line)}
+.bigBtn.plain:hover,.bigBtn.alt:hover{background:#f3f5fb;border-color:var(--cobalt)}
+.sheet{background:#faf8f2;border-color:var(--line);border-width:1px;box-shadow:var(--ui-shadow)}
+.sheetHead{background:#faf8f2;border-bottom-color:#e1dfd6}
+.sheetHead h2{font-family:var(--display);font-weight:700;color:var(--ink)}
+.sheetBody{scrollbar-color:#c7c9bf transparent}
+#sheetToggle,#nextAlt,.chip,.ghost,.corner,.viewMenu>summary,.quick-tools button,.linkbtn,.compareChoice{border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);box-shadow:none;font-weight:500}
+#nextBtn{border:1px solid var(--cobalt);border-radius:10px;background:var(--cobalt);color:#fff;box-shadow:none;font-weight:600}
+#nextBtn:hover{background:#17307f}
+.chip[aria-pressed=true],.quick-tools button[aria-pressed=true],.linkbtn.main{background:var(--cobalt);color:#fff;border-color:var(--cobalt);box-shadow:none;font-weight:600}
+#nextBtn:active,#sheetToggle:active,.chip:active{transform:none}
+.ghost:hover,.chip:hover,.corner:hover,.compareChoice:hover{border-color:var(--cobalt)}
+.viewMenuBody,.viewMenu[open]>summary{background:var(--paper);border-color:var(--line);box-shadow:var(--ui-shadow)}
+.steps li{background:#faf8f2e8;border-top-color:#d9ddd7;color:var(--muted)}
+.steps li[aria-current=step]{background:#fff;border-top-color:var(--cobalt);color:var(--cobalt)}
+.steps li.past{border-top-color:#a7b6cc}
+.readout>span:not(.modeChip){background:#faf8f2ed;color:var(--ink)}
+.tip,.chInfo,.cm-note,#scoreDetail,.surfaceTip{background:var(--ui-soft);border-color:#c7c9bf;color:var(--muted);border-radius:9px}
+.chInfo b{color:var(--cobalt)}
+.scoreBox{border-radius:10px;background:var(--cobalt);box-shadow:none}
+.kiln{background:#f4efe7;border-color:#c2ab92;border-radius:9px}
+.kiln b{color:#865439}
+.swatch,.dot{border-color:var(--line)}
+.swatch[aria-pressed=true],.dot[aria-pressed=true]{border-color:var(--cobalt);outline-color:var(--cobalt)}
+input[type=text],input[type=search],textarea,select{border-color:var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+input[type=range],input[type=checkbox]{accent-color:var(--cobalt)}
+.chBox,.howBox,.drawerIn,.searchIn{background:var(--paper);border:1px solid var(--line);border-radius:22px;box-shadow:var(--ui-shadow)}
+.chCard{border-color:var(--line);border-radius:10px;background:#fff}
+.chCard.master{border-color:#a7b6cc;background:#f1f4fa}
+.chCard.master i,.chCard i{color:#52658c}
+.chSep{border-top-color:#c7c9bf}.chSep b{color:var(--cobalt)}
+.drawer{background:#141e3666;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.shelfHead h2,.searchIn h2{color:var(--ink);font-family:var(--display)}
+.piece{border-bottom-color:#c7c9bf;box-shadow:none;color:var(--ink)}
+.piece img{border-radius:10px}.shelfDetail{background:#fff;border-color:var(--line);border-radius:10px}
+#card{border-color:var(--line);border-radius:10px;box-shadow:var(--ui-shadow)}
+.compareChoice{background:#f3f5fb;color:var(--cobalt);border-color:#cbd2e3}
+.searchContext,.searchIn small{color:var(--muted)}
+.toast{background:var(--ink);border-radius:10px;box-shadow:var(--ui-shadow)}
+@media(min-width:760px){.sheet{border-radius:22px}}
+@media(max-width:759px){.sheet{border-radius:18px 18px 0 0}.drawerIn{border-radius:18px 18px 0 0}.searchIn{border-radius:20px}}
+
+/* Completed-work views stay outside the tools, in the same top navigation flow. */
+.resultViewDock{display:none;flex-basis:100%;gap:6px;max-width:300px}.stage[data-stage="done"] .resultViewDock{display:flex}.resultViewDock button{position:static!important;flex:1;min-height:42px!important}.resultViewDock button[aria-pressed="true"]{background:#1f3fa8!important;color:white!important;border-color:#1f3fa8!important}#photoRenderInline{display:none!important}
+
+/* Short, non-interactive stage hint; never a full-width banner. */
+.stage .hint{left:12px;right:auto;top:210px;width:max-content;max-width:min(360px,calc(100% - 24px));box-sizing:border-box;padding:8px 12px;border-radius:10px;box-shadow:none;font-size:12px;line-height:1.5;text-align:left}
+.stage .hint #hintText{border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;padding:0!important}
+@media(max-width:759px){.stage .hint{top:190px;max-width:calc(100% - 24px);font-size:11px}}
+
+/* Rotation remains directly available beside the visible work area. */
+.rotationControls{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:calc(100% - 20px);display:flex;justify-content:space-between;align-items:center;pointer-events:none;z-index:4}
+.rotationControls .corner{position:static!important;inset:auto!important;transform:none!important;pointer-events:auto;width:44px;height:44px;min-height:44px;padding:0;border-radius:50%;display:grid;place-items:center}
+.rotationControls .corner[hidden]{display:none!important}
+
+/* Navigation controls align text and arrows at the same vertical centre. */
+.stageToolbar{align-items:center}.viewMenu>summary{display:flex;align-items:center;justify-content:center;box-sizing:border-box;height:44px;line-height:1}
+.stageToolbar .rotationControls{position:static;inset:auto;transform:none;flex:0 0 auto;width:auto!important;gap:6px;align-items:center;justify-content:flex-start}
+.stageToolbar .rotationControls .corner{width:42px;height:42px;min-height:42px;border-radius:10px}

@@ -10,7 +10,7 @@ window.TodakBackdrop=function(color,mode){
 var T=window.THREE;
 if(!T){window.TodakPhoto={available:false};return;}
 var renderer,scene,camera,pot,floor,environment,signature='',materials=[],textures=[],lost=false;
-var woodTexture,room,keyLight,cyclorama;
+var woodTexture,room,keyLight,cyclorama,glossEnvironment;
 var low=matchMedia('(pointer:coarse)').matches;
 function canvas(w,h){var c=document.createElement('canvas');c.width=w;c.height=h;return c;}
 function noise(x,y){var n=Math.sin(x*127.1+y*311.7)*43758.5453;return n-Math.floor(n);}
@@ -24,7 +24,15 @@ function makeEnvironment(){
     var i=(y*w+x)*4;data[i]=sky*.98+soft+rim;data[i+1]=sky*.95+soft*.97+rim;data[i+2]=sky*.89+soft*.9+rim*.96;data[i+3]=1;
   }
   var raw=new T.DataTexture(data,w,h,T.RGBAFormat,T.FloatType);raw.mapping=T.EquirectangularReflectionMapping;raw.needsUpdate=true;
-  var pm=new T.PMREMGenerator(renderer);environment=pm.fromEquirectangular(raw);scene.environment=environment.texture;raw.dispose();pm.dispose();
+  var pm=new T.PMREMGenerator(renderer);environment=pm.fromEquirectangular(raw);scene.environment=environment.texture;
+  // Camera faces +Z: visible frontal reflections are at longitude U=.75.
+  // Preserve the original environment for matte clay and the shaded interior.
+  var glossy=new Float32Array(data);
+  for(var gy=0;gy<h;gy++)for(var gx=0;gx<w;gx++){
+    var u=gx/w,v=gy/h,panel=7.5*Math.exp(-Math.pow((u-.705)/.032,8)-Math.pow((v-.585)/.19,8)),fillPanel=2.1*Math.exp(-Math.pow((u-.855)/.018,8)-Math.pow((v-.56)/.17,8)),at=(gy*w+gx)*4;
+    for(var channel=0;channel<3;channel++)glossy[at+channel]=data[at+channel]*.32+panel+fillPanel;
+  }
+  var reflection=new T.DataTexture(glossy,w,h,T.RGBAFormat,T.FloatType);reflection.mapping=T.EquirectangularReflectionMapping;reflection.needsUpdate=true;glossEnvironment=pm.fromEquirectangular(reflection);raw.dispose();reflection.dispose();pm.dispose();
 }
 function init(){
   if(renderer)return !lost;
@@ -42,7 +50,7 @@ function init(){
     floor=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.MeshStandardMaterial({color:0xe4d9ca,roughness:.92}));floor.rotation.x=-Math.PI/2;floor.position.y=-.025;floor.receiveShadow=false;scene.add(floor);
     var receiver=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.ShadowMaterial({opacity:.10}));receiver.rotation.x=-Math.PI/2;receiver.position.y=-.018;receiver.receiveShadow=true;scene.add(receiver);
     var c=canvas(128,128),g=c.getContext('2d'),grad=g.createRadialGradient(64,64,0,64,64,64);grad.addColorStop(0,'rgba(30,24,17,.42)');grad.addColorStop(.45,'rgba(30,24,17,.14)');grad.addColorStop(1,'rgba(30,24,17,0)');g.fillStyle=grad;g.fillRect(0,0,128,128);
-    var contact=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial({map:new T.CanvasTexture(c),transparent:true,depthWrite:false,opacity:.8}));contact.name='contact';contact.rotation.x=-Math.PI/2;contact.position.y=.002;scene.add(contact);
+    var contact=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial({map:new T.CanvasTexture(c),transparent:true,depthWrite:false,opacity:.8}));contact.name='contact';contact.rotation.x=-Math.PI/2;contact.position.y=-.012;scene.add(contact);
     var wood=canvas(512,512),wx=wood.getContext('2d'),wi=wx.createImageData(512,512);
     for(var yy=0;yy<512;yy++)for(var xx=0;xx<512;xx++){var ii=(yy*512+xx)*4,v=3*Math.sin(yy*.22+Math.sin(xx*.013)*2)+(noise(xx,yy)-.5)*5;wi.data[ii]=204+v;wi.data[ii+1]=180+v;wi.data[ii+2]=147+v;wi.data[ii+3]=255;}wx.putImageData(wi,0,0);
     woodTexture=new T.CanvasTexture(wood);woodTexture.colorSpace=T.SRGBColorSpace;woodTexture.wrapS=woodTexture.wrapT=T.RepeatWrapping;woodTexture.repeat.set(40,40);
@@ -74,25 +82,38 @@ function rebuild(d){
   var pix=g.getImageData(0,0,size,size);
   for(var y=0;y<size;y++)for(var x=0;x<size;x++){
     var angle=x/size*Math.PI*2,i=(y*size+x)*4,n=noise(x,y),cloud=Math.sin(angle*3+Math.sin(y*.023)*2)*Math.sin(y*.017+Math.sin(angle*2)*1.3),depth=d.glazeId==='cobalt'?12:(d.glazeId==='cheongja'||d.glazeId==='mint'?5:1.8),v=(n-.5)*3+Math.sin(y*.031+Math.sin(angle*3))*.8+cloud*depth;
-    if(n>.998)v-=15;
+    var edgeFade=Math.min(1,y/10,(size-1-y)/10);v*=Math.max(0,edgeFade);if(n>.998)v-=15*Math.max(0,edgeFade);
     for(var k=0;k<3;k++)pix.data[i+k]=Math.max(0,Math.min(255,base[k]+v));
   }g.putImageData(pix,0,0);
   if(d.overlay)g.drawImage(d.overlay,0,0,size,size);
   // Bare clay only at the foot; preserve painted/carved decorations everywhere else.
-  g.fillStyle='#bba081';g.fillRect(0,size-2,size,2);
+  // Bare clay remains on the underside material, not a painted hairline at the silhouette.
   var bump=canvas(512,512),bg=bump.getContext('2d'),im=bg.createImageData(512,512);
-  for(var j=0;j<512*512;j++){var xx=j%512,yy=j/512|0,vv=128+(noise(xx,yy)-.5)*12+Math.sin(yy*.65)*1.5;im.data[j*4]=im.data[j*4+1]=im.data[j*4+2]=vv;im.data[j*4+3]=255;}bg.putImageData(im,0,0);
+  for(var j=0;j<512*512;j++){var xx=j%512,yy=j/512|0,edge=Math.max(0,Math.min(1,yy/12,(511-yy)/12)),vv=128+((noise(xx,yy)-.5)*12+Math.sin(yy*.65)*1.5)*edge;im.data[j*4]=im.data[j*4+1]=im.data[j*4+2]=vv;im.data[j*4+3]=255;}bg.putImageData(im,0,0);
   if(d.carve){bg.globalAlpha=.38;bg.drawImage(d.carve,0,0,512,512);}
   var map=tex(c,true),micro=tex(bump,false),gloss=d.finish==='gloss';
-  var outer=new T.MeshPhysicalMaterial({map:map,metalness:0,roughness:gloss?.43:.78,clearcoat:gloss?.32:.04,clearcoatRoughness:gloss?.38:.6,ior:1.46,bumpMap:micro,bumpScale:gloss?.014:.025,envMapIntensity:gloss?.8:.45});
-  var inside=outer.clone(),innerCanvas=canvas(64,256),ix=innerCanvas.getContext('2d');ix.fillStyle='rgb('+d.inside.join(',')+')';ix.fillRect(0,0,64,256);if(d.dipDepth&&d.dipColor){ix.fillStyle='rgb('+d.dipColor.join(',')+')';ix.fillRect(0,0,64,256*d.dipDepth);}inside.map=tex(innerCanvas,true);inside.roughness+=.08;inside.envMapIntensity=.32;
+  var outer=new T.MeshPhysicalMaterial({map:map,metalness:0,roughness:gloss?.14:.78,clearcoat:gloss?.92:.04,clearcoatRoughness:gloss?.065:.6,ior:1.46,bumpMap:micro,bumpScale:gloss?.008:.025,envMap:gloss?glossEnvironment.texture:null,envMapIntensity:gloss?1.15:.45});
+  var inside=outer.clone(),innerCanvas=canvas(64,256),ix=innerCanvas.getContext('2d');
+  // Occlusion increases below the opening, including the inside floor.
+  for(var iy=0;iy<256;iy++){
+    var level=1-iy/255,depth=Math.max(0,Math.min(1,(1-level)*d.height/Math.max(.05,d.height-d.floor))),shade=.87-.43*Math.pow(depth,.7),innerColor=d.dipDepth&&iy<256*d.dipDepth?d.dipColor:d.inside;
+    ix.fillStyle='rgb('+innerColor.map(function(channel){return Math.round(channel*shade);}).join(',')+')';ix.fillRect(0,iy,64,1);
+  }
+  inside.map=tex(innerCanvas,true);inside.envMap=null;inside.clearcoatRoughness=gloss?.09:.6;inside.roughness=gloss?.28:.86;inside.envMapIntensity=gloss?.42:.24;inside.clearcoat=gloss?.55:.04;
+
   var clay=new T.MeshStandardMaterial({color:0xbda185,roughness:.95,bumpMap:micro,bumpScale:.02});materials.push(outer,inside,clay);
-  var points=[new T.Vector2(0,0)],n=128,H=d.height,outerStart=1;
-  for(var a=0;a<=n;a++)points.push(new T.Vector2(d.rAt(a/n),H*a/n));
-  var outerEnd=points.length-1,ro=d.rAt(1),ri=d.innerAt(1),hollow=H-d.floor>.05;
+  var n=128,H=d.height,ro=d.rAt(1),ri=d.innerAt(1),hollow=H-d.floor>.05;
+  // Tiny rounded edges avoid a grazing, razor-sharp material seam at rim and foot.
+  var footBevel=Math.min(.045,H*.004,d.rAt(0)*.02),rimBevel=hollow?Math.max(.001,Math.min(.045,(ro-ri)*.18,H*.004)):.02;
+  var points=[new T.Vector2(0,0),new T.Vector2(Math.max(0,d.rAt(0)-footBevel),0)],outerStart=1;
+  points.push(new T.Vector2(d.rAt(0)-footBevel*.25,footBevel*.25));
+  points.push(new T.Vector2(d.rAt(footBevel/H),footBevel));
+  for(var a=1;a<n;a++){var outerY=H*a/n;if(outerY>footBevel&&outerY<H-rimBevel)points.push(new T.Vector2(d.rAt(a/n),outerY));}
+  points.push(new T.Vector2(ro,H-rimBevel));points.push(new T.Vector2(ro-rimBevel*.25,H-rimBevel*.25));points.push(new T.Vector2(ro-rimBevel,H));
+  var outerEnd=points.length-1;
   if(hollow){
-    points.push(new T.Vector2(ro-.015,H+.018));points.push(new T.Vector2(ri+.015,H+.018));
-    for(var b=n;b>=0;b--){var yy=d.floor+(H-d.floor)*b/n;points.push(new T.Vector2(d.innerAt(yy/H),yy));}
+    points.push(new T.Vector2(ri+rimBevel,H));points.push(new T.Vector2(ri+rimBevel*.25,H-rimBevel*.25));points.push(new T.Vector2(ri,H-rimBevel));
+    for(var b=n-1;b>=0;b--){var yy=d.floor+(H-d.floor)*b/n;if(yy<H-rimBevel)points.push(new T.Vector2(d.innerAt(yy/H),yy));}
     points.push(new T.Vector2(0,d.floor));
   }else points.push(new T.Vector2(0,H));
   var geo=new T.LatheGeometry(points,low?128:192),uv=geo.attributes.uv,pos=geo.attributes.position;
@@ -104,15 +125,44 @@ function rebuild(d){
   }
   var reordered=[],start=0;
   indices.forEach(function(group,index){geo.addGroup(start,group.length,index);start+=group.length;for(var j=0;j<group.length;j++)reordered.push(group[j]);});geo.setIndex(reordered);
-  var mesh=new T.Mesh(geo,materials);mesh.castShadow=true;mesh.receiveShadow=true;pot.add(mesh);
+  // Dedicated studio reflectors affect only the outer clear glaze. They use the
+  // physical GGX coat BRDF, so highlights follow the actual curved surface.
+  if(gloss){
+    outer.onBeforeCompile=function(shader){
+      shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>',`
+#ifdef USE_CLEARCOAT
+      PhysicalMaterial glazeReflector = material;
+      glazeReflector.clearcoatRoughness = 0.19;
+      vec3 glazeKey = normalize(vec3(-0.55, -0.95, 1.2));
+      vec3 glazeFill = normalize(vec3(0.65, -0.8, 1.1));
+      vec3 glazeTop = normalize(vec3(-0.45, 0.65, 1.2));
+      vec3 glazeLow = normalize(vec3(-0.35, -1.0, 0.15));
+      vec3 glazeBowl = normalize(vec3(-0.2, -0.8, -0.75));
+      vec3 glazeNormal = normalize(geometryClearcoatNormal);
+      vec3 glazeReflection = 4.0 * saturate(dot(glazeNormal, glazeKey)) * BRDF_GGX_Clearcoat(glazeKey, geometryViewDir, glazeNormal, glazeReflector);
+      glazeReflector.clearcoatRoughness = 0.22;
+      glazeReflection += 2.0 * saturate(dot(glazeNormal, glazeFill)) * BRDF_GGX_Clearcoat(glazeFill, geometryViewDir, glazeNormal, glazeReflector);
+      glazeReflection += 2.5 * saturate(dot(glazeNormal, glazeTop)) * BRDF_GGX_Clearcoat(glazeTop, geometryViewDir, glazeNormal, glazeReflector);
+      glazeReflection += 2.5 * saturate(dot(glazeNormal, glazeLow)) * BRDF_GGX_Clearcoat(glazeLow, geometryViewDir, glazeNormal, glazeReflector);
+      glazeReflection += 2.0 * saturate(dot(glazeNormal, glazeBowl)) * BRDF_GGX_Clearcoat(glazeBowl, geometryViewDir, glazeNormal, glazeReflector);
+      outgoingLight += material.clearcoat * glazeReflection;
+#endif
+#include <opaque_fragment>`);
+    };
+    outer.customProgramCacheKey=function(){return 'todak-outer-glaze-reflectors-v1';};
+  }
+  var mesh=new T.Mesh(geo,materials);mesh.castShadow=true;mesh.receiveShadow=false;pot.add(mesh);
   var contact=scene.getObjectByName('contact'),r=d.rAt(0);contact.scale.set(r*2.8,r*2.8,1);
 }
 function configure(d,width,height){
-  var scale=d.scale,W=d.width,HC=d.canvasHeight; if(d.framed!==false){var radius=0;for(var f=0;f<=32;f++)radius=Math.max(radius,d.rAt(f/32));var VW=d.viewWidth||W,VH=d.viewHeight||HC;scale=Math.min(VH/(d.height*1.85),VW/(radius*3.8))*(d.zoom||1);d=Object.assign({},d,{scale:scale,cx:VW*.5+(d.panX||0),base:VH*.52+d.height*scale*.43+(d.panY||0)});} var cos=Math.sqrt(1-.32*.32),aim=(d.base-HC/2)/(scale*cos),x=(W/2-d.cx)/scale;
+  var scale=d.scale,W=d.width,HC=d.canvasHeight; if(d.framed!==false){var radius=0;for(var f=0;f<=32;f++)radius=Math.max(radius,d.rAt(f/32));var VW=d.viewWidth||W,VH=d.viewHeight||HC;scale=Math.min(VH/(d.height*1.85),VW/(radius*3.8))*(d.zoom||1)*(d.objectScale||1);d=Object.assign({},d,{scale:scale,cx:VW*.5+(d.panX||0),base:VH*.52+d.height*scale*.43+(d.panY||0)});} var cos=Math.sqrt(1-.32*.32),aim=(d.base-HC/2)/(scale*cos),x=(W/2-d.cx)/scale;
   camera.aspect=W/HC;camera.near=.1;camera.far=1000;
   var distance=(HC/scale/2)/Math.tan(16*Math.PI/180);
-  camera.position.set(x,aim+distance*.32,distance*cos);camera.lookAt(x,aim,0);camera.updateProjectionMatrix();
-  pot.rotation.y=-d.rotation;
+  // Shift the framing through the lens instead of moving the camera sideways.
+  // Off-axis viewing made a centered, upright rim appear slanted beside the tool panel.
+  camera.setViewOffset(W,HC,W/2-d.cx,0,W,HC);
+  camera.up.set(0,1,0);camera.position.set(0,aim+distance*.32,distance*cos);camera.lookAt(0,aim,0);camera.updateProjectionMatrix();
+  pot.rotation.set(0,-d.rotation,0);
   var backdrop=window.TodakBackdrop(d.color,d.background);scene.background=new T.Color().setRGB(backdrop.rgb[0]/255,backdrop.rgb[1]/255,backdrop.rgb[2]/255,T.SRGBColorSpace);floor.material.color.copy(scene.background);
   var map=d.background==='warm'?woodTexture:null;if(floor.material.map!==map){floor.material.map=map;floor.material.needsUpdate=true;}if(map)floor.material.color.setRGB(backdrop.woodTint,backdrop.woodTint,backdrop.woodTint);
   room.visible=!d.transparent;
@@ -124,7 +174,9 @@ function configure(d,width,height){
   scene.getObjectByName('contact').visible=!d.transparent;
   scene.children.forEach(function(o){if(o.material&&o.material.type==='ShadowMaterial')o.visible=!d.transparent;});
   if(d.transparent){scene.background=null;renderer.setClearColor(0x000000,0);}
+  var photoBG=!d.transparent&&window.TodakBackgrounds&&TodakBackgrounds.ready(d.background);
+  if(photoBG){scene.background=null;renderer.setClearColor(0,0);floor.visible=false;cyclorama.visible=false;room.visible=false;}
   renderer.setSize(width,height,false);renderer.render(scene,camera);
 }
-window.TodakPhoto={available:true,render:function(d){if(!init()||lost)return null;try{if(signature!==d.key){rebuild(d);signature=d.key;}configure(d,d.pixelWidth,d.pixelHeight);return renderer.domElement;}catch(e){console.warn('토닥 렌더링 오류',e);return null;}},export:function(d,size,aspect){if(!init())return null;var r=0;for(var i=0;i<=64;i++)r=Math.max(r,d.rAt(i/64));var ratio=aspect||1,w=Math.round(size*Math.min(1,ratio)),h=Math.round(size/Math.max(1,ratio)),sc=Math.min(h/(d.height*1.5),w/(r*2.8));return this.render(Object.assign({},d,{viewWidth:w,viewHeight:h,zoom:1,panX:0,panY:0,width:w,canvasHeight:h,pixelWidth:w,pixelHeight:h,scale:sc,cx:w/2,base:h/2+d.height*.45*sc,rotation:d.rotation}));}};
+window.TodakPhoto={available:true,render:function(d){if(!init()||lost)return null;try{if(signature!==d.key){rebuild(d);signature=d.key;}configure(d,d.pixelWidth,d.pixelHeight);if(!d.transparent&&window.TodakBackgrounds&&TodakBackgrounds.ready(d.background)){var out=canvas(renderer.domElement.width,renderer.domElement.height),cx=out.getContext('2d');if(window.TodakRealPhoto&&TodakRealPhoto.drawBackground)TodakRealPhoto.drawBackground(cx,out.width,out.height,d.background,d.backgroundZoom,d.backgroundPanX,d.backgroundPanY);else TodakBackgrounds.draw(cx,out.width,out.height,d.background);cx.drawImage(renderer.domElement,0,0);return out;}return renderer.domElement;}catch(e){console.warn('토닥 렌더링 오류',e);return null;}},export:function(d,size,aspect){if(!init())return null;var r=0;for(var i=0;i<=64;i++)r=Math.max(r,d.rAt(i/64));var ratio=aspect||1,w=Math.round(size*Math.min(1,ratio)),h=Math.round(size/Math.max(1,ratio)),sc=Math.min(h/(d.height*1.5),w/(r*2.8));return this.render(Object.assign({},d,{viewWidth:w,viewHeight:h,zoom:1,panX:0,panY:0,width:w,canvasHeight:h,pixelWidth:w,pixelHeight:h,scale:sc,cx:w/2,base:h/2+d.height*.45*sc,rotation:d.rotation}));}};
 })();
