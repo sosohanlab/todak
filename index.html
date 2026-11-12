@@ -527,6 +527,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 
 <link rel="stylesheet" href="shelf-break.css?v=992bd7e7a9f6">
 <link rel="stylesheet" href="home-layout.css?v=9cef29ad5124">
+<link rel="stylesheet" href="trimming.css?v=e60d0b0f0e54">
 </head>
 <body>
 <main class="app">
@@ -639,7 +640,8 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
           <div class="chips" id="stamps">
 <button type="button" class="chip stampChoice" data-s="flower" aria-pressed="true"><svg viewBox="-22 -22 44 44" aria-hidden="true"><path d="M0 -9 C4 -15 11 -9 7 -4 C16 -4 14 6 6 6 C9 15 -1 18 -4 9 C-12 15 -18 6 -9 2 C-18 -5 -7 -14 0 -9 Z M-2 -2 a3 3 0 1 0 0 6 a3 3 0 1 0 0 -6"/></svg><span>꽃</span></button><button type="button" class="chip stampChoice" data-s="leaf" aria-pressed="false"><svg viewBox="-22 -22 44 44" aria-hidden="true"><path d="M0 -17 Q22 0 0 17 Q-22 0 0 -17 Z M0 -10 L0 12 M0 2 L7 -4 M0 7 L-7 0"/></svg><span>잎</span></button><button type="button" class="chip stampChoice" data-s="star" aria-pressed="false"><svg viewBox="-22 -22 44 44" aria-hidden="true"><path d="M0 -17 L4 -5 L17 -5 L7 3 L11 16 L0 8 L-11 16 L-7 3 L-17 -5 L-4 -5 Z"/></svg><span>별</span></button><button type="button" class="chip stampChoice" data-s="wave" aria-pressed="false"><svg viewBox="-22 -22 44 44" aria-hidden="true"><path d="M-17 -8 Q-9 -17 0 -8 T17 -8 M-17 1 Q-9 -8 0 1 T17 1 M-17 10 Q-9 1 0 10 T17 10"/></svg><span>물결</span></button><button type="button" class="chip stampChoice" data-s="dots" aria-pressed="false"><svg viewBox="-22 -22 44 44" aria-hidden="true"><path d="M-11 0 a3 3 0 1 0 .01 0 M0 0 a3 3 0 1 0 .01 0 M11 0 a3 3 0 1 0 .01 0"/></svg><span>세 점</span></button><button type="button" class="chip stampChoice" data-s="sun" aria-pressed="false"><svg viewBox="-22 -22 44 44" aria-hidden="true"><path d="M0 -8 a8 8 0 1 0 .01 0 M0 -18 V-13 M0 13 V18 M-18 0 H-13 M13 0 H18 M-13 -13 L-9 -9 M9 9 L13 13 M13 -13 L9 -9 M-9 9 L-13 13"/></svg><span>해</span></button><button type="button" class="chip stampChoice" data-s="moon" aria-pressed="false"><svg viewBox="-22 -22 44 44" aria-hidden="true"><path d="M7 -16 C-19 -14 -19 14 7 16 C-4 8 -4 -8 7 -16 Z"/></svg><span>초승달</span></button><button type="button" class="chip stampChoice" data-s="sprig" aria-pressed="false"><svg viewBox="-22 -22 44 44" aria-hidden="true"><path d="M0 17 V-16 M0 -8 Q-14 -18 -12 -5 Q-5 1 0 -1 M0 3 Q14 -8 12 4 Q5 10 0 10"/></svg><span>풀잎</span></button><button type="button" class="chip stampChoice" data-s="arch" aria-pressed="false"><svg viewBox="-22 -22 44 44" aria-hidden="true"><path d="M-17 14 V0 A17 17 0 0 1 17 0 V14 M-10 14 V0 A10 10 0 0 1 10 0 V14 M-3 14 V0 A3 3 0 0 1 3 0 V14"/></svg><span>반원</span></button><button type="button" class="chip stampChoice" data-s="diamond" aria-pressed="false"><svg viewBox="-22 -22 44 44" aria-hidden="true"><path d="M0 -17 L12 0 L0 17 L-12 0 Z M0 -7 L5 0 L0 7 L-5 0 Z"/></svg><span>마름모</span></button>          </div>
         </div>
-        <div class="field" id="f-size">
+        <div class="field" id="f-carve-mode" hidden><span class="label">무늬의 높이</span><div class="chips" id="carveMode"><button type="button" class="chip" data-cm="incised" aria-pressed="true">음각 · 파내기</button><button type="button" class="chip" data-cm="raised" aria-pressed="false">양각 · 돋우기</button></div><p class="searchPrivacy">같은 선을 그려도 완성작에서는 안으로 파이거나 바깥으로 솟아올라요.</p></div>
+<div class="field" id="f-size">
           <div class="rangehead"><label class="label" for="dsize">굵기·크기</label><output id="dsizeOut" for="dsize"></output></div>
           <div class="sizeRow">
             <input type="range" id="dsize" min="0" max="100" step="1" value="35">
@@ -917,7 +919,8 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 
 <script src="config.js?v=523e84644e38"></script>
 
-<script src="load-3d.js?v=9b52912cccf0"></script>
+<script src="ceramic-surface.js?v=55208fcb4fdb"></script>
+<script src="load-3d.js?v=b9c092556aa2"></script>
 <script>
 
 (function(){
@@ -990,6 +993,7 @@ var ptr={down:false,x:0,y:0,sx:0,sy:0,lx:0,mode:null,decided:false,h0:0,mouse:fa
 var TW=2048, TH=640;
 function mk(w,h,read){var c=document.createElement("canvas"); c.width=w; c.height=h; return {c:c,x:c.getContext("2d",read?{willReadFrequently:true}:undefined)};}
 var paint=mk(TW,TH), carve=mk(TW,TH), dipM=mk(TW,TH), fxT=mk(TW,TH), tmp=mk(TW,TH), fin=mk(TW,TH,true), ov=mk(4,4);
+var dCarveMode="incised";
 var hasPaint=false, hasCarve=false, texVer=0, composeKey="", finalData=null, ovKey="", ovImg=null, horizon=null, dipKey="", fxKey="", decoHist=[];
 
 function $(id){return document.getElementById(id);}
@@ -1081,7 +1085,7 @@ function rAt(t){
   var p=clamp(t,0,1)*(N-1), i=Math.min(Math.floor(p),N-1), f=p-i, r=st.radii;
   var p0=r[Math.max(i-1,0)], p1=r[i], p2=r[Math.min(i+1,N-1)], p3=r[Math.min(i+2,N-1)];
   var v=0.5*((2*p1)+(-p0+p2)*f+(2*p0-5*p1+4*p2-p3)*f*f+(-p0+3*p1-3*p2+p3)*f*f*f);
-  return Math.max(v,1);
+  return Math.max(v,.025);
 }
 for(var m=0;m<18;m++){marks.push({t:0.08+0.86*Math.random(),ph:Math.random()*TWO,w:3+Math.random()*6});}
 
@@ -1288,7 +1292,7 @@ function sculptStep(dt,ts){
       if(moved>0.004){
         ptr.changed=true;
         if(st.target&&tool==="shape"&&ptr.maxD>0.06&&ptr.mode!=="pull"){rough();}
-        if(Math.random()<0.55&&drops.length<40&&ptr.mode!=="pull"){
+        if(tool!=="trim"&&Math.random()<0.55&&drops.length<40&&ptr.mode!=="pull"){
           var side=ptr.x<CX?-1:1;
           drops.push({x:ptr.x,y:ptr.y,vx:side*(0.6+Math.random()*1.8),vy:-0.4-Math.random()*1.6,life:1});
         }
@@ -1327,10 +1331,11 @@ function undoDeco(){
   if(h.c){carve.x.clearRect(0,0,TW,TH); carve.x.drawImage(h.c,0,0);}
   hasPaint=h.hp; hasCarve=h.hc; st.used=JSON.parse(h.u); texVer++; updateReadout(); dirty=true;
 }
+$("carveMode").addEventListener("click",function(e){var b=e.target.closest("[data-cm]");if(!b)return;dCarveMode=b.dataset.cm;press("carveMode","cm",dCarveMode);});
 function dab(u,v,size,ring){
   var r=rAt(v), rx=Math.max(0.7,size/(TWO*r)*TW), ry=Math.max(0.7,size/st.height*TH), x=u*TW, y=(1-v)*TH;
   var targets=[], i, k, c, dx;
-  if(dTool==="carve"){targets=[carve.x]; carve.x.fillStyle="#000";}
+  if(dTool==="carve"){targets=[carve.x]; carve.x.fillStyle=dCarveMode==="raised"?"#fff":"#000";}
   else if(dTool==="erase"){targets=[paint.x,carve.x];}
   else{var target=dTool==="brush"&&opacityStroke?opacityStroke.x:paint.x;targets=[target];target.fillStyle=css(pigColor());}
   for(i=0;i<targets.length;i++){
@@ -1402,14 +1407,10 @@ function buildFx(){
       c.fillStyle="rgba(74,46,24,"+(0.35+0.45*k).toFixed(2)+")";
       c.beginPath(); c.arc(x,y,k<0.9?0.7+k*1.7:2.2+Math.random()*2,0,TWO); c.fill();
     }
-  }else if(st.fx==="crackle"){
-    c.strokeStyle="rgba(70,62,54,.42)"; c.lineWidth=1.3;
-    for(i=0;i<300;i++){
-      x=Math.random()*TW; y=Math.random()*TH; var ang=Math.random()*TWO;
-      c.beginPath(); c.moveTo(x,y);
-      for(k=0;k<7;k++){ang+=(Math.random()-0.5)*1.5; x+=Math.cos(ang)*(12+Math.random()*24); y+=Math.sin(ang)*(12+Math.random()*24); c.lineTo(x,y);}
-      c.stroke();
-    }
+  }else if(st.fx==="crackle"&&window.TodakCeramicSurface){
+    var surface=TodakCeramicSurface.create(512,st.fx),sample=surface.color.getContext('2d').getImageData(0,0,512,512),out=document.createElement('canvas');out.width=out.height=512;var ox=out.getContext('2d');
+    for(var at=0;at<sample.data.length;at+=4){var shade=255-sample.data[at];sample.data[at]=40;sample.data[at+1]=65;sample.data[at+2]=58;sample.data[at+3]=Math.min(130,shade*2);}
+    ox.putImageData(sample,0,0);c.drawImage(out,0,0,TW,TH);
   }
 }
 function tint(maskCanvas,color,alpha){
@@ -1430,8 +1431,9 @@ function phase(){
   if(st.stage==="glaze"||(st.stage==="fire"&&fireU<0.55))return "raw";
   return "fired";
 }
-function compose(){
+function compose(geometryCarve){
   var ph=phase(), key=[ph,texVer,st.dip,st.dipDepth,st.glaze2,st.glaze,st.fx,(st.customC||"")+"",kilnSig()].join("|");
+  key+=geometryCarve?"|mesh-carve":"";
   if(key===composeKey&&finalData)return false;
   composeKey=key;
   var f=fin.x; f.clearRect(0,0,TW,TH);
@@ -1441,13 +1443,13 @@ function compose(){
     tint(dipM.c,ph==="raw"?mix(c2,RAW,0.55):c2,ph==="raw"?0.9:0.96);
   }
   if(hasPaint){f.globalAlpha=ph==="deco"?1:(ph==="raw"?0.28:0.93); f.drawImage(paint.c,0,0); f.globalAlpha=1;}
-  if(hasCarve){
+  if(hasCarve&&!geometryCarve){
     /* 새긴 자리: 흙에서는 그늘, 구운 뒤에는 유약이 고여 짙어진다 */
     if(ph==="deco")tint(carve.c,[70,48,30],0.6);
     else if(ph==="raw")tint(carve.c,[120,112,104],0.3);
     else tint(carve.c,mix(glaze().c,[20,18,16],0.55),0.62);
   }
-  if((ph==="fired"||st.stage==="glaze")&&st.fx!=="none"){buildFx(); f.drawImage(fxT.c,0,0);}
+  if(!geometryCarve&&(ph==="fired"||st.stage==="glaze")&&st.fx!=="none"){buildFx(); f.drawImage(fxT.c,0,0);}
   if(ph==="fired"&&st.kiln&&st.kiln.type!=="plain"){buildKiln(); f.drawImage(kilnT.c,0,0);}
   finalData=f.getImageData(0,0,TW,TH).data;
   return true;
@@ -1591,10 +1593,10 @@ function innerGrad(c,k){
   return g;
 }
 function photoData(){
-  compose();
+  compose(true);
   var wide=stageEl.clientWidth>=760,unit=W/(stageEl.clientWidth||360),sheetH=$('sheet').getBoundingClientRect().height||126;
   var viewWidth=wide?Math.max(W*.45,W-440*unit):W,viewHeight=HC;
-  return {viewWidth:viewWidth,viewHeight:viewHeight,key:[texVer,st.height,st.radii.join(','),st.inner.join(','),st.floor,st.glaze,(st.customC||[]).join(','),st.glaze2,st.dip,st.dipDepth,st.fx,st.finish,kilnSig()].join('|'),glazeId:st.glaze,height:st.height,floor:st.floor,rAt:rAt,innerAt:innerAt,color:glaze().c,dipDepth:st.dip?(typeof st.dipDepth==="number"?st.dipDepth:(st.dip==="half"?.5:.2)):0,dipColor:byId(GLAZES,st.glaze2).c,inside:glaze().c,finish:st.finish,overlay:fin.c,carve:hasCarve?carve.c:null,rotation:rot,objectScale:window.TodakRealPhoto?TodakRealPhoto.objectScale():1,zoom:Z,panX:window.TodakRealPhoto?TodakRealPhoto.renderPan().x:CX-CX0,panY:window.TodakRealPhoto?TodakRealPhoto.renderPan().y:BASE-BASE0,background:photoScene,width:W,canvasHeight:HC,pixelWidth:cv.width,pixelHeight:cv.height,scale:SV,cx:CX,base:BASE};
+  return {viewWidth:viewWidth,viewHeight:viewHeight,key:[texVer,st.height,st.radii.join(','),st.inner.join(','),st.floor,st.glaze,(st.customC||[]).join(','),st.glaze2,st.dip,st.dipDepth,st.fx,st.finish,kilnSig()].join('|'),glazeId:st.glaze,surface:st.fx,height:st.height,floor:st.floor,rAt:rAt,innerAt:innerAt,color:glaze().c,dipDepth:st.dip?(typeof st.dipDepth==="number"?st.dipDepth:(st.dip==="half"?.5:.2)):0,dipColor:byId(GLAZES,st.glaze2).c,inside:glaze().c,finish:st.finish,overlay:fin.c,carve:hasCarve?carve.c:null,rotation:rot,objectScale:window.TodakRealPhoto?TodakRealPhoto.objectScale():1,zoom:Z,panX:window.TodakRealPhoto?TodakRealPhoto.renderPan().x:CX-CX0,panY:window.TodakRealPhoto?TodakRealPhoto.renderPan().y:BASE-BASE0,background:photoScene,width:W,canvasHeight:HC,pixelWidth:cv.width,pixelHeight:cv.height,scale:SV,cx:CX,base:BASE};
 }
 var photo3DPending=false;
 function drawPhoto(){
@@ -2120,7 +2122,7 @@ var TIPS={
 };
 var DTIPS={
   brush:"고른 색으로 그려요.",
-  carve:"선을 새겨요. 구우면 짙은 선이 돼요.",
+  carve:"음각은 파내고, 양각은 돋워요. 완성작에서 실제 높이 차이를 볼 수 있어요.",
   stamp:"누르면 모양이 하나 찍혀요.",
   erase:"그림과 새긴 선을 지워요.",
   move:""
@@ -2147,6 +2149,7 @@ function syncControls(){
   $("f-opacity").hidden=dTool!=="brush"&&dTool!=="stamp";
   $("f-pig").hidden=(dTool==="carve"||dTool==="erase"||dTool==="move");
   $("f-size").hidden=(dTool==="move");
+  $("f-carve-mode").hidden=dTool!=="carve";
   $("pigCustom").classList.toggle("on",dPig==="custom");
   $("glazeCustom").classList.toggle("on",st.glaze==="custom");
   sizeUI();
@@ -3484,7 +3487,7 @@ function start(saved){
     st.radii=saved.radii.slice(); st.height=saved.height||12;
     if(Array.isArray(saved.inner)&&saved.inner.length===N){st.inner=saved.inner.slice(); st.floor=saved.floor||0.8;}
     else{st.inner=st.radii.map(function(r){return Math.max(0.6,r-0.5);}); st.floor=0.8;}
-    st.topPaint=saved.topPaint||null; st.customC=saved.customC||null; st.glaze=(saved.glaze==="custom"&&!st.customC)?"baekja":(saved.glaze||"baekja"); st.glaze2=saved.glaze2||"cobalt"; st.dip=saved.dip||"";st.dipDepth=typeof saved.dipDepth==="number"?saved.dipDepth:(st.dip==="half"?.5:.2);
+    st.trimReady=false; st.topPaint=saved.topPaint||null; st.customC=saved.customC||null; st.glaze=(saved.glaze==="custom"&&!st.customC)?"baekja":(saved.glaze||"baekja"); st.glaze2=saved.glaze2||"cobalt"; st.dip=saved.dip||"";st.dipDepth=typeof saved.dipDepth==="number"?saved.dipDepth:(st.dip==="half"?.5:.2);
     st.finish=saved.finish||"gloss"; st.fx=saved.fx||"none"; st.kiln=saved.kiln||null; st.fire=FIRE_NAME[saved.fire]?saved.fire:"mid"; st.blind=!!saved.blind; st.touches=saved.touches||0; st.falls=saved.falls||0; st.target=TARGETS[saved.target]?saved.target:""; st.curId=saved.curId||null; st.name=saved.name||""; st.purpose=saved.purpose||""; st.used=saved.used||{};
     st.stage=saved.stage==="fire"?"glaze":(ORDER.indexOf(saved.stage)>=0?saved.stage:"throw");
     loadTex(saved.paint,paint,function(){hasPaint=!!saved.paint; texVer++; dirty=true;});
@@ -3764,7 +3767,7 @@ document.addEventListener('pointercancel',function(){sheetOutsideTap=null;});
  function profile(p){return {h:p.h,r:p.r.slice(),inner:p.inner.slice(),floor:p.floor};}
  function drawingData(work,size,rotation){
   var p=work.profile,visual=work.visual||{};
-  return {key:'community-'+work.id+'-'+(work.revision||0),height:p.h,floor:p.floor,rAt:function(t){return sample(p.r,t);},innerAt:function(t){return sample(p.inner,t);},color:work.color,inside:work.color,glazeId:visual.glazeId||'custom',finish:visual.finish||'gloss',overlay:cache[work.id+'overlay']||null,carve:cache[work.id+'carve']||null,dipDepth:visual.dipDepth||0,dipColor:visual.dipColor||work.color,rotation:rotation||0,zoom:1,panX:0,panY:0,background:'studio',transparent:false,width:size,canvasHeight:size,pixelWidth:size,pixelHeight:size,viewWidth:size,viewHeight:size,scale:10,cx:size/2,base:size*.75};
+  return {key:'community-'+work.id+'-'+(work.revision||0),height:p.h,floor:p.floor,rAt:function(t){return sample(p.r,t);},innerAt:function(t){return sample(p.inner,t);},color:work.color,inside:work.color,glazeId:visual.glazeId||'custom',surface:visual.surface||'none',finish:visual.finish||'gloss',overlay:cache[work.id+'overlay']||null,carve:cache[work.id+'carve']||null,dipDepth:visual.dipDepth||0,dipColor:visual.dipColor||work.color,rotation:rotation||0,zoom:1,panX:0,panY:0,background:'studio',transparent:false,width:size,canvasHeight:size,pixelWidth:size,pixelHeight:size,viewWidth:size,viewHeight:size,scale:10,cx:size/2,base:size*.75};
  }
  function fallback(canvas,work){var g=canvas.getContext('2d'),s=canvas.width,p=work.profile,max=Math.max.apply(null,p.r),scale=Math.min(s*.64/p.h,s*.65/(max*2)),base=s*.83;g.fillStyle='#eae5dc';g.fillRect(0,0,s,s);g.fillStyle='#bfb9ac';g.beginPath();g.ellipse(s/2,base+3,max*scale*1.15,scale*.3,0,0,Math.PI*2);g.fill();g.beginPath();p.r.forEach(function(r,i){var x=s/2-r*scale,y=base-i/(p.r.length-1)*p.h*scale;if(!i)g.moveTo(x,y);else g.lineTo(x,y);});for(var i=p.r.length-1;i>=0;i--)g.lineTo(s/2+p.r[i]*scale,base-i/(p.r.length-1)*p.h*scale);g.closePath();var c=work.color,gradient=g.createLinearGradient(s*.2,0,s*.8,0);gradient.addColorStop(0,'rgb('+c.map(function(v){return Math.round(v*.65);}).join(',')+')');gradient.addColorStop(.4,'rgb('+c.join(',')+')');gradient.addColorStop(.65,'rgb('+c.map(function(v){return Math.round(v+(255-v)*.2);}).join(',')+')');gradient.addColorStop(1,'rgb('+c.map(function(v){return Math.round(v*.7);}).join(',')+')');g.fillStyle=gradient;g.fill();g.fillStyle='rgba(25,32,30,.35)';g.beginPath();g.ellipse(s/2,base-p.h*scale,p.r.at(-1)*scale,p.r.at(-1)*scale*.24,0,0,Math.PI*2);g.fill();}
  function drawWork(canvas,work,rotation){var d=drawingData(work,canvas.width,rotation),rendered=window.TodakPhoto&&TodakPhoto.available?TodakPhoto.render(d):null;if(rendered){canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);canvas.getContext('2d').drawImage(rendered,0,0,canvas.width,canvas.height);}else fallback(canvas,work);return !!rendered;}
@@ -3814,7 +3817,7 @@ document.addEventListener('pointercancel',function(){sheetOutsideTap=null;});
  var homeButton=document.createElement('button');homeButton.type='button';homeButton.className='bigBtn plain';homeButton.id='goCommunity';homeButton.innerHTML='<b>모두의 진열장 <small style="font-size:10px;color:#6b7763">미리보기</small></b><span>작품을 구경하고, 마음에 드는 모양에 도전해요</span>';el('goShelf').after(homeButton);homeButton.onclick=openGallery;
  var shelfButton=document.createElement('button');shelfButton.type='button';shelfButton.className='ghost';shelfButton.id='shelfCommunity';shelfButton.textContent='모두의 진열장 ↗';shelfButton.onclick=openGallery;el('drawer').querySelector('.shelfHead').after(shelfButton);
  var doneButton=document.createElement('button');doneButton.type='button';doneButton.className='ghost';doneButton.id='publishCurrent';doneButton.textContent='모두의 진열장에 올리기';doneButton.style.width='100%';doneButton.style.marginTop='10px';el('openCard').closest('.actions').after(doneButton);doneButton.onclick=function(){openPublish();};
- var oldItemFields=itemFields;itemFields=function(it){it=oldItemFields(it);compose();it.communityVisual={glazeId:st.glaze,finish:st.finish,dipDepth:st.dip?st.dipDepth:0,dipColor:byId(GLAZES,st.glaze2).c,overlay:fin.c.toDataURL('image/png'),carve:hasCarve?carve.c.toDataURL('image/png'):null};it.communitySource=st.target.indexOf('community:')===0?st.target.slice(10):null;it.communityScore=it.communitySource?score():null;return it;};
+ var oldItemFields=itemFields;itemFields=function(it){it=oldItemFields(it);compose(true);it.communityVisual={glazeId:st.glaze,surface:st.fx,finish:st.finish,dipDepth:st.dip?st.dipDepth:0,dipColor:byId(GLAZES,st.glaze2).c,overlay:fin.c.toDataURL('image/png'),carve:hasCarve?carve.c.toDataURL('image/png'):null};it.communitySource=st.target.indexOf('community:')===0?st.target.slice(10):null;it.communityScore=it.communitySource?score():null;return it;};
  var oldSetStage=setStage;setStage=function(stage){oldSetStage(stage);var previous=el('cmResult');if(previous)previous.remove();if(stage!=='done'||st.target.indexOf('community:')!==0)return;var work=getWork(st.target.slice(10));if(!work)return;var box=document.createElement('div');box.id='cmResult';box.className='cm-result';box.innerHTML='<h4>'+esc(work.author)+'님의 모양에 도전했어요 · '+score()+'점</h4><div class="cm-result-pair"><div><img src="'+imageFor(work)+'" alt="원본 작품"><b>원본 · '+esc(work.name)+'</b></div><div><img src="'+thumbNow()+'" alt="내가 빚은 작품"><b>내가 빚은 도자기</b></div></div><button type="button" class="cm-ghost" style="width:100%" id="cmResultOrigin">원본과 함께 빚은 작품 보기 ↗</button>';el('publishCurrent').after(box);el('cmResultOrigin').onclick=function(){openGallery();showDetail(work);};};
 
 /* Walkable exhibition, weekly rankings and progression. Local preview only. */
@@ -3924,7 +3927,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  }
  function sample(a,t){var p=Math.max(0,Math.min(1,t))*(a.length-1),i=Math.min(a.length-2,Math.floor(p));return a[i]+(a[i+1]-a[i])*(p-i);}
  async function dataFor(item){var rs=item.full2&&item.full2.radii||item.shape&&item.shape.r,inner=item.full2&&item.full2.inner,h=item.shape&&item.shape.h;if(!Array.isArray(rs)||rs.length<2||!h||rs.some(function(v){return !Number.isFinite(v);}))throw Error('missing_geometry');rs=rs.slice();inner=Array.isArray(inner)&&inner.length>1?inner.slice():rs.map(function(r){return Math.max(0,r-.5);});var floor=item.full2&&Number.isFinite(item.full2.floor)?item.full2.floor:.8,visual=item.communityVisual||{},images=await Promise.all([visual.overlay,visual.carve,item.topPaint||visual.topPaint].map(function(url){return url?picture(url).catch(function(){return null;}):Promise.resolve(null);}));
-  return {key:'break-'+item.id,height:h,floor:floor,rAt:function(t){return sample(rs,t);},innerAt:function(t){return Math.max(0,Math.min(sample(inner,t),sample(rs,t)-.12));},color:item.c||[230,225,214],inside:item.c||[230,225,214],glazeId:visual.glazeId||'baekja',finish:visual.finish||'gloss',dipDepth:visual.dipDepth||0,dipColor:visual.dipColor||item.c||[230,225,214],overlay:images[0],carve:images[1],topOverlay:images[2],topRadius:Math.max.apply(null,rs),rotation:visual.rotation||0};
+  return {key:'break-'+item.id,height:h,floor:floor,rAt:function(t){return sample(rs,t);},innerAt:function(t){return Math.max(0,Math.min(sample(inner,t),sample(rs,t)-.12));},color:item.c||[230,225,214],inside:item.c||[230,225,214],glazeId:visual.glazeId||'baekja',surface:visual.surface||'none',finish:visual.finish||'gloss',dipDepth:visual.dipDepth||0,dipColor:visual.dipColor||item.c||[230,225,214],overlay:images[0],carve:images[1],topOverlay:images[2],topRadius:Math.max.apply(null,rs),rotation:visual.rotation||0};
  }
  async function open(item){epoch++;var token=epoch;if(view)view.dispose();view=null;work=item;ready=false;busy=false;progress=null;pileThumb=null;seed=(Date.now()^Math.floor(Math.random()*2147483647))>>>0;hammer={x:480,y:210,angle:.2};$('breakSwing').hidden=false;$('breakSwing').disabled=true;$('breakClose').disabled=false;$('breakStatus').textContent='저장된 도자기의 입체 형태를 불러오고 있어요. 닫기는 언제든 가능해요.';dlg.showModal();queuePile();draw();try{if(!window.TodakPhoto||!TodakPhoto.createFracture){if(window.TodakLoad3D)await TodakLoad3D();}if(token!==epoch||!dlg.open)return;var data=await dataFor(item);if(token!==epoch||!dlg.open)return;if(!window.TodakPhoto||!TodakPhoto.createFracture)throw Error('no_3d');var made=TodakPhoto.createFracture(data,seed);if(!made)throw Error('no_3d');if(token!==epoch||!dlg.open){made.dispose();return;}view=made;pileThumb=view.pileImage();ready=true;$('breakSwing').disabled=false;$('breakStatus').textContent='망치를 도자기 쪽으로 한 번 휘두르면 깨져요. 깨뜨리기 전에 닫으면 작품은 그대로 보관돼요.';draw();}catch(e){if(token!==epoch)return;$('breakStatus').textContent=e.message==='missing_geometry'?'이 작품에는 입체 형태 기록이 없어 깨뜨릴 수 없어요. 작품은 그대로 보관됩니다.':'이 기기에서는 입체 깨뜨리기를 불러오지 못했어요. 작품은 그대로 보관됩니다.';}}
  function strike(){if(!ready||busy||!view||!work)return;busy=true;ready=false;var token=epoch,item=work,controller=view,record={id:item.id,t:Date.now(),thumb:pileThumb,seed:seed,name:item.name||item.full||'작품',version:2};$('breakSwing').disabled=true;$('breakSwing').hidden=true;$('breakStatus').textContent='';hammer={x:400,y:350,angle:-1.05};var start=performance.now();
@@ -4195,6 +4198,64 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
 
  window.TodakCommunity={open:openGallery,works:allWorks,show:showDetail,publish:function(){openPublish();},start:beginChallenge};
  if(new URLSearchParams(location.search).get('view')==='community')setTimeout(function(){openGallery();},220);
+})();
+
+/* Optional leather-hard trimming. Removes real profile material; never moves the cavity. */
+(function(){
+ var dryingTimer=0,shavings=[],drying=false;
+ TOOLS.trim={f:.62,sm:0};
+ TIPS.trim='<b>겉면에 도구를 대고 안쪽으로 조금 밀거나, 위아래로 움직여 깎아요.</b> 가만히 대면 그 높이가 한 바퀴씩 깎여요. 안쪽 공간과 바닥 높이는 유지돼요.';
+ var toolButton=document.createElement('button');toolButton.type='button';toolButton.className='chip';toolButton.dataset.t='trim';toolButton.setAttribute('aria-pressed','false');toolButton.textContent='깎아 다듬기';$('tools').insertBefore(toolButton,$('undo'));
+ var quickButton=document.createElement('button');quickButton.type='button';quickButton.dataset.quick='trim';quickButton.setAttribute('aria-pressed','false');quickButton.textContent='4 깎기';document.querySelector('.quick-tools').insertBefore(quickButton,document.querySelector('.quick-tool-hint'));quickButton.onclick=function(){toolButton.click();};
+ var controls=document.createElement('div');controls.id='trimControls';controls.className='trim-controls';controls.hidden=true;controls.innerHTML='<strong id="trimStatus" role="status" aria-live="polite"></strong><p>젖은 흙을 잠깐 말린 뒤, 겉면·줄기·굽을 정리해요. 다른 도구를 고르면 다시 손으로 빚을 수 있어요.</p><button type="button" class="ghost" id="trimDry">살짝 말리고 깎기</button>';$('toolTip').after(controls);
+ function sync(){
+  var active=tool==='trim';controls.hidden=!active;
+  $('trimStatus').textContent=drying?'살짝 말리는 중…':st.trimReady?'깎을 준비가 됐어요 · 얇은 흙 띠가 떨어져요.':'깎기 전에 흙을 잠깐 말려요.';
+  $('trimDry').hidden=!!st.trimReady;$('trimDry').disabled=drying;
+  var h=document.querySelector('.quick-tool-hint');if(active&&h)h.textContent=drying?'살짝 말리는 중…':st.trimReady?'겉면에 도구를 대고 천천히 깎아요 · 안쪽과 바닥은 그대로예요.':'깎기를 다시 선택하면 흙을 살짝 말려요.';
+ }
+ function cancel(){clearTimeout(dryingTimer);dryingTimer=0;drying=false;}
+ function dry(){if(st.trimReady||drying){sync();return;}drying=true;sync();dryingTimer=setTimeout(function(){drying=false;if(tool!=='trim'||st.stage!=='throw')return;st.trimReady=true;wet=0;wob=0;dirty=true;sync();},900);}
+ $('trimDry').onclick=dry;
+ var previousTips=showTips;showTips=function(){previousTips();sync();};
+ $('tools').addEventListener('click',function(e){var b=e.target.closest('[data-t]');if(!b)return;if(b.dataset.t==='trim'){dry();}else{cancel();st.trimReady=false;shavings=[];dirty=true;sync();}});
+ var previousFresh=freshClay;freshClay=function(){cancel();st.trimReady=false;shavings=[];previousFresh();sync();};
+ var previousStage=setStage;setStage=function(s){if(s!=='throw')cancel();previousStage(s);sync();};
+ function trim(dt){
+  ptr.contact=false;ptr.maxD=0;if(!st.trimReady||drying)return 0;
+  var t=(BASE-ptr.y)/(st.height*SV),rowH=st.height/(N-1);if(t<.005||t>1.01)return 0;
+  if(ptr.trimLastStartX!==ptr.sx||ptr.trimLastStartY!==ptr.sy||ptr.w0==null){
+    var startT=clamp((BASE-ptr.sy)/(st.height*SV),0,1),startD=Math.abs(ptr.sx-CX)/SV;
+    ptr.w0=st.radii.slice();ptr.trimLastStartX=ptr.sx;ptr.trimLastStartY=ptr.sy;ptr.trimInvalid=Math.abs(startD-rAt(startT))>Math.max(.65,15/SV);ptr.trimSide=ptr.sx<CX?-1:1;
+  }
+  if(ptr.trimInvalid)return 0;
+  var toolRadius=(ptr.x-CX)*ptr.trimSide/SV,surface=rAt(clamp(t,0,1));if(toolRadius>surface+.65||toolRadius<-.1)return 0;
+  var penetration=clamp(surface-toolRadius,-.05,.9),rate=clamp(.035+penetration*.4,0,.42)*Math.min(dt,80)/42,moved=0,blocked=false;
+  var baseline=[];if(st.height-st.floor>.05){for(var z=1;z<N;z++)baseline[z]=wallNormalThickness(st.inner[z],z*rowH);}
+  for(var j=1;j<N;j++){
+    var y=j*rowH,dist=y-t*st.height;if(Math.abs(dist)>TOOLS.trim.f*2.1)continue;
+    var weight=Math.exp(-dist*dist/(TOOLS.trim.f*TOOLS.trim.f)),before=st.radii[j],minimum=.26;
+    if(y>=st.floor&&st.height-st.floor>.05){var a=Math.max(0,j-1),b=Math.min(N-1,j+1),slope=(st.radii[b]-st.radii[a])/Math.max(rowH,(b-a)*rowH);minimum=Math.max(minimum,st.inner[j]+.52*Math.sqrt(1+slope*slope));}
+    var next=Math.min(before,Math.max(minimum,before-rate*weight)),cut=before-next;
+    if(cut>.000001){st.radii[j]=next;moved+=cut;grooves[j]=Math.max(0,grooves[j]-cut*.6);ptr.contact=true;ptr.maxD=Math.max(ptr.maxD,cut);}else if(weight>.5)blocked=true;
+  }
+  // A pass can expose a nearby sloped wall: validate true normal clearance, not just radial distance.
+  if(st.height-st.floor>.05){for(var jj=1;jj<N;jj++){if(jj*rowH>=st.floor&&st.inner[jj]>.01&&wallNormalThickness(st.inner[jj],jj*rowH)<Math.min(.505,baseline[jj])-.00001){st.radii=ptr.trimBefore.slice();moved=0;ptr.contact=false;blocked=true;break;}}}
+  if(moved>.0001&&shavings.length<48){shavings.push({x:CX+ptr.trimSide*surface*SV,y:ptr.y,vx:ptr.trimSide*(.4+Math.random()*.6),vy:.5+Math.random(),life:1,turn:Math.random()*6.28});}
+  if(blocked&&!ptr.trimWarned){$('trimStatus').textContent='더 깎으면 너무 얇아져요. 이 부분은 남겨 둘게요.';ptr.trimWarned=true;}
+  return moved;
+ }
+ var oldTouch=touchClay;touchClay=function(dt){if(tool!=='trim')return oldTouch(dt);ptr.trimBefore=st.radii.slice();return trim(dt);};
+ var oldSculpt=sculptStep;sculptStep=function(dt,ts){oldSculpt(dt,ts);if(tool==='trim'){wet=0;wob=0;}for(var i=shavings.length-1;i>=0;i--){var p=shavings[i];p.x+=p.vx*dt*.07;p.y+=p.vy*dt*.07;p.vy+=dt*.005;p.life-=dt/1500;if(p.life<=0||p.y>BASE+40)shavings.splice(i,1);}};
+ var oldStress=stressStep,oldThin=freeThinStep;stressStep=function(dt){if(tool==='trim'&&st.trimReady){stressNow=stressT=0;return;}oldStress(dt);};freeThinStep=function(dt){if(tool==='trim'&&st.trimReady){stressNow=stressT=0;return;}oldThin(dt);};
+ var oldDraw=draw;draw=function(){oldDraw();if(st.stage!=='throw'||tool!=='trim')return;ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.lineCap='round';
+  shavings.forEach(function(p){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.turn);ctx.globalAlpha=p.life;ctx.strokeStyle='#d0b89b';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-6,1);ctx.bezierCurveTo(-1,-7,8,-6,6,0);ctx.bezierCurveTo(4,5,-3,3,0,-1);ctx.stroke();ctx.restore();});
+  if(st.trimReady&&ptr.down&&ptr.contact){var side=ptr.trimSide||1,x=CX+side*rAt(clamp((BASE-ptr.y)/(st.height*SV),0,1))*SV,y=ptr.y;ctx.strokeStyle='#5f6260';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x+side*44,y-14);ctx.lineTo(x+side*7,y+1);ctx.stroke();ctx.strokeStyle='#ecece5';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(x,y,7,4,-side*.3,0,TWO);ctx.stroke();}
+  ctx.restore();};
+ cv.addEventListener('pointerdown',function(){ptr.trimWarned=false;ptr.trimLastStartX=null;ptr.trimLastStartY=null;});
+ // Preserve optional dry state on reload without changing any existing shape records.
+ window.TodakTrimming={dry:dry,ready:function(){return !!st.trimReady;},drying:function(){return drying;}};
+ sync();
 })();
 
 if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}

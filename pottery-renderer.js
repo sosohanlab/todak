@@ -30,7 +30,7 @@ function makeEnvironment(){
   var glossy=new Float32Array(data);
   for(var gy=0;gy<h;gy++)for(var gx=0;gx<w;gx++){
     var u=gx/w,v=gy/h,panel=7.5*Math.exp(-Math.pow((u-.705)/.032,8)-Math.pow((v-.585)/.19,8)),fillPanel=2.1*Math.exp(-Math.pow((u-.855)/.018,8)-Math.pow((v-.56)/.17,8)),at=(gy*w+gx)*4;
-    for(var channel=0;channel<3;channel++)glossy[at+channel]=data[at+channel]*.32+panel+fillPanel;
+    for(var channel=0;channel<3;channel++)glossy[at+channel]=data[at+channel]*.65+panel*.65+fillPanel*.7;
   }
   var reflection=new T.DataTexture(glossy,w,h,T.RGBAFormat,T.FloatType);reflection.mapping=T.EquirectangularReflectionMapping;reflection.needsUpdate=true;glossEnvironment=pm.fromEquirectangular(reflection);raw.dispose();reflection.dispose();pm.dispose();
 }
@@ -85,23 +85,31 @@ function rebuild(d){
     var edgeFade=Math.min(1,y/10,(size-1-y)/10);v*=Math.max(0,edgeFade);if(n>.998)v-=15*Math.max(0,edgeFade);
     for(var k=0;k<3;k++)pix.data[i+k]=Math.max(0,Math.min(255,base[k]+v));
   }g.putImageData(pix,0,0);
+  var surface=d.surface==='crackle'&&window.TodakCeramicSurface?TodakCeramicSurface.create(low?512:1024,d.surface):null;
+  if(surface){g.save();g.globalCompositeOperation='multiply';g.drawImage(surface.color,0,0,size,size);g.restore();}
   if(d.overlay)g.drawImage(d.overlay,0,0,size,size);
   // Bare clay only at the foot; preserve painted/carved decorations everywhere else.
   // Bare clay remains on the underside material, not a painted hairline at the silhouette.
   var bump=canvas(512,512),bg=bump.getContext('2d'),im=bg.createImageData(512,512);
   for(var j=0;j<512*512;j++){var xx=j%512,yy=j/512|0,edge=Math.max(0,Math.min(1,yy/12,(511-yy)/12)),vv=128+((noise(xx,yy)-.5)*12+Math.sin(yy*.65)*1.5)*edge;im.data[j*4]=im.data[j*4+1]=im.data[j*4+2]=vv;im.data[j*4+3]=255;}bg.putImageData(im,0,0);
-  if(d.carve){bg.globalAlpha=.38;bg.drawImage(d.carve,0,0,512,512);}
+  // Micro texture stays separate from the true carved geometry.
+  if(surface){bg.globalAlpha=1;bg.drawImage(surface.height,0,0,512,512);}
   var map=tex(c,true),micro=tex(bump,false),gloss=d.finish==='gloss';
-  var outer=new T.MeshPhysicalMaterial({map:map,metalness:0,roughness:gloss?.14:.78,clearcoat:gloss?.92:.04,clearcoatRoughness:gloss?.065:.6,ior:1.46,bumpMap:micro,bumpScale:gloss?.008:.025,envMap:gloss?glossEnvironment.texture:null,envMapIntensity:gloss?1.15:.45});
+  var outer=new T.MeshPhysicalMaterial({map:map,metalness:0,roughness:gloss?.2:.78,clearcoat:gloss?1:.04,clearcoatRoughness:gloss?.065:.6,ior:1.46,bumpMap:micro,bumpScale:gloss?.003:.012,envMap:gloss?glossEnvironment.texture:null,envMapIntensity:gloss?1.15:.45});
+  if(surface){outer.bumpScale=.025;outer.roughnessMap=tex(surface.roughness,false);outer.roughness=gloss?.48:.95;}
   var inside=outer.clone(),innerCanvas=canvas(64,256),ix=innerCanvas.getContext('2d');
   // Occlusion increases below the opening, including the inside floor.
   for(var iy=0;iy<256;iy++){
-    var level=1-iy/255,depth=Math.max(0,Math.min(1,(1-level)*d.height/Math.max(.05,d.height-d.floor))),shade=.87-.43*Math.pow(depth,.7),innerColor=d.dipDepth&&iy<256*d.dipDepth?d.dipColor:d.inside;
+    var level=1-iy/255,depth=Math.max(0,Math.min(1,(1-level)*d.height/Math.max(.05,d.height-d.floor))),shade=.94-.2*Math.pow(depth,.8),innerColor=d.dipDepth&&iy<256*d.dipDepth?d.dipColor:d.inside;
     ix.fillStyle='rgb('+innerColor.map(function(channel){return Math.round(channel*shade);}).join(',')+')';ix.fillRect(0,iy,64,1);
+  }
+  if(surface){
+    var shaded=innerCanvas,innerSurface=canvas(512,512),isx=innerSurface.getContext('2d');isx.drawImage(shaded,0,0,512,512);isx.globalCompositeOperation='multiply';isx.drawImage(surface.color,0,0,512,512);isx.globalCompositeOperation='source-over';innerCanvas=innerSurface;ix=isx;
   }
   if(d.topOverlay){
     innerCanvas=canvas(768,768);ix=innerCanvas.getContext('2d');
     ix.fillStyle='rgb('+d.inside.join(',')+')';ix.fillRect(0,0,768,768);
+    if(surface){ix.globalCompositeOperation='multiply';ix.drawImage(surface.color,0,0,768,768);ix.globalCompositeOperation='source-over';}
     ix.drawImage(d.topOverlay,0,0,768,768);
   }
   if(d.topOverlay){
@@ -110,10 +118,10 @@ function rebuild(d){
       shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying float todakInnerLevel;').replace('#include <opaque_fragment>','outgoingLight *= .87 - .43 * pow(clamp((1.0 - todakInnerLevel) * '+Number(d.height/Math.max(.05,d.height-d.floor)).toFixed(5)+', 0.0, 1.0), .7);\n#include <opaque_fragment>');
     };
   }
-  inside.map=tex(innerCanvas,true);inside.envMap=null;inside.clearcoatRoughness=gloss?.09:.6;inside.roughness=gloss?.28:.86;inside.envMapIntensity=gloss?.42:.24;inside.clearcoat=gloss?.55:.04;
+  inside.map=tex(innerCanvas,true);inside.envMap=gloss?glossEnvironment.texture:null;inside.clearcoatRoughness=gloss?.09:.6;inside.roughness=gloss?.23:.86;inside.envMapIntensity=gloss?.65:.24;inside.clearcoat=gloss?.85:.04;
 
   var clay=new T.MeshStandardMaterial({color:0xbda185,roughness:.95,bumpMap:micro,bumpScale:.02});materials.push(outer,inside,clay);
-  var n=128,H=d.height,ro=d.rAt(1),ri=d.innerAt(1),hollow=H-d.floor>.05;
+  var carving=!!d.carve,n=carving?(low?224:320):128,H=d.height,ro=d.rAt(1),ri=d.innerAt(1),hollow=H-d.floor>.05;
   // Tiny rounded edges avoid a grazing, razor-sharp material seam at rim and foot.
   var footBevel=Math.min(.045,H*.004,d.rAt(0)*.02),rimBevel=hollow?Math.max(.001,Math.min(.045,(ro-ri)*.18,H*.004)):.02;
   var points=[new T.Vector2(0,0),new T.Vector2(Math.max(0,d.rAt(0)-footBevel),0)],outerStart=1;
@@ -127,55 +135,46 @@ function rebuild(d){
     for(var b=n-1;b>=0;b--){var yy=d.floor+(H-d.floor)*b/n;if(yy<H-rimBevel)points.push(new T.Vector2(d.innerAt(yy/H),yy));}
     points.push(new T.Vector2(0,d.floor));
   }else points.push(new T.Vector2(0,H));
-  var geo=new T.LatheGeometry(points,low?128:192),uv=geo.attributes.uv,pos=geo.attributes.position;
+  var geo=new T.LatheGeometry(points,carving?(low?320:512):(low?160:256)),uv=geo.attributes.uv,pos=geo.attributes.position;
   for(var z=0;z<uv.count;z++){
     uv.setY(z,Math.max(0,Math.min(1,pos.getY(z)/H)));
     if(d.topOverlay&&z%points.length>outerEnd){var topR=d.topRadius||d.rAt(1);uv.setXY(z,.5+pos.getX(z)/(2*topR),.5+pos.getZ(z)/(2*topR));}
   }
-  geo.clearGroups();var segs=low?128:192,rows=points.length-1,indices=[[],[],[]],old=geo.index.array;
+  geo.clearGroups();var segs=carving?(low?320:512):(low?160:256),rows=points.length-1,indices=[[],[],[]],old=geo.index.array;
   for(var s=0;s<segs;s++)for(var row=0;row<rows;row++){
     var material=row<outerStart?2:(row<outerEnd?0:1),offset=(s*rows+row)*6;
     for(var q=0;q<6;q++)indices[material].push(old[offset+q]);
   }
   var reordered=[],start=0;
   indices.forEach(function(group,index){geo.addGroup(start,group.length,index);start+=group.length;for(var j=0;j<group.length;j++)reordered.push(group[j]);});geo.setIndex(reordered);
-  // Dedicated studio reflectors affect only the outer clear glaze. They use the
-  // physical GGX coat BRDF, so highlights follow the actual curved surface.
-  if(gloss){
-    outer.onBeforeCompile=function(shader){
-      shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>',`
-#ifdef USE_CLEARCOAT
-      PhysicalMaterial glazeReflector = material;
-      glazeReflector.clearcoatRoughness = 0.19;
-      vec3 glazeKey = normalize(vec3(-0.55, -0.95, 1.2));
-      vec3 glazeFill = normalize(vec3(0.65, -0.8, 1.1));
-      vec3 glazeTop = normalize(vec3(-0.45, 0.65, 1.2));
-      vec3 glazeLow = normalize(vec3(-0.35, -1.0, 0.15));
-      vec3 glazeBowl = normalize(vec3(-0.2, -0.8, -0.75));
-      vec3 glazeNormal = normalize(geometryClearcoatNormal);
-      vec3 glazeReflection = 4.0 * saturate(dot(glazeNormal, glazeKey)) * BRDF_GGX_Clearcoat(glazeKey, geometryViewDir, glazeNormal, glazeReflector);
-      glazeReflector.clearcoatRoughness = 0.22;
-      glazeReflection += 2.0 * saturate(dot(glazeNormal, glazeFill)) * BRDF_GGX_Clearcoat(glazeFill, geometryViewDir, glazeNormal, glazeReflector);
-      glazeReflection += 2.5 * saturate(dot(glazeNormal, glazeTop)) * BRDF_GGX_Clearcoat(glazeTop, geometryViewDir, glazeNormal, glazeReflector);
-      glazeReflection += 2.5 * saturate(dot(glazeNormal, glazeLow)) * BRDF_GGX_Clearcoat(glazeLow, geometryViewDir, glazeNormal, glazeReflector);
-      glazeReflection += 2.0 * saturate(dot(glazeNormal, glazeBowl)) * BRDF_GGX_Clearcoat(glazeBowl, geometryViewDir, glazeNormal, glazeReflector);
-      outgoingLight += material.clearcoat * glazeReflection;
-#endif
-#include <opaque_fragment>`);
-    };
-    outer.customProgramCacheKey=function(){return 'todak-outer-glaze-reflectors-v1';};
+  // Incisions change the actual outer shell, including its silhouette and normals.
+  var incisionStats={vertices:0,maxDepth:0,raisedVertices:0,maxRaise:0};
+  if(carving){
+    var mask=canvas(1024,1024),mx=mask.getContext('2d');mx.filter='blur(1.2px)';mx.drawImage(d.carve,0,0,1024,1024);
+    var alpha=mx.getImageData(0,0,1024,1024).data,normal=geo.attributes.normal;
+    function cutAt(u,v){var x=((u%1+1)%1)*1024,y=Math.max(0,Math.min(1023,(1-v)*1023)),xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi;
+      function a(xx,yy){var i=(yy*1024+(xx%1024))*4;return alpha[i+3]/255*(d.carveMode==='raised'?-1:(alpha[i]>127?-1:1));}
+      return (a(xi,yi)*(1-xf)+a(xi+1,yi)*xf)*(1-yf)+(a(xi,Math.min(1023,yi+1))*(1-xf)+a(xi+1,Math.min(1023,yi+1))*xf)*yf;
+    }
+    for(var vi=0;vi<pos.count;vi++){
+      var profileRow=vi%points.length;if(profileRow<outerStart||profileRow>outerEnd)continue;
+      var py=pos.getY(vi),level=Math.max(0,Math.min(1,py/H)),r=Math.hypot(pos.getX(vi),pos.getZ(vi)),wall=py>d.floor?Math.max(.025,r-d.innerAt(level)):Math.max(.025,r),amount=cutAt(uv.getX(vi),uv.getY(vi));
+      var edge=Math.min(1,py/.12,(H-py)/.12),depth=amount*(amount<0?(d.carveDepth||.12):Math.min(d.carveDepth||.12,wall*.32))*Math.max(0,edge);
+      if(Math.abs(depth)>.00001){pos.setXYZ(vi,pos.getX(vi)-normal.getX(vi)*depth,py-normal.getY(vi)*depth,pos.getZ(vi)-normal.getZ(vi)*depth);incisionStats.vertices++;incisionStats.maxDepth=Math.max(incisionStats.maxDepth,depth);if(depth<0){incisionStats.raisedVertices++;incisionStats.maxRaise=Math.max(incisionStats.maxRaise,-depth);}}
+    }
+    pos.needsUpdate=true;geo.computeVertexNormals();geo.computeBoundingSphere();
   }
-  var mesh=new T.Mesh(geo,materials);mesh.castShadow=true;mesh.receiveShadow=false;pot.add(mesh);
+  var mesh=new T.Mesh(geo,materials);mesh.castShadow=true;mesh.receiveShadow=false;mesh.userData.incision=incisionStats;pot.add(mesh);
   var contact=scene.getObjectByName('contact'),r=d.rAt(0);contact.scale.set(r*2.8,r*2.8,1);
 }
 function configure(d,width,height){
-  var scale=d.scale,W=d.width,HC=d.canvasHeight; if(d.framed!==false){var radius=0;for(var f=0;f<=32;f++)radius=Math.max(radius,d.rAt(f/32));var VW=d.viewWidth||W,VH=d.viewHeight||HC;scale=Math.min(VH/(d.height*1.85),VW/(radius*3.8))*(d.zoom||1)*(d.objectScale||1);d=Object.assign({},d,{scale:scale,cx:VW*.5+(d.panX||0),base:VH*.52+d.height*scale*.43+(d.panY||0)});} var cos=Math.sqrt(1-.32*.32),aim=(d.base-HC/2)/(scale*cos),x=(W/2-d.cx)/scale;
+  var scale=d.scale,W=d.width,HC=d.canvasHeight; if(d.framed!==false){var radius=0;for(var f=0;f<=32;f++)radius=Math.max(radius,d.rAt(f/32));var VW=d.viewWidth||W,VH=d.viewHeight||HC;scale=Math.min(VH/(d.height*1.85),VW/(radius*3.8))*(d.zoom||1)*(d.objectScale||1);d=Object.assign({},d,{scale:scale,cx:VW*.5+(d.panX||0),base:VH*.52+d.height*scale*.43+(d.panY||0)});} var pitch=d.elevation==null?.32:Math.sin(d.elevation),cos=Math.sqrt(1-pitch*pitch),aim=(d.base-HC/2)/(scale*cos),x=(W/2-d.cx)/scale;
   camera.aspect=W/HC;camera.near=.1;camera.far=1000;
   var distance=(HC/scale/2)/Math.tan(16*Math.PI/180);
   // Shift the framing through the lens instead of moving the camera sideways.
   // Off-axis viewing made a centered, upright rim appear slanted beside the tool panel.
   camera.setViewOffset(W,HC,W/2-d.cx,0,W,HC);
-  camera.up.set(0,1,0);camera.position.set(0,aim+distance*.32,distance*cos);camera.lookAt(0,aim,0);camera.updateProjectionMatrix();
+  camera.up.set(0,1,0);camera.position.set(0,aim+distance*pitch,distance*cos);camera.lookAt(0,aim,0);camera.updateProjectionMatrix();
   pot.rotation.set(0,-d.rotation,0);
   var backdrop=window.TodakBackdrop(d.color,d.background);scene.background=new T.Color().setRGB(backdrop.rgb[0]/255,backdrop.rgb[1]/255,backdrop.rgb[2]/255,T.SRGBColorSpace);floor.material.color.copy(scene.background);
   var map=d.background==='warm'?woodTexture:null;if(floor.material.map!==map){floor.material.map=map;floor.material.needsUpdate=true;}if(map)floor.material.color.setRGB(backdrop.woodTint,backdrop.woodTint,backdrop.woodTint);

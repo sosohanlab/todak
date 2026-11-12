@@ -6,10 +6,10 @@ s=source.read_text()
 # Rebuild only the local extension block; the original pottery mechanics remain intact.
 a=s.index('/* Private local prototype:');b=s.index('\nif(hot&&hot.ready){hot.ready(start);}',a)
 community=(ROOT/'community.js').read_text();marker=' window.TodakCommunity='
-addons='\n'.join((ROOT/name).read_text() for name in ['market.js','display-assets.js','shop.js','shelf-display.js','shelf-break.js','real-photo.js','wheel-freedom.js','home-layout.js','tutorial.js'])
+addons='\n'.join((ROOT/name).read_text() for name in ['market.js','display-assets.js','shop.js','shelf-display.js','shelf-break.js','real-photo.js','wheel-freedom.js','home-layout.js','tutorial.js','trimming.js'])
 community=community.replace(marker,'\n'+addons+'\n'+marker)
 s=s[:a]+community+s[b:]
-for name in ['market.css','shop.css','brand.css','tutorial.css','shelf-display.css','wheel-freedom.css','shelf-break.css','home-layout.css']:
+for name in ['market.css','shop.css','brand.css','tutorial.css','shelf-display.css','wheel-freedom.css','shelf-break.css','home-layout.css','trimming.css']:
  if not re.search(r'href="'+re.escape(name)+r'(?:\?[^"]*)?"',s):s=s.replace('</head>','<link rel="stylesheet" href="'+name+'">\n</head>')
 # Refresh the community templates without changing the studio DOM.
 a=s.index('<dialog class="community" id="communityDlg"');b=s.index('<dialog id="marketDlg"',a) if '<dialog id="marketDlg"' in s else s.index('</main>',a)
