@@ -513,6 +513,18 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 <link rel="stylesheet" href="brand.css?v=e6836a19c0e4">
 <link rel="stylesheet" href="tutorial.css?v=8cb600446369">
 <link rel="stylesheet" href="shelf-display.css?v=f20566bc0ec0">
+<link rel="stylesheet" href="market.css?v=f96055eea7d1">
+<link rel="stylesheet" href="shop.css?v=2a36d87a785c">
+<link rel="stylesheet" href="brand.css?v=e6836a19c0e4">
+<link rel="stylesheet" href="tutorial.css?v=8cb600446369">
+<link rel="stylesheet" href="shelf-display.css?v=f20566bc0ec0">
+<link rel="stylesheet" href="wheel-freedom.css?v=0aa10303b61f">
+<link rel="stylesheet" href="market.css?v=f96055eea7d1">
+<link rel="stylesheet" href="shop.css?v=2a36d87a785c">
+<link rel="stylesheet" href="brand.css?v=e6836a19c0e4">
+<link rel="stylesheet" href="tutorial.css?v=8cb600446369">
+<link rel="stylesheet" href="shelf-display.css?v=f20566bc0ec0">
+<link rel="stylesheet" href="wheel-freedom.css?v=0aa10303b61f">
 </head>
 <body>
 <main class="app">
@@ -902,7 +914,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 
 <script src="config.js?v=523e84644e38"></script>
 
-<script src="load-3d.js?v=ca945b5ace41"></script>
+<script src="load-3d.js?v=52efa7277c39"></script>
 <script>
 
 (function(){
@@ -1047,7 +1059,7 @@ function innerAt(t){
 }
 function setHeight(nh){
   var solid=st.floor>=st.height-0.02;
-  st.height=clamp(nh,HMIN,HMAX);
+  st.height=clamp(nh,st.target?HMIN:1.2,HMAX);
   st.floor=solid?st.height:Math.min(st.floor,st.height);
 }
 function fitV(){
@@ -1194,7 +1206,7 @@ function touchClay(dt){
       if(Math.abs(d-(inside?innerAt(j/(N-1)):st.radii[j]))>1.6)continue;
       var next=previous[j]+0.55*k*((previous[j-1]+previous[j+1])/2-previous[j]);
       if(inside){next=Math.max(previous[j],Math.min(next,innerLimitAt(j/(N-1),MINW)));st.inner[j]=next;}
-      else{next=Math.min(previous[j],Math.max(next,st.inner[j]+MINW));st.radii[j]=next;grooves[j]*=Math.exp(-dt/260);}
+      else{next=Math.min(previous[j],Math.max(next,j*rowH>=st.floor?st.inner[j]+MINW:(st.target?RMIN:.35)));st.radii[j]=next;grooves[j]*=Math.exp(-dt/260);}
       moved+=Math.abs(next-previous[j]);ptr.contact=true;
     }
     // Smoothing only touches the selected surface; never shrink the whole cavity.
@@ -1218,7 +1230,7 @@ function touchClay(dt){
         var travel=row-ptr.shapeLastRow;
         var progress=Math.abs(travel)>.001?clamp((nearestRow-ptr.shapeLastRow)/travel,0,1):1;
         var localRadius=ptr.shapeLastRadius+(surfaceRadius-ptr.shapeLastRadius)*progress;
-        ptr.shapeTargets[j]=clamp(ptr.w0[j]+(localRadius-ptr.w0[j])*weight,j<2?Math.min(2,ptr.w0[j]):RMIN,RMAX);
+        ptr.shapeTargets[j]=clamp(ptr.w0[j]+(localRadius-ptr.w0[j])*weight,j<2?Math.min(2,ptr.w0[j]):(st.target?RMIN:.35),RMAX);
         ptr.shapeWeights[j]=weight;
       }
       var targetRadius=ptr.shapeTargets[j];
@@ -1260,7 +1272,7 @@ function sculptStep(dt,ts){
   var moved=0;
   if(ptr.down&&ptr.decided&&st.stage==="throw"){
     if(ptr.mode==="pull"){
-      var nh=clamp(ptr.h0+(ptr.sy-ptr.y)/SV,HMIN,HMAX);
+      var nh=clamp(ptr.h0+(ptr.sy-ptr.y)/SV,st.target?HMIN:1.2,HMAX);
       moved=Math.abs(nh-st.height)*0.5; setHeight(nh); ptr.contact=moved>0;
     }else{
       moved=touchClay(dt);
@@ -2731,7 +2743,7 @@ function collapse(){
   stressT=0; st.falls=(st.falls||0)+1;
   for(j=0;j<N;j++)avg+=st.radii[j]; avg/=N;
   for(j=0;j<N;j++){st.radii[j]=clamp((st.radii[j]*0.15+avg*0.85)*1.12+(Math.random()-0.5)*0.5,2,RMAX); grooves[j]=1;}
-  st.height=Math.max(HMIN,st.height*0.55); st.floor=solid?st.height:Math.min(st.floor,Math.max(0.6,st.height-0.3));
+  st.height=Math.max(st.target?HMIN:1.2,st.height*0.55); st.floor=solid?st.height:Math.min(st.floor,Math.max(0.6,st.height-0.3));
   for(j=0;j<N;j++){st.inner[j]=Math.max(0.3,Math.min(st.inner[j],st.radii[j]-0.5));}
   wob=0.32; ptr.down=false; ptr.contact=false;
   if(navigator.vibrate){try{navigator.vibrate(60);}catch(_){}}
@@ -3447,7 +3459,7 @@ function start(saved){
     st.radii=saved.radii.slice(); st.height=saved.height||12;
     if(Array.isArray(saved.inner)&&saved.inner.length===N){st.inner=saved.inner.slice(); st.floor=saved.floor||0.8;}
     else{st.inner=st.radii.map(function(r){return Math.max(0.6,r-0.5);}); st.floor=0.8;}
-    st.customC=saved.customC||null; st.glaze=(saved.glaze==="custom"&&!st.customC)?"baekja":(saved.glaze||"baekja"); st.glaze2=saved.glaze2||"cobalt"; st.dip=saved.dip||"";st.dipDepth=typeof saved.dipDepth==="number"?saved.dipDepth:(st.dip==="half"?.5:.2);
+    st.topPaint=saved.topPaint||null; st.customC=saved.customC||null; st.glaze=(saved.glaze==="custom"&&!st.customC)?"baekja":(saved.glaze||"baekja"); st.glaze2=saved.glaze2||"cobalt"; st.dip=saved.dip||"";st.dipDepth=typeof saved.dipDepth==="number"?saved.dipDepth:(st.dip==="half"?.5:.2);
     st.finish=saved.finish||"gloss"; st.fx=saved.fx||"none"; st.kiln=saved.kiln||null; st.fire=FIRE_NAME[saved.fire]?saved.fire:"mid"; st.blind=!!saved.blind; st.touches=saved.touches||0; st.falls=saved.falls||0; st.target=TARGETS[saved.target]?saved.target:""; st.curId=saved.curId||null; st.name=saved.name||""; st.purpose=saved.purpose||""; st.used=saved.used||{};
     st.stage=saved.stage==="fire"?"glaze":(ORDER.indexOf(saved.stage)>=0?saved.stage:"throw");
     loadTex(saved.paint,paint,function(){hasPaint=!!saved.paint; texVer++; dirty=true;});
@@ -3462,7 +3474,7 @@ function start(saved){
 var hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot){
   hot.snapshot(function(){
-    var o={radii:st.radii,inner:st.inner,floor:st.floor,height:st.height,customC:st.customC,kiln:st.kiln,fire:st.fire,blind:st.blind,touches:st.touches,falls:st.falls,target:st.target,curId:st.curId,glaze:st.glaze,glaze2:st.glaze2,dip:st.dip,dipDepth:st.dipDepth,finish:st.finish,fx:st.fx,name:st.name,purpose:st.purpose,stage:st.stage,used:st.used};
+    var o={topPaint:st.topPaint||null,radii:st.radii,inner:st.inner,floor:st.floor,height:st.height,customC:st.customC,kiln:st.kiln,fire:st.fire,blind:st.blind,touches:st.touches,falls:st.falls,target:st.target,curId:st.curId,glaze:st.glaze,glaze2:st.glaze2,dip:st.dip,dipDepth:st.dipDepth,finish:st.finish,fx:st.fx,name:st.name,purpose:st.purpose,stage:st.stage,used:st.used};
     try{if(hasPaint)o.paint=paint.c.toDataURL(); if(hasCarve)o.carve=carve.c.toDataURL();}catch(_){}
     return o;
   });
@@ -3903,6 +3915,66 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  var oldStage=setStage;setStage=function(stage){if(stage!=='done'){objectPan={x:0,y:0};applyObjectSize(1);renderEpoch++;pending=null;readyImage=null;readyItem=null;}oldStage(stage);if(stage==='done'){photoOn=true;displayPhoto=!!readyImage;scenes();syncView();dirty=true;}};
  window.TodakRealPhoto={drawBackground:drawBackground,renderPan:function(){return baseDrawing?{x:CX-CX0,y:BASE-BASE0}:{x:objectPan.x,y:objectPan.y};},viewport:function(){return {x:CX-CX0,y:BASE-BASE0,zoom:Z,width:photoData().viewWidth,height:HC};},moveObject:function(dx,dy){var width=photoData().viewWidth;objectPan.x=clamp(objectPan.x+dx,-width*.4,width*.4);objectPan.y=clamp(objectPan.y+dy,-HC*.4,HC*.4);displayPhoto=false;dirty=true;},objectScale:function(){return photoObjectScale;},open:openPhoto,select:selectView,live:function(){displayPhoto=false;dirty=true;},invalidate:function(){pending=null;readyImage=null;readyItem=null;displayPhoto=false;dirty=true;},snapshot:function(){return snapshot;},render:render};
  el('qualityClose').onclick=function(){el('qualityDlg').close();};
+})();
+
+/* Free wheel throwing: axisymmetric profiles and a separate, planar inner surface. */
+(function(){
+ var top=false,glazeBrush=false,active=null,last=null,history=[],topLayer=mk(768,768),loaded=null,topVersion=0,changed=false;
+ function profile(points,t){for(var i=1;i<points.length;i++)if(t<=points[i][0]){var a=points[i-1],b=points[i],f=(t-a[0])/(b[0]-a[0]);f=f*f*(3-2*f);return a[1]+(b[1]-a[1])*f;}return points[points.length-1][1];}
+ var forms={
+  plate:{name:'접시',h:1.8,floor:.45,p:[[0,3],[.18,3.2],[.4,5.8],[.75,9.5],[1,10.2]]},
+  goblet:{name:'와인잔',h:20,floor:10,p:[[0,3.8],[.08,3.7],[.17,.65],[.46,.55],[.55,2.4],[.72,4.5],[.88,4.9],[1,4.5]]},
+  pedestal:{name:'굽 있는 그릇',h:10,floor:4.4,p:[[0,4.4],[.12,4.3],[.3,1.5],[.43,1.5],[.53,4],[.78,7.2],[1,8.2]]},
+  budvase:{name:'호리병',h:18,floor:1,p:[[0,2.8],[.2,5],[.45,5.6],[.68,2.4],[.85,1.4],[1,1.8]]}
+ };
+ Object.keys(forms).forEach(function(k){var p=forms[k];PRESETS[k]={h:p.h,f:function(t){return profile(p.p,t);}};var b=document.createElement('button');b.type='button';b.className='chip';b.dataset.p=k;b.textContent=p.name;$('presets').appendChild(b);});
+ var oldPreset=applyPreset;applyPreset=function(k){oldPreset(k);if(forms[k]){st.floor=forms[k].floor;st.inner=st.radii.map(function(r,i){return i/(N-1)*st.height<=st.floor?0:Math.max(0,r-.45);});constrainInterior();}top=false;history=[];refresh();};
+ function block(id,parent,html){var e=document.createElement('div');e.id=id;e.className='wheelFreedom';e.innerHTML=html;$(parent).appendChild(e);return e;}
+ block('freeProfile','f-presets','<details><summary>높이·부분 너비 세밀하게 조절</summary><p>조절할 높이를 고른 뒤 그 부분의 너비를 바꿔요. 가는 줄기와 넓은 굽도 만들 수 있어요.</p><label>전체 높이 <output id="freeHeightOut"></output><input id="freeHeight" type="range" min="1.2" max="26" step="0.1"></label><label>조절할 위치 <output id="freeLevelOut">50%</output><input id="freeLevel" type="range" min="0" max="100" value="50"></label><label>부분 너비 <output id="freeWidthOut"></output><input id="freeWidth" type="range" min="0.7" max="27" step="0.1"></label><label>조절 범위 <output id="freeSpanOut">보통</output><input id="freeSpan" type="range" min="2" max="35" value="12"></label><p>깊이는 속·두께 조절에서 바꿔요. 가는 줄기는 속을 파지 않은 흙으로 유지해 주세요.</p></details>');
+ function resetProfile(){if(!st.radii.length)return;$('freeHeight').value=st.height;$('freeHeightOut').textContent=st.height.toFixed(1)+'cm';var t=Number($('freeLevel').value)/100;$('freeWidth').value=rAt(t)*2;$('freeWidthOut').textContent=(rAt(t)*2).toFixed(1)+'cm';}
+ var base=null;
+ function beginProfile(){if(st.target)return;pushHist();base={r:st.radii.slice(),i:st.inner.slice()};}
+ ['freeHeight','freeWidth'].forEach(function(id){$(id).addEventListener('pointerdown',beginProfile);$(id).addEventListener('keydown',function(e){if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown'].indexOf(e.key)>=0)beginProfile();});$(id).addEventListener('change',function(){base=null;});});
+ $('freeHeight').addEventListener('input',function(){if(st.target)return;if(!base)beginProfile();var old=st.height,ratio=Number(this.value)/old;st.floor*=ratio;setHeight(Number(this.value));updateReadout();resetProfile();dirty=true;});
+ $('freeLevel').addEventListener('input',function(){$('freeLevelOut').textContent=this.value+'%';base=null;resetProfile();});
+ $('freeSpan').addEventListener('input',function(){$('freeSpanOut').textContent=this.value<7?'좁게':this.value>22?'넓게':'보통';base=null;});
+ $('freeWidth').addEventListener('input',function(){if(st.target)return;if(!base)beginProfile();var t=Number($('freeLevel').value)/100,span=Number($('freeSpan').value)/100,r=Number(this.value)/2,delta=r-profileAt(base.r,t);for(var i=0;i<N;i++){var y=i/(N-1),d=Math.abs(y-t)/span,w=d<1?(1+Math.cos(Math.PI*d))/2:0;st.radii[i]=clamp(base.r[i]+delta*w,.35,RMAX);st.inner[i]=clamp(base.i[i]+delta*w,0,Math.max(0,st.radii[i]-MINW));if(y*st.height<st.floor)st.inner[i]=0;}constrainInterior();markPreset(null);updateReadout();$('freeWidthOut').textContent=this.value+'cm';dirty=true;});
+ function profileAt(a,t){var v=t*(N-1),i=Math.min(N-2,Math.floor(v));return a[i]+(a[i+1]-a[i])*(v-i);}
+ ['deco','glaze'].forEach(function(stage){block('wheelView-'+stage,'p-'+stage,'<div class="chips"><button type="button" class="chip" id="wheelSide-'+stage+'" aria-pressed="true">側面</button><button type="button" class="chip" id="wheelTop-'+stage+'" aria-pressed="false">위에서 꾸미기</button></div><button type="button" class="ghost" id="topUndo-'+stage+'">안쪽 붓칠 되돌리기</button><p class="wheelViewHint">접시 안쪽은 위에서 직접 그려요. 바깥쪽은 옆면에서 꾸며요.</p>');$('wheelSide-'+stage).textContent='옆면 보기';$('p-'+stage).insertBefore($('wheelView-'+stage),$('p-'+stage).firstChild);$('wheelTop-'+stage).onclick=function(){if(st.height-st.floor<.05){toast('속·두께 조절로 안쪽을 먼저 파 주세요.');return;}top=true;if(stage==='glaze'){glazeBrush=true;$('glazeBrush').checked=true;}refresh();dirty=true;};$('wheelSide-'+stage).onclick=function(){top=false;refresh();dirty=true;};});
+ block('freeGlaze','p-glaze','<label><input type="checkbox" id="glazeBrush"> 붓으로 유약 바르기</label><p>선택한 붓 색으로 자유롭게 칠해요. 옆면과 접시 안쪽을 각각 꾸밀 수 있어요.</p><label>붓 유약 색<select id="glazeBrushColor"></select></label><label>붓 굵기<input type="range" id="glazeBrushSize" min="0.1" max="2" step="0.05" value="0.45"></label><div class="chips"><button class="chip" type="button" id="glazeFree">자유롭게</button><button class="chip" type="button" id="glazeChecks">체크무늬 칸 채우기</button><button class="ghost" type="button" id="wheelUndo">붓칠 되돌리기</button></div><p id="glazePaintHint">체크무늬는 원하는 칸을 누르거나 쓸어서 채워요. 다른 색을 골라 이어서 칠해 보세요.</p>');
+ $('p-glaze').insertBefore($('freeGlaze'),$('wheelView-glaze').nextSibling);
+ GLAZES.filter(function(g){return g.id!=='custom';}).forEach(function(g){var o=document.createElement('option');o.value=g.id;o.textContent=g.n||g.name||g.id;$('glazeBrushColor').appendChild(o);});
+ $('glazeBrushColor').value='cobalt';var checks=false;
+ $('glazeBrush').onchange=function(){glazeBrush=this.checked;if(!glazeBrush)top=false;refresh();};
+ $('glazeFree').onclick=function(){checks=false;refresh();};$('glazeChecks').onclick=function(){checks=true;glazeBrush=true;$('glazeBrush').checked=true;refresh();};
+ function refresh(){['deco','glaze'].forEach(function(s){if(!$('wheelTop-'+s))return;$('wheelTop-'+s).setAttribute('aria-pressed',String(top));$('wheelSide-'+s).setAttribute('aria-pressed',String(!top));});if($('glazeChecks')){$('glazeChecks').setAttribute('aria-pressed',String(checks));$('glazeFree').setAttribute('aria-pressed',String(!checks));}resetProfile();}
+ function loadTop(){if(loaded===st.topPaint)return;loaded=st.topPaint||null;topLayer.x.clearRect(0,0,768,768);if(loaded){var expected=loaded;loadTex(loaded,topLayer,function(){if(st.topPaint===expected){topVersion++;dirty=true;}});}}
+ function commitTop(){st.topPaint=topLayer.c.toDataURL();loaded=st.topPaint;topVersion++;texVer++;dirty=cardDirty=true;}
+ var oldClear=clearDeco;clearDeco=function(){oldClear();st.topPaint=null;loaded=null;topLayer.x.clearRect(0,0,768,768);history=[];topVersion++;};
+ var oldStage=setStage;setStage=function(s){active=null;top=false;glazeBrush=false;if($('glazeBrush'))$('glazeBrush').checked=false;oldStage(s);loadTop();refresh();};
+ var oldFields=itemFields;itemFields=function(it){it=oldFields(it);if(st.topPaint){it.topPaint=st.topPaint;if(it.communityVisual)it.communityVisual.topPaint=st.topPaint;}return it;};
+ var oldData=photoData;photoData=function(){loadTop();var d=oldData();if(st.topPaint){d.topOverlay=topLayer.c;d.topRadius=Math.max.apply(null,st.radii);d.key+='|top:'+topVersion;}return d;};
+ function topLayout(){var unit=W/Math.max(1,stageEl.clientWidth),wide=stageEl.clientWidth>=760,right=wide?Math.min(W*.45,530*unit):0;var available=Math.max(W*.35,W-right),r=Math.min(available*.42,HC*.32),cy=HC*.55;return {x:available/2,y:cy,r:r,cm:Math.max.apply(null,st.radii),opening:innerAt(1)};}
+ function inTop(p){var l=topLayout(),dx=(p.x-l.x)/l.r,dy=(p.y-l.y)/l.r;if(Math.hypot(dx,dy)>l.opening/l.cm)return null;return {x:(dx+1)*384,y:(dy+1)*384};}
+ var oldDraw=draw;draw=function(){if(!top||['deco','glaze'].indexOf(st.stage)<0){oldDraw();return;}loadTop();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,HC);drawScene();ctx.setTransform(dpr,0,0,dpr,0,0);var l=topLayout(),outer=rAt(1)/l.cm*l.r,opening=l.opening/l.cm*l.r;ctx.save();ctx.shadowColor='rgba(0,0,0,.22)';ctx.shadowBlur=20;ctx.shadowOffsetY=10;ctx.beginPath();ctx.arc(l.x,l.y,outer,0,TWO);ctx.fillStyle=css(st.stage==='deco'?RAW:glaze().c);ctx.fill();ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.beginPath();ctx.arc(l.x,l.y,opening,0,TWO);ctx.clip();ctx.fillStyle=css(st.stage==='deco'?mix(RAW,[255,255,255],.2):glaze().c);ctx.fillRect(l.x-l.r,l.y-l.r,2*l.r,2*l.r);ctx.drawImage(topLayer.c,l.x-l.r,l.y-l.r,2*l.r,2*l.r);if(checks&&st.stage==='glaze'&&glazeBrush){ctx.strokeStyle='rgba(90,70,55,.22)';ctx.lineWidth=1;for(var a=-1;a<=1.001;a+=.2){ctx.beginPath();ctx.moveTo(l.x+a*l.r,l.y-l.r);ctx.lineTo(l.x+a*l.r,l.y+l.r);ctx.stroke();ctx.beginPath();ctx.moveTo(l.x-l.r,l.y+a*l.r);ctx.lineTo(l.x+l.r,l.y+a*l.r);ctx.stroke();}}ctx.restore();ctx.fillStyle='#29334e';ctx.font='15px sans-serif';ctx.textAlign='center';ctx.fillText('접시 안쪽 · 위에서 꾸미기',l.x,Math.max(55,l.y-outer-24));};
+ function remember(){history.push({url:st.topPaint||null,top:topLayer.x.getImageData(0,0,768,768),p:paint.x.getImageData(0,0,TW,TH),hp:hasPaint});if(history.length>6)history.shift();}
+ function undoBrush(){var h=history.pop();if(!h)return;topLayer.x.putImageData(h.top,0,0);paint.x.putImageData(h.p,0,0);hasPaint=h.hp;st.topPaint=h.url;loaded=h.url;topVersion++;texVer++;dirty=cardDirty=true;}
+ $('wheelUndo').onclick=undoBrush;$('topUndo-deco').onclick=undoBrush;$('topUndo-glaze').onclick=undoBrush;
+ function brushColor(){return st.stage==='glaze'?byId(GLAZES,$('glazeBrushColor').value).c:pigColor();}
+ var visited={};
+ function paintTop(p,first){var h=inTop(p);if(!h){last=null;return;}var c=topLayer.x,l=topLayout(),size=(st.stage==='glaze'?Number($('glazeBrushSize').value):curSize())/l.cm*384,erase=st.stage==='deco'&&dTool==='erase';c.save();c.globalCompositeOperation=erase?'destination-out':'source-over';c.fillStyle=c.strokeStyle=css(brushColor());c.lineCap=c.lineJoin='round';c.lineWidth=size*2;
+ if(st.stage==='glaze'&&checks){var cell=76.8,col=Math.floor(h.x/cell),row=Math.floor(h.y/cell),key=col+','+row;if(!visited[key]){c.fillRect(col*cell,row*cell,cell+.5,cell+.5);visited[key]=true;}}
+ else if(st.stage==='deco'&&dTool==='stamp'){if(first){c.translate(h.x,h.y);c.scale(size/20,size/20);c.lineWidth=2.6;c.stroke(new Path2D(STAMP_PATHS[dStamp]||STAMP_PATHS.flower));}}
+ else if(st.stage==='deco'&&dRing){var radius=Math.hypot(h.x-384,h.y-384);c.beginPath();c.arc(384,384,radius,0,TWO);c.stroke();}
+ else {c.beginPath();c.moveTo(last?last.x:h.x,last?last.y:h.y);c.lineTo(h.x,h.y);c.stroke();c.beginPath();c.arc(h.x,h.y,size,0,TWO);c.fill();}
+ c.restore();changed=true;last=h;topVersion++;texVer++;dirty=true;}
+ function paintSide(p,first){var hit=hitSurface(p.x,p.y);if(!hit){ptr.last=null;return;}var saved={t:dTool,p:dPig,c:dColor,s:dSizeV.brush,o:dOpacity,r:dRing};dTool='brush';dPig='custom';dColor=brushColor();dOpacity=1;dRing=false;dSizeV.brush=Math.log(Number($('glazeBrushSize').value)/RANGE.brush[0])/Math.log(RANGE.brush[1]/RANGE.brush[0]);if(checks){var col=Math.floor(hit.u*16),row=Math.floor((1-hit.v)*12),key=col+','+row;if(!visited[key]){paint.x.fillStyle=css(dColor);paint.x.fillRect(col*TW/16,row*TH/12,TW/16+.5,TH/12+.5);visited[key]=true;hasPaint=true;texVer++;dirty=true;}}else applyDeco(hit,first||!ptr.last);dTool=saved.t;dPig=saved.p;dColor=saved.c;dSizeV.brush=saved.s;dOpacity=saved.o;dRing=saved.r;}
+ function handles(){return st.stage==='deco'&&top||st.stage==='glaze'&&glazeBrush;}
+ cv.addEventListener('pointerdown',function(e){if(!handles()||e.button>0)return;e.preventDefault();e.stopImmediatePropagation();if(st.stage==='deco'&&(dTool==='carve'||dTool==='move')){toast('윗면은 붓·도장·지우개로 꾸며요. 새김과 회전은 옆면 보기에서 해 주세요.');return;}if(active!==null)return;loadTop();active=e.pointerId;changed=false;last=null;ptr.last=null;visited={};remember();cv.setPointerCapture(e.pointerId);pos(e);var p={x:ptr.x,y:ptr.y};if(top)paintTop(p,true);else paintSide(p,true);},true);
+ cv.addEventListener('pointermove',function(e){if(active!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();pos(e);var p={x:ptr.x,y:ptr.y};if(top)paintTop(p,false);else paintSide(p,false);},true);
+ function end(e){if(active!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();active=null;last=null;ptr.last=null;if(top&&changed)commitTop();else if(top){history.pop();}else {texVer++;dirty=cardDirty=true;}}
+ cv.addEventListener('pointerup',end,true);cv.addEventListener('pointercancel',end,true);cv.addEventListener('lostpointercapture',end,true);
+ window.TodakWheel={forms:forms,top:function(){return top;},layout:topLayout,layer:topLayer,refresh:refresh};
 })();
 
 /* First visit only. Existing pottery mechanics stay unchanged outside the guide. */

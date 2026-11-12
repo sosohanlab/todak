@@ -99,6 +99,17 @@ function rebuild(d){
     var level=1-iy/255,depth=Math.max(0,Math.min(1,(1-level)*d.height/Math.max(.05,d.height-d.floor))),shade=.87-.43*Math.pow(depth,.7),innerColor=d.dipDepth&&iy<256*d.dipDepth?d.dipColor:d.inside;
     ix.fillStyle='rgb('+innerColor.map(function(channel){return Math.round(channel*shade);}).join(',')+')';ix.fillRect(0,iy,64,1);
   }
+  if(d.topOverlay){
+    innerCanvas=canvas(768,768);ix=innerCanvas.getContext('2d');
+    ix.fillStyle='rgb('+d.inside.join(',')+')';ix.fillRect(0,0,768,768);
+    ix.drawImage(d.topOverlay,0,0,768,768);
+  }
+  if(d.topOverlay){
+    inside.onBeforeCompile=function(shader){
+      shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nvarying float todakInnerLevel;').replace('#include <begin_vertex>','#include <begin_vertex>\ntodakInnerLevel = position.y / '+Number(d.height).toFixed(5)+';');
+      shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying float todakInnerLevel;').replace('#include <opaque_fragment>','outgoingLight *= .87 - .43 * pow(clamp((1.0 - todakInnerLevel) * '+Number(d.height/Math.max(.05,d.height-d.floor)).toFixed(5)+', 0.0, 1.0), .7);\n#include <opaque_fragment>');
+    };
+  }
   inside.map=tex(innerCanvas,true);inside.envMap=null;inside.clearcoatRoughness=gloss?.09:.6;inside.roughness=gloss?.28:.86;inside.envMapIntensity=gloss?.42:.24;inside.clearcoat=gloss?.55:.04;
 
   var clay=new T.MeshStandardMaterial({color:0xbda185,roughness:.95,bumpMap:micro,bumpScale:.02});materials.push(outer,inside,clay);
@@ -117,7 +128,10 @@ function rebuild(d){
     points.push(new T.Vector2(0,d.floor));
   }else points.push(new T.Vector2(0,H));
   var geo=new T.LatheGeometry(points,low?128:192),uv=geo.attributes.uv,pos=geo.attributes.position;
-  for(var z=0;z<uv.count;z++)uv.setY(z,Math.max(0,Math.min(1,pos.getY(z)/H)));
+  for(var z=0;z<uv.count;z++){
+    uv.setY(z,Math.max(0,Math.min(1,pos.getY(z)/H)));
+    if(d.topOverlay&&z%points.length>outerEnd){var topR=d.topRadius||d.rAt(1);uv.setXY(z,.5+pos.getX(z)/(2*topR),.5+pos.getZ(z)/(2*topR));}
+  }
   geo.clearGroups();var segs=low?128:192,rows=points.length-1,indices=[[],[],[]],old=geo.index.array;
   for(var s=0;s<segs;s++)for(var row=0;row<rows;row++){
     var material=row<outerStart?2:(row<outerEnd?0:1),offset=(s*rows+row)*6;
