@@ -4205,8 +4205,9 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  var dryingTimer=0,shavings=[],drying=false;
  TOOLS.trim={f:.62,sm:0};
  TIPS.trim='<b>겉면에 도구를 대고 안쪽으로 조금 밀거나, 위아래로 움직여 깎아요.</b> 가만히 대면 그 높이가 한 바퀴씩 깎여요. 안쪽 공간과 바닥 높이는 유지돼요.';
- var toolButton=document.createElement('button');toolButton.type='button';toolButton.className='chip';toolButton.dataset.t='trim';toolButton.setAttribute('aria-pressed','false');toolButton.textContent='깎아 다듬기';$('tools').insertBefore(toolButton,$('undo'));
- var quickButton=document.createElement('button');quickButton.type='button';quickButton.dataset.quick='trim';quickButton.setAttribute('aria-pressed','false');quickButton.textContent='4 깎기';document.querySelector('.quick-tools').insertBefore(quickButton,document.querySelector('.quick-tool-hint'));quickButton.onclick=function(){toolButton.click();};
+ var toolButton=document.createElement('button');toolButton.type='button';toolButton.className='chip';toolButton.dataset.t='trim';toolButton.setAttribute('aria-pressed','false');toolButton.textContent='깎아 다듬기';$('tools').insertBefore(toolButton,document.querySelector('#tools [data-t="sponge"]'));
+ var quickButton=document.createElement('button');quickButton.type='button';quickButton.dataset.quick='trim';quickButton.setAttribute('aria-pressed','false');quickButton.textContent='3 깎기';document.querySelector('.quick-tools').insertBefore(quickButton,document.querySelector('[data-quick="sponge"]'));quickButton.onclick=function(){toolButton.click();};
+ document.querySelector('[data-quick="sponge"]').textContent='4 매끈하게';
  var controls=document.createElement('div');controls.id='trimControls';controls.className='trim-controls';controls.hidden=true;controls.innerHTML='<strong id="trimStatus" role="status" aria-live="polite"></strong><p>젖은 흙을 잠깐 말린 뒤, 겉면·줄기·굽을 정리해요. 다른 도구를 고르면 다시 손으로 빚을 수 있어요.</p><button type="button" class="ghost" id="trimDry">살짝 말리고 깎기</button>';$('toolTip').after(controls);
  function sync(){
   var active=tool==='trim';controls.hidden=!active;
