@@ -525,6 +525,8 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 
 
 
+<link rel="stylesheet" href="shelf-break.css?v=e39e941d2d90">
+<link rel="stylesheet" href="home-layout.css?v=9cef29ad5124">
 </head>
 <body>
 <main class="app">
@@ -2693,7 +2695,7 @@ function renderShelf(){
     [sel.purpose,sel.full,sel.bits,sel.kiln,shelfOrigin(sel),sel.date].forEach(function(t){if(!t)return; var p=document.createElement("p"); p.textContent=t; box.appendChild(p);});
     var act=document.createElement("div"), again=document.createElement("button"), del=document.createElement("button");
     act.className="actions"; again.type=del.type="button"; again.className=del.className="ghost";
-    again.textContent="이 모양으로 다시 빚기"; del.textContent=shelfArm?"정말 치울까요? 한 번 더":"진열장에서 치우기";
+    again.textContent="이 모양으로 다시 빚기"; del.textContent=shelfArm?"한 번 더 눌러 망치 들기":"삭제하기";
     again.addEventListener("click",function(){
       if(!sel.full2)return;
       st.radii=sel.full2.radii.slice(); st.inner=sel.full2.inner.slice(); st.floor=sel.full2.floor; st.height=sel.shape.h;
@@ -2703,10 +2705,10 @@ function renderShelf(){
     });
     del.addEventListener("click",function(){
       if(!shelfArm){shelfArm=true; renderShelf(); return;}
-      store.items=store.items.filter(function(i){return i.id!==sel.id;});
-      if(st.curId===sel.id)st.curId=null;
-      dbDel(sel.id); lsSave(); shelfSel=null; shelfArm=false; renderShelf();
+      if(window.TodakBreakage){TodakBreakage.open(sel);shelfArm=false;renderShelf();}
+      else{toast("망치를 준비하지 못했어요. 작품은 그대로 보관했어요.");}
     });
+    if(shelfArm){var warning=document.createElement('p');warning.className='breakConfirm';warning.setAttribute('role','alert');warning.textContent='정말 이 작품을 깨뜨릴까요? 깨뜨린 작품은 복구할 수 없고 조각은 남아요.';box.appendChild(warning);var cancel=document.createElement('button');cancel.type='button';cancel.className='ghost';cancel.textContent='취소';cancel.onclick=function(){shelfArm=false;renderShelf();};act.appendChild(cancel);}
     act.appendChild(again); act.appendChild(del); box.appendChild(act);
     d.appendChild(im); d.appendChild(box);
   }
@@ -3898,6 +3900,58 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  window.TodakShelfDisplay={refresh:function(){paint();},slots:slots};renderShelf();
 })();
 
+/* Deliberate shelf removal: confirm, swing the rubber mallet, keep the fragments. */
+(function(){
+ var KEY='todak.shards.v1',records=[],dbPromise=null,pending=false,work=null,image=null,fragments=[],hits=0,swing=null,hammer={x:480,y:210,angle:.2},raf=0,epoch=0,loadEpoch=0;
+ var dlg=document.createElement('dialog');dlg.id='breakDlg';dlg.className='breakDlg';dlg.innerHTML='<div class="breakHead"><h2 id="breakTitle">망치로 작품 깨뜨리기</h2><button type="button" class="ghost" id="breakClose">닫기</button></div><p id="breakStatus" role="status" aria-live="polite">망치를 잡아 도자기 쪽으로 휘둘러 보세요.</p><div class="breakScene"><canvas id="breakCanvas" width="640" height="450" aria-label="망치를 끌어 도자기를 깨뜨리는 작업대"></canvas></div><div class="breakActions"><button type="button" class="ghost" id="breakSwing">망치 휘두르기</button><span>마우스·손가락으로 드래그하거나 버튼으로 휘둘러요.</span></div>';
+ document.body.appendChild(dlg);var canvas=$('breakCanvas'),c=canvas.getContext('2d'),mallet=new Image();mallet.src='rubber-mallet.png?v=1077feff2752';
+ var panel=document.createElement('section');panel.id='shelfRubble';panel.hidden=true;panel.innerHTML='<div class="rubbleHead"><b>남겨진 도자기 조각</b><span id="rubbleCount"></span></div><p>깨뜨린 작품의 조각이 이곳에 차곡차곡 남아요.</p><div class="rubbleScroll"><canvas id="rubbleCanvas" width="640" height="150" aria-label="깨뜨린 도자기 조각 더미"></canvas></div>';$('shelfDetail').after(panel);
+ var pile=$('rubbleCanvas'),pc=pile.getContext('2d');
+ function random(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+ function database(){if(dbPromise)return dbPromise;dbPromise=new Promise(function(resolve){if(!window.indexedDB){resolve(null);return;}try{var req=indexedDB.open('todak-fragments',1);req.onupgradeneeded=function(){if(!req.result.objectStoreNames.contains('pieces'))req.result.createObjectStore('pieces',{keyPath:'id'});};req.onsuccess=function(){resolve(req.result);};req.onerror=req.onblocked=function(){resolve(null);};}catch(e){resolve(null);}});return dbPromise;}
+ function localRecords(){try{var r=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(r)?r.filter(function(v){return v&&typeof v.id==='string'&&typeof v.thumb==='string';}):[];}catch(e){return [];}}
+ async function load(){records=localRecords();renderPile();var db=await database();if(!db){if(window.document&&document.getElementById('shelfGrid'))renderShelf();return;}try{var req=db.transaction('pieces').objectStore('pieces').getAll();req.onsuccess=function(){if(!window.document)return;var all={};records.concat(req.result||[]).forEach(function(v){all[v.id]=v;});records=Object.keys(all).map(function(k){return all[k];}).sort(function(a,b){return a.t-b.t;});renderShelf();renderPile();};}catch(e){}}
+ async function persist(record){var db=await database();if(db){try{await new Promise(function(resolve,reject){var tx=db.transaction('pieces','readwrite');tx.objectStore('pieces').put(record);tx.oncomplete=resolve;tx.onerror=tx.onabort=function(){reject(tx.error);};});return true;}catch(e){}}
+  try{var all=records.filter(function(v){return v.id!==record.id;}).concat(record);localStorage.setItem(KEY,JSON.stringify(all));return true;}catch(e){return false;}
+ }
+ function source(im,seed){var r=random(seed),cols=5,rows=5,w=im.width,h=im.height,vertices=[],out=[];for(var y=0;y<=rows;y++){vertices[y]=[];for(var x=0;x<=cols;x++)vertices[y][x]=[x*w/cols+(x&&x<cols?(r()-.5)*w/cols*.55:0),y*h/rows+(y&&y<rows?(r()-.5)*h/rows*.55:0)];}
+  for(var j=0;j<rows;j++)for(var i=0;i<cols;i++){var a=vertices[j][i],b=vertices[j][i+1],d=vertices[j+1][i],e=vertices[j+1][i+1];[[a,b,e],[a,e,d]].forEach(function(poly){var minX=Math.floor(Math.min.apply(null,poly.map(function(v){return v[0];}))),minY=Math.floor(Math.min.apply(null,poly.map(function(v){return v[1];}))),ww=Math.ceil(Math.max.apply(null,poly.map(function(v){return v[0];})))-minX+1,hh=Math.ceil(Math.max.apply(null,poly.map(function(v){return v[1];})))-minY+1,part=document.createElement('canvas');part.width=ww;part.height=hh;var x=part.getContext('2d');x.beginPath();poly.forEach(function(v,k){if(k)x.lineTo(v[0]-minX,v[1]-minY);else x.moveTo(v[0]-minX,v[1]-minY);});x.closePath();x.clip();x.drawImage(im,-minX,-minY);try{var data=x.getImageData(0,0,ww,hh).data,opaque=false;for(var p=3;p<data.length;p+=4)if(data[p]>30){opaque=true;break;}if(!opaque)return;}catch(e){}
+   out.push({c:part,x:minX+ww/2,y:minY+hh/2,w:ww,h:hh,angle:0});});}return out;
+ }
+ function picture(url){return new Promise(function(resolve,reject){var im=new Image();im.onload=function(){resolve(im);};im.onerror=reject;im.src=url;});}
+ async function renderPile(){var token=++loadEpoch,height=Math.max(150,110+records.length*8);pile.width=640;pile.height=height;pc.fillStyle='#e9e1d4';pc.fillRect(0,0,640,height);pc.fillStyle='#c4b5a0';pc.fillRect(0,height-10,640,10);$('shelfRubble').hidden=!records.length;$('rubbleCount').textContent=records.length+'점의 조각';
+  for(var i=0;i<records.length;i++){var rec=records[i];try{var im=await picture(rec.thumb);if(token!==loadEpoch)return;var r=random(rec.seed),parts=source(im,rec.seed);parts.forEach(function(p){var scale=.33+r()*.17,x=35+r()*570,y=height-23-i*8-r()*45;pc.save();pc.translate(x,y);pc.rotate((r()-.5)*Math.PI*2);pc.shadowColor='#38281838';pc.shadowBlur=2;pc.shadowOffsetY=2;pc.drawImage(p.c,-p.w*scale/2,-p.h*scale/2,p.w*scale,p.h*scale);pc.restore();});}catch(e){}}
+  if(dlg.open)draw();
+ }
+ function drawHammer(){c.save();c.translate(hammer.x,hammer.y);c.rotate(hammer.angle);if(mallet.complete&&mallet.naturalWidth){c.drawImage(mallet,-76,-132,152,152);}else{c.fillStyle='#9b683f';c.fillRect(-7,-85,14,95);c.fillStyle='#303236';c.beginPath();c.roundRect(-38,-112,76,36,8);c.fill();}c.restore();}
+ function draw(){c.clearRect(0,0,640,450);var bg=c.createLinearGradient(0,0,0,450);bg.addColorStop(0,'#eee7da');bg.addColorStop(1,'#d8c5a8');c.fillStyle=bg;c.fillRect(0,0,640,450);c.fillStyle='#aa8762';c.fillRect(0,386,640,64);if(records.length)c.drawImage(pile,0,320,640,130);
+  if(work&&image&&hits<3){var sc=Math.min(250/image.width,270/image.height),ww=image.width*sc,hh=image.height*sc;c.drawImage(image,320-ww/2,375-hh,ww,hh);if(hits){c.save();c.beginPath();c.rect(320-ww/2,375-hh,ww,hh);c.clip();c.strokeStyle='#493b3a';c.lineWidth=2;c.beginPath();c.moveTo(315,160);c.lineTo(330,210);c.lineTo(298,246);c.lineTo(337,284);c.lineTo(309,342);if(hits>1){c.moveTo(330,210);c.lineTo(383,233);c.lineTo(356,270);c.moveTo(298,246);c.lineTo(257,273);}c.stroke();c.restore();}}
+  fragments.forEach(function(p){c.save();c.translate(p.x,p.y);c.rotate(p.angle);c.globalAlpha=1;c.shadowColor="#3a2c2566";c.shadowBlur=2;c.shadowOffsetY=2;c.drawImage(p.c,-p.w*p.scale/2,-p.h*p.scale/2,p.w*p.scale,p.h*p.scale);c.restore();});if(work&&hits<3)drawHammer();
+ }
+ async function shardImage(item,im){
+  // Older rendered thumbnails may include a studio background. Break only ceramic.
+  var sample=document.createElement('canvas');sample.width=sample.height=2;var sx=sample.getContext('2d');sx.drawImage(im,0,0,2,2);try{if(sx.getImageData(0,0,1,1).data[3]<240)return item.thumb;}catch(e){return item.thumb;}
+  var out=document.createElement('canvas');out.width=300;out.height=280;var x=out.getContext('2d'),rs=item.full2&&item.full2.radii||item.shape&&item.shape.r||[3,4,4,4],h=item.shape&&item.shape.h||12,max=Math.max.apply(null,rs),scale=Math.min(225/h,225/(2*max)),base=254;
+  x.beginPath();rs.forEach(function(r,i){var yy=base-i/(rs.length-1)*h*scale;if(i)x.lineTo(150+r*scale,yy);else x.moveTo(150+r*scale,yy);});for(var i=rs.length-1;i>=0;i--)x.lineTo(150-rs[i]*scale,base-i/(rs.length-1)*h*scale);x.closePath();x.fillStyle='rgb('+(item.c||[222,215,198]).join(',')+')';x.fill();x.globalCompositeOperation='source-atop';
+  if(item.communityVisual&&item.communityVisual.overlay){try{var overlay=await picture(item.communityVisual.overlay);x.drawImage(overlay,150-max*scale,base-h*scale,2*max*scale,h*scale);}catch(e){}}
+  var shade=x.createLinearGradient(150-max*scale,0,150+max*scale,0);shade.addColorStop(0,'rgba(0,0,0,.24)');shade.addColorStop(.35,'rgba(255,255,255,.12)');shade.addColorStop(.75,'rgba(0,0,0,0)');shade.addColorStop(1,'rgba(0,0,0,.15)');x.fillStyle=shade;x.fillRect(0,0,300,280);return out.toDataURL('image/png');
+ }
+ async function breakWork(){if(pending||!work)return;pending=true;$('breakSwing').disabled=true;$('breakClose').disabled=true;$('breakStatus').textContent='조각을 모으고 있어요…';var item=work,shardThumb=await shardImage(item,image),record={id:item.id,t:Date.now(),thumb:shardThumb,seed:(Date.now()^Math.floor(Math.random()*2147483647))>>>0,name:item.name||item.full||'작품'};var okay=await persist(record);if(!okay){hits=2;pending=false;$('breakSwing').disabled=false;$('breakClose').disabled=false;$('breakStatus').textContent='조각을 저장할 공간이 부족해 작품은 보관했어요. 공간을 확보한 뒤 다시 시도해 주세요.';draw();return;}
+  records.push(record);store.items=store.items.filter(function(it){return it.id!==item.id;});if(st.curId===item.id)st.curId=null;dbDel(item.id);lsSave();shelfSel=null;shelfArm=false;renderShelf();
+  var fragmentImage=await picture(record.thumb),r=random(record.seed),scale=Math.min(250/fragmentImage.width,270/fragmentImage.height),parts=source(fragmentImage,record.seed);fragments=parts.map(function(p){p.x=320+(p.x-fragmentImage.width/2)*scale;p.y=375-fragmentImage.height*scale+p.y*scale;p.scale=scale;p.vx=(r()-.5)*14;p.vy=-4-r()*9;p.spin=(r()-.5)*.25;return p;});
+  var token=epoch,frame=0;function animate(){if(token!==epoch)return;frame++;fragments.forEach(function(p){p.vy+=.55;p.x+=p.vx;p.y+=p.vy;p.angle+=p.spin;if(p.y>411){p.y=411;p.vy=-Math.abs(p.vy)*.25;p.vx*=.7;p.spin*=.7;}p.x=Math.max(20,Math.min(620,p.x));});draw();if(frame<65)raf=requestAnimationFrame(animate);else{renderPile().then(function(){if(token!==epoch)return;fragments=[];draw();pending=false;$('breakClose').disabled=false;$('breakSwing').hidden=true;$('breakStatus').textContent='작품을 깨뜨렸어요. 조각은 '+records.length+'점의 조각 더미에 남겨 두었어요.';});}}animate();
+ }
+ function strike(){if(!work||!image||hits>=3||pending)return;hits++;hammer={x:400,y:350,angle:-1.05};draw();if(hits===3){breakWork();}else{$('breakStatus').textContent='금이 갔어요. '+(3-hits)+'번 더 휘둘러 깨뜨려 보세요.';setTimeout(function(){if(dlg.open&&hits<3){hammer.angle=.2;hammer.x=480;hammer.y=210;draw();}},140);}}
+ function point(e){var b=canvas.getBoundingClientRect();return {x:(e.clientX-b.left)*640/b.width,y:(e.clientY-b.top)*450/b.height};}
+ canvas.addEventListener('pointerdown',function(e){if(!work||pending||hits>=3||e.button>0)return;var p=point(e);swing={id:e.pointerId,start:p,last:p,distance:0,hit:false};canvas.setPointerCapture(e.pointerId);e.preventDefault();});
+ canvas.addEventListener('pointermove',function(e){if(!swing||swing.id!==e.pointerId)return;var p=point(e),a=swing.last;swing.distance+=Math.hypot(p.x-a.x,p.y-a.y);swing.last=p;hammer={x:p.x,y:p.y,angle:Math.atan2(p.y-a.y,p.x-a.x)-1};var dx=p.x-a.x,dy=p.y-a.y,t=Math.max(0,Math.min(1,((320-a.x)*dx+(265-a.y)*dy)/(dx*dx+dy*dy||1)));if(Math.hypot(a.x+dx*t-320,a.y+dy*t-265)<110)swing.hit=true;draw();e.preventDefault();});
+ canvas.addEventListener('pointerup',function(e){if(!swing||swing.id!==e.pointerId)return;var okay=swing.distance>=35&&swing.hit;swing=null;if(okay)strike();else $('breakStatus').textContent='망치를 도자기 쪽으로 크게 휘둘러 주세요.';});canvas.addEventListener('pointercancel',function(){swing=null;});
+ $('breakSwing').onclick=strike;$('breakClose').onclick=function(){if(!pending)dlg.close();};dlg.addEventListener('cancel',function(e){if(pending)e.preventDefault();});dlg.addEventListener('close',function(){epoch++;cancelAnimationFrame(raf);swing=null;work=null;fragments=[];});
+ async function open(item){if(pending)return;epoch++;var token=epoch;work=item;hits=0;image=null;fragments=[];hammer={x:480,y:210,angle:.2};$('breakSwing').hidden=false;$('breakSwing').disabled=true;$('breakClose').disabled=false;$('breakStatus').textContent='망치를 도자기 쪽으로 드래그해 휘두르세요. 세 번 치면 깨져요. 닫으면 작품을 그대로 보관해요.';dlg.showModal();draw();try{var im=await picture(item.thumb);if(token!==epoch)return;image=im;$('breakSwing').disabled=false;draw();}catch(e){$('breakStatus').textContent='작품 사진을 불러오지 못했어요. 작품은 그대로 보관했어요.';}}
+ var oldShelf=renderShelf;renderShelf=function(){var broken={};records.forEach(function(r){broken[r.id]=true;});var removed=store.items.filter(function(it){return broken[it.id];});if(removed.length){store.items=store.items.filter(function(it){return !broken[it.id];});if(st.curId&&broken[st.curId])st.curId=null;removed.forEach(function(it){dbDel(it.id);});lsSave();}return oldShelf.apply(this,arguments);};
+ window.TodakBreakage={open:open,records:function(){return records.slice();},strike:strike,ready:load()};
+})();
+
 (function(){
  var renderEpoch=0,readyImage=null,readyItem=null,displayPhoto=true,pending=null,snapshot=null,photoObjectScale=1,objectPan={x:0,y:0},baseDrawing=false,backgroundView=null;
  function payload(){compose();return {radii:st.radii.slice(),inner:st.inner.map(function(v,i){return Math.min(v,st.radii[i]-.001);}),height:st.height,floor:st.floor,color:glaze().c,glazeId:st.glaze,finish:st.finish,fx:st.fx,overlay:fin.c.toDataURL('image/png'),scene:TodakShop.wallet.background,rotation:rot};}
@@ -3984,6 +4038,9 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  cv.addEventListener('pointerup',end,true);cv.addEventListener('pointercancel',end,true);cv.addEventListener('lostpointercapture',end,true);
  window.TodakWheel={forms:forms,top:function(){return top;},layout:topLayout,layer:topLayer,refresh:refresh};
 })();
+
+/* Home layout only: group the brand above a roomy two-column menu. */
+(function(){var box=document.querySelector('#home .homeBox'),intro=document.createElement('header');intro.className='homeIntro';box.prepend(intro);['.homeMark','.homeEyebrow','.homeTitle','.homeSub'].forEach(function(selector){var e=box.querySelector(selector);if(e)intro.appendChild(e);});})();
 
 /* First visit only. Existing pottery mechanics stay unchanged outside the guide. */
 (function(){
