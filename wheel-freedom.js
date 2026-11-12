@@ -1,26 +1,12 @@
 /* Free wheel throwing: axisymmetric profiles and a separate, planar inner surface. */
 (function(){
  var top=false,glazeBrush=false,active=null,last=null,history=[],topLayer=mk(768,768),loaded=null,topVersion=0,changed=false;
- function profile(points,t){for(var i=1;i<points.length;i++)if(t<=points[i][0]){var a=points[i-1],b=points[i],f=(t-a[0])/(b[0]-a[0]);f=f*f*(3-2*f);return a[1]+(b[1]-a[1])*f;}return points[points.length-1][1];}
- var forms={
-  plate:{name:'접시',h:1.8,floor:.45,p:[[0,3],[.18,3.2],[.4,5.8],[.75,9.5],[1,10.2]]},
-  goblet:{name:'와인잔',h:20,floor:10,p:[[0,3.8],[.08,3.7],[.17,.65],[.46,.55],[.55,2.4],[.72,4.5],[.88,4.9],[1,4.5]]},
-  pedestal:{name:'굽 있는 그릇',h:10,floor:4.4,p:[[0,4.4],[.12,4.3],[.3,1.5],[.43,1.5],[.53,4],[.78,7.2],[1,8.2]]},
-  budvase:{name:'호리병',h:18,floor:1,p:[[0,2.8],[.2,5],[.45,5.6],[.68,2.4],[.85,1.4],[1,1.8]]}
- };
- Object.keys(forms).forEach(function(k){var p=forms[k];PRESETS[k]={h:p.h,f:function(t){return profile(p.p,t);}};var b=document.createElement('button');b.type='button';b.className='chip';b.dataset.p=k;b.textContent=p.name;$('presets').appendChild(b);});
- var oldPreset=applyPreset;applyPreset=function(k){oldPreset(k);if(forms[k]){st.floor=forms[k].floor;st.inner=st.radii.map(function(r,i){return i/(N-1)*st.height<=st.floor?0:Math.max(0,r-.45);});constrainInterior();}top=false;history=[];refresh();};
+ var forms={};
+ // Free throwing always starts with one lump; existing saved profiles remain valid.
+ Array.from($('presets').querySelectorAll('button')).forEach(function(b){if(b.dataset.p!=='lump')b.remove();});
+ $('f-presets').hidden=true;
+ function resetProfile(){}
  function block(id,parent,html){var e=document.createElement('div');e.id=id;e.className='wheelFreedom';e.innerHTML=html;$(parent).appendChild(e);return e;}
- block('freeProfile','f-presets','<details><summary>높이·부분 너비 세밀하게 조절</summary><p>조절할 높이를 고른 뒤 그 부분의 너비를 바꿔요. 가는 줄기와 넓은 굽도 만들 수 있어요.</p><label>전체 높이 <output id="freeHeightOut"></output><input id="freeHeight" type="range" min="1.2" max="26" step="0.1"></label><label>조절할 위치 <output id="freeLevelOut">50%</output><input id="freeLevel" type="range" min="0" max="100" value="50"></label><label>부분 너비 <output id="freeWidthOut"></output><input id="freeWidth" type="range" min="0.7" max="27" step="0.1"></label><label>조절 범위 <output id="freeSpanOut">보통</output><input id="freeSpan" type="range" min="2" max="35" value="12"></label><p>깊이는 속·두께 조절에서 바꿔요. 가는 줄기는 속을 파지 않은 흙으로 유지해 주세요.</p></details>');
- function resetProfile(){if(!st.radii.length)return;$('freeHeight').value=st.height;$('freeHeightOut').textContent=st.height.toFixed(1)+'cm';var t=Number($('freeLevel').value)/100;$('freeWidth').value=rAt(t)*2;$('freeWidthOut').textContent=(rAt(t)*2).toFixed(1)+'cm';}
- var base=null;
- function beginProfile(){if(st.target)return;pushHist();base={r:st.radii.slice(),i:st.inner.slice()};}
- ['freeHeight','freeWidth'].forEach(function(id){$(id).addEventListener('pointerdown',beginProfile);$(id).addEventListener('keydown',function(e){if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown'].indexOf(e.key)>=0)beginProfile();});$(id).addEventListener('change',function(){base=null;});});
- $('freeHeight').addEventListener('input',function(){if(st.target)return;if(!base)beginProfile();var old=st.height,ratio=Number(this.value)/old;st.floor*=ratio;setHeight(Number(this.value));updateReadout();resetProfile();dirty=true;});
- $('freeLevel').addEventListener('input',function(){$('freeLevelOut').textContent=this.value+'%';base=null;resetProfile();});
- $('freeSpan').addEventListener('input',function(){$('freeSpanOut').textContent=this.value<7?'좁게':this.value>22?'넓게':'보통';base=null;});
- $('freeWidth').addEventListener('input',function(){if(st.target)return;if(!base)beginProfile();var t=Number($('freeLevel').value)/100,span=Number($('freeSpan').value)/100,r=Number(this.value)/2,delta=r-profileAt(base.r,t);for(var i=0;i<N;i++){var y=i/(N-1),d=Math.abs(y-t)/span,w=d<1?(1+Math.cos(Math.PI*d))/2:0;st.radii[i]=clamp(base.r[i]+delta*w,.35,RMAX);st.inner[i]=clamp(base.i[i]+delta*w,0,Math.max(0,st.radii[i]-MINW));if(y*st.height<st.floor)st.inner[i]=0;}constrainInterior();markPreset(null);updateReadout();$('freeWidthOut').textContent=this.value+'cm';dirty=true;});
- function profileAt(a,t){var v=t*(N-1),i=Math.min(N-2,Math.floor(v));return a[i]+(a[i+1]-a[i])*(v-i);}
  ['deco','glaze'].forEach(function(stage){block('wheelView-'+stage,'p-'+stage,'<div class="chips"><button type="button" class="chip" id="wheelSide-'+stage+'" aria-pressed="true">側面</button><button type="button" class="chip" id="wheelTop-'+stage+'" aria-pressed="false">위에서 꾸미기</button></div><button type="button" class="ghost" id="topUndo-'+stage+'">안쪽 붓칠 되돌리기</button><p class="wheelViewHint">접시 안쪽은 위에서 직접 그려요. 바깥쪽은 옆면에서 꾸며요.</p>');$('wheelSide-'+stage).textContent='옆면 보기';$('p-'+stage).insertBefore($('wheelView-'+stage),$('p-'+stage).firstChild);$('wheelTop-'+stage).onclick=function(){if(st.height-st.floor<.05){toast('속·두께 조절로 안쪽을 먼저 파 주세요.');return;}top=true;if(stage==='glaze'){glazeBrush=true;$('glazeBrush').checked=true;}refresh();dirty=true;};$('wheelSide-'+stage).onclick=function(){top=false;refresh();dirty=true;};});
  block('freeGlaze','p-glaze','<label><input type="checkbox" id="glazeBrush"> 붓으로 유약 바르기</label><p>선택한 붓 색으로 자유롭게 칠해요. 옆면과 접시 안쪽을 각각 꾸밀 수 있어요.</p><label>붓 유약 색<select id="glazeBrushColor"></select></label><label>붓 굵기<input type="range" id="glazeBrushSize" min="0.1" max="2" step="0.05" value="0.45"></label><div class="chips"><button class="chip" type="button" id="glazeFree">자유롭게</button><button class="chip" type="button" id="glazeChecks">체크무늬 칸 채우기</button><button class="ghost" type="button" id="wheelUndo">붓칠 되돌리기</button></div><p id="glazePaintHint">체크무늬는 원하는 칸을 누르거나 쓸어서 채워요. 다른 색을 골라 이어서 칠해 보세요.</p>');
  $('p-glaze').insertBefore($('freeGlaze'),$('wheelView-glaze').nextSibling);
