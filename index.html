@@ -2768,11 +2768,11 @@ function freeThinCause(){
  }return '';
 }
 function freeThinStep(dt){
- stressNow=0;stressT=0;if(!ptr.contact||!ptr.down){freeThinTime=0;return;}
+ stressNow=0;stressT=0;if(tool==='thick'||!ptr.contact||!ptr.down){freeThinTime=0;return;}
  if(freeThinCause()){freeThinTime+=dt;if(freeThinTime>=120)freeThinFall();}else freeThinTime=0;
 }
 function freeThinFall(){
- if(st.target||st.stage!=='throw'||!freeThinCause())return;
+ if(st.target||st.stage!=='throw'||tool==='thick'||!freeThinCause()){freeThinTime=0;return;}
  collapse();freeThinTime=0;
  for(var j=0;j<N;j++)st.inner[j]=Math.min(st.inner[j],innerLimitAt(j/(N-1),.65));
  toast('두께가 0.5cm 이하가 되어 흙이 무너졌어요. 되돌리기로 복구할 수 있어요.');
