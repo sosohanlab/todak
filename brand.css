@@ -75,5 +75,5 @@
 .stage[data-stage="throw"] .viewDock{display:block}
 .stage .stageViewSwitch{position:static;left:auto;right:auto;top:auto;bottom:auto;transform:none;margin:2px 0 0;width:300px;max-width:100%;height:auto;min-height:44px;box-sizing:border-box;border-radius:10px;padding:3px;box-shadow:none}
 .stage[data-stage="throw"] .stageViewSwitch{display:flex}
-.home-shop{position:absolute;right:max(16px,env(safe-area-inset-right));top:max(16px,env(safe-area-inset-top));width:auto!important;margin:0!important;font:500 12px 'IBM Plex Sans KR',sans-serif;padding:9px 12px;border:1px solid #c8cbc1;border-radius:10px;background:#faf8f2;color:#141e36;z-index:2}
+.home-shop{position:absolute;right:max(16px,env(safe-area-inset-right));top:max(16px,env(safe-area-inset-top));width:auto!important;margin:0!important;font:500 12px 'IBM Plex Sans KR',sans-serif;padding:9px 12px;border:1px solid #c8cbc1;border-radius:10px;background:#fff;color:#141e36;z-index:2}
 @media(max-width:480px){.home-shop{right:12px;top:12px;font-size:11px;padding:8px 10px}}

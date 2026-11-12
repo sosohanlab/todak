@@ -498,14 +498,19 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 <link rel="stylesheet" href="community.css?v=475961f8199a">
 <link rel="stylesheet" href="market.css?v=f96055eea7d1">
 <link rel="stylesheet" href="shop.css?v=2a36d87a785c">
-<link rel="stylesheet" href="brand.css?v=3ce0c86cb5b6">
+<link rel="stylesheet" href="brand.css?v=e6836a19c0e4">
 <link rel="stylesheet" href="studio-theme.css?v=59c2d26c7244">
 <script src="photo-backgrounds.js?v=dfb7ef3d38ad"></script>
 <link rel="stylesheet" href="tutorial.css?v=8cb600446369">
 <link rel="stylesheet" href="shelf-display.css?v=f20566bc0ec0">
 <link rel="stylesheet" href="market.css?v=f96055eea7d1">
 <link rel="stylesheet" href="shop.css?v=2a36d87a785c">
-<link rel="stylesheet" href="brand.css?v=3ce0c86cb5b6">
+<link rel="stylesheet" href="brand.css?v=e6836a19c0e4">
+<link rel="stylesheet" href="tutorial.css?v=8cb600446369">
+<link rel="stylesheet" href="shelf-display.css?v=f20566bc0ec0">
+<link rel="stylesheet" href="market.css?v=f96055eea7d1">
+<link rel="stylesheet" href="shop.css?v=2a36d87a785c">
+<link rel="stylesheet" href="brand.css?v=e6836a19c0e4">
 <link rel="stylesheet" href="tutorial.css?v=8cb600446369">
 <link rel="stylesheet" href="shelf-display.css?v=f20566bc0ec0">
 </head>
@@ -3897,7 +3902,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  var baseFields=itemFields;itemFields=function(it){it=baseFields(it);if(readyImage&&readyItem===st.curId&&st.stage==='done')it.thumb=thumb();return it;};
  var oldStage=setStage;setStage=function(stage){if(stage!=='done'){objectPan={x:0,y:0};applyObjectSize(1);renderEpoch++;pending=null;readyImage=null;readyItem=null;}oldStage(stage);if(stage==='done'){photoOn=true;displayPhoto=!!readyImage;scenes();syncView();dirty=true;}};
  window.TodakRealPhoto={drawBackground:drawBackground,renderPan:function(){return baseDrawing?{x:CX-CX0,y:BASE-BASE0}:{x:objectPan.x,y:objectPan.y};},viewport:function(){return {x:CX-CX0,y:BASE-BASE0,zoom:Z,width:photoData().viewWidth,height:HC};},moveObject:function(dx,dy){var width=photoData().viewWidth;objectPan.x=clamp(objectPan.x+dx,-width*.4,width*.4);objectPan.y=clamp(objectPan.y+dy,-HC*.4,HC*.4);displayPhoto=false;dirty=true;},objectScale:function(){return photoObjectScale;},open:openPhoto,select:selectView,live:function(){displayPhoto=false;dirty=true;},invalidate:function(){pending=null;readyImage=null;readyItem=null;displayPhoto=false;dirty=true;},snapshot:function(){return snapshot;},render:render};
- var quality=document.createElement('button');quality.type='button';quality.className='ghost';quality.id='openQuality';quality.style.margin='8px 0';quality.textContent='완성 사진의 표현 미리보기';quality.onclick=function(){modal('qualityDlg');};el('goMarket').after(quality);el('qualityClose').onclick=function(){el('qualityDlg').close();};
+ el('qualityClose').onclick=function(){el('qualityDlg').close();};
 })();
 
 /* First visit only. Existing pottery mechanics stay unchanged outside the guide. */
