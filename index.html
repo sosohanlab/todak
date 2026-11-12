@@ -1124,7 +1124,7 @@ function touchClay(dt){
       var startX=ptr.sx==null?ptr.x:ptr.sx,startY=ptr.sy==null?ptr.y:ptr.sy;
       var startT=(BASE-startY)/(h*SV),startD=Math.abs(startX-CX)/SV;
       ptr.shapeInvalid=startT<-.05||startT>1.1||startD>rAt(clamp(startT,0,1))+1;
-      ptr.w0=st.radii.slice();ptr.shapeInner=st.inner.slice();ptr.shapeWeights=Array(N).fill(0);ptr.shapeSide=startX<CX?-1:1;ptr.shapeOffset=startD-rAt(clamp(startT,0,1));ptr.shapeLastRow=clamp(startT,0,1)*(N-1);
+      ptr.w0=st.radii.slice();ptr.shapeInner=st.inner.slice();ptr.shapeWeights=Array(N).fill(0);ptr.shapeTargets=st.radii.slice();ptr.shapeSide=startX<CX?-1:1;ptr.shapeOffset=startD-rAt(clamp(startT,0,1));ptr.shapeLastRow=clamp(startT,0,1)*(N-1);ptr.shapeLastRadius=startD-ptr.shapeOffset;
     }
     if(ptr.shapeInvalid)return 0;
     var surfaceRadius=(ptr.x-CX)*ptr.shapeSide/SV-ptr.shapeOffset;
@@ -1133,15 +1133,21 @@ function touchClay(dt){
       dist=(j-nearestRow)*rowH;
       var weight=Math.abs(dist)>F*2.2?0:Math.exp(-dist*dist/(F*F*1.4));
       if(!weight&&!ptr.shapeWeights[j])continue;
-      ptr.shapeWeights[j]=Math.max(ptr.shapeWeights[j],weight);weight=ptr.shapeWeights[j];
-      var targetRadius=clamp(ptr.w0[j]+(surfaceRadius-ptr.w0[j])*weight,j<2?Math.min(2,ptr.w0[j]):RMIN,RMAX);
+      if(weight>=ptr.shapeWeights[j]&&weight>0){
+        var travel=row-ptr.shapeLastRow;
+        var progress=Math.abs(travel)>.001?clamp((nearestRow-ptr.shapeLastRow)/travel,0,1):1;
+        var localRadius=ptr.shapeLastRadius+(surfaceRadius-ptr.shapeLastRadius)*progress;
+        ptr.shapeTargets[j]=clamp(ptr.w0[j]+(localRadius-ptr.w0[j])*weight,j<2?Math.min(2,ptr.w0[j]):RMIN,RMAX);
+        ptr.shapeWeights[j]=weight;
+      }
+      var targetRadius=ptr.shapeTargets[j];
       var before=st.radii[j];st.radii[j]+=(targetRadius-before)*k;
       if(j*rowH>=st.floor&&st.floor<h-.05){st.inner[j]=clamp(ptr.shapeInner[j]+st.radii[j]-ptr.w0[j],.3,Math.max(.3,st.radii[j]-MINW));}
       if(st.inner[j]>st.radii[j]-MINW)st.inner[j]=Math.max(.3,st.radii[j]-MINW);
       delta=Math.abs(st.radii[j]-before);moved+=delta;ptr.maxD=Math.max(ptr.maxD,delta);
       if(delta>.0001){ptr.contact=true;grooves[j]=Math.min(1,grooves[j]+delta*.25);}
     }
-    ptr.shapeLastRow=row;
+    ptr.shapeLastRow=row;ptr.shapeLastRadius=surfaceRadius;
     return moved;
   }
   if(tool==="thick"){

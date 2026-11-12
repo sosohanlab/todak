@@ -61,6 +61,16 @@ q.preset('cup');q.tool('shape');{
  for(let i=0;i<20;i++)q.touch(16);
  for(const t of [.3,.5,.7]){const j=Math.round(t*(q.N-1));assert(Math.abs(q.st.radii[j]-(outer[j0]+1))<.05,'fast upward stroke must stay continuous');}
 }
+// Widening the upper part later in a stroke must not widen the already passed lower part.
+for(const side of [-1,1]){
+ q.preset('cup');q.tool('shape');const v=q.view(),h=q.st.height,outer=q.st.radii.slice(),j0=Math.round(.2*(q.N-1));
+ setGesture(v.CX+side*outer[j0]*v.SV,v.BASE-h*.2*v.SV);
+ for(let step=0;step<=50;step++){q.ptr.y=v.BASE-h*(.2+step/50*.65)*v.SV;for(let f=0;f<4;f++)q.touch(16);}
+ const lower=q.st.radii[Math.round(.25*(q.N-1))],upper=q.st.radii[Math.round(.85*(q.N-1))];
+ q.ptr.x+=side*1.2*v.SV;for(let f=0;f<30;f++)q.touch(16);
+ assert(Math.abs(q.st.radii[Math.round(.25*(q.N-1))]-lower)<.01,'upper widening must preserve lower contour');
+ assert(q.st.radii[Math.round(.85*(q.N-1))]>upper+.9,'upper contour must widen');
+}
 // Holding a wide lower contour and dragging straight upward must also widen the neck.
 for(const side of [-1,1]){
  q.preset('vase');q.tool('shape');const v=q.view(),outer=q.st.radii.slice(),floor=q.st.floor,h=q.st.height,start=.3,j0=Math.round(start*(q.N-1));
