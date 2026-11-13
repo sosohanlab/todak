@@ -526,7 +526,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 
 
 <link rel="stylesheet" href="shelf-break.css?v=992bd7e7a9f6">
-<link rel="stylesheet" href="home-layout.css?v=20261113spacing">
+<link rel="stylesheet" href="home-layout.css?v=20261113zones">
 <link rel="stylesheet" href="trimming.css?v=e60d0b0f0e54">
 </head>
 <body>
@@ -4061,7 +4061,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
 })();
 
 /* Home layout only: group the brand above a roomy two-column menu. */
-(function(){var box=document.querySelector('#home .homeBox'),intro=document.createElement('header');intro.className='homeIntro';box.prepend(intro);['.homeMark','.homeEyebrow','.homeTitle','.homeSub'].forEach(function(selector){var e=box.querySelector(selector);if(e)intro.appendChild(e);});})();
+(function(){var box=document.querySelector('#home .homeBox'),intro=document.createElement('header');intro.className='homeIntro';box.prepend(intro);['.homeMark','.homeEyebrow','.homeTitle','.homeSub'].forEach(function(selector){var e=box.querySelector(selector);if(e)intro.appendChild(e);});var menus=document.createElement('div');menus.className='homeMenus';box.appendChild(menus);['goFree','goChallenge','goShelf','goMarket','homeClose'].forEach(function(id){var e=document.getElementById(id);if(e)menus.appendChild(e);});var bottom=document.createElement('footer');bottom.className='homeBottom';box.appendChild(bottom);Array.from(box.querySelectorAll('.homeFoot')).forEach(function(e){bottom.appendChild(e);});})();
 
 /* First visit only. Existing pottery mechanics stay unchanged outside the guide. */
 (function(){
