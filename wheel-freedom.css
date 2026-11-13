@@ -57,3 +57,7 @@
 #potteryToolRack .rackTool,#potteryToolRack .rackTool svg{overflow:visible!important;clip-path:none!important}
 
 #activeToolCursor{position:fixed;z-index:6;width:32px;height:110px;transform:translate(-6px,-8px) rotate(-32deg);transform-origin:6px 8px;pointer-events:none;filter:drop-shadow(2px 3px 2px #49351d33)}#activeToolCursor[hidden]{display:none!important}#activeToolCursor svg{width:100%;height:100%;fill:none;stroke:#795c3b;stroke-width:1.1;overflow:visible}
+
+/* View and undo actions remain directly below the sheet header. */
+#sheetViewBar{flex:none;padding:8px 12px;border-bottom:1px solid #e1dfd6;background:#faf8f2}#sheetViewBar[hidden],#sheetViewBar [hidden]{display:none!important}#sheetViewBar .wheelFreedom{margin:0}#sheetViewBar .chips{display:flex;gap:6px;flex-wrap:nowrap}#sheetViewBar button{min-height:44px;flex:1;min-width:0;padding:8px 5px;font-size:12px;white-space:nowrap} .sheet:not(.open) #sheetViewBar{display:none}
+@media(max-width:359px){#sheetViewBar{padding:7px 8px}#sheetViewBar button{font-size:11px}}
