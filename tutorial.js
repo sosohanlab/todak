@@ -18,14 +18,16 @@
   {id:'raised',stage:'deco',title:'양각으로 돋운 무늬 만들기',target:'[data-d="carve"]',text:'무늬의 높이에서 양각 · 돋우기를 고르고 도자기에 선을 그려 보세요. 음각은 안으로 파인 홈, 양각은 흙 위로 솟은 선이에요. 밝은 윗면과 아래 그림자로 높이를 확인하세요.'},
   {id:'carveRing',stage:'deco',title:'조각칼로 한 바퀴 띠 새기기',target:'[data-d="carve"]',text:'조각칼에서 한 바퀴 띠를 선택하고 도자기 위를 문질러 보세요. 둘레를 따라 홈이 이어져요.'},
   {id:'rotate',stage:'deco',title:'8. 반대쪽도 보기',target:'#rotR',text:'소리 옆의 좌우 화살표를 눌러 도자기를 돌려 보세요. 반대편에도 꾸밀 수 있어요. 휠이나 두 손가락으로 확대할 수 있고, 소리 버튼에서 작업음을 켤 수 있어요.'},
+  {id:'glazeBase',stage:'glaze',title:'바탕붓 고르기',target:'#rackGlazeBase',text:'도구통에서 납작한 바탕붓을 선택하세요. 바탕붓을 고르면 전체 바탕 색과 표면 설정이 나타나요.'},
   {id:'color',stage:'glaze',title:'9. 유약 색 고르기',target:'#swatches',text:'유약 색을 하나 골라 보세요. 색 더 보기에서 더 많은 색과 직접 고르는 색을 사용할 수 있어요.'},
   {id:'finish',stage:'glaze',title:'10. 유광과 무광 고르기',target:'#finish',text:'반짝이게 또는 보송하게를 직접 골라 보세요. 굽기 전에는 물레 위에서, 완성 후에는 완성 사진에서 확인해요.'},
   {id:'glazeBrush',stage:'glaze',title:'도구통에서 유약 붓 고르기',target:'#rackGlazeBrush',text:'도자기 뒤쪽 도구통에서 붓칠을 눌러 보세요. 도구를 고른 뒤 옆면이나 위에서 꾸미기에서 원하는 부분에 유약을 칠할 수 있어요.'},
   {id:'glazeOpacity',stage:'glaze',title:'유약 투명도 조절하기',target:'#glazeOpacity',text:'유약 불투명도를 움직여 보세요. 낮추면 바탕이 비치고, 높이면 진하게 칠해져요. 붓 유약 색과 굵기도 고를 수 있어요.'},
   {id:'glazePaint',stage:'glaze',title:'직접 유약 칠해보기',target:'#cv',text:'도자기 위에 원하는 선이나 무늬를 직접 칠해 보세요. 옆면과 위에서 꾸미기 모두 사용할 수 있어요. 붓질한 뒤 손을 떼면 담그기 안내로 이어져요. 불투명도가 0%라면 조금 올려 주세요.'},
+  {id:'glazeBaseReturn',stage:'glaze',title:'바탕붓으로 돌아가기',target:'#rackGlazeBase',text:'바탕붓을 다시 선택하면 담가서 덧입히기와 표면 무늬 설정이 나타나요. 붓으로 칠한 무늬는 유지돼요.'},
   {id:'dip',stage:'glaze',title:'11. 담그는 깊이 정하기',target:'#dip',text:'담가서 덧입히기를 열고 입구만 또는 절반까지를 고른 뒤, 담그는 깊이를 움직여 보세요. 덧입힐 색도 고를 수 있어요.'},
   {id:'effect',stage:'glaze',title:'12. 표면 무늬 확인하기',target:'#fx',text:'없음·점박이·잔금 중 원하는 표면을 골라 보세요. 어떤 항목을 골라도 다음 안내로 이어져요.'},
-  {id:'heat',stage:'glaze',title:'13. 불 세기 정하기',target:'#fire',text:'불 세기를 직접 골라 보세요. 약한 불은 안전하고, 센 불은 색 변화나 금이 생길 수 있어요. 고른 뒤 가마로 넘어가요.'},
+  {id:'heat',stage:'fire',title:'13. 불 세기 정하기',target:'#fire',text:'불 세기를 직접 골라 보세요. 약한 불은 안전하고, 센 불은 색 변화나 금이 생길 수 있어요. 고른 뒤 작품을 가마에 넣어 구워요.'},
   {id:'load',stage:'fire',title:'14. 가마에 넣기',target:'#cv',text:'작품을 누르거나 가마 안으로 끌어 넣으세요. 가마가 닫히면 굽기가 시작돼요.'},
   {id:'open',stage:'fire',title:'15. 식힌 뒤 꺼내기',target:'#openKiln',text:'굽기가 끝나면 온도가 내려가는 것을 지켜보세요. 100℃ 이하로 식은 뒤 가마 문 열기를 눌러야 안전해요.'},
   {id:'photo',stage:'done',title:'16. 완성 사진 확인하기',target:'#finishedPhoto',text:'완성 사진을 눌러 보세요. 360° 감상에서는 직접 돌려 안쪽과 바닥도 볼 수 있어요. 물레에서 보기와 전환할 수 있어요. 마우스나 한 손가락으로 끌면 도자기가 이동하고, 좌우 화살표는 도자기를 돌려요.'},
@@ -145,6 +147,8 @@
  var decoBase=applyDeco;applyDeco=function(hit,first){var result=decoBase(hit,first);if(active&&hit){if(dTool==='brush'&&hasPaint&&dOpacity>0)mark(dRing?'brushRing':'brush');if(dTool==='stamp'&&hasPaint&&dOpacity>0)mark('stamp');if(dTool==='carve'&&hasCarve)mark(dRing?'carveRing':dCarveMode==='raised'?'raised':'carve');}return result;};
  var fireBase=fireTick;fireTick=function(){var result=fireBase.apply(this,arguments);if(active&&st.stage==='fire'&&fstep!=='prep')mark('load');return result;};
  var openBase=openKilnNow;openKilnNow=function(){if(active&&current().id==='load'){if(done)advance();else{toast('먼저 작품을 가마에 넣어 주세요.');return;}}if(active&&current().id==='open'){if(fstep!=='ready'||kilnTemp>100){toast('100℃ 이하로 식을 때까지 기다려 주세요.');return;}mark('open');}return openBase.apply(this,arguments);};
+ $('rackGlazeBase').addEventListener('click',function(){if($('rackGlazeBase').getAttribute('aria-pressed')==='true'){mark('glazeBase');mark('glazeBaseReturn');}});
+ var tutorialFireNext=fireNext;fireNext=function(){if(active&&current().id==='heat'){toast('먼저 불 세기를 골라 주세요.');return;}return tutorialFireNext.apply(this,arguments);};
  $('stamps').addEventListener('click',function(e){if(e.target.closest('[data-s]'))mark('stampChoice');});
  function watchText(id){var input=$(id),timer=null,composing=false;
   function queue(){clearTimeout(timer);if(composing||!active||current().id!==id||!input.value.trim())return;timer=setTimeout(function(){if(active&&current().id===id&&input.value.trim()&&!composing)mark(id);},800);}
@@ -172,7 +176,7 @@
  $('viewMenu').addEventListener('toggle',function(){if(active&&current().id==='sound')route();});
  document.addEventListener('scroll',function(){if(active)route();},true);
  window.addEventListener('resize',function(){if(active)route();});
- var helpText={throw:'모양 잡기: 바깥 옆면을 좌우로 끌어요. 속·두께: 오른쪽 안쪽 벽을 조절해요. 매끈하게: 벽을 문질러 굴곡을 다듬어요. 입체/단면 보기로 확인하세요.',deco:'붓·도장·조각칼로 작품 위에 꾸며요. 색·크기·불투명도를 바꿀 수 있어요. 지우개와 되돌리기로 고치고, 좌우 화살표로 돌려 반대편도 꾸미세요.',glaze:'도구통에서 바탕 유약·붓칠를 고르고 유약 색과 불투명도, 유광/무광을 조절해요. 담가서 덧입히기에서 색과 담그는 깊이를 조절하고, 표면 무늬와 불 세기를 정하세요.',fire:'작품을 누르거나 가마로 끌어 넣어요. 굽기가 끝나고 100℃ 이하로 식으면 가마 문을 열어 꺼내세요.',done:'드래그로 도자기 이동, 좌우 화살표로 회전, 휠·두 손가락으로 배경 확대·축소. 도자기 크기와 배경은 따로 조절해요. 카드 저장·공유, 닮은 물건 검색과 비교 카드도 사용할 수 있어요.'};
+ var helpText={throw:'모양 잡기: 바깥 옆면을 좌우로 끌어요. 속·두께: 오른쪽 안쪽 벽을 조절해요. 매끈하게: 벽을 문질러 굴곡을 다듬어요. 입체/단면 보기로 확인하세요.',deco:'붓·도장·조각칼로 작품 위에 꾸며요. 색·크기·불투명도를 바꿀 수 있어요. 지우개와 되돌리기로 고치고, 좌우 화살표로 돌려 반대편도 꾸미세요.',glaze:'도구통에서 바탕 유약·붓칠를 고르고 유약 색과 불투명도, 유광/무광을 조절해요. 바탕붓에서 담그는 깊이와 표면 무늬를 정하세요.',fire:'불 세기를 고른 뒤 작품을 누르거나 가마로 끌어 넣어요. 굽기가 끝나고 100℃ 이하로 식으면 가마 문을 열어 꺼내세요.',done:'드래그로 도자기 이동, 좌우 화살표로 회전, 휠·두 손가락으로 배경 확대·축소. 도자기 크기와 배경은 따로 조절해요. 카드 저장·공유, 닮은 물건 검색과 비교 카드도 사용할 수 있어요.'};
  var helpButton=document.createElement('button');helpButton.type='button';helpButton.id='stageHelpButton';helpButton.className='ghost';helpButton.textContent='도움말';helpButton.setAttribute('aria-expanded','false');helpButton.setAttribute('aria-controls','stageBriefHelp');$('sheetTitle').after(helpButton);
  var helpBox=document.createElement('aside');helpBox.id='stageBriefHelp';helpBox.hidden=true;helpBox.innerHTML='<b id="stageBriefTitle"></b><p id="stageBriefText"></p><button type="button" class="ghost" id="stageHelpClose">닫기</button>';$('sheetBody').prepend(helpBox);
  function closeHelp(){helpBox.hidden=true;helpButton.setAttribute('aria-expanded','false');}

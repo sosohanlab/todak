@@ -119,11 +119,11 @@ function rebuild(d){
   }
   inside.map=tex(innerCanvas,true);inside.envMap=gloss?glossEnvironment.texture:null;inside.clearcoatRoughness=gloss?.09:.6;inside.roughness=gloss?.23:.86;inside.envMapIntensity=gloss?.65:.24;inside.clearcoat=gloss?.85:.04;
 
-  var underside=outer.clone();underside.map=null;underside.color.setRGB(d.color[0]/255,d.color[1]/255,d.color[2]/255,T.SRGBColorSpace);materials.push(outer,inside,underside);
+  var underside=outer.clone();underside.map=null;underside.color.setRGB(d.color[0]/255,d.color[1]/255,d.color[2]/255,T.SRGBColorSpace);if(d.bottomOverlay){var bc=canvas(768,768),bx=bc.getContext('2d');bx.fillStyle='rgb('+d.color.join(',')+')';bx.fillRect(0,0,768,768);bx.globalAlpha=d.bottomOpacity==null?.8:d.bottomOpacity;bx.drawImage(d.bottomOverlay,0,0,768,768);underside.map=tex(bc,true);underside.color.setHex(0xffffff);}materials.push(outer,inside,underside);
   var carving=!!d.carve,n=carving?(low?224:320):128,H=d.height,ro=d.rAt(1),ri=d.innerAt(1),hollow=H-d.floor>.05;
   // Tiny rounded edges avoid a grazing, razor-sharp material seam at rim and foot.
   var footBevel=Math.min(.045,H*.004,d.rAt(0)*.02),rimBevel=d.profileRounded?.001:hollow?Math.max(.001,Math.min(.045+(d.rimSoftness||0)*.16,(ro-ri)*.45,H*.018)):.02;
-  var points=[new T.Vector2(0,0),new T.Vector2(Math.max(0,d.rAt(0)-footBevel),0)],outerStart=1;
+  var points=[new T.Vector2(0,0)],baseR=Math.max(0,d.rAt(0)-footBevel),baseRows=d.bottomCarve?(low?80:128):1;for(var br=1;br<=baseRows;br++)points.push(new T.Vector2(baseR*br/baseRows,0));var outerStart=points.length-1;
   points.push(new T.Vector2(d.rAt(0)-footBevel*.25,footBevel*.25));
   points.push(new T.Vector2(d.rAt(footBevel/H),footBevel));
   for(var a=1;a<n;a++){var outerY=H*a/n;if(outerY>footBevel&&outerY<H-rimBevel)points.push(new T.Vector2(d.rAt(a/n),outerY));}
@@ -137,6 +137,7 @@ function rebuild(d){
   var geo=new T.LatheGeometry(points,carving?(low?320:512):(low?160:256)),uv=geo.attributes.uv,pos=geo.attributes.position;
   for(var z=0;z<uv.count;z++){
     uv.setY(z,Math.max(0,Math.min(1,pos.getY(z)/H)));
+    if((d.bottomOverlay||d.bottomCarve)&&z%points.length<=outerStart)uv.setXY(z,.5+pos.getX(z)/(2*d.rAt(0)),.5-pos.getZ(z)/(2*d.rAt(0)));
     if(d.topOverlay&&z%points.length>outerEnd){var topR=d.topRadius||d.rAt(1);uv.setXY(z,.5+pos.getX(z)/(2*topR),.5+pos.getZ(z)/(2*topR));}
   }
   geo.clearGroups();var segs=carving?(low?320:512):(low?160:256),rows=points.length-1,indices=[[],[],[]],old=geo.index.array;
@@ -165,6 +166,7 @@ function rebuild(d){
     // The first and last angular columns coincide; keep their normals identical.
     var normals=geo.attributes.normal;for(var row=0;row<points.length;row++){var first=row,last=segs*points.length+row,nx=normals.getX(first)+normals.getX(last),ny=normals.getY(first)+normals.getY(last),nz=normals.getZ(first)+normals.getZ(last),len=Math.hypot(nx,ny,nz)||1;normals.setXYZ(first,nx/len,ny/len,nz/len);normals.setXYZ(last,nx/len,ny/len,nz/len);}normals.needsUpdate=true;geo.computeBoundingSphere();
   }
+  if(d.bottomCarve){var bm=canvas(768,768),bmx=bm.getContext('2d');bmx.drawImage(d.bottomCarve,0,0,768,768);var bd=bmx.getImageData(0,0,768,768).data;for(var bv=0;bv<pos.count;bv++){if(bv%points.length>outerStart)continue;var bx=Math.max(0,Math.min(767,Math.round(uv.getX(bv)*767))),by=Math.max(0,Math.min(767,Math.round((1-uv.getY(bv))*767))),bi=(by*768+bx)*4,amount=(bd[bi]>127?-1:1)*bd[bi+3]/255,rad=Math.hypot(pos.getX(bv),pos.getZ(bv)),fade=Math.max(0,Math.min(1,(baseR-rad)/Math.max(.03,baseR*.04)));pos.setY(bv,amount*Math.min(.10,Math.max(.01,d.floor*.25))*fade);}pos.needsUpdate=true;geo.computeVertexNormals();geo.computeBoundingSphere();}
   var mesh=new T.Mesh(geo,materials);mesh.castShadow=true;mesh.receiveShadow=false;mesh.userData.incision=incisionStats;pot.add(mesh);
   var contact=scene.getObjectByName('contact'),r=d.rAt(0);contact.scale.set(r*2.8,r*2.8,1);
 }

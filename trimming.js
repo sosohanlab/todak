@@ -30,15 +30,15 @@
  var previousStage=setStage;setStage=function(s){if(s!=='throw')cancel();previousStage(s);sync();};
  function trim(dt){
   ptr.contact=false;ptr.maxD=0;if(!st.trimReady||drying)return 0;
-  var t=(BASE-ptr.y)/(st.height*SV),rowH=st.height/(N-1);if(t<.005||t>1.01)return 0;
+  var t=clayLevel(ptr.x,ptr.y),rowH=st.height/(N-1);if(t<-.005||t>1.01)return 0;
   if(ptr.trimLastStartX!==ptr.sx||ptr.trimLastStartY!==ptr.sy||ptr.w0==null){
-    var startT=clamp((BASE-ptr.sy)/(st.height*SV),0,1),startD=Math.abs(ptr.sx-CX)/SV;
-    ptr.w0=st.radii.slice();ptr.trimLastRow=startT*(N-1);ptr.trimRemoved=0;ptr.trimLastStartX=ptr.sx;ptr.trimLastStartY=ptr.sy;ptr.trimInvalid=Math.abs(startD-rAt(startT))>Math.max(.65,15/SV);ptr.trimSide=ptr.sx<CX?-1:1;
+    var startT=clamp(clayLevel(ptr.sx,ptr.sy),0,1),startD=Math.abs(ptr.sx-CX)/SV;
+    ptr.w0=st.radii.slice();ptr.trimLastRow=startT*(N-1);ptr.trimRemoved=0;ptr.trimLastStartX=ptr.sx;ptr.trimLastStartY=ptr.sy;ptr.trimInvalid=!hitSurface(ptr.sx,ptr.sy)&&Math.abs(startD-rAt(startT))>Math.max(.65,15/SV);ptr.trimOffset=startD-rAt(startT);ptr.trimSide=ptr.sx<CX?-1:1;
   }
   if(ptr.trimInvalid)return 0;
-  var toolRadius=(ptr.x-CX)*ptr.trimSide/SV,surface=rAt(clamp(t,0,1));if(toolRadius>surface+.65||toolRadius<-.1)return 0;
+  var toolRadius=(ptr.x-CX)*ptr.trimSide/SV-(ptr.trimOffset||0),surface=rAt(clamp(t,0,1));if(toolRadius>surface+.65||toolRadius<-.1)return 0;
   var blade=Math.max(.10,toolRadius),width=Math.max(TOOLS.trim.f,rowH*.85),speed=1-Math.exp(-Math.min(dt,80)/40),moved=0,blocked=false,removed=0,row=clamp(t,0,1)*(N-1),lastRow=ptr.trimLastRow==null?row:ptr.trimLastRow;
-  for(var j=1;j<N;j++){
+  for(var j=0;j<N;j++){
     var y=j*rowH,nearest=clamp(j,Math.min(row,lastRow),Math.max(row,lastRow)),dist=Math.abs(j-nearest)*rowH;if(dist>width)continue;
     // A narrow, nearly flat blade leaves a defined groove, not a broad finger-shaped dent.
     var weight=Math.pow(Math.max(0,1-dist/width),.35),before=st.radii[j],minimum=.10;

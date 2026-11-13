@@ -108,3 +108,11 @@
 
 #potteryToolRack .rackTool[data-slot="stamp"] .toolPhoto{transform-origin:50% 50%}
 #potteryToolRack [data-slot="glaze"]{--lean:0deg}
+
+/* Each glaze tool owns one panel; utility controls remain available without a tool. */
+#glazeBaseSettings[hidden],#freeGlaze[hidden],#fireSettings[hidden],#freeGlaze label[hidden],#glazePaintHint[hidden]{display:none!important}
+#glazeBrushPalette{margin:16px 0}#glazeBrushPalette .swatch{display:grid;gap:3px;margin:0;font-size:12.5px}
+.stage>#openKiln{right:auto;bottom:auto;width:max-content;height:auto;max-width:calc(100% - 24px);color:#fff;background:#1f3fa8;border-color:#1f3fa8}
+.stage>#openKiln:hover,.stage>#openKiln:focus-visible{color:#fff;background:#17307f}
+body:has(#home:not([hidden])) #potteryToolRack,body:has(#home:not([hidden])) #rackToolName,body:has(#home:not([hidden])) #activeToolCursor,body:has(#chSel:not([hidden])) #potteryToolRack,body:has(#chSel:not([hidden])) #rackToolName{display:none!important}
+@media(max-width:400px){#sheetViewBar .chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible}#sheetViewBar [id^="topUndo-"]{grid-column:1/-1}}
