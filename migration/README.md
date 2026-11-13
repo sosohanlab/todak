@@ -4,11 +4,12 @@ New site: https://todak.sosohanlab.com/
 Old storage origin: https://sosohanlab.github.io
 Required bridge: https://sosohanlab.github.io/todak-transfer/
 
-## Deployment dependency (not yet completed)
+## Deployment
 
 The `todak` project now has a CNAME. GitHub redirects its old project URL to the
 custom domain, so a bridge inside `/todak/` cannot read the old origin's storage.
-Create public repository **sosohanlab/todak-transfer**, initialize its main branch,
+The bridge repository **sosohanlab/todak-transfer** is now created and published.
+To recreate it, initialize its main branch,
 and publish **migration/index.html** from this repository as its root **index.html**.
 Enable GitHub Pages: Deploy from a branch → main → /(root).
 Do **not** set a custom domain or add CNAME in that bridge repository.

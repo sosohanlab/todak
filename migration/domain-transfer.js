@@ -8,7 +8,7 @@
   entry.hidden = true; // Reveal only after the old-origin bridge is deployed and responds.
   entry.type = 'button'; entry.className = 'ghost'; entry.textContent = '이전 주소 작품 가져오기';
   entry.style.cssText = 'grid-column:1/-1;justify-self:center;margin:8px 0;';
-  home.insertBefore(entry, home.querySelector('.homeFoot'));
+  (home.querySelector('.homeMenus') || home).appendChild(entry);
   const dialog = document.createElement('dialog');
   dialog.style.cssText = 'max-width:440px;width:calc(100% - 48px);border:1px solid #d6d2c9;border-radius:18px;padding:24px;background:#faf8f2;color:#23304a;';
   dialog.innerHTML = '<h2>기존 작품 가져오기</h2><p>이전에 작품을 만든 기기와 브라우저에서 한 번만 가져오면 돼요. 새 주소에서 만든 작품도 함께 보관해요.</p><p role="status" aria-live="polite"></p><button type="button" data-open class="primary">기존 진열장 연결하기</button><p><label>백업 파일로 가져오기 <input type="file" accept=".json,application/json"></label></p><button type="button" data-close class="ghost">닫기</button>';

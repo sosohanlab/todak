@@ -17,6 +17,7 @@ test('actual bridge and destination UI transfer via validated messages, retainin
    o.postMessage=(data,target)=>{assert.equal(target,o.location.origin);queueMicrotask(()=>o.dispatchEvent(new o.MessageEvent('message',{origin:w.location.origin,source:w,data}))); };
    o.eval(o.document.scripts[1].textContent);return o;
   };
+  w.eval(fs.readFileSync('home-layout.js','utf8'));
   w.eval(ui);const entry=w.document.querySelector('.homeBox button'),probe=w.document.querySelector('iframe');assert.equal(entry.hidden,true);
   w.dispatchEvent(new w.MessageEvent('message',{origin:'https://evil.example',source:probe.contentWindow,data:{type:'todak-bridge-ready'}}));assert.equal(entry.hidden,true);
   w.dispatchEvent(new w.MessageEvent('message',{origin:'https://sosohanlab.github.io',source:probe.contentWindow,data:{type:'todak-bridge-ready'}}));assert.equal(entry.hidden,false);
