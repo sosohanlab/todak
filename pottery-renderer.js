@@ -175,6 +175,7 @@ function configure(d,width,height){
   // Off-axis viewing made a centered, upright rim appear slanted beside the tool panel.
   camera.setViewOffset(W,HC,W/2-d.cx,0,W,HC);
   camera.up.set(0,1,0);camera.position.set(0,aim+distance*pitch,distance*cos);camera.lookAt(0,aim,0);camera.updateProjectionMatrix();
+  if(d.inspection){aim=d.height*.5;camera.setViewOffset(W,HC,0,0,W,HC);camera.position.set(0,aim+distance*pitch,distance*cos);camera.lookAt(0,aim,0);camera.updateProjectionMatrix();}
   pot.rotation.set(0,-d.rotation,0);
   var backdrop=window.TodakBackdrop(d.color,d.background);scene.background=new T.Color().setRGB(backdrop.rgb[0]/255,backdrop.rgb[1]/255,backdrop.rgb[2]/255,T.SRGBColorSpace);floor.material.color.copy(scene.background);
   var map=d.background==='warm'?woodTexture:null;if(floor.material.map!==map){floor.material.map=map;floor.material.needsUpdate=true;}if(map)floor.material.color.setRGB(backdrop.woodTint,backdrop.woodTint,backdrop.woodTint);
@@ -189,7 +190,7 @@ function configure(d,width,height){
   if(d.transparent){scene.background=null;renderer.setClearColor(0x000000,0);}
   var photoBG=!d.transparent&&window.TodakBackgrounds&&TodakBackgrounds.ready(d.background);
   if(photoBG){scene.background=null;renderer.setClearColor(0,0);floor.visible=false;cyclorama.visible=false;room.visible=false;}
-  renderer.setSize(width,height,false);renderer.render(scene,camera);
+  renderer.setSize(width,height,false);var activeCamera=camera;if(d.overhead){var rr=d.topRadius||0;for(var ri=0;ri<=64;ri++)rr=Math.max(rr,d.rAt(ri/64));activeCamera=new T.OrthographicCamera(-rr,rr,rr,-rr,.01,1000);activeCamera.up.set(0,0,-1);activeCamera.position.set(0,d.height+100,0);activeCamera.lookAt(0,0,0);}renderer.render(scene,activeCamera);
 }
 window.TodakPhoto={available:true,render:function(d){if(!init()||lost)return null;try{if(signature!==d.key){rebuild(d);signature=d.key;}configure(d,d.pixelWidth,d.pixelHeight);if(!d.transparent&&window.TodakBackgrounds&&TodakBackgrounds.ready(d.background)){var out=canvas(renderer.domElement.width,renderer.domElement.height),cx=out.getContext('2d');if(window.TodakRealPhoto&&TodakRealPhoto.drawBackground)TodakRealPhoto.drawBackground(cx,out.width,out.height,d.background,d.backgroundZoom,d.backgroundPanX,d.backgroundPanY);else TodakBackgrounds.draw(cx,out.width,out.height,d.background);cx.drawImage(renderer.domElement,0,0);return out;}return renderer.domElement;}catch(e){console.warn('토닥 렌더링 오류',e);return null;}},export:function(d,size,aspect){if(!init())return null;var r=0;for(var i=0;i<=64;i++)r=Math.max(r,d.rAt(i/64));var ratio=aspect||1,w=Math.round(size*Math.min(1,ratio)),h=Math.round(size/Math.max(1,ratio)),sc=Math.min(h/(d.height*1.5),w/(r*2.8));return this.render(Object.assign({},d,{viewWidth:w,viewHeight:h,zoom:1,panX:0,panY:0,width:w,canvasHeight:h,pixelWidth:w,pixelHeight:h,scale:sc,cx:w/2,base:h/2+d.height*.45*sc,rotation:d.rotation}));}};
 /* Break the actual lathed shell; outer glaze UVs and inner wall stay on each shard. */

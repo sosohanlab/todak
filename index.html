@@ -518,7 +518,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 
 
 
-<link rel="stylesheet" href="wheel-freedom.css?v=20261113top2">
+<link rel="stylesheet" href="wheel-freedom.css?v=tools-20261113">
 
 
 
@@ -3985,18 +3985,19 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
 
 /* Free wheel throwing: axisymmetric profiles and a separate, planar inner surface. */
 (function(){
- var top=false,glazeBrush=false,active=null,last=null,history=[],topLayer=mk(768,768),loaded=null,topVersion=0,changed=false;
+ var top=false,glazeBrush=false,active=null,last=null,history=[],topLayer=mk(768,768),strokeBase=mk(768,768),strokeInk=mk(768,768),loaded=null,topVersion=0,changed=false;
  var forms={};
  // Free throwing always starts with one lump; existing saved profiles remain valid.
  Array.from($('presets').querySelectorAll('button')).forEach(function(b){if(b.dataset.p!=='lump')b.remove();});
  $('f-presets').hidden=true;
  function resetProfile(){}
  function block(id,parent,html){var e=document.createElement('div');e.id=id;e.className='wheelFreedom';e.innerHTML=html;$(parent).appendChild(e);return e;}
- ['deco','glaze'].forEach(function(stage){block('wheelView-'+stage,'p-'+stage,'<div class="chips"><button type="button" class="chip" id="wheelSide-'+stage+'" aria-pressed="true">側面</button><button type="button" class="chip" id="wheelTop-'+stage+'" aria-pressed="false">위에서 꾸미기</button><button type="button" class="ghost" id="topUndo-'+stage+'">안쪽 붓칠 되돌리기</button></div><p class="wheelViewHint">만든 도자기의 입구와 안쪽을 위에서 꾸며요. 바깥쪽은 옆면에서 꾸며요.</p>');$('wheelSide-'+stage).textContent='옆면 보기';$('p-'+stage).insertBefore($('wheelView-'+stage),$('p-'+stage).firstChild);$('wheelTop-'+stage).onclick=function(){if(st.height-st.floor<.05){toast('속·두께 조절로 안쪽을 먼저 파 주세요.');return;}top=true;if(stage==='glaze'){glazeBrush=true;$('glazeBrush').checked=true;}refresh();dirty=true;};$('wheelSide-'+stage).onclick=function(){top=false;refresh();dirty=true;};});
- block('freeGlaze','p-glaze','<label><input type="checkbox" id="glazeBrush"> 붓으로 유약 바르기</label><p>선택한 붓 색으로 자유롭게 칠해요. 옆면과 접시 안쪽을 각각 꾸밀 수 있어요.</p><label>붓 유약 색<select id="glazeBrushColor"></select></label><label>붓 굵기<input type="range" id="glazeBrushSize" min="0.1" max="2" step="0.05" value="0.45"></label><div class="chips"><button class="chip" type="button" id="glazeFree">자유롭게</button><button class="chip" type="button" id="glazeChecks">체크무늬 칸 채우기</button><button class="ghost" type="button" id="wheelUndo">붓칠 되돌리기</button></div><p id="glazePaintHint">체크무늬는 원하는 칸을 누르거나 쓸어서 채워요. 다른 색을 골라 이어서 칠해 보세요.</p>');
+ ['deco','glaze'].forEach(function(stage){block('wheelView-'+stage,'p-'+stage,'<div class="chips"><button type="button" class="chip" id="wheelSide-'+stage+'" aria-pressed="true">側面</button><button type="button" class="chip" id="wheelTop-'+stage+'" aria-pressed="false">위에서 꾸미기</button><button type="button" class="ghost" id="topUndo-'+stage+'">되돌리기</button></div><p class="wheelViewHint">만든 도자기의 입구와 안쪽을 위에서 꾸며요. 바깥쪽은 옆면에서 꾸며요.</p>');$('wheelSide-'+stage).textContent='옆면 보기';$('p-'+stage).insertBefore($('wheelView-'+stage),$('p-'+stage).firstChild);$('wheelTop-'+stage).onclick=function(){if(st.height-st.floor<.05){toast('속·두께 조절로 안쪽을 먼저 파 주세요.');return;}top=true;refresh();dirty=true;};$('wheelSide-'+stage).onclick=function(){top=false;refresh();dirty=true;};});
+ block('freeGlaze','p-glaze','<label><input type="checkbox" id="glazeBrush"> 붓으로 유약 바르기</label><p>선택한 붓 색으로 자유롭게 칠해요. 옆면과 접시 안쪽을 각각 꾸밀 수 있어요.</p><label>붓 유약 색<select id="glazeBrushColor"></select></label><label>유약 불투명도 <output id="glazeOpacityValue">100%</output><input id="glazeOpacity" type="range" min="0" max="100" step="1" value="100"></label><label>붓 굵기<input type="range" id="glazeBrushSize" min="0.1" max="2" step="0.05" value="0.45"></label><div class="chips"><button class="chip" type="button" id="glazeFree">자유롭게</button><button class="chip" type="button" id="glazeChecks">체크무늬 칸 채우기</button><button class="ghost" type="button" id="wheelUndo">되돌리기</button></div><p id="glazePaintHint">체크무늬는 원하는 칸을 누르거나 쓸어서 채워요. 다른 색을 골라 이어서 칠해 보세요.</p>');
  $('p-glaze').insertBefore($('freeGlaze'),$('wheelView-glaze').nextSibling);
  GLAZES.filter(function(g){return g.id!=='custom';}).forEach(function(g){var o=document.createElement('option');o.value=g.id;o.textContent=g.n||g.name||g.id;$('glazeBrushColor').appendChild(o);});
  $('glazeBrushColor').value='cobalt';var checks=false;
+ $('glazeOpacity').oninput=function(){$('glazeOpacityValue').textContent=this.value+'%';};
  $('glazeBrush').onchange=function(){glazeBrush=this.checked;if(!glazeBrush)top=false;refresh();};
  $('glazeFree').onclick=function(){checks=false;refresh();};$('glazeChecks').onclick=function(){checks=true;glazeBrush=true;$('glazeBrush').checked=true;refresh();};
  function refresh(){['deco','glaze'].forEach(function(s){if(!$('wheelTop-'+s))return;$('wheelTop-'+s).setAttribute('aria-pressed',String(top));$('wheelSide-'+s).setAttribute('aria-pressed',String(!top));});if($('glazeChecks')){$('glazeChecks').setAttribute('aria-pressed',String(checks));$('glazeFree').setAttribute('aria-pressed',String(!checks));}resetProfile();}
@@ -4018,26 +4019,34 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  }
  function inTop(p){var l=topLayout(),dx=(p.x-l.x)/l.r,dy=(p.y-l.y)/l.r,r=Math.hypot(dx,dy),rows=topSurface(l),hit=rows[Math.min(rows.length-1,Math.floor(r*rows.length))];if(r>1||!hit||!hit.inside)return null;return {x:(dx+1)*384,y:(dy+1)*384};}
  var oldDraw=draw;draw=function(){if(!top||['deco','glaze'].indexOf(st.stage)<0){oldDraw();return;}loadTop();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,HC);drawScene();ctx.setTransform(dpr,0,0,dpr,0,0);var l=topLayout(),rows=topSurface(l),base=st.stage==='deco'?RAW:glaze().c;ctx.save();
+  var materialTop=false;
+  if(st.stage==='glaze'){
+   if(!window.TodakPhoto&&window.TodakLoad3D&&!window.todakTopLoading){window.todakTopLoading=true;TodakLoad3D().then(function(){dirty=true;}).catch(function(){});}
+   if(window.TodakPhoto&&TodakPhoto.available){var data=photoData(),edge=Math.max(1,Math.round(l.r*2));data=Object.assign({},data,{key:data.key+'|overhead',overhead:true,transparent:true,width:edge,canvasHeight:edge,viewWidth:edge,viewHeight:edge,pixelWidth:edge*dpr,pixelHeight:edge*dpr,rotation:0});var rendered=TodakPhoto.render(data);if(rendered){ctx.drawImage(rendered,l.x-l.r,l.y-l.r,l.r*2,l.r*2);materialTop=true;}}
+  }
+  if(!materialTop){
   // Every ring uses the height of the surface visible along the viewing ray.
   for(var i=rows.length-1;i>=0;i--){var hit=rows[i];if(!hit)continue;var outer=(i+1)/rows.length*l.r,inner=i/rows.length*l.r,depth=(st.height-hit.y)/Math.max(.1,st.height-st.floor),shade=hit.inside?.60+.37*(1-depth):.74+.25*hit.y/st.height;
    ctx.beginPath();ctx.arc(l.x,l.y,outer,0,TWO);ctx.arc(l.x,l.y,inner,0,TWO,true);ctx.fillStyle=css(base,shade);ctx.fill('evenodd');
   }
   ctx.save();ctx.beginPath();for(var k=0;k<rows.length;k++){if(!rows[k]||!rows[k].inside)continue;ctx.moveTo(l.x+(k+1)/rows.length*l.r,l.y);ctx.arc(l.x,l.y,(k+1)/rows.length*l.r,0,TWO);ctx.arc(l.x,l.y,k/rows.length*l.r,0,TWO,true);}ctx.clip('evenodd');ctx.drawImage(topLayer.c,l.x-l.r,l.y-l.r,2*l.r,2*l.r);
-  if(checks&&st.stage==='glaze'&&glazeBrush){ctx.strokeStyle='rgba(90,70,55,.22)';ctx.lineWidth=1;for(var a=-1;a<=1.001;a+=.2){ctx.beginPath();ctx.moveTo(l.x+a*l.r,l.y-l.r);ctx.lineTo(l.x+a*l.r,l.y+l.r);ctx.stroke();ctx.beginPath();ctx.moveTo(l.x-l.r,l.y+a*l.r);ctx.lineTo(l.x+l.r,l.y+a*l.r);ctx.stroke();}}ctx.restore();ctx.restore();ctx.fillStyle='#29334e';ctx.font='15px sans-serif';ctx.textAlign='center';ctx.fillText('내 도자기 · 위에서 꾸미기',l.x,Math.max(55,l.y-l.r-24));};
+  if(st.stage==='glaze'){ctx.globalCompositeOperation='multiply';var shade=ctx.createRadialGradient(l.x-l.r*.2,l.y-l.r*.25,l.r*.1,l.x,l.y,l.r);shade.addColorStop(0,'#fffdf8');shade.addColorStop(.7,'#d2cbb9');shade.addColorStop(1,'#a8a18f');ctx.fillStyle=shade;ctx.fillRect(l.x-l.r,l.y-l.r,l.r*2,l.r*2);ctx.globalCompositeOperation='source-over';}
+  if(checks&&st.stage==='glaze'&&glazeBrush){ctx.strokeStyle='rgba(90,70,55,.22)';ctx.lineWidth=1;for(var a=-1;a<=1.001;a+=.2){ctx.beginPath();ctx.moveTo(l.x+a*l.r,l.y-l.r);ctx.lineTo(l.x+a*l.r,l.y+l.r);ctx.stroke();ctx.beginPath();ctx.moveTo(l.x-l.r,l.y+a*l.r);ctx.lineTo(l.x+l.r,l.y+a*l.r);ctx.stroke();}}ctx.restore();}
+ ctx.restore();ctx.fillStyle='#29334e';ctx.font='15px sans-serif';ctx.textAlign='center';ctx.fillText('내 도자기 · 위에서 꾸미기',l.x,Math.max(55,l.y-l.r-24));};
  function remember(){history.push({url:st.topPaint||null,top:topLayer.x.getImageData(0,0,768,768),p:paint.x.getImageData(0,0,TW,TH),hp:hasPaint});if(history.length>6)history.shift();}
  function undoBrush(){var h=history.pop();if(!h)return;topLayer.x.putImageData(h.top,0,0);paint.x.putImageData(h.p,0,0);hasPaint=h.hp;st.topPaint=h.url;loaded=h.url;topVersion++;texVer++;dirty=cardDirty=true;}
  $('wheelUndo').onclick=undoBrush;$('topUndo-deco').onclick=undoBrush;$('topUndo-glaze').onclick=undoBrush;
  function brushColor(){return st.stage==='glaze'?byId(GLAZES,$('glazeBrushColor').value).c:pigColor();}
  var visited={};
- function paintTop(p,first){var h=inTop(p);if(!h){last=null;return;}var c=topLayer.x,l=topLayout(),size=(st.stage==='glaze'?Number($('glazeBrushSize').value):curSize())/l.cm*384,erase=st.stage==='deco'&&dTool==='erase';c.save();c.globalCompositeOperation=erase?'destination-out':'source-over';c.fillStyle=c.strokeStyle=css(brushColor());c.lineCap=c.lineJoin='round';c.lineWidth=size*2;
+ function paintTop(p,first){var h=inTop(p);if(!h){last=null;return;}var erase=st.stage==='deco'&&dTool==='erase',c=erase?topLayer.x:strokeInk.x,l=topLayout(),size=(st.stage==='glaze'?Number($('glazeBrushSize').value):curSize())/l.cm*384,erase=st.stage==='deco'&&dTool==='erase';c.save();c.globalCompositeOperation=erase?'destination-out':'source-over';c.fillStyle=c.strokeStyle=css(brushColor());c.lineCap=c.lineJoin='round';c.lineWidth=size*2;
  if(st.stage==='glaze'&&checks){var cell=76.8,col=Math.floor(h.x/cell),row=Math.floor(h.y/cell),key=col+','+row;if(!visited[key]){c.fillRect(col*cell,row*cell,cell+.5,cell+.5);visited[key]=true;}}
  else if(st.stage==='deco'&&dTool==='stamp'){if(first){c.translate(h.x,h.y);c.scale(size/20,size/20);c.lineWidth=2.6;c.stroke(new Path2D(STAMP_PATHS[dStamp]||STAMP_PATHS.flower));}}
  else if(st.stage==='deco'&&dRing){var radius=Math.hypot(h.x-384,h.y-384);c.beginPath();c.arc(384,384,radius,0,TWO);c.stroke();}
  else {c.beginPath();c.moveTo(last?last.x:h.x,last?last.y:h.y);c.lineTo(h.x,h.y);c.stroke();c.beginPath();c.arc(h.x,h.y,size,0,TWO);c.fill();}
- c.restore();changed=true;last=h;topVersion++;texVer++;dirty=true;}
- function paintSide(p,first){var hit=hitSurface(p.x,p.y);if(!hit){ptr.last=null;return;}var saved={t:dTool,p:dPig,c:dColor,s:dSizeV.brush,o:dOpacity,r:dRing};dTool='brush';dPig='custom';dColor=brushColor();dOpacity=1;dRing=false;dSizeV.brush=Math.log(Number($('glazeBrushSize').value)/RANGE.brush[0])/Math.log(RANGE.brush[1]/RANGE.brush[0]);if(checks){var col=Math.floor(hit.u*16),row=Math.floor((1-hit.v)*12),key=col+','+row;if(!visited[key]){paint.x.fillStyle=css(dColor);paint.x.fillRect(col*TW/16,row*TH/12,TW/16+.5,TH/12+.5);visited[key]=true;hasPaint=true;texVer++;dirty=true;}}else applyDeco(hit,first||!ptr.last);dTool=saved.t;dPig=saved.p;dColor=saved.c;dSizeV.brush=saved.s;dOpacity=saved.o;dRing=saved.r;}
+ c.restore();if(!erase){topLayer.x.clearRect(0,0,768,768);topLayer.x.drawImage(strokeBase.c,0,0);topLayer.x.save();topLayer.x.globalAlpha=st.stage==='glaze'?Number($('glazeOpacity').value)/100:dOpacity;topLayer.x.drawImage(strokeInk.c,0,0);topLayer.x.restore();}changed=true;last=h;topVersion++;texVer++;dirty=true;}
+ function paintSide(p,first){var hit=hitSurface(p.x,p.y);if(!hit){ptr.last=null;return;}var saved={t:dTool,p:dPig,c:dColor,s:dSizeV.brush,o:dOpacity,r:dRing};dTool='brush';dPig='custom';dColor=brushColor();dOpacity=Number($('glazeOpacity').value)/100;dRing=false;dSizeV.brush=Math.log(Number($('glazeBrushSize').value)/RANGE.brush[0])/Math.log(RANGE.brush[1]/RANGE.brush[0]);if(checks){var col=Math.floor(hit.u*16),row=Math.floor((1-hit.v)*12),key=col+','+row;if(!visited[key]){paint.x.save();paint.x.globalAlpha=dOpacity;paint.x.fillStyle=css(dColor);paint.x.fillRect(col*TW/16,row*TH/12,TW/16+.5,TH/12+.5);paint.x.restore();visited[key]=true;hasPaint=true;texVer++;dirty=true;}}else applyDeco(hit,first||!ptr.last);dTool=saved.t;dPig=saved.p;dColor=saved.c;dSizeV.brush=saved.s;dOpacity=saved.o;dRing=saved.r;}
  function handles(){return st.stage==='deco'&&top||st.stage==='glaze'&&glazeBrush;}
- cv.addEventListener('pointerdown',function(e){if(!handles()||e.button>0)return;e.preventDefault();e.stopImmediatePropagation();if(st.stage==='deco'&&(dTool==='carve'||dTool==='move')){toast('윗면은 붓·도장·지우개로 꾸며요. 새김과 회전은 옆면 보기에서 해 주세요.');return;}if(active!==null)return;loadTop();active=e.pointerId;changed=false;last=null;ptr.last=null;visited={};remember();cv.setPointerCapture(e.pointerId);pos(e);var p={x:ptr.x,y:ptr.y};if(top)paintTop(p,true);else paintSide(p,true);},true);
+ cv.addEventListener('pointerdown',function(e){if(!handles()||e.button>0)return;e.preventDefault();e.stopImmediatePropagation();if(st.stage==='deco'&&(dTool==='carve'||dTool==='move')){toast('윗면은 붓·도장·지우개로 꾸며요. 새김과 회전은 옆면 보기에서 해 주세요.');return;}if(active!==null)return;loadTop();active=e.pointerId;changed=false;last=null;ptr.last=null;visited={};remember();strokeBase.x.clearRect(0,0,768,768);strokeBase.x.drawImage(topLayer.c,0,0);strokeInk.x.clearRect(0,0,768,768);cv.setPointerCapture(e.pointerId);pos(e);var p={x:ptr.x,y:ptr.y};if(top)paintTop(p,true);else paintSide(p,true);},true);
  cv.addEventListener('pointermove',function(e){if(active!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();pos(e);var p={x:ptr.x,y:ptr.y};if(top)paintTop(p,false);else paintSide(p,false);},true);
  function end(e){if(active!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();active=null;last=null;ptr.last=null;if(top&&changed)commitTop();else if(top){history.pop();}else {texVer++;dirty=cardDirty=true;}}
  cv.addEventListener('pointerup',end,true);cv.addEventListener('pointercancel',end,true);cv.addEventListener('lostpointercapture',end,true);
@@ -4046,6 +4055,31 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  var drawWithTop=draw;draw=function(){drawWithTop();if(st.stage!=='fire'||$('openKiln').hidden)return;var g=kilnGeo(),box=cv.getBoundingClientRect(),stageBox=stageEl.getBoundingClientRect(),sheetBox=$('sheet').getBoundingClientRect(),x=box.left-stageBox.left+(g.x0+g.cw)/W*box.width,y=box.top-stageBox.top+(g.top+g.bot)/2/HC*box.height,limit=sheetBox.top>box.top?Math.min(box.bottom,sheetBox.top):box.bottom;
   $('openKiln').style.left=Math.max(85,Math.min(stageBox.width-85,x))+'px';$('openKiln').style.top=Math.max(box.top-stageBox.top+70,Math.min(limit-stageBox.top-35,y))+'px';
  };
+
+ var rack=document.createElement('nav');rack.id='potteryToolRack';rack.setAttribute('aria-label','도구통');rack.hidden=true;rack.innerHTML='<small>도구통 · 도구를 눌러 선택하세요</small><div id="rackDeco"></div><div id="rackGlaze"></div>';stageEl.appendChild(rack);
+ var dtools=$('dtools');$('rackDeco').appendChild(dtools);dtools.parentElement.setAttribute('aria-label','꾸미기 도구');
+ var oldToolField=$('p-deco').querySelector('.field');if(oldToolField){var label=oldToolField.querySelector('.label');if(label)label.remove();}
+ var symbols={brush:'<path d="M9 22l10-15 4 3-10 15zM8 23q-6 2-4 7 8 1 9-5"/>',carve:'<path d="M5 29l12-17 6 4-13 16zM17 12l4-8 6 4-4 8"/>',stamp:'<path d="M10 5h12v8l-3 6v5h-6v-5l-3-6zM6 24h20v7H6z"/>',erase:'<path d="M5 24L19 7l10 8-13 16H10zM12 16l10 8"/>'};
+ Array.from(dtools.querySelectorAll('[data-d]')).forEach(function(button){var name=button.textContent;button.classList.add('rackTool');button.innerHTML='<svg viewBox="0 0 34 36" aria-hidden="true">'+symbols[button.dataset.d]+'</svg><span>'+name+'</span>';});
+ function glazeTool(id,label,icon,action){var b=document.createElement('button');b.id=id;b.type='button';b.className='rackTool';b.innerHTML='<svg viewBox="0 0 34 36" aria-hidden="true">'+icon+'</svg><span>'+label+'</span>';b.onclick=function(){action();rackSync();};$('rackGlaze').appendChild(b);return b;}
+ glazeTool('rackGlazeBase','바탕 유약','<path d="M6 13h22l-3 18H9zM12 13V8a5 5 0 0 1 10 0v5"/>',function(){glazeBrush=false;$('glazeBrush').checked=false;refresh();});
+ glazeTool('rackGlazeBrush','붓칠',symbols.brush,function(){$('glazeBrush').checked=true;glazeBrush=true;checks=false;refresh();});
+ glazeTool('rackGlazeChecks','체크 칠하기','<path d="M5 5h24v24H5zM13 5v24M21 5v24M5 13h24M5 21h24"/>',function(){$('glazeBrush').checked=true;glazeBrush=true;checks=true;refresh();});
+ $('glazeBrush').closest('label').hidden=true;$('glazeFree').hidden=true;$('glazeChecks').hidden=true;
+ $('glazePaintHint').textContent='화면 앞 도구통에서 바탕 유약·붓칠·체크 칠하기를 직접 골라 주세요.';
+ function rackSync(){rack.hidden=st.stage!=='deco'&&st.stage!=='glaze';$('rackDeco').hidden=st.stage!=='deco';$('rackGlaze').hidden=st.stage!=='glaze';$('rackGlazeBase').setAttribute('aria-pressed',String(!glazeBrush));$('rackGlazeBrush').setAttribute('aria-pressed',String(glazeBrush&&!checks));$('rackGlazeChecks').setAttribute('aria-pressed',String(glazeBrush&&checks));var sh=$('sheet').getBoundingClientRect();rack.style.bottom=stageEl.clientWidth<760?Math.max(10,(window.innerHeight||HC)-sh.top+8)+'px':'24px';}
+ var rackRefresh=refresh;refresh=function(){rackRefresh();rackSync();};var rackStage=setStage;setStage=function(stage){rackStage(stage);rackSync();};var rackSheet=setSheet;setSheet=function(open){var result=rackSheet(open);rackSync();setTimeout(rackSync,300);return result;};window.addEventListener('resize',rackSync);rackSync();
+ // A separate 3D inspection camera; dragging rotates the object instead of moving the photo.
+ var viewer=document.createElement('dialog');viewer.id='finished360';viewer.innerHTML='<button type="button" id="closeFinished360">닫기 ×</button><h2>완성 작품 · 360° 감상</h2><p>좌우로 돌리고 위아래로 기울여 안쪽과 바닥까지 살펴보세요.</p><canvas id="finished360Canvas" width="600" height="540" aria-label="도자기 360도 감상"></canvas><small id="finished360Status">드래그로 회전 · 휠 또는 두 손가락으로 확대</small>';document.body.appendChild(viewer);
+ var inspect=document.createElement('button');inspect.id='openFinished360';inspect.type='button';inspect.className='corner';inspect.textContent='360° 감상';document.querySelector('.resultViewDock').appendChild(inspect);
+ var orbitCanvas=$('finished360Canvas'),yaw=0,pitch=.32,zoom=1,orbitPointer=null;
+ function renderOrbit(){if(!viewer.open||!window.TodakPhoto)return;var data=photoData();Object.assign(data,{width:600,canvasHeight:540,viewWidth:600,viewHeight:540,pixelWidth:600,pixelHeight:540,rotation:yaw,elevation:pitch,zoom:zoom,objectScale:1,panX:0,panY:0,background:'studio',transparent:true,inspection:true});var out=TodakPhoto.render(data);if(out){var x=orbitCanvas.getContext('2d');x.fillStyle='#e8e1d3';x.fillRect(0,0,600,540);x.drawImage(out,0,0,600,540);}}
+ inspect.onclick=function(){viewer.showModal();yaw=rot;pitch=.32;zoom=1;renderOrbit();if(!window.TodakPhoto&&window.TodakLoad3D){$('finished360Status').textContent='3D 작품을 불러오는 중…';TodakLoad3D().then(function(){$('finished360Status').textContent='드래그로 회전 · 휠로 확대';renderOrbit();}).catch(function(){$('finished360Status').textContent='3D 감상을 열 수 없어요. 잠시 후 다시 시도해 주세요.';});}};
+ $('closeFinished360').onclick=function(){viewer.close();dirty=true;};
+ var fingers=new Map(),pinch=0;orbitCanvas.addEventListener('pointerdown',function(e){fingers.set(e.pointerId,{x:e.clientX,y:e.clientY});orbitPointer={id:e.pointerId,x:e.clientX,y:e.clientY};orbitCanvas.setPointerCapture(e.pointerId);if(fingers.size===2){var p=Array.from(fingers.values());pinch=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);}});
+ orbitCanvas.addEventListener('pointermove',function(e){if(!fingers.has(e.pointerId))return;var previous=fingers.get(e.pointerId);fingers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(fingers.size===2){var p=Array.from(fingers.values()),next=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);if(pinch>0)zoom=clamp(zoom*next/pinch,.5,2.5);pinch=next;}else{yaw+=(e.clientX-previous.x)*.012;pitch=clamp(pitch+(e.clientY-previous.y)*.008,-1.45,1.5);}renderOrbit();});
+ ['pointerup','pointercancel','lostpointercapture'].forEach(function(event){orbitCanvas.addEventListener(event,function(e){fingers.delete(e.pointerId);pinch=0;});});orbitCanvas.addEventListener('wheel',function(e){e.preventDefault();zoom=clamp(zoom*Math.exp(-e.deltaY*.001),.5,2.5);renderOrbit();},{passive:false});
+ window.TodakFinished360={render:renderOrbit,state:function(){return {yaw:yaw,pitch:pitch,zoom:zoom};}};
  window.TodakWheel={forms:forms,top:function(){return top;},layout:topLayout,layer:topLayer,refresh:refresh,surface:function(){return topSurface(topLayout());}};
 })();
 
@@ -4065,21 +4099,24 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
   {id:'smoothSection',stage:'throw',title:'단면으로 안쪽 보기',target:'#sectionView',text:'단면·벽 두께 버튼을 눌러 안쪽 벽을 펼쳐 보세요.'},
   {id:'smoothInner',stage:'throw',title:'안쪽도 매끈하게',target:'[data-t="sponge"]',text:'오른쪽 단면의 안쪽 벽을 문질러 속도 매끈하게 다듬어 보세요.'},
   {id:'solid',stage:'throw',title:'4. 전체 모양 확인하기',target:'#solidView',text:'입체 보기를 눌러 다듬은 전체 모양을 확인하세요. 단면·벽 두께는 언제든 다시 켤 수 있어요.'},
-  {id:'brush',stage:'deco',title:'5. 붓으로 그려 보기',target:'[data-d="brush"]',text:'붓을 고르고 작품 위에 선을 그려 보세요. 색상, 붓 크기, 불투명도를 바꿀 수 있어요. 불투명도를 낮추면 색이 옅게 쌓여요.'},
+  {id:'brush',stage:'deco',title:'5. 붓으로 그려 보기',target:'[data-d="brush"]',text:'화면 앞 도구통에서 붓을 고르고 작품 위에 선을 그려 보세요. 색상, 붓 크기, 불투명도를 바꿀 수 있어요. 불투명도를 낮추면 색이 옅게 쌓여요.'},
   {id:'brushRing',stage:'deco',title:'붓으로 한 바퀴 띠 그리기',target:'[data-d="brush"]',text:'붓에서 한 바퀴 띠를 선택하고 도자기 위를 그려 보세요. 같은 높이에 둘러지는 띠 무늬를 만들어요.'},
-  {id:'stampChoice',stage:'deco',title:'도장과 모양 고르기',target:'[data-d="stamp"]',text:'도장 도구를 선택한 뒤 아래 도장 모양에서 꽃·잎 등 원하는 모양을 직접 골라 주세요.'},
+  {id:'stampChoice',stage:'deco',title:'도장과 모양 고르기',target:'[data-d="stamp"]',text:'화면 앞 도구통에서 도장을 선택한 뒤 아래 도장 모양에서 꽃·잎 등 원하는 모양을 직접 골라 주세요.'},
   {id:'stamp',stage:'deco',title:'6. 도장 찍기',target:'[data-d="stamp"]',text:'고른 모양으로 도자기에 한 번 찍어 보세요. 크기와 색상도 바꿀 수 있어요.'},
-  {id:'carve',stage:'deco',title:'7. 새김 무늬 넣기',target:'[data-d="carve"]',text:'새김 도구를 고르고 작품 위를 문질러 무늬를 새겨 보세요. 지우개와 되돌리기로 장식을 수정할 수 있어요.'},
+  {id:'carve',stage:'deco',title:'7. 새김 무늬 넣기',target:'[data-d="carve"]',text:'화면 앞 도구통에서 조각칼을 고르고 작품 위를 문질러 무늬를 새겨 보세요. 지우개와 되돌리기로 장식을 수정할 수 있어요.'},
   {id:'carveRing',stage:'deco',title:'조각칼로 한 바퀴 띠 새기기',target:'[data-d="carve"]',text:'조각칼에서 한 바퀴 띠를 선택하고 도자기 위를 문질러 보세요. 둘레를 따라 홈이 이어져요.'},
   {id:'rotate',stage:'deco',title:'8. 반대쪽도 보기',target:'#rotR',text:'소리 옆의 좌우 화살표를 눌러 도자기를 돌려 보세요. 반대편에도 꾸밀 수 있어요. 휠이나 두 손가락으로 확대할 수 있고, 소리 버튼에서 작업음을 켤 수 있어요.'},
   {id:'color',stage:'glaze',title:'9. 유약 색 고르기',target:'#swatches',text:'유약 색을 하나 골라 보세요. 색 더 보기에서 더 많은 색과 직접 고르는 색을 사용할 수 있어요.'},
   {id:'finish',stage:'glaze',title:'10. 유광과 무광 고르기',target:'#finish',text:'반짝이게 또는 보송하게를 직접 골라 보세요. 굽기 전에는 물레 위에서, 완성 후에는 완성 사진에서 확인해요.'},
+  {id:'glazeBrush',stage:'glaze',title:'도구통에서 유약 붓 고르기',target:'#rackGlazeBrush',text:'화면 앞 도구통에서 붓칠을 눌러 보세요. 도구를 고른 뒤 옆면이나 위에서 꾸미기에서 원하는 부분에 유약을 칠할 수 있어요.'},
+  {id:'glazeOpacity',stage:'glaze',title:'유약 투명도 조절하기',target:'#glazeOpacity',text:'유약 불투명도를 움직여 보세요. 낮추면 바탕이 비치고, 높이면 진하게 칠해져요. 붓 유약 색과 굵기도 고를 수 있어요.'},
   {id:'dip',stage:'glaze',title:'11. 담그는 깊이 정하기',target:'#dip',text:'담가서 덧입히기를 열고 입구만 또는 절반까지를 고른 뒤, 담그는 깊이를 움직여 보세요. 덧입힐 색도 고를 수 있어요.'},
   {id:'effect',stage:'glaze',title:'12. 표면 무늬 확인하기',target:'#fx',text:'점박이 또는 잔금을 선택해 무늬 변화를 보세요. 없음으로 되돌릴 수도 있어요.'},
   {id:'heat',stage:'glaze',title:'13. 불 세기 정하기',target:'#fire',text:'불 세기를 직접 골라 보세요. 약한 불은 안전하고, 센 불은 색 변화나 금이 생길 수 있어요. 고른 뒤 가마로 넘어가요.'},
   {id:'load',stage:'fire',title:'14. 가마에 넣기',target:'#cv',text:'작품을 누르거나 가마 안으로 끌어 넣으세요. 가마가 닫히면 굽기가 시작돼요.'},
   {id:'open',stage:'fire',title:'15. 식힌 뒤 꺼내기',target:'#openKiln',text:'굽기가 끝나면 온도가 내려가는 것을 지켜보세요. 100℃ 이하로 식은 뒤 가마 문 열기를 눌러야 안전해요.'},
-  {id:'photo',stage:'done',title:'16. 완성 사진 확인하기',target:'#finishedPhoto',text:'완성 사진을 눌러 보세요. 물레에서 보기와 전환할 수 있어요. 마우스나 한 손가락으로 끌면 도자기가 이동하고, 좌우 화살표는 도자기를 돌려요.'},
+  {id:'photo',stage:'done',title:'16. 완성 사진 확인하기',target:'#finishedPhoto',text:'완성 사진을 눌러 보세요. 360° 감상에서는 직접 돌려 안쪽과 바닥도 볼 수 있어요. 물레에서 보기와 전환할 수 있어요. 마우스나 한 손가락으로 끌면 도자기가 이동하고, 좌우 화살표는 도자기를 돌려요.'},
+  {id:'inspect360',stage:'done',title:'완성 작품 360도로 보기',target:'#openFinished360',text:'360° 감상을 눌러 작품을 좌우로 돌리고 위아래로 기울여 보세요. 안쪽과 바닥까지 확인한 뒤 닫기를 누르면 안내가 이어져요.'},
   {id:'size',stage:'done',title:'17. 도자기 크기 바꾸기',target:'#photoObjectSize',text:'도구 열기 후 사진 속 도자기 크기의 − / ＋ 버튼을 누르거나 슬라이더를 좌우로 움직여 보세요. 도자기만 커지고 작아져요. 휠·두 손가락 확대와 축소는 배경에 적용돼요. 보기 초기화로 되돌릴 수 있어요.'},
   {id:'background',stage:'done',title:'18. 배경 바꾸기',target:'#realPhotoScene',text:'완성 사진 배경에서 다른 배경을 골라 보세요. 현재 배경은 모두 기본 제공이에요. 유약 변경으로 같은 모양에 다른 유약을 입힐 수도 있어요.'},
   {id:'title',stage:'done',title:'작품 이름 적기',target:'#openCard',text:'카드로 저장·공유를 열고 작품 제목을 적어 주세요. 입력을 마치고 잠시 기다리면 다음 안내로 넘어가요.'},
@@ -4098,7 +4135,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  function lastInStage(){return index===steps.length-1||steps[index+1].stage!==steps[index].stage;}
  function gestureReady(){var id=current().id;return (id==='trim'&&tool==='trim'&&st.trimReady)||(id==='shape'&&tool==='shape')||(id==='inside'&&tool==='thick')||(id==='smooth'&&tool==='sponge'&&!secOn)||(id==='smoothInner'&&tool==='sponge'&&secOn)||(id==='brush'&&dTool==='brush'&&!dRing)||(id==='brushRing'&&dTool==='brush'&&dRing)||(id==='stamp'&&dTool==='stamp')||(id==='carve'&&dTool==='carve'&&!dRing)||(id==='carveRing'&&dTool==='carve'&&dRing);}
  function intendedTarget(){
-  var step=current();if(step.id==='sound')return $('sound');
+  var step=current();if(step.id==='inspect360')return $('finished360').open?$('closeFinished360'):$('openFinished360');if(step.id==='sound')return $('sound');
   if(step.id==='stampChoice')return dTool==='stamp'?document.querySelector('#stamps [data-s]'):document.querySelector('[data-d="stamp"]');
   if(done&&lastInStage()&&step.stage!=='done'&&step.stage!=='fire')return $('nextBtn');
   if(!$('cardDlg').hidden){if(step.id==='title')return $('title');if(step.id==='purpose')return $('purpose');if(step.id==='save'&&!done)return !$('saveCard').hidden?$('saveCard'):$('shareBtn');return $('cardClose');}
@@ -4198,6 +4235,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  }
  watchText('title');watchText('purpose');
  function afterClick(id,action){$(id).addEventListener('click',function(){if(active)setTimeout(action,0);});}
+ afterClick('rackGlazeBrush',function(){mark('glazeBrush');});afterClick('closeFinished360',function(){mark('inspect360');});$('glazeOpacity').addEventListener('input',function(){mark('glazeOpacity');});
  afterClick('sound',function(){mark('sound');});afterClick('cardClose',function(){mark('closeCard');});afterClick('closeSearch',function(){mark('closeSearch');});afterClick('menuBtn',function(){mark('home');});
  afterClick('sectionView',function(){if(secOn)mark('smoothSection');});afterClick('solidView',function(){if(!secOn)mark('solid');});['rotL','rotR'].forEach(function(id){afterClick(id,function(){mark('rotate');});});afterClick('finishedPhoto',function(){if(photoOn)mark('photo');});
  $('openCard').addEventListener('click',function(){if(!active||!dl||dl.tutorialObserved)return;var save=dl.save;dl.save=function(){var result=save.apply(this,arguments);return Promise.resolve(result).then(function(value){mark('save');return value;},function(error){if(active&&current().id==='save')mark('save');throw error;});};dl.tutorialObserved=true;},true);
@@ -4216,7 +4254,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  $('viewMenu').addEventListener('toggle',function(){if(active&&current().id==='sound')route();});
  document.addEventListener('scroll',function(){if(active)route();},true);
  window.addEventListener('resize',function(){if(active)route();});
- var helpText={throw:'모양 잡기: 바깥 옆면을 좌우로 끌어요. 속·두께: 오른쪽 안쪽 벽을 조절해요. 매끈하게: 벽을 문질러 굴곡을 다듬어요. 입체/단면 보기로 확인하세요.',deco:'붓·도장·조각칼로 작품 위에 꾸며요. 색·크기·불투명도를 바꿀 수 있어요. 지우개와 되돌리기로 고치고, 좌우 화살표로 돌려 반대편도 꾸미세요.',glaze:'유약 색과 유광/무광을 골라요. 담가서 덧입히기에서 색과 담그는 깊이를 조절하고, 표면 무늬와 불 세기를 정하세요.',fire:'작품을 누르거나 가마로 끌어 넣어요. 굽기가 끝나고 100℃ 이하로 식으면 가마 문을 열어 꺼내세요.',done:'드래그로 도자기 이동, 좌우 화살표로 회전, 휠·두 손가락으로 배경 확대·축소. 도자기 크기와 배경은 따로 조절해요. 카드 저장·공유, 닮은 물건 검색과 비교 카드도 사용할 수 있어요.'};
+ var helpText={throw:'모양 잡기: 바깥 옆면을 좌우로 끌어요. 속·두께: 오른쪽 안쪽 벽을 조절해요. 매끈하게: 벽을 문질러 굴곡을 다듬어요. 입체/단면 보기로 확인하세요.',deco:'붓·도장·조각칼로 작품 위에 꾸며요. 색·크기·불투명도를 바꿀 수 있어요. 지우개와 되돌리기로 고치고, 좌우 화살표로 돌려 반대편도 꾸미세요.',glaze:'도구통에서 바탕 유약·붓칠·체크 칠하기를 고르고 유약 색과 불투명도, 유광/무광을 조절해요. 담가서 덧입히기에서 색과 담그는 깊이를 조절하고, 표면 무늬와 불 세기를 정하세요.',fire:'작품을 누르거나 가마로 끌어 넣어요. 굽기가 끝나고 100℃ 이하로 식으면 가마 문을 열어 꺼내세요.',done:'드래그로 도자기 이동, 좌우 화살표로 회전, 휠·두 손가락으로 배경 확대·축소. 도자기 크기와 배경은 따로 조절해요. 카드 저장·공유, 닮은 물건 검색과 비교 카드도 사용할 수 있어요.'};
  var helpButton=document.createElement('button');helpButton.type='button';helpButton.id='stageHelpButton';helpButton.className='ghost';helpButton.textContent='도움말';helpButton.setAttribute('aria-expanded','false');helpButton.setAttribute('aria-controls','stageBriefHelp');$('sheetTitle').after(helpButton);
  var helpBox=document.createElement('aside');helpBox.id='stageBriefHelp';helpBox.hidden=true;helpBox.innerHTML='<b id="stageBriefTitle"></b><p id="stageBriefText"></p><button type="button" class="ghost" id="stageHelpClose">닫기</button>';$('sheetBody').prepend(helpBox);
  function closeHelp(){helpBox.hidden=true;helpButton.setAttribute('aria-expanded','false');}
