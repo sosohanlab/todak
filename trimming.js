@@ -38,18 +38,15 @@
   if(ptr.trimInvalid)return 0;
   var toolRadius=(ptr.x-CX)*ptr.trimSide/SV,surface=rAt(clamp(t,0,1));if(toolRadius>surface+.65||toolRadius<-.1)return 0;
   var penetration=clamp(surface-toolRadius,-.05,.9),rate=clamp(.035+penetration*.4,0,.42)*Math.min(dt,80)/42,moved=0,blocked=false;
-  var baseline=[];if(st.height-st.floor>.05){for(var z=1;z<N;z++)baseline[z]=wallNormalThickness(st.inner[z],z*rowH);}
   for(var j=1;j<N;j++){
     var y=j*rowH,dist=y-t*st.height;if(Math.abs(dist)>TOOLS.trim.f*2.1)continue;
-    var weight=Math.exp(-dist*dist/(TOOLS.trim.f*TOOLS.trim.f)),before=st.radii[j],minimum=st.target?.26:.10;
-    if(y>=st.floor&&st.height-st.floor>.05){var a=Math.max(0,j-1),b=Math.min(N-1,j+1),slope=(st.radii[b]-st.radii[a])/Math.max(rowH,(b-a)*rowH);minimum=Math.max(minimum,st.inner[j]+(st.target?.52:.08)*Math.sqrt(1+slope*slope));}
+    var weight=Math.exp(-dist*dist/(TOOLS.trim.f*TOOLS.trim.f)),before=st.radii[j],minimum=.10;
+    if(y>=st.floor&&st.height-st.floor>.05){var a=Math.max(0,j-1),b=Math.min(N-1,j+1),slope=(st.radii[b]-st.radii[a])/Math.max(rowH,(b-a)*rowH);minimum=Math.max(minimum,st.inner[j]+.08*Math.sqrt(1+slope*slope));}
     var next=Math.min(before,Math.max(minimum,before-rate*weight)),cut=before-next;
     if(cut>.000001){st.radii[j]=next;moved+=cut;grooves[j]=Math.max(0,grooves[j]-cut*.6);ptr.contact=true;ptr.maxD=Math.max(ptr.maxD,cut);}else if(weight>.5)blocked=true;
   }
-  // A pass can expose a nearby sloped wall: validate true normal clearance, not just radial distance.
-  if(st.target&&st.height-st.floor>.05){for(var jj=1;jj<N;jj++){if(jj*rowH>=st.floor&&st.inner[jj]>.01&&wallNormalThickness(st.inner[jj],jj*rowH)<Math.min(.505,baseline[jj])-.00001){st.radii=ptr.trimBefore.slice();moved=0;ptr.contact=false;blocked=true;break;}}}
   if(moved>.0001&&shavings.length<48){shavings.push({x:CX+ptr.trimSide*surface*SV,y:ptr.y,vx:ptr.trimSide*(.4+Math.random()*.6),vy:.5+Math.random(),life:1,turn:Math.random()*6.28});}
-  if(blocked&&!ptr.trimWarned){$('trimStatus').textContent=st.target?'도전 모드에서는 벽 두께를 남겨 둬요.':'안쪽 공간에 닿았어요. 속·두께 조절에서 속 깊이를 줄이면 기둥을 채우고 더 깎을 수 있어요.';ptr.trimWarned=true;}
+  if(blocked&&!ptr.trimWarned){$('trimStatus').textContent='안쪽 공간에 닿았어요. 속·두께 조절에서 속 깊이를 줄이면 기둥을 채우고 더 깎을 수 있어요.';ptr.trimWarned=true;}
   if(moved>.0001)window.dispatchEvent(new CustomEvent('todak-trimmed'));
   return moved;
  }
