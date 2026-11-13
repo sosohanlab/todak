@@ -122,7 +122,7 @@ function rebuild(d){
   var underside=outer.clone();underside.map=null;underside.color.setRGB(d.color[0]/255,d.color[1]/255,d.color[2]/255,T.SRGBColorSpace);materials.push(outer,inside,underside);
   var carving=!!d.carve,n=carving?(low?224:320):128,H=d.height,ro=d.rAt(1),ri=d.innerAt(1),hollow=H-d.floor>.05;
   // Tiny rounded edges avoid a grazing, razor-sharp material seam at rim and foot.
-  var footBevel=Math.min(.045,H*.004,d.rAt(0)*.02),rimBevel=hollow?Math.max(.001,Math.min(.045+(d.rimSoftness||0)*.16,(ro-ri)*.45,H*.018)):.02;
+  var footBevel=Math.min(.045,H*.004,d.rAt(0)*.02),rimBevel=d.profileRounded?.001:hollow?Math.max(.001,Math.min(.045+(d.rimSoftness||0)*.16,(ro-ri)*.45,H*.018)):.02;
   var points=[new T.Vector2(0,0),new T.Vector2(Math.max(0,d.rAt(0)-footBevel),0)],outerStart=1;
   points.push(new T.Vector2(d.rAt(0)-footBevel*.25,footBevel*.25));
   points.push(new T.Vector2(d.rAt(footBevel/H),footBevel));
@@ -149,7 +149,7 @@ function rebuild(d){
   // Incisions change the actual outer shell, including its silhouette and normals.
   var incisionStats={vertices:0,maxDepth:0,raisedVertices:0,maxRaise:0};
   if(carving){
-    var mask=canvas(1024,1024),mx=mask.getContext('2d');mx.filter='blur(1.2px)';mx.drawImage(d.carve,0,0,1024,1024);
+    var mask=canvas(1024,1024),mx=mask.getContext('2d');mx.filter='blur(3px)';mx.drawImage(d.carve,0,0,1024,1024);
     var alpha=mx.getImageData(0,0,1024,1024).data,normal=geo.attributes.normal;
     function cutAt(u,v){var x=((u%1+1)%1)*1024,y=Math.max(0,Math.min(1023,(1-v)*1023)),xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi;
       function a(xx,yy){var i=(yy*1024+(xx%1024))*4;return alpha[i+3]/255*(d.carveMode==='raised'?-1:(alpha[i]>127?-1:1));}
@@ -158,10 +158,12 @@ function rebuild(d){
     for(var vi=0;vi<pos.count;vi++){
       var profileRow=vi%points.length;if(profileRow<outerStart||profileRow>outerEnd)continue;
       var py=pos.getY(vi),level=Math.max(0,Math.min(1,py/H)),r=Math.hypot(pos.getX(vi),pos.getZ(vi)),wall=py>d.floor?Math.max(.025,r-d.innerAt(level)):Math.max(.025,r),amount=cutAt(uv.getX(vi),uv.getY(vi));
-      var edge=Math.min(1,py/.12,(H-py)/.12),depth=amount*(amount<0?(d.carveDepth||.12):Math.min(d.carveDepth||.12,wall*.32))*Math.max(0,edge);
-      if(Math.abs(depth)>.00001){pos.setXYZ(vi,pos.getX(vi)-normal.getX(vi)*depth,py-normal.getY(vi)*depth,pos.getZ(vi)-normal.getZ(vi)*depth);incisionStats.vertices++;incisionStats.maxDepth=Math.max(incisionStats.maxDepth,depth);if(depth<0){incisionStats.raisedVertices++;incisionStats.maxRaise=Math.max(incisionStats.maxRaise,-depth);}}
+      var fade=Math.min(.35,H*.04),edge=Math.max(0,Math.min(1,py/fade,(H-py)/fade));edge=edge*edge*(3-2*edge);var depth=amount*(amount<0?(d.carveDepth||.12):Math.min(d.carveDepth||.12,wall*.32))*Math.max(0,edge);
+      if(Math.abs(depth)>.00001){var ratio=Math.max(.01,r-depth)/Math.max(.001,r);pos.setXYZ(vi,pos.getX(vi)*ratio,py,pos.getZ(vi)*ratio);incisionStats.vertices++;incisionStats.maxDepth=Math.max(incisionStats.maxDepth,depth);if(depth<0){incisionStats.raisedVertices++;incisionStats.maxRaise=Math.max(incisionStats.maxRaise,-depth);}}
     }
-    pos.needsUpdate=true;geo.computeVertexNormals();geo.computeBoundingSphere();
+    pos.needsUpdate=true;geo.computeVertexNormals();
+    // The first and last angular columns coincide; keep their normals identical.
+    var normals=geo.attributes.normal;for(var row=0;row<points.length;row++){var first=row,last=segs*points.length+row,nx=normals.getX(first)+normals.getX(last),ny=normals.getY(first)+normals.getY(last),nz=normals.getZ(first)+normals.getZ(last),len=Math.hypot(nx,ny,nz)||1;normals.setXYZ(first,nx/len,ny/len,nz/len);normals.setXYZ(last,nx/len,ny/len,nz/len);}normals.needsUpdate=true;geo.computeBoundingSphere();
   }
   var mesh=new T.Mesh(geo,materials);mesh.castShadow=true;mesh.receiveShadow=false;mesh.userData.incision=incisionStats;pot.add(mesh);
   var contact=scene.getObjectByName('contact'),r=d.rAt(0);contact.scale.set(r*2.8,r*2.8,1);
