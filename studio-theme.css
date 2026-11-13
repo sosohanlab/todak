@@ -76,3 +76,5 @@ input[type=range],input[type=checkbox]{accent-color:var(--cobalt)}
 .stageToolbar #openKiln{flex:0 0 auto;white-space:nowrap;min-height:42px;padding:8px 14px;background:var(--cobalt);color:#fff;border-color:var(--cobalt)}
 .stage:not([data-stage="fire"]) #openKiln{display:none!important}
 #openKiln[hidden]{display:none!important}
+
+.soundToggle{display:inline-flex;align-items:center;justify-content:center;gap:6px}.soundToggle svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.soundToggle .soundWaves,.soundToggle[aria-pressed=true] .soundSlash{display:none}.soundToggle[aria-pressed=true] .soundWaves{display:block}.soundToggle[aria-pressed=true]{color:var(--cobalt);border-color:var(--cobalt)}

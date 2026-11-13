@@ -42,6 +42,7 @@
   if(st.height-st.floor>.05){for(var jj=1;jj<N;jj++){if(jj*rowH>=st.floor&&st.inner[jj]>.01&&wallNormalThickness(st.inner[jj],jj*rowH)<Math.min(.505,baseline[jj])-.00001){st.radii=ptr.trimBefore.slice();moved=0;ptr.contact=false;blocked=true;break;}}}
   if(moved>.0001&&shavings.length<48){shavings.push({x:CX+ptr.trimSide*surface*SV,y:ptr.y,vx:ptr.trimSide*(.4+Math.random()*.6),vy:.5+Math.random(),life:1,turn:Math.random()*6.28});}
   if(blocked&&!ptr.trimWarned){$('trimStatus').textContent='더 깎으면 너무 얇아져요. 이 부분은 남겨 둘게요.';ptr.trimWarned=true;}
+  if(moved>.0001)window.dispatchEvent(new CustomEvent('todak-trimmed'));
   return moved;
  }
  var oldTouch=touchClay;touchClay=function(dt){if(tool!=='trim')return oldTouch(dt);ptr.trimBefore=st.radii.slice();return trim(dt);};
