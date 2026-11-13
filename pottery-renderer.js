@@ -88,8 +88,7 @@ function rebuild(d){
   var surface=d.surface==='crackle'&&window.TodakCeramicSurface?TodakCeramicSurface.create(low?512:1024,d.surface):null;
   if(surface){g.save();g.globalCompositeOperation='multiply';g.drawImage(surface.color,0,0,size,size);g.restore();}
   if(d.overlay)g.drawImage(d.overlay,0,0,size,size);
-  // Bare clay only at the foot; preserve painted/carved decorations everywhere else.
-  // Bare clay remains on the underside material, not a painted hairline at the silhouette.
+  // The underside receives the selected base glaze and the same finish as the outside.
   var bump=canvas(512,512),bg=bump.getContext('2d'),im=bg.createImageData(512,512);
   for(var j=0;j<512*512;j++){var xx=j%512,yy=j/512|0,edge=Math.max(0,Math.min(1,yy/12,(511-yy)/12)),vv=128+((noise(xx,yy)-.5)*12+Math.sin(yy*.65)*1.5)*edge;im.data[j*4]=im.data[j*4+1]=im.data[j*4+2]=vv;im.data[j*4+3]=255;}bg.putImageData(im,0,0);
   // Micro texture stays separate from the true carved geometry.
@@ -120,7 +119,7 @@ function rebuild(d){
   }
   inside.map=tex(innerCanvas,true);inside.envMap=gloss?glossEnvironment.texture:null;inside.clearcoatRoughness=gloss?.09:.6;inside.roughness=gloss?.23:.86;inside.envMapIntensity=gloss?.65:.24;inside.clearcoat=gloss?.85:.04;
 
-  var clay=new T.MeshStandardMaterial({color:0xbda185,roughness:.95,bumpMap:micro,bumpScale:.02});materials.push(outer,inside,clay);
+  var underside=outer.clone();underside.map=null;underside.color.setRGB(d.color[0]/255,d.color[1]/255,d.color[2]/255,T.SRGBColorSpace);materials.push(outer,inside,underside);
   var carving=!!d.carve,n=carving?(low?224:320):128,H=d.height,ro=d.rAt(1),ri=d.innerAt(1),hollow=H-d.floor>.05;
   // Tiny rounded edges avoid a grazing, razor-sharp material seam at rim and foot.
   var footBevel=Math.min(.045,H*.004,d.rAt(0)*.02),rimBevel=hollow?Math.max(.001,Math.min(.045+(d.rimSoftness||0)*.16,(ro-ri)*.45,H*.018)):.02;

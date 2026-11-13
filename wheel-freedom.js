@@ -74,16 +74,26 @@
  var rack=document.createElement('nav');rack.id='potteryToolRack';rack.setAttribute('aria-label','도구통');rack.hidden=true;rack.innerHTML='<small>도구통</small><div id="rackDeco"></div><div id="rackGlaze"></div>';stageEl.appendChild(rack);
  var dtools=$('dtools');$('rackDeco').appendChild(dtools);dtools.parentElement.setAttribute('aria-label','꾸미기 도구');
  var oldToolField=$('p-deco').querySelector('.field');if(oldToolField){var label=oldToolField.querySelector('.label');if(label)label.remove();}
- var symbols={brush:'<path d="M9 22l10-15 4 3-10 15zM8 23q-6 2-4 7 8 1 9-5"/>',carve:'<path d="M5 29l12-17 6 4-13 16zM17 12l4-8 6 4-4 8"/>',stamp:'<path d="M10 5h12v8l-3 6v5h-6v-5l-3-6zM6 24h20v7H6z"/>',erase:'<path d="M5 24L19 7l10 8-13 16H10zM12 16l10 8"/>'};
+ var symbols={
+ brush:'<path fill="#c69559" d="M16 40h8l2 108q-6 5-12 0z"/><path fill="#d8c7a6" d="M14 30h12v17H14z"/><path fill="#9f7040" d="M14 31C9 18 12 7 20 2c8 5 11 16 6 29z"/><path fill="none" d="M18 8v20M22 10v18"/>',
+ carve:'<path fill="#c99760" d="M15 47h11l1 98q-6 8-13 0z"/><path fill="#a3a59d" d="M18 49V29c-20-15-7-28 3-24 16 5 13 22-1 24M14 28h15"/>',
+ stamp:'<path fill="#bc8d54" d="M15 32h10v98H15z"/><path fill="#d8b582" d="M8 10q12-12 24 0v24H8z"/><path fill="#ac7948" d="M11 3h18v10H11z"/>',
+ erase:'<path fill="#c69966" d="M17 47h7v100h-7z"/><path fill="#e0c5a1" d="M8 10h24v40H8z"/><path fill="#c1a17b" d="M8 38h24v12H8z"/>',
+ glaze:'<path fill="#c99a5c" d="M17 46h8l2 102q-7 6-13 0z"/><path fill="#e8d3a7" d="M9 23c0-27 25-27 25 0 0 17-25 24-25 0z"/>'
+ };
  $('p-deco').appendChild($('dUndo'));$('dUndo').hidden=true;$('topUndo-deco').onclick=function(){if(top)undoBrush();else undoDeco();};$('wheelUndo').hidden=true;$('dToolTip').hidden=true;
- Array.from(dtools.querySelectorAll('[data-d]')).forEach(function(button){var name=button.textContent;button.classList.add('rackTool');button.innerHTML='<svg viewBox="0 0 34 36" aria-hidden="true">'+symbols[button.dataset.d]+'</svg><span>'+name+'</span>';});
- function glazeTool(id,label,icon,action){var b=document.createElement('button');b.id=id;b.type='button';b.className='rackTool';b.innerHTML='<svg viewBox="0 0 34 36" aria-hidden="true">'+icon+'</svg><span>'+label+'</span>';b.onclick=function(){action();rackSync();};$('rackGlaze').appendChild(b);return b;}
- glazeTool('rackGlazeBase','바탕 유약','<path d="M6 13h22l-3 18H9zM12 13V8a5 5 0 0 1 10 0v5"/>',function(){glazeBrush=false;$('glazeBrush').checked=false;refresh();});
+ Array.from(dtools.querySelectorAll('[data-d]')).forEach(function(button){var name=button.textContent;button.classList.add('rackTool');button.innerHTML='<svg viewBox="0 0 40 154" aria-hidden="true">'+symbols[button.dataset.d]+'</svg><span>'+name+'</span>';});
+ function glazeTool(id,label,icon,action){var b=document.createElement('button');b.id=id;b.type='button';b.className='rackTool';b.innerHTML='<svg viewBox="0 0 40 154" aria-hidden="true">'+icon+'</svg><span>'+label+'</span>';b.onclick=function(){action();rackSync();};$('rackGlaze').appendChild(b);return b;}
+ glazeTool('rackGlazeBase','바탕 유약',symbols.glaze,function(){glazeBrush=false;$('glazeBrush').checked=false;refresh();});
  glazeTool('rackGlazeBrush','붓칠',symbols.brush,function(){$('glazeBrush').checked=true;glazeBrush=true;checks=false;refresh();});
 
+ var toolName=document.createElement('output');toolName.id='rackToolName';toolName.setAttribute('aria-live','polite');rack.appendChild(toolName);
+ function currentName(){return st.stage==='glaze'?(glazeBrush?'붓칠':'바탕 유약'):({brush:'붓',carve:'조각칼',stamp:'도장',erase:'지우개'}[dTool]||'도구통');}
+ function showToolName(name){toolName.textContent=name;}
+ rack.querySelectorAll('.rackTool').forEach(function(button){var name=button.querySelector('span').textContent;button.setAttribute('aria-label',name);button.title=name;button.addEventListener('mouseenter',function(){showToolName(name);});button.addEventListener('focus',function(){showToolName(name);});button.addEventListener('mouseleave',function(){showToolName(currentName());});button.addEventListener('click',function(){showToolName(name);});});showToolName(currentName());
  $('glazeBrush').closest('label').hidden=true;$('glazeFree').remove();$('glazeChecks').remove();$('wheelUndo').textContent='되돌리기';
- $('glazePaintHint').textContent='도자기 뒤쪽 도구통에서 바탕 유약·붓칠를 직접 골라 주세요.';
- function rackSync(){rack.hidden=st.stage!=='deco'&&st.stage!=='glaze';$('rackDeco').hidden=st.stage!=='deco';$('rackGlaze').hidden=st.stage!=='glaze';$('rackGlazeBase').setAttribute('aria-pressed',String(!glazeBrush));$('rackGlazeBrush').setAttribute('aria-pressed',String(glazeBrush&&!checks));var sh=$('sheet').getBoundingClientRect();rack.style.bottom='auto';}
+ $('glazePaintHint').textContent='도자기 뒤쪽 도구통에서 바탕 유약·붓칠을 직접 골라 주세요.';
+ function rackSync(){if(toolName)showToolName(currentName());rack.hidden=st.stage!=='deco'&&st.stage!=='glaze';$('rackDeco').hidden=st.stage!=='deco';$('rackGlaze').hidden=st.stage!=='glaze';$('rackGlazeBase').setAttribute('aria-pressed',String(!glazeBrush));$('rackGlazeBrush').setAttribute('aria-pressed',String(glazeBrush&&!checks));var sh=$('sheet').getBoundingClientRect();rack.style.bottom='auto';}
  var rackRefresh=refresh;refresh=function(){rackRefresh();rackSync();};var rackStage=setStage;setStage=function(stage){rackStage(stage);rackSync();};var rackSheet=setSheet;setSheet=function(open){var result=rackSheet(open);rackSync();setTimeout(rackSync,300);return result;};window.addEventListener('resize',rackSync);rackSync();
  // A separate 3D inspection camera; dragging rotates the object instead of moving the photo.
  var viewer=document.createElement('dialog');viewer.id='finished360';viewer.innerHTML='<button type="button" id="closeFinished360">닫기 ×</button><h2>완성 작품 · 360° 감상</h2><p>좌우로 돌리고 위아래로 기울여 안쪽과 바닥까지 살펴보세요.</p><canvas id="finished360Canvas" width="600" height="540" aria-label="도자기 360도 감상"></canvas><small id="finished360Status">드래그로 회전 · 휠 또는 두 손가락으로 확대</small>';document.body.appendChild(viewer);

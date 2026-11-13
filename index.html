@@ -501,7 +501,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 <link rel="stylesheet" href="brand.css?v=e6836a19c0e4">
 <link rel="stylesheet" href="studio-theme.css?v=studio-guide-20261113">
 <script src="photo-backgrounds.js?v=dfb7ef3d38ad"></script>
-<link rel="stylesheet" href="tutorial.css?v=studio-guide-20261113">
+<link rel="stylesheet" href="tutorial.css?v=toolpot-glazed-base">
 <link rel="stylesheet" href="shelf-display.css?v=f20566bc0ec0">
 
 
@@ -518,7 +518,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 
 
 
-<link rel="stylesheet" href="wheel-freedom.css?v=soft-rim-rear-tools">
+<link rel="stylesheet" href="wheel-freedom.css?v=toolpot-glazed-base">
 
 
 
@@ -4066,16 +4066,26 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  var rack=document.createElement('nav');rack.id='potteryToolRack';rack.setAttribute('aria-label','도구통');rack.hidden=true;rack.innerHTML='<small>도구통</small><div id="rackDeco"></div><div id="rackGlaze"></div>';stageEl.appendChild(rack);
  var dtools=$('dtools');$('rackDeco').appendChild(dtools);dtools.parentElement.setAttribute('aria-label','꾸미기 도구');
  var oldToolField=$('p-deco').querySelector('.field');if(oldToolField){var label=oldToolField.querySelector('.label');if(label)label.remove();}
- var symbols={brush:'<path d="M9 22l10-15 4 3-10 15zM8 23q-6 2-4 7 8 1 9-5"/>',carve:'<path d="M5 29l12-17 6 4-13 16zM17 12l4-8 6 4-4 8"/>',stamp:'<path d="M10 5h12v8l-3 6v5h-6v-5l-3-6zM6 24h20v7H6z"/>',erase:'<path d="M5 24L19 7l10 8-13 16H10zM12 16l10 8"/>'};
+ var symbols={
+ brush:'<path fill="#c69559" d="M16 40h8l2 108q-6 5-12 0z"/><path fill="#d8c7a6" d="M14 30h12v17H14z"/><path fill="#9f7040" d="M14 31C9 18 12 7 20 2c8 5 11 16 6 29z"/><path fill="none" d="M18 8v20M22 10v18"/>',
+ carve:'<path fill="#c99760" d="M15 47h11l1 98q-6 8-13 0z"/><path fill="#a3a59d" d="M18 49V29c-20-15-7-28 3-24 16 5 13 22-1 24M14 28h15"/>',
+ stamp:'<path fill="#bc8d54" d="M15 32h10v98H15z"/><path fill="#d8b582" d="M8 10q12-12 24 0v24H8z"/><path fill="#ac7948" d="M11 3h18v10H11z"/>',
+ erase:'<path fill="#c69966" d="M17 47h7v100h-7z"/><path fill="#e0c5a1" d="M8 10h24v40H8z"/><path fill="#c1a17b" d="M8 38h24v12H8z"/>',
+ glaze:'<path fill="#c99a5c" d="M17 46h8l2 102q-7 6-13 0z"/><path fill="#e8d3a7" d="M9 23c0-27 25-27 25 0 0 17-25 24-25 0z"/>'
+ };
  $('p-deco').appendChild($('dUndo'));$('dUndo').hidden=true;$('topUndo-deco').onclick=function(){if(top)undoBrush();else undoDeco();};$('wheelUndo').hidden=true;$('dToolTip').hidden=true;
- Array.from(dtools.querySelectorAll('[data-d]')).forEach(function(button){var name=button.textContent;button.classList.add('rackTool');button.innerHTML='<svg viewBox="0 0 34 36" aria-hidden="true">'+symbols[button.dataset.d]+'</svg><span>'+name+'</span>';});
- function glazeTool(id,label,icon,action){var b=document.createElement('button');b.id=id;b.type='button';b.className='rackTool';b.innerHTML='<svg viewBox="0 0 34 36" aria-hidden="true">'+icon+'</svg><span>'+label+'</span>';b.onclick=function(){action();rackSync();};$('rackGlaze').appendChild(b);return b;}
- glazeTool('rackGlazeBase','바탕 유약','<path d="M6 13h22l-3 18H9zM12 13V8a5 5 0 0 1 10 0v5"/>',function(){glazeBrush=false;$('glazeBrush').checked=false;refresh();});
+ Array.from(dtools.querySelectorAll('[data-d]')).forEach(function(button){var name=button.textContent;button.classList.add('rackTool');button.innerHTML='<svg viewBox="0 0 40 154" aria-hidden="true">'+symbols[button.dataset.d]+'</svg><span>'+name+'</span>';});
+ function glazeTool(id,label,icon,action){var b=document.createElement('button');b.id=id;b.type='button';b.className='rackTool';b.innerHTML='<svg viewBox="0 0 40 154" aria-hidden="true">'+icon+'</svg><span>'+label+'</span>';b.onclick=function(){action();rackSync();};$('rackGlaze').appendChild(b);return b;}
+ glazeTool('rackGlazeBase','바탕 유약',symbols.glaze,function(){glazeBrush=false;$('glazeBrush').checked=false;refresh();});
  glazeTool('rackGlazeBrush','붓칠',symbols.brush,function(){$('glazeBrush').checked=true;glazeBrush=true;checks=false;refresh();});
 
+ var toolName=document.createElement('output');toolName.id='rackToolName';toolName.setAttribute('aria-live','polite');rack.appendChild(toolName);
+ function currentName(){return st.stage==='glaze'?(glazeBrush?'붓칠':'바탕 유약'):({brush:'붓',carve:'조각칼',stamp:'도장',erase:'지우개'}[dTool]||'도구통');}
+ function showToolName(name){toolName.textContent=name;}
+ rack.querySelectorAll('.rackTool').forEach(function(button){var name=button.querySelector('span').textContent;button.setAttribute('aria-label',name);button.title=name;button.addEventListener('mouseenter',function(){showToolName(name);});button.addEventListener('focus',function(){showToolName(name);});button.addEventListener('mouseleave',function(){showToolName(currentName());});button.addEventListener('click',function(){showToolName(name);});});showToolName(currentName());
  $('glazeBrush').closest('label').hidden=true;$('glazeFree').remove();$('glazeChecks').remove();$('wheelUndo').textContent='되돌리기';
- $('glazePaintHint').textContent='도자기 뒤쪽 도구통에서 바탕 유약·붓칠를 직접 골라 주세요.';
- function rackSync(){rack.hidden=st.stage!=='deco'&&st.stage!=='glaze';$('rackDeco').hidden=st.stage!=='deco';$('rackGlaze').hidden=st.stage!=='glaze';$('rackGlazeBase').setAttribute('aria-pressed',String(!glazeBrush));$('rackGlazeBrush').setAttribute('aria-pressed',String(glazeBrush&&!checks));var sh=$('sheet').getBoundingClientRect();rack.style.bottom='auto';}
+ $('glazePaintHint').textContent='도자기 뒤쪽 도구통에서 바탕 유약·붓칠을 직접 골라 주세요.';
+ function rackSync(){if(toolName)showToolName(currentName());rack.hidden=st.stage!=='deco'&&st.stage!=='glaze';$('rackDeco').hidden=st.stage!=='deco';$('rackGlaze').hidden=st.stage!=='glaze';$('rackGlazeBase').setAttribute('aria-pressed',String(!glazeBrush));$('rackGlazeBrush').setAttribute('aria-pressed',String(glazeBrush&&!checks));var sh=$('sheet').getBoundingClientRect();rack.style.bottom='auto';}
  var rackRefresh=refresh;refresh=function(){rackRefresh();rackSync();};var rackStage=setStage;setStage=function(stage){rackStage(stage);rackSync();};var rackSheet=setSheet;setSheet=function(open){var result=rackSheet(open);rackSync();setTimeout(rackSync,300);return result;};window.addEventListener('resize',rackSync);rackSync();
  // A separate 3D inspection camera; dragging rotates the object instead of moving the photo.
  var viewer=document.createElement('dialog');viewer.id='finished360';viewer.innerHTML='<button type="button" id="closeFinished360">닫기 ×</button><h2>완성 작품 · 360° 감상</h2><p>좌우로 돌리고 위아래로 기울여 안쪽과 바닥까지 살펴보세요.</p><canvas id="finished360Canvas" width="600" height="540" aria-label="도자기 360도 감상"></canvas><small id="finished360Status">드래그로 회전 · 휠 또는 두 손가락으로 확대</small>';document.body.appendChild(viewer);
@@ -4203,11 +4213,11 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
   try{var target=intendedTarget(),message='';
    if(target&&target.closest('#sheet')&&!$('sheet').classList.contains('open')&&target!==$('sheetToggle')){target=$('sheetToggle');message='먼저 도구 열기를 눌러 주세요.';}
    if(target&&target.closest('#sheet')&&$('sheet').classList.contains('open')){var parent=target.parentElement;while(parent&&parent!==$('sheet')){if(parent.tagName==='DETAILS')parent.open=true;parent=parent.parentElement;}}
-   if(highlight!==target){if(highlight)highlight.classList.remove('tutorialTarget');highlight=target;if(highlight&&highlight!==cv)highlight.classList.add('tutorialTarget');}
+   if(highlight!==target){if(highlight)highlight.classList.remove('tutorialTarget');highlight=target;if(highlight&&highlight!==cv&&highlight!==$('fireTitle'))highlight.classList.add('tutorialTarget');}
    if(!message&&done&&lastInStage()&&current().stage!=='done'&&current().stage!=='fire')message='빨간색으로 표시된 실제 '+$('nextBtn').textContent+' 버튼을 눌러 주세요.';
    if(!message)message=done?'잘했어요! 다음 안내로 이어집니다.':current().id==='open'&&fstep!=='ready'?'굽고 식히는 중이에요. 잠시 기다려 주세요.':'손가락 모션과 빨간 표시를 따라 직접 해보세요.';
    var clip=clippedTarget(target);if(clip)message=clip.direction==='up'?'창 안에서 위로 스크롤해 버튼이나 입력칸을 보이게 해주세요.':'창 안에서 아래로 스크롤해 버튼이나 입력칸을 보이게 해주세요.';
-   $('tutorialStatus').textContent=message;if(current().id==='solid'&&!secOn)$('tutorialText').textContent='이미 입체 보기로 전체 모양을 보고 있어요. 확인했다면 꾸미러 가기 버튼으로 넘어가세요.';if(current().id==='photo'&&photoOn)$('tutorialText').textContent='이미 완성 사진으로 보고 있어요. 다음 안내로 이어집니다.';if(gestureReady())$('tutorialText').textContent=({trim:'깎을 준비가 됐어요. 바깥 벽에 도구를 대고 안쪽으로 조금 밀거나 위아래로 움직여 흙을 깎아 보세요.',shape:'선택된 모양 잡기로 옆면을 좌우로 끌어 굴곡을 만들고, 높이를 바꿔 가며 위아래도 다듬어 보세요. ↕ 손잡이로 키를 바꿀 수 있어요.',inside:'속·두께 조절이 선택되어 있어요. 오른쪽 안쪽 벽을 좌우로 끌어 두께를 조절하세요.',smooth:'매끈하게가 선택되어 있어요. 바깥쪽 벽을 문질러 겉면을 다듬어 보세요.',smoothInner:'매끈하게가 선택되어 있어요. 오른쪽 단면의 안쪽 벽을 문질러 보세요.',brushRing:'한 바퀴 띠가 선택되어 있어요. 도자기에 그려 둘레를 따라 띠를 만들어 보세요.',carveRing:'한 바퀴 띠가 선택되어 있어요. 도자기에 그려 둘레를 따라 홈을 새겨 보세요.',brush:'붓이 선택되어 있어요. 손가락 모션처럼 도자기 위에 동그라미나 원하는 무늬를 그려 보세요.',stamp:'도장이 선택되어 있어요. 도자기 위를 눌러 찍어 보세요.',carve:'새김 도구가 선택되어 있어요. 도자기 위를 문질러 보세요.'})[current().id];positionHints(target);if(done&&!lastInStage())hand.hidden=true;if(clip){if(highlight)highlight.classList.remove('tutorialTarget');var sb=clip.owner?clip.owner.getBoundingClientRect():{left:0,top:0,width:window.innerWidth,height:window.innerHeight};hand.hidden=false;hand.dataset.motion=clip.direction==='up'?'scrollUp':'scrollDown';hand.setAttribute('data-scroll-label',clip.direction==='up'?'↑ 위로 스크롤':'↓ 아래로 스크롤');hand.style.left=(sb.left+sb.width*.85)+'px';hand.style.top=Math.max(60,Math.min((window.innerHeight||800)-100,sb.top+sb.height*.5))+'px';}else if(highlight&&highlight!==cv)highlight.classList.add('tutorialTarget');
+   $('tutorialStatus').textContent=message;if(current().id==='solid'&&!secOn)$('tutorialText').textContent='이미 입체 보기로 전체 모양을 보고 있어요. 확인했다면 꾸미러 가기 버튼으로 넘어가세요.';if(current().id==='photo'&&photoOn)$('tutorialText').textContent='이미 완성 사진으로 보고 있어요. 다음 안내로 이어집니다.';if(gestureReady())$('tutorialText').textContent=({trim:'깎을 준비가 됐어요. 바깥 벽에 도구를 대고 안쪽으로 조금 밀거나 위아래로 움직여 흙을 깎아 보세요.',shape:'선택된 모양 잡기로 옆면을 좌우로 끌어 굴곡을 만들고, 높이를 바꿔 가며 위아래도 다듬어 보세요. ↕ 손잡이로 키를 바꿀 수 있어요.',inside:'속·두께 조절이 선택되어 있어요. 오른쪽 안쪽 벽을 좌우로 끌어 두께를 조절하세요.',smooth:'매끈하게가 선택되어 있어요. 바깥쪽 벽을 문질러 겉면을 다듬어 보세요.',smoothInner:'매끈하게가 선택되어 있어요. 오른쪽 단면의 안쪽 벽을 문질러 보세요.',brushRing:'한 바퀴 띠가 선택되어 있어요. 도자기에 그려 둘레를 따라 띠를 만들어 보세요.',carveRing:'한 바퀴 띠가 선택되어 있어요. 도자기에 그려 둘레를 따라 홈을 새겨 보세요.',brush:'붓이 선택되어 있어요. 손가락 모션처럼 도자기 위에 동그라미나 원하는 무늬를 그려 보세요.',stamp:'도장이 선택되어 있어요. 도자기 위를 눌러 찍어 보세요.',carve:'새김 도구가 선택되어 있어요. 도자기 위를 문질러 보세요.'})[current().id];positionHints(target);if(done&&!lastInStage())hand.hidden=true;if(clip){if(highlight)highlight.classList.remove('tutorialTarget');var sb=clip.owner?clip.owner.getBoundingClientRect():{left:0,top:0,width:window.innerWidth,height:window.innerHeight};hand.hidden=false;hand.dataset.motion=clip.direction==='up'?'scrollUp':'scrollDown';hand.setAttribute('data-scroll-label',clip.direction==='up'?'↑ 위로 스크롤':'↓ 아래로 스크롤');hand.style.left=(sb.left+sb.width*.85)+'px';hand.style.top=Math.max(60,Math.min((window.innerHeight||800)-100,sb.top+sb.height*.5))+'px';}else if(highlight&&highlight!==cv&&highlight!==$('fireTitle'))highlight.classList.add('tutorialTarget');
   }finally{routing=false;}
  }
  function refresh(){if(!active){coach.hidden=true;hand.hidden=true;return;}coach.hidden=false;var step=current();$('tutorialCount').textContent='처음 빚기 · '+(index+1)+' / '+steps.length;$('tutorialTitle').textContent=(index+1)+'. '+step.title.replace(/^\d+\.\s*/, '');$('tutorialText').textContent=step.text;$('nextBtn').disabled=!(done&&lastInStage()&&step.stage!=='done');route();}
