@@ -5,8 +5,8 @@
  var steps=[
   {id:'sound',stage:'throw',title:'작업 소리 켜기',target:'#sound',text:'상단의 스피커 버튼을 눌러 소리를 켜 보세요. 다시 누르면 대각선이 표시되며 소리가 꺼져요.'},
   {id:'shape',stage:'throw',title:'1. 바깥 모양 만들기',target:'[data-t="shape"]',text:'모양 잡기를 고르고 도자기 옆면을 좌우로 끌어 보세요. 위아래로 이동하며 여러 높이를 다듬고, ↕ 손잡이로 키도 바꿀 수 있어요.'},
-  {id:'inside',stage:'throw',title:'2. 속과 두께 다듬기',target:'[data-t="thick"]',text:'속·두께 조절을 고른 뒤 오른쪽 안쪽 벽을 잡아 좌우로 움직여 보세요. 초록 점선은 권장 두께예요. 바깥 모양과 바닥 높이는 그대로예요.'},
-  {id:'trim',stage:'throw',title:'깎아 다듬기',target:'[data-t="trim"]',text:'깎아 다듬기를 고르면 흙을 잠깐 말려요. 준비가 되면 바깥 벽에 도구를 대고 안쪽으로 조금 밀거나 위아래로 움직여 깎아 보세요. 안쪽 공간과 바닥은 유지돼요.'},
+  {id:'inside',stage:'throw',title:'2. 속과 두께 다듬기',target:'[data-t="thick"]',text:'속·두께 조절을 고른 뒤 오른쪽 안쪽 벽을 잡아 좌우로 움직여 보세요. 초록 점선은 권장 두께예요. 속 깊이 슬라이더를 줄이면 아래쪽이 채워져 와인잔의 기둥을 만들 수 있어요.'},
+  {id:'trim',stage:'throw',title:'깎아 만들기',target:'[data-t="trim"]',text:'깎아 만들기를 고르면 흙을 잠깐 말려요. 준비가 되면 바깥 벽에 도구를 대고 안쪽으로 조금 밀거나 위아래로 움직여 깎아 보세요. 안쪽 공간과 바닥은 유지돼요.'},
   {id:'smooth',stage:'throw',title:'겉면 매끈하게',target:'[data-t="sponge"]',text:'매끈하게를 고르고 입체 보기에서 바깥쪽 벽을 잠시 문질러 보세요. 튀어나온 굴곡과 물레 자국을 다듬어요. 실수했다면 되돌리기를 쓸 수 있어요.'},
   {id:'smoothSection',stage:'throw',title:'단면으로 안쪽 보기',target:'#sectionView',text:'단면·벽 두께 버튼을 눌러 안쪽 벽을 펼쳐 보세요.'},
   {id:'smoothInner',stage:'throw',title:'안쪽도 매끈하게',target:'[data-t="sponge"]',text:'오른쪽 단면의 안쪽 벽을 문질러 속도 매끈하게 다듬어 보세요.'},
