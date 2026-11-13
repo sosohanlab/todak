@@ -109,7 +109,7 @@ function rebuild(d){
     innerCanvas=canvas(768,768);ix=innerCanvas.getContext('2d');
     ix.fillStyle='rgb('+d.inside.join(',')+')';ix.fillRect(0,0,768,768);
     if(surface){ix.globalCompositeOperation='multiply';ix.drawImage(surface.color,0,0,768,768);ix.globalCompositeOperation='source-over';}
-    ix.drawImage(d.topOverlay,0,0,768,768);
+    ix.save();ix.globalAlpha=d.topOpacity==null?.64:d.topOpacity;ix.drawImage(d.topOverlay,0,0,768,768);ix.restore();
   }
   if(d.topOverlay){
     inside.onBeforeCompile=function(shader){

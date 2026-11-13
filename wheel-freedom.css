@@ -68,3 +68,18 @@
 #potteryToolRack::after{z-index:3;clip-path:polygon(0 12%,10% 18%,30% 23%,50% 25%,70% 23%,90% 18%,100% 12%,100% 100%,0 100%)}
 
 #potteryToolRack .rackTool:nth-child(4){left:101px;transform:rotate(17deg)}
+
+/* Photo tools retain their real proportions and generous touch targets. */
+#potteryToolRack .rackTool .toolPhoto{fill:none;stroke:none;filter:drop-shadow(1px 2px 1px #49351d24)}
+#potteryToolRack .rackTool[data-d="stamp"] .toolPhoto{width:52px;height:106px;transform:rotate(180deg)}
+#potteryToolRack .rackTool[data-d="erase"] .toolPhoto{width:42px;height:68px}
+#potteryToolRack .rackTool[data-d="erase"]{top:-16px;left:116px;transform:rotate(22deg)}
+#potteryToolRack .rackTool[data-d="erase"][aria-pressed=true]{top:-30px}
+#activeToolCursor{width:50px;height:130px;transform:translate(-25px,-3px) rotate(-32deg);transform-origin:25px 3px}
+#activeToolCursor .toolPhoto{stroke:none;fill:none;filter:none}
+#activeToolCursor[data-tool="stamp"]{height:90px}#activeToolCursor[data-tool="stamp"] .toolPhoto{transform:rotate(180deg)}
+#activeToolCursor[data-tool="erase"]{height:65px;width:40px;transform:translate(-20px,-10px) rotate(-20deg)}
+
+#potteryToolRack .rackTool[data-d="erase"] .toolPhoto{width:34px;height:54px}
+#potteryToolRack .rackTool[data-d="erase"]{top:12px;left:98px;transform:rotate(10deg)}
+#potteryToolRack .rackTool[data-d="erase"][aria-pressed=true]{top:0}

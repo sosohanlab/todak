@@ -64,10 +64,7 @@
   if(st.trimReady&&ptr.down&&!ptr.trimInvalid){
    var side=ptr.trimSide||1,x=ptr.x,y=ptr.y;
    if(ptr.contact){ctx.save();ctx.setLineDash([5,5]);ctx.beginPath();ctx.ellipse(CX,y,Math.max(1,Math.abs(x-CX)),Math.max(1,Math.abs(x-CX)*TILT),0,0,TWO);ctx.strokeStyle='rgba(244,214,162,.65)';ctx.lineWidth=1.2;ctx.stroke();ctx.restore();}
-   ctx.strokeStyle='#977047';ctx.lineWidth=12;ctx.beginPath();ctx.moveTo(x+side*92,y-28);ctx.lineTo(x+side*42,y-9);ctx.stroke();
-   ctx.strokeStyle='#cead7f';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x+side*90,y-30);ctx.lineTo(x+side*43,y-12);ctx.stroke();
-   ctx.strokeStyle='#666b65';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x+side*43,y-10);ctx.lineTo(x+side*8,y);ctx.stroke();
-   ctx.strokeStyle='#eee9da';ctx.lineWidth=2.6;ctx.beginPath();ctx.ellipse(x,y,8,Math.max(3,TOOLS.trim.f*SV),-side*.23,0,TWO);ctx.stroke();
+   if(window.TodakToolImages)TodakToolImages.draw(ctx,'trim',x,y,105,side*(-Math.PI/2-.3));
   }
   ctx.restore();};
  cv.addEventListener('pointerdown',function(){ptr.trimWarned=false;ptr.trimLastStartX=null;ptr.trimLastStartY=null;});
