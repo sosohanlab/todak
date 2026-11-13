@@ -41,3 +41,7 @@
 
 /* Tool names live outside the clipped stage and rotated prop. */
 #rackToolName{position:fixed!important;transform:none!important;max-width:calc(100vw - 16px)!important;overflow:visible!important;clip-path:none!important;white-space:nowrap!important;z-index:10000;min-height:29px;box-sizing:border-box}#rackToolName[hidden]{display:none!important}
+
+/* Remove the old horizontal tool-list scrollport inside the prop. */
+#potteryToolRack #dtools,#potteryToolRack #rackDeco,#potteryToolRack #rackGlaze{overflow:visible!important;overflow-x:visible!important;overflow-y:visible!important;clip-path:none!important;contain:none!important;padding-bottom:0;min-height:178px}
+#potteryToolRack .rackTool,#potteryToolRack .rackTool svg{overflow:visible!important;clip-path:none!important}
