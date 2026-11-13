@@ -20,3 +20,14 @@
 }
 @media(max-width:759px) and (max-height:650px){#home .homeBox{min-height:calc(100dvh - 48px)}#home .homeMenus{gap:10px 16px;padding:16px 0}}
 @media(max-width:759px) and (max-height:580px){#home .homeBox{min-height:calc(100dvh - 42px)}}
+
+/* Compact home callouts without adding a badge row inside cards. */
+#home #goFree.tutorialFirstStart{outline:none;outline-offset:0;box-shadow:none}
+#home #goMarket{position:relative;overflow:visible}
+#home #goMarket.communityPreparing b{display:block;white-space:nowrap}
+#home #goMarket .communityState{position:absolute;top:-11px;right:12px;display:inline-block;white-space:nowrap;font-size:11px;line-height:1.2;padding:5px 9px;margin:0;border:1px solid #c8cec1;border-radius:12px;background:#e7ecdf;color:#596550;z-index:2}
+#home #goMarket .communityState::after{content:'';position:absolute;right:11px;bottom:-4px;width:6px;height:6px;background:#e7ecdf;border-right:1px solid #c8cec1;border-bottom:1px solid #c8cec1;transform:rotate(45deg)}
+@media(max-width:759px){
+ #home .homeMenus{transform:translateY(-10px)}
+ #home .homeMenus #tutorialHomeNote{margin-bottom:-16px;z-index:2;pointer-events:none}
+}
