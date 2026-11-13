@@ -83,3 +83,28 @@
 #potteryToolRack .rackTool[data-d="erase"] .toolPhoto{width:34px;height:54px}
 #potteryToolRack .rackTool[data-d="erase"]{top:12px;left:98px;transform:rotate(10deg)}
 #potteryToolRack .rackTool[data-d="erase"][aria-pressed=true]{top:0}
+
+/* Wall rail with three cups. Buttons remain upright and do not overlap; only photographs lean. */
+#potteryToolRack{width:300px;height:222px;right:464px;left:auto;top:146px;transform:none;max-width:none;overflow:visible;isolation:isolate}
+#potteryToolRack::before,#potteryToolRack::after{left:0;right:auto;top:62px;bottom:auto;width:300px;height:148px;border:0;border-radius:0;background:transparent url("assets/wall-tool-holders.webp") center / 100% 100% no-repeat;box-shadow:none;pointer-events:none}
+#potteryToolRack::before{z-index:1;filter:drop-shadow(1px 3px 2px #71503230)}
+#potteryToolRack::after{z-index:3;clip-path:polygon(0 42%,10% 42%,12% 47%,22% 51%,32% 47%,34% 42%,38% 42%,40% 47%,50% 51%,60% 47%,62% 42%,67% 42%,69% 47%,79% 51%,89% 47%,92% 42%,100% 42%,100% 100%,0 100%)}
+#potteryToolRack #rackThrow,#potteryToolRack #rackDeco,#potteryToolRack #rackGlaze,#potteryToolRack #dtools{position:absolute;inset:0;display:block;overflow:visible!important;min-height:0;padding:0;pointer-events:none}
+#potteryToolRack .rackTool[data-slot],#potteryToolRack .rackTool[data-slot][aria-pressed=true]{position:absolute;left:var(--tool-x);top:var(--tool-y,0px);width:44px;height:var(--tool-height,146px);min-width:44px;min-height:44px;padding:0!important;transform:none;z-index:2;pointer-events:auto;overflow:visible;align-items:center;justify-content:flex-start;filter:none;outline-offset:2px}
+#potteryToolRack .rackTool[data-slot] svg,#potteryToolRack .rackTool[data-slot] .toolPhoto{width:var(--photo-width,38px);height:var(--tool-height,146px);pointer-events:none;transform:rotate(var(--lean,0deg));transform-origin:50% 88%;stroke:none;fill:none;transition:transform .12s ease;filter:drop-shadow(1px 1px 1px #49351d22)}
+#potteryToolRack .rackTool[data-slot][aria-pressed=true] svg{transform:translateY(-8px) rotate(var(--lean,0deg));filter:drop-shadow(0 0 2px #fff9e5)}
+#potteryToolRack [data-slot="brush"]{--tool-x:20px;--tool-y:14px;--lean:-5deg}
+#potteryToolRack [data-slot="carve"]{--tool-x:64px;--tool-y:15px;--lean:3deg}
+#potteryToolRack [data-slot="stamp"]{--tool-x:128px;--tool-y:48px;--tool-height:108px;--photo-width:54px;--lean:180deg}
+#potteryToolRack [data-slot="erase"]{--tool-x:212px;--tool-y:96px;--tool-height:59px;--photo-width:36px;--lean:0deg}
+#potteryToolRack [data-slot="trim"]{--tool-x:46px;--tool-y:14px;--lean:-3deg}
+#potteryToolRack [data-slot="sponge"]{--tool-x:128px;--tool-y:107px;--tool-height:48px;--photo-width:52px;--lean:0deg}
+#potteryToolRack [data-slot="glaze"]{--tool-x:46px;--tool-y:18px;--photo-width:46px;--lean:-3deg}
+#potteryToolRack [data-slot="glazeBrush"]{--tool-x:128px;--tool-y:14px;--lean:3deg}
+#activeToolCursor[data-tool="sponge"]{width:56px;height:48px;transform:translate(-28px,-24px);transform-origin:center}
+@media(max-width:1440px){#potteryToolRack.rackDocked{position:relative;inset:auto;transform:none;width:300px;height:222px;margin:30px auto 10px;max-width:none;flex:none;grid-column:1/-1}}
+@media(max-width:380px){#potteryToolRack.rackDocked{margin-inline:calc((100% - 300px)/2);transform:scale(.90);transform-origin:50% 50%;margin-top:17px;margin-bottom:-4px}}
+@media(prefers-reduced-motion:reduce){#potteryToolRack .rackTool[data-slot] svg{transition:none}}
+
+#potteryToolRack .rackTool[data-slot="stamp"] .toolPhoto{transform-origin:50% 50%}
+#potteryToolRack [data-slot="glaze"]{--lean:0deg}

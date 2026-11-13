@@ -20,8 +20,8 @@ w.localStorage.setItem('todak.tutorial.v1','complete');w.eval(main);const q=w.qa
 const doc=w.document;q.free();q.preset('bowl');
 for(const [width,height] of [[320,568],[390,844],[768,1024],[820,1180],[1024,768],[1180,820],[1366,768],[1920,1080]]){
  Object.defineProperty(w,'innerWidth',{value:width,configurable:true});Object.defineProperty(w,'innerHeight',{value:height,configurable:true});
- for(const stage of ['deco','glaze']){q.stage(stage);w.dispatchEvent(new w.Event('resize'));const rack=doc.getElementById('potteryToolRack');assert.equal(rack.parentNode.id,width<=1180?'p-'+stage:'stage',width+' '+stage+' rack host');assert.equal(rack.classList.contains('rackDocked'),width<=1180);assert(!rack.hidden);}
- q.stage('throw');assert(doc.getElementById('potteryToolRack').hidden);
+ for(const stage of ['throw','deco','glaze']){q.stage(stage);w.dispatchEvent(new w.Event('resize'));const rack=doc.getElementById('potteryToolRack');assert.equal(rack.parentNode.id,width<=1440?'p-'+stage:'stage',width+' '+stage+' rack host');assert.equal(rack.classList.contains('rackDocked'),width<=1440);assert(!rack.hidden);}
+ q.stage('fire');assert(doc.getElementById('potteryToolRack').hidden);q.stage('done');assert(doc.getElementById('potteryToolRack').hidden);
 }
 q.stage('deco');q.clear();q.deco(.25,true);const alpha=q.paint.x.getImageData(512,512,1,1).data[3];for(let i=0;i<20;i++)q.deco(.25,false);assert(q.paint.x.getImageData(512,512,1,1).data[3]<=65,'bristle detail respects continuous-stroke opacity');
-assert(!fs.readFileSync(root+'index.html','utf8').includes('ctx.roundRect(ptr.x-8,ptr.y-110,16,118,8)'),'no capsule hand');assert.equal(errors.length,0);console.log('PASS eight viewport widths: tool pot docks outside vessel at <=1180, desktop placement restored, hidden during shaping, bristle opacity capped, no finger overlay');dom.window.close();
+assert(!fs.readFileSync(root+'index.html','utf8').includes('ctx.roundRect(ptr.x-8,ptr.y-110,16,118,8)'),'no capsule hand');assert.equal(errors.length,0);console.log('PASS eight viewport widths: tool pot docks outside vessel at <=1440, desktop placement restored, stage-specific tools during shaping, hidden while firing/done, bristle opacity capped, no finger overlay');dom.window.close();
