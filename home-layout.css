@@ -29,5 +29,5 @@
 #home #goMarket .communityState::after{content:'';position:absolute;right:11px;bottom:-4px;width:6px;height:6px;background:#e7ecdf;border-right:1px solid #c8cec1;border-bottom:1px solid #c8cec1;transform:rotate(45deg)}
 @media(max-width:759px){
  #home .homeMenus{transform:translateY(-10px)}
- #home .homeMenus #tutorialHomeNote{margin-bottom:-16px;z-index:2;pointer-events:none}
+ #home .homeMenus #tutorialHomeNote{margin-bottom:4px;z-index:2;pointer-events:none}
 }
