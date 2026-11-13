@@ -71,18 +71,19 @@
   $('openKiln').style.left=Math.max(85,Math.min(stageBox.width-85,x))+'px';$('openKiln').style.top=Math.max(box.top-stageBox.top+70,Math.min(limit-stageBox.top-35,y))+'px';
  };
 
- var rack=document.createElement('nav');rack.id='potteryToolRack';rack.setAttribute('aria-label','도구통');rack.hidden=true;rack.innerHTML='<small>도구통 · 도구를 눌러 선택하세요</small><div id="rackDeco"></div><div id="rackGlaze"></div>';stageEl.appendChild(rack);
+ var rack=document.createElement('nav');rack.id='potteryToolRack';rack.setAttribute('aria-label','도구통');rack.hidden=true;rack.innerHTML='<small>도구통</small><div id="rackDeco"></div><div id="rackGlaze"></div>';stageEl.appendChild(rack);
  var dtools=$('dtools');$('rackDeco').appendChild(dtools);dtools.parentElement.setAttribute('aria-label','꾸미기 도구');
  var oldToolField=$('p-deco').querySelector('.field');if(oldToolField){var label=oldToolField.querySelector('.label');if(label)label.remove();}
  var symbols={brush:'<path d="M9 22l10-15 4 3-10 15zM8 23q-6 2-4 7 8 1 9-5"/>',carve:'<path d="M5 29l12-17 6 4-13 16zM17 12l4-8 6 4-4 8"/>',stamp:'<path d="M10 5h12v8l-3 6v5h-6v-5l-3-6zM6 24h20v7H6z"/>',erase:'<path d="M5 24L19 7l10 8-13 16H10zM12 16l10 8"/>'};
+ $('p-deco').appendChild($('dUndo'));$('dUndo').hidden=true;$('topUndo-deco').onclick=function(){if(top)undoBrush();else undoDeco();};$('wheelUndo').hidden=true;$('dToolTip').hidden=true;
  Array.from(dtools.querySelectorAll('[data-d]')).forEach(function(button){var name=button.textContent;button.classList.add('rackTool');button.innerHTML='<svg viewBox="0 0 34 36" aria-hidden="true">'+symbols[button.dataset.d]+'</svg><span>'+name+'</span>';});
  function glazeTool(id,label,icon,action){var b=document.createElement('button');b.id=id;b.type='button';b.className='rackTool';b.innerHTML='<svg viewBox="0 0 34 36" aria-hidden="true">'+icon+'</svg><span>'+label+'</span>';b.onclick=function(){action();rackSync();};$('rackGlaze').appendChild(b);return b;}
  glazeTool('rackGlazeBase','바탕 유약','<path d="M6 13h22l-3 18H9zM12 13V8a5 5 0 0 1 10 0v5"/>',function(){glazeBrush=false;$('glazeBrush').checked=false;refresh();});
  glazeTool('rackGlazeBrush','붓칠',symbols.brush,function(){$('glazeBrush').checked=true;glazeBrush=true;checks=false;refresh();});
- glazeTool('rackGlazeChecks','체크 칠하기','<path d="M5 5h24v24H5zM13 5v24M21 5v24M5 13h24M5 21h24"/>',function(){$('glazeBrush').checked=true;glazeBrush=true;checks=true;refresh();});
- $('glazeBrush').closest('label').hidden=true;$('glazeFree').hidden=true;$('glazeChecks').hidden=true;
- $('glazePaintHint').textContent='화면 앞 도구통에서 바탕 유약·붓칠·체크 칠하기를 직접 골라 주세요.';
- function rackSync(){rack.hidden=st.stage!=='deco'&&st.stage!=='glaze';$('rackDeco').hidden=st.stage!=='deco';$('rackGlaze').hidden=st.stage!=='glaze';$('rackGlazeBase').setAttribute('aria-pressed',String(!glazeBrush));$('rackGlazeBrush').setAttribute('aria-pressed',String(glazeBrush&&!checks));$('rackGlazeChecks').setAttribute('aria-pressed',String(glazeBrush&&checks));var sh=$('sheet').getBoundingClientRect();rack.style.bottom=stageEl.clientWidth<760?Math.max(10,(window.innerHeight||HC)-sh.top+8)+'px':'24px';}
+
+ $('glazeBrush').closest('label').hidden=true;$('glazeFree').remove();$('glazeChecks').remove();$('wheelUndo').textContent='되돌리기';
+ $('glazePaintHint').textContent='도자기 뒤쪽 도구통에서 바탕 유약·붓칠를 직접 골라 주세요.';
+ function rackSync(){rack.hidden=st.stage!=='deco'&&st.stage!=='glaze';$('rackDeco').hidden=st.stage!=='deco';$('rackGlaze').hidden=st.stage!=='glaze';$('rackGlazeBase').setAttribute('aria-pressed',String(!glazeBrush));$('rackGlazeBrush').setAttribute('aria-pressed',String(glazeBrush&&!checks));var sh=$('sheet').getBoundingClientRect();rack.style.bottom='auto';}
  var rackRefresh=refresh;refresh=function(){rackRefresh();rackSync();};var rackStage=setStage;setStage=function(stage){rackStage(stage);rackSync();};var rackSheet=setSheet;setSheet=function(open){var result=rackSheet(open);rackSync();setTimeout(rackSync,300);return result;};window.addEventListener('resize',rackSync);rackSync();
  // A separate 3D inspection camera; dragging rotates the object instead of moving the photo.
  var viewer=document.createElement('dialog');viewer.id='finished360';viewer.innerHTML='<button type="button" id="closeFinished360">닫기 ×</button><h2>완성 작품 · 360° 감상</h2><p>좌우로 돌리고 위아래로 기울여 안쪽과 바닥까지 살펴보세요.</p><canvas id="finished360Canvas" width="600" height="540" aria-label="도자기 360도 감상"></canvas><small id="finished360Status">드래그로 회전 · 휠 또는 두 손가락으로 확대</small>';document.body.appendChild(viewer);

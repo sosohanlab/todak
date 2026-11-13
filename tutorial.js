@@ -7,23 +7,23 @@
   {id:'shape',stage:'throw',title:'1. 바깥 모양 만들기',target:'[data-t="shape"]',text:'모양 잡기를 고르고 도자기 옆면을 좌우로 끌어 보세요. 위아래로 이동하며 여러 높이를 다듬고, ↕ 손잡이로 키도 바꿀 수 있어요.'},
   {id:'inside',stage:'throw',title:'2. 속과 두께 다듬기',target:'[data-t="thick"]',text:'속·두께 조절을 고른 뒤 오른쪽 안쪽 벽을 잡아 좌우로 움직여 보세요. 초록 점선은 권장 두께예요. 속 깊이 슬라이더를 줄이면 아래쪽이 채워져 와인잔의 기둥을 만들 수 있어요.'},
   {id:'trim',stage:'throw',title:'깎아 만들기',target:'[data-t="trim"]',text:'깎아 만들기를 고르면 흙을 잠깐 말려요. 준비가 되면 바깥 벽에 도구를 대고 안쪽으로 조금 밀거나 위아래로 움직여 깎아 보세요. 안쪽 공간과 바닥은 유지돼요.'},
-  {id:'smooth',stage:'throw',title:'겉면 매끈하게',target:'[data-t="sponge"]',text:'매끈하게를 고르고 입체 보기에서 바깥쪽 벽을 잠시 문질러 보세요. 튀어나온 굴곡과 물레 자국을 다듬어요. 실수했다면 되돌리기를 쓸 수 있어요.'},
+  {id:'smooth',stage:'throw',title:'겉면 매끈하게',target:'[data-t="sponge"]',text:'매끈하게를 고르고 입체 보기에서 바깥쪽 벽을 잠시 문질러 보세요. 모양을 파내지 않고 작은 굴곡과 물레 자국만 정리해요. 강도를 조절할 수 있고, 입구 가장자리를 문지르면 살짝 둥글어져요. 실수했다면 되돌리기를 쓸 수 있어요.'},
   {id:'smoothSection',stage:'throw',title:'단면으로 안쪽 보기',target:'#sectionView',text:'단면·벽 두께 버튼을 눌러 안쪽 벽을 펼쳐 보세요.'},
   {id:'smoothInner',stage:'throw',title:'안쪽도 매끈하게',target:'[data-t="sponge"]',text:'오른쪽 단면의 안쪽 벽을 문질러 속도 매끈하게 다듬어 보세요.'},
   {id:'solid',stage:'throw',title:'4. 전체 모양 확인하기',target:'#solidView',text:'입체 보기를 눌러 다듬은 전체 모양을 확인하세요. 단면·벽 두께는 언제든 다시 켤 수 있어요.'},
-  {id:'brush',stage:'deco',title:'5. 붓으로 그려 보기',target:'[data-d="brush"]',text:'화면 앞 도구통에서 붓을 고르고 작품 위에 선을 그려 보세요. 색상, 붓 크기, 불투명도를 바꿀 수 있어요. 불투명도를 낮추면 색이 옅게 쌓여요.'},
+  {id:'brush',stage:'deco',title:'5. 붓으로 그려 보기',target:'[data-d="brush"]',text:'도자기 뒤쪽 도구통에서 붓을 고르고 작품 위에 선을 그려 보세요. 색상, 붓 크기, 불투명도를 바꿀 수 있어요. 불투명도를 낮추면 색이 옅게 쌓여요.'},
   {id:'brushRing',stage:'deco',title:'붓으로 한 바퀴 띠 그리기',target:'[data-d="brush"]',text:'붓에서 한 바퀴 띠를 선택하고 도자기 위를 그려 보세요. 같은 높이에 둘러지는 띠 무늬를 만들어요.'},
-  {id:'stampChoice',stage:'deco',title:'도장과 모양 고르기',target:'[data-d="stamp"]',text:'화면 앞 도구통에서 도장을 선택한 뒤 아래 도장 모양에서 꽃·잎 등 원하는 모양을 직접 골라 주세요.'},
+  {id:'stampChoice',stage:'deco',title:'도장과 모양 고르기',target:'[data-d="stamp"]',text:'도자기 뒤쪽 도구통에서 도장을 선택한 뒤 아래 도장 모양에서 꽃·잎 등 원하는 모양을 직접 골라 주세요.'},
   {id:'stamp',stage:'deco',title:'6. 도장 찍기',target:'[data-d="stamp"]',text:'고른 모양으로 도자기에 한 번 찍어 보세요. 크기와 색상도 바꿀 수 있어요.'},
-  {id:'carve',stage:'deco',title:'7. 새김 무늬 넣기',target:'[data-d="carve"]',text:'화면 앞 도구통에서 조각칼을 고르고 작품 위를 문질러 무늬를 새겨 보세요. 지우개와 되돌리기로 장식을 수정할 수 있어요.'},
+  {id:'carve',stage:'deco',title:'7. 새김 무늬 넣기',target:'[data-d="carve"]',text:'도자기 뒤쪽 도구통에서 조각칼을 고르고 작품 위를 문질러 무늬를 새겨 보세요. 지우개와 되돌리기로 장식을 수정할 수 있어요.'},
   {id:'carveRing',stage:'deco',title:'조각칼로 한 바퀴 띠 새기기',target:'[data-d="carve"]',text:'조각칼에서 한 바퀴 띠를 선택하고 도자기 위를 문질러 보세요. 둘레를 따라 홈이 이어져요.'},
   {id:'rotate',stage:'deco',title:'8. 반대쪽도 보기',target:'#rotR',text:'소리 옆의 좌우 화살표를 눌러 도자기를 돌려 보세요. 반대편에도 꾸밀 수 있어요. 휠이나 두 손가락으로 확대할 수 있고, 소리 버튼에서 작업음을 켤 수 있어요.'},
   {id:'color',stage:'glaze',title:'9. 유약 색 고르기',target:'#swatches',text:'유약 색을 하나 골라 보세요. 색 더 보기에서 더 많은 색과 직접 고르는 색을 사용할 수 있어요.'},
   {id:'finish',stage:'glaze',title:'10. 유광과 무광 고르기',target:'#finish',text:'반짝이게 또는 보송하게를 직접 골라 보세요. 굽기 전에는 물레 위에서, 완성 후에는 완성 사진에서 확인해요.'},
-  {id:'glazeBrush',stage:'glaze',title:'도구통에서 유약 붓 고르기',target:'#rackGlazeBrush',text:'화면 앞 도구통에서 붓칠을 눌러 보세요. 도구를 고른 뒤 옆면이나 위에서 꾸미기에서 원하는 부분에 유약을 칠할 수 있어요.'},
+  {id:'glazeBrush',stage:'glaze',title:'도구통에서 유약 붓 고르기',target:'#rackGlazeBrush',text:'도자기 뒤쪽 도구통에서 붓칠을 눌러 보세요. 도구를 고른 뒤 옆면이나 위에서 꾸미기에서 원하는 부분에 유약을 칠할 수 있어요.'},
   {id:'glazeOpacity',stage:'glaze',title:'유약 투명도 조절하기',target:'#glazeOpacity',text:'유약 불투명도를 움직여 보세요. 낮추면 바탕이 비치고, 높이면 진하게 칠해져요. 붓 유약 색과 굵기도 고를 수 있어요.'},
   {id:'dip',stage:'glaze',title:'11. 담그는 깊이 정하기',target:'#dip',text:'담가서 덧입히기를 열고 입구만 또는 절반까지를 고른 뒤, 담그는 깊이를 움직여 보세요. 덧입힐 색도 고를 수 있어요.'},
-  {id:'effect',stage:'glaze',title:'12. 표면 무늬 확인하기',target:'#fx',text:'점박이 또는 잔금을 선택해 무늬 변화를 보세요. 없음으로 되돌릴 수도 있어요.'},
+  {id:'effect',stage:'glaze',title:'12. 표면 무늬 확인하기',target:'#fx',text:'없음·점박이·잔금 중 원하는 표면을 골라 보세요. 어떤 항목을 골라도 다음 안내로 이어져요.'},
   {id:'heat',stage:'glaze',title:'13. 불 세기 정하기',target:'#fire',text:'불 세기를 직접 골라 보세요. 약한 불은 안전하고, 센 불은 색 변화나 금이 생길 수 있어요. 고른 뒤 가마로 넘어가요.'},
   {id:'load',stage:'fire',title:'14. 가마에 넣기',target:'#cv',text:'작품을 누르거나 가마 안으로 끌어 넣으세요. 가마가 닫히면 굽기가 시작돼요.'},
   {id:'open',stage:'fire',title:'15. 식힌 뒤 꺼내기',target:'#openKiln',text:'굽기가 끝나면 온도가 내려가는 것을 지켜보세요. 100℃ 이하로 식은 뒤 가마 문 열기를 눌러야 안전해요.'},
@@ -155,7 +155,7 @@
 
  // This is an explicit user request, never an automatic search. Network failure cannot lock the guide.
  $('searchImage').addEventListener('click',function(){if(active)mark('search');});
- $('swatches').addEventListener('click',function(e){if(e.target.closest('[data-g]'))mark('color');});$('finish').addEventListener('click',function(e){if(e.target.closest('[data-f]'))mark('finish');});$('fx').addEventListener('click',function(e){var b=e.target.closest('[data-x]');if(b&&b.dataset.x!=='none')mark('effect');});$('fire').addEventListener('click',function(e){if(e.target.closest('[data-fr]'))mark('heat');});
+ $('swatches').addEventListener('click',function(e){if(e.target.closest('[data-g]'))mark('color');});$('finish').addEventListener('click',function(e){if(e.target.closest('[data-f]'))mark('finish');});$('fx').addEventListener('click',function(e){var b=e.target.closest('[data-x]');if(b)mark('effect');});$('fire').addEventListener('click',function(e){if(e.target.closest('[data-fr]'))mark('heat');});
  $('dipDepth').addEventListener('input',function(){if(st.dip)mark('dip');});var dipBefore=null;$('dipHandle').addEventListener('pointerdown',function(){dipBefore=$('dipDepth').value;});$('dipHandle').addEventListener('pointermove',function(){if(dipBefore!==null&&$('dipDepth').value!==dipBefore)mark('dip');});
  $('photoObjectSize').addEventListener('input',function(){mark('size');});$('realPhotoScene').addEventListener('change',function(){mark('background');});
  var sheetBase=setSheet;setSheet=function(open){var result=sheetBase(open);if(active)route();return result;};
@@ -166,7 +166,7 @@
  $('viewMenu').addEventListener('toggle',function(){if(active&&current().id==='sound')route();});
  document.addEventListener('scroll',function(){if(active)route();},true);
  window.addEventListener('resize',function(){if(active)route();});
- var helpText={throw:'모양 잡기: 바깥 옆면을 좌우로 끌어요. 속·두께: 오른쪽 안쪽 벽을 조절해요. 매끈하게: 벽을 문질러 굴곡을 다듬어요. 입체/단면 보기로 확인하세요.',deco:'붓·도장·조각칼로 작품 위에 꾸며요. 색·크기·불투명도를 바꿀 수 있어요. 지우개와 되돌리기로 고치고, 좌우 화살표로 돌려 반대편도 꾸미세요.',glaze:'도구통에서 바탕 유약·붓칠·체크 칠하기를 고르고 유약 색과 불투명도, 유광/무광을 조절해요. 담가서 덧입히기에서 색과 담그는 깊이를 조절하고, 표면 무늬와 불 세기를 정하세요.',fire:'작품을 누르거나 가마로 끌어 넣어요. 굽기가 끝나고 100℃ 이하로 식으면 가마 문을 열어 꺼내세요.',done:'드래그로 도자기 이동, 좌우 화살표로 회전, 휠·두 손가락으로 배경 확대·축소. 도자기 크기와 배경은 따로 조절해요. 카드 저장·공유, 닮은 물건 검색과 비교 카드도 사용할 수 있어요.'};
+ var helpText={throw:'모양 잡기: 바깥 옆면을 좌우로 끌어요. 속·두께: 오른쪽 안쪽 벽을 조절해요. 매끈하게: 벽을 문질러 굴곡을 다듬어요. 입체/단면 보기로 확인하세요.',deco:'붓·도장·조각칼로 작품 위에 꾸며요. 색·크기·불투명도를 바꿀 수 있어요. 지우개와 되돌리기로 고치고, 좌우 화살표로 돌려 반대편도 꾸미세요.',glaze:'도구통에서 바탕 유약·붓칠를 고르고 유약 색과 불투명도, 유광/무광을 조절해요. 담가서 덧입히기에서 색과 담그는 깊이를 조절하고, 표면 무늬와 불 세기를 정하세요.',fire:'작품을 누르거나 가마로 끌어 넣어요. 굽기가 끝나고 100℃ 이하로 식으면 가마 문을 열어 꺼내세요.',done:'드래그로 도자기 이동, 좌우 화살표로 회전, 휠·두 손가락으로 배경 확대·축소. 도자기 크기와 배경은 따로 조절해요. 카드 저장·공유, 닮은 물건 검색과 비교 카드도 사용할 수 있어요.'};
  var helpButton=document.createElement('button');helpButton.type='button';helpButton.id='stageHelpButton';helpButton.className='ghost';helpButton.textContent='도움말';helpButton.setAttribute('aria-expanded','false');helpButton.setAttribute('aria-controls','stageBriefHelp');$('sheetTitle').after(helpButton);
  var helpBox=document.createElement('aside');helpBox.id='stageBriefHelp';helpBox.hidden=true;helpBox.innerHTML='<b id="stageBriefTitle"></b><p id="stageBriefText"></p><button type="button" class="ghost" id="stageHelpClose">닫기</button>';$('sheetBody').prepend(helpBox);
  function closeHelp(){helpBox.hidden=true;helpButton.setAttribute('aria-expanded','false');}

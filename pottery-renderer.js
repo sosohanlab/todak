@@ -123,15 +123,15 @@ function rebuild(d){
   var clay=new T.MeshStandardMaterial({color:0xbda185,roughness:.95,bumpMap:micro,bumpScale:.02});materials.push(outer,inside,clay);
   var carving=!!d.carve,n=carving?(low?224:320):128,H=d.height,ro=d.rAt(1),ri=d.innerAt(1),hollow=H-d.floor>.05;
   // Tiny rounded edges avoid a grazing, razor-sharp material seam at rim and foot.
-  var footBevel=Math.min(.045,H*.004,d.rAt(0)*.02),rimBevel=hollow?Math.max(.001,Math.min(.045,(ro-ri)*.18,H*.004)):.02;
+  var footBevel=Math.min(.045,H*.004,d.rAt(0)*.02),rimBevel=hollow?Math.max(.001,Math.min(.045+(d.rimSoftness||0)*.16,(ro-ri)*.45,H*.018)):.02;
   var points=[new T.Vector2(0,0),new T.Vector2(Math.max(0,d.rAt(0)-footBevel),0)],outerStart=1;
   points.push(new T.Vector2(d.rAt(0)-footBevel*.25,footBevel*.25));
   points.push(new T.Vector2(d.rAt(footBevel/H),footBevel));
   for(var a=1;a<n;a++){var outerY=H*a/n;if(outerY>footBevel&&outerY<H-rimBevel)points.push(new T.Vector2(d.rAt(a/n),outerY));}
-  points.push(new T.Vector2(ro,H-rimBevel));points.push(new T.Vector2(ro-rimBevel*.25,H-rimBevel*.25));points.push(new T.Vector2(ro-rimBevel,H));
+  for(var lip=0;lip<=6;lip++){var angle=lip/6*Math.PI/2;points.push(new T.Vector2(ro-rimBevel+rimBevel*Math.cos(angle),H-rimBevel+rimBevel*Math.sin(angle)));}
   var outerEnd=points.length-1;
   if(hollow){
-    points.push(new T.Vector2(ri+rimBevel,H));points.push(new T.Vector2(ri+rimBevel*.25,H-rimBevel*.25));points.push(new T.Vector2(ri,H-rimBevel));
+    for(var lip=0;lip<=6;lip++){var angle=Math.PI/2+lip/6*Math.PI/2;points.push(new T.Vector2(ri+rimBevel+rimBevel*Math.cos(angle),H-rimBevel+rimBevel*Math.sin(angle)));}
     for(var b=n-1;b>=0;b--){var yy=d.floor+(H-d.floor)*b/n;if(yy<H-rimBevel)points.push(new T.Vector2(d.innerAt(yy/H),yy));}
     points.push(new T.Vector2(0,d.floor));
   }else points.push(new T.Vector2(0,H));
