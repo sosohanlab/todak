@@ -149,7 +149,7 @@ function rebuild(d){
   // Incisions change the actual outer shell, including its silhouette and normals.
   var incisionStats={vertices:0,maxDepth:0,raisedVertices:0,maxRaise:0};
   if(carving){
-    var mask=canvas(1024,1024),mx=mask.getContext('2d');mx.filter='blur(3px)';mx.drawImage(d.carve,0,0,1024,1024);
+    var mask=canvas(1024,1024),mx=mask.getContext('2d');mx.filter='blur(5px)';mx.drawImage(d.carve,0,0,1024,1024);
     var alpha=mx.getImageData(0,0,1024,1024).data,normal=geo.attributes.normal;
     function cutAt(u,v){var x=((u%1+1)%1)*1024,y=Math.max(0,Math.min(1023,(1-v)*1023)),xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi;
       function a(xx,yy){var i=(yy*1024+(xx%1024))*4;return alpha[i+3]/255*(d.carveMode==='raised'?-1:(alpha[i]>127?-1:1));}

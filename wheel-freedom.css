@@ -61,3 +61,10 @@
 /* View and undo actions remain directly below the sheet header. */
 #sheetViewBar{flex:none;padding:8px 12px;border-bottom:1px solid #e1dfd6;background:#faf8f2}#sheetViewBar[hidden],#sheetViewBar [hidden]{display:none!important}#sheetViewBar .wheelFreedom{margin:0}#sheetViewBar .chips{display:flex;gap:6px;flex-wrap:nowrap}#sheetViewBar button{min-height:44px;flex:1;min-width:0;padding:8px 5px;font-size:12px;white-space:nowrap} .sheet:not(.open) #sheetViewBar{display:none}
 @media(max-width:359px){#sheetViewBar{padding:7px 8px}#sheetViewBar button{font-size:11px}}
+
+/* Supplied ceramic pot: the back sits behind the handles, the front conceals their ends. */
+#potteryToolRack::before,#potteryToolRack::after{left:28px;right:auto;top:auto;bottom:20px;width:125px;height:135px;box-sizing:border-box;border:0;border-radius:0;background:transparent url("assets/speckled-tool-pot.webp") no-repeat -45.45px -30.85px / 220px 188.5px;box-shadow:none;pointer-events:none}
+#potteryToolRack::before{z-index:1;filter:drop-shadow(3px 5px 3px #62452c26)}
+#potteryToolRack::after{z-index:3;clip-path:polygon(0 12%,10% 18%,30% 23%,50% 25%,70% 23%,90% 18%,100% 12%,100% 100%,0 100%)}
+
+#potteryToolRack .rackTool:nth-child(4){left:101px;transform:rotate(17deg)}

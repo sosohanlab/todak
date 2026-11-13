@@ -500,7 +500,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 <link rel="stylesheet" href="shop.css?v=2a36d87a785c">
 <link rel="stylesheet" href="brand.css?v=e6836a19c0e4">
 <link rel="stylesheet" href="studio-theme.css?v=studio-guide-20261113">
-<script src="photo-backgrounds.js?v=dfb7ef3d38ad"></script>
+<script src="photo-backgrounds.js?v=provided-workshop-20261113"></script>
 <link rel="stylesheet" href="tutorial.css?v=toolpot-glazed-base">
 <link rel="stylesheet" href="shelf-display.css?v=f20566bc0ec0">
 
@@ -518,7 +518,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 
 
 
-<link rel="stylesheet" href="wheel-freedom.css?v=pressure-brush-controls-20261113">
+<link rel="stylesheet" href="wheel-freedom.css?v=provided-pot-20261113">
 
 
 
@@ -1339,16 +1339,52 @@ function undoDeco(){
   hasPaint=h.hp; hasCarve=h.hc; st.used=JSON.parse(h.u); texVer++; updateReadout(); dirty=true;
 }
 $("carveMode").addEventListener("click",function(e){var b=e.target.closest("[data-cm]");if(!b)return;dCarveMode=b.dataset.cm;press("carveMode","cm",dCarveMode);});
-// Separate bristle trails retain dry gaps instead of repeatedly filling solid circles.
+// Rebuild a continuous wet-brush ribbon, so pointer events never create tiled ends.
 function brushPressure(e){var raw=Number(e.pressure),kind=e.pointerType;return kind==='pen'&&raw>0?clamp(raw,.02,1):kind==='touch'&&raw>0&&Math.abs(raw-.5)>.001?clamp(raw,.02,1):.65;}
-function brushSegment(c,ax,ay,bx,by,rx,ry,pressure){
- var p=pressure==null?.65:pressure,width=.28+1.08*Math.pow(p,.65),dx=(bx-ax)/rx,dy=(by-ay)/ry,len=Math.hypot(dx,dy),nx=len>.0001?-dy/len:0,ny=len>.0001?dx/len:1;
- c.save();c.translate(ax,ay);c.scale(rx,ry);c.lineCap='butt';c.strokeStyle=c.fillStyle;
- for(var j=0;j<35;j++){
-  if(j%13===3||j%13===4)continue;
-  var t=((j+.5)/35*2-1)*width,grain=.5+.5*Math.sin(j*2.399),load=(.18+.72*p)*(.46+.54*grain);
-  c.globalAlpha=load;c.lineWidth=(.026+.018*grain)*width;c.beginPath();c.moveTo(nx*t,ny*t);c.lineTo(dx+nx*t,dy+ny*t+(len<.0001?.12*width:0));c.stroke();
- }c.restore();
+var brushPoints=[];
+function brushPoint(x,y,rx,ry,p){return {x:x,y:y,rx:Math.max(.7,rx),ry:Math.max(.7,ry),p:p==null?.65:p};}
+function brushStroke(c,points){
+ if(!points.length)return;
+ var samples=[],keys=['x','y','rx','ry','p'];
+ function mid(a,b){var v={};keys.forEach(function(k){v[k]=(a[k]+b[k])/2;});return v;}
+ function add(a,b,d,t){var v={};keys.forEach(function(k){v[k]=(1-t)*(1-t)*a[k]+2*(1-t)*t*b[k]+t*t*d[k];});samples.push(v);}
+ for(var i=0;i<points.length;i++){
+  var q=points[i],a=i?mid(points[i-1],q):q,b=i+1<points.length?mid(q,points[i+1]):q;
+  var steps=Math.max(1,Math.min(32,Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/Math.max(.7,Math.min(q.rx,q.ry)*.22))));
+  for(var j=0;j<steps;j++)add(a,q,b,j/steps);
+ }samples.push(points[points.length-1]);
+ var distance=0,average=0;
+ samples.forEach(function(v,i){var before=samples[Math.max(0,i-1)],after=samples[Math.min(samples.length-1,i+1)];distance+=Math.hypot(v.x-before.x,v.y-before.y);v.distance=distance;v.angle=Math.atan2((after.y-before.y)/v.ry,(after.x-before.x)/v.rx);v.width=(.28+1.02*Math.pow(v.p,.65))*(.98+.02*Math.sin(distance*.17));average+=v.p;});
+ average/=samples.length;
+ if(distance>2)samples.forEach(function(v){var reach=Math.max(1,Math.min(v.rx,v.ry)*2);v.width*=(.58+.42*Math.min(1,v.distance/reach))*(.66+.34*Math.min(1,(distance-v.distance)/reach));});
+ function edge(v,angle,scale){return [v.x+Math.cos(angle)*v.rx*v.width*scale,v.y+Math.sin(angle)*v.ry*v.width*scale];}
+ function line(v,angle,scale,first){var xy=edge(v,angle,scale);if(first)c.moveTo(xy[0],xy[1]);else c.lineTo(xy[0],xy[1]);}
+ c.save();c.lineJoin=c.lineCap='round';
+ var bands=[1,.98,.95,.91,.86,.78,.64,.46],loads=[.08,.14,.23,.30,.35,.30,.18,.08];
+ bands.forEach(function(scale,k){
+  c.beginPath();samples.forEach(function(v,i){line(v,v.angle+Math.PI/2,scale,i===0);});
+  var end=samples[samples.length-1],start=samples[0];
+  for(var j=1;j<=12;j++)line(end,end.angle+Math.PI/2-j*Math.PI/12,scale);
+  for(var i=samples.length-1;i>=0;i--)line(samples[i],samples[i].angle-Math.PI/2,scale);
+  for(var j=1;j<=12;j++)line(start,start.angle-Math.PI/2-j*Math.PI/12,scale);
+  c.closePath();c.globalAlpha=loads[k]*(.4+.6*average);c.fill();
+ });
+ // Subtle filament grain in the wet pigment, never empty comb-like channels.
+ c.globalCompositeOperation='destination-out';c.globalAlpha=.055;c.strokeStyle='#000';
+ [-.61,-.33,.16,.49,.72].forEach(function(offset){c.beginPath();samples.forEach(function(v,i){var xy=edge(v,v.angle+Math.PI/2,offset);if(i)c.lineTo(xy[0],xy[1]);else c.moveTo(xy[0],xy[1]);});c.lineWidth=.45;c.stroke();});
+ c.restore();
+}
+function brushSegment(c,ax,ay,bx,by,rx,ry,p){brushStroke(c,[brushPoint(ax,ay,rx,ry,p),brushPoint(bx,by,rx,ry,p)]);}
+function paintBrushPath(hit,size,first){
+ if(first)brushPoints=[];
+ var prev=brushPoints[brushPoints.length-1],x=hit.u*TW;
+ if(prev){while(x-prev.x>TW/2)x-=TW;while(x-prev.x<-TW/2)x+=TW;}
+ var point=brushPoint(x,(1-hit.v)*TH,size/(TWO*rAt(hit.v))*TW,size/st.height*TH,ptr.brushPressure);
+ if(prev&&Math.hypot(point.x-prev.x,point.y-prev.y)<.35)brushPoints[brushPoints.length-1]=point;else brushPoints.push(point);
+ if(brushPoints.length>2048)brushPoints=brushPoints.filter(function(_,i){return i%2===0||i===brushPoints.length-1;});
+ var c=opacityStroke.x;c.clearRect(0,0,TW,TH);c.fillStyle=css(pigColor());
+ var min=Infinity,max=-Infinity;brushPoints.forEach(function(v){min=Math.min(min,v.x-v.rx*1.4);max=Math.max(max,v.x+v.rx*1.4);});
+ for(var k=Math.ceil(-max/TW);k<=Math.floor((TW-min)/TW);k++){c.save();c.translate(k*TW,0);brushStroke(c,brushPoints);c.restore();}
 }
 function dab(u,v,size,ring,fromU,fromV){
   var r=rAt(v), rx=Math.max(0.7,size/(TWO*r)*TW), ry=Math.max(0.7,size/st.height*TH), x=u*TW, y=(1-v)*TH;
@@ -1379,7 +1415,8 @@ function applyDeco(hit,first){
   if((dTool==="brush"||dTool==="stamp")&&dOpacity<=0){ptr.last=hit;return;}
   if(dTool==="brush"&&first){if(!opacityStroke){opacityStroke=mk(TW,TH);opacityBase=mk(TW,TH);}opacityBase.x.putImageData(paint.x.getImageData(0,0,TW,TH),0,0);opacityStroke.x.clearRect(0,0,TW,TH);}
 
-  if(dTool==="stamp"){
+  if(dTool==="brush"&&!dRing){paintBrushPath(hit,curSize(),first);hasPaint=true;markUsed();}
+  else if(dTool==="stamp"){
     if(first){stampAt(hit.u,hit.v); hasPaint=true; markUsed();}
   }else{
     var size=curSize(), a=ptr.last||hit, du=hit.u-a.u, dv=hit.v-a.v, n, i, f;
@@ -1453,11 +1490,18 @@ var reliefPreviewKey=-1,reliefPreviewLayer=null;
 function reliefPreview(){
  if(reliefPreviewKey===texVer&&reliefPreviewLayer)return reliefPreviewLayer.c;
  var size=512,mask=mk(size,size);mask.x.drawImage(carve.c,0,0,size,size);var pixels=mask.x.getImageData(0,0,size,size).data;
+ var field=new Float32Array(size*size),temp=new Float32Array(size*size),kernel=[1,4,6,4,1];
+ for(var i=0;i<field.length;i++)field[i]=(pixels[i*4]/127.5-1)*pixels[i*4+3]/255;
+ // A rounded profile avoids hard black/white outlines around both relief types.
+ for(var pass=0;pass<2;pass++){
+  for(var y=0;y<size;y++)for(var x=0;x<size;x++){var v=0;for(var k=-2;k<=2;k++)v+=field[y*size+(x+k+size)%size]*kernel[k+2];temp[y*size+x]=v/16;}
+  for(var y=0;y<size;y++)for(var x=0;x<size;x++){var v=0;for(var k=-2;k<=2;k++)v+=temp[clamp(y+k,0,size-1)*size+x]*kernel[k+2];field[y*size+x]=v/16;}
+ }
  reliefPreviewLayer=reliefPreviewLayer||mk(size,size);var out=reliefPreviewLayer.x.createImageData(size,size);
- function h(x,y){x=(x+size)%size;y=clamp(y,0,size-1);var at=(y*size+x)*4;return (pixels[at]>127?1:-1)*pixels[at+3]/255;}
+ function h(x,y){return field[clamp(y,0,size-1)*size+(x+size)%size];}
  for(var y=0;y<size;y++)for(var x=0;x<size;x++){
-  var height=h(x,y),slope=h(x-2,y-2)-h(x+2,y+2),shadow=Math.max(0,h(x-3,y-4)-Math.max(0,height)),light=slope<0,body=height>0?.10:.23,alpha=Math.min(.82,Math.abs(slope)*.65+Math.abs(height)*body+shadow*.28),i=(y*size+x)*4;
-  var value=light?255:height>0&&Math.abs(slope)<.06?238:55;out.data[i]=value;out.data[i+1]=light?249:value;out.data[i+2]=light?232:value;out.data[i+3]=Math.round(alpha*255);
+  var height=h(x,y),dx=h(x+2,y)-h(x-2,y),dy=h(x,y+2)-h(x,y-2),shade=(dx*.4+dy*.9)*.32+height*.025,light=shade>0,i=(y*size+x)*4;
+  out.data[i]=light?255:91;out.data[i+1]=light?246:76;out.data[i+2]=light?225:58;out.data[i+3]=Math.round(Math.min(.28,Math.abs(shade))*255);
  }reliefPreviewLayer.x.putImageData(out,0,0);reliefPreviewKey=texVer;return reliefPreviewLayer.c;
 }
 function compose(geometryCarve){
@@ -4016,7 +4060,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
 /* Free wheel throwing: axisymmetric profiles and a separate, planar inner surface. */
 (function(){
  var top=false,glazeBrush=false,active=null,last=null,history=[],topLayer=mk(768,768),strokeBase=mk(768,768),strokeInk=mk(768,768),loaded=null,topVersion=0,changed=false;
- var forms={};
+ var forms={},topBrushPaths=[];
  // Free throwing always starts with one lump; existing saved profiles remain valid.
  Array.from($('presets').querySelectorAll('button')).forEach(function(b){if(b.dataset.p!=='lump')b.remove();});
  $('f-presets').hidden=true;
@@ -4072,7 +4116,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  if(st.stage==='glaze'&&checks){var cell=76.8,col=Math.floor(h.x/cell),row=Math.floor(h.y/cell),key=col+','+row;if(!visited[key]){c.fillRect(col*cell,row*cell,cell+.5,cell+.5);visited[key]=true;}}
  else if(st.stage==='deco'&&dTool==='stamp'){if(first){c.translate(h.x,h.y);c.scale(size/20,size/20);c.lineWidth=2.6;c.stroke(new Path2D(STAMP_PATHS[dStamp]||STAMP_PATHS.flower));}}
  else if(st.stage==='deco'&&dRing){var radius=Math.hypot(h.x-384,h.y-384);c.beginPath();c.arc(384,384,radius,0,TWO);c.stroke();}
- else if(!erase){brushSegment(c,last?last.x:h.x,last?last.y:h.y,h.x,h.y,size,size,ptr.brushPressure);}
+ else if(!erase){if(first)topBrushPaths=[];if(!last||!topBrushPaths.length)topBrushPaths.push([]);var path=topBrushPaths[topBrushPaths.length-1];path.push(brushPoint(h.x,h.y,size,size,ptr.brushPressure));c.clearRect(0,0,768,768);topBrushPaths.forEach(function(points){brushStroke(c,points);});}
  else {c.beginPath();c.moveTo(last?last.x:h.x,last?last.y:h.y);c.lineTo(h.x,h.y);c.stroke();c.beginPath();c.arc(h.x,h.y,size,0,TWO);c.fill();}
  c.restore();if(!erase){topLayer.x.clearRect(0,0,768,768);topLayer.x.drawImage(strokeBase.c,0,0);topLayer.x.save();topLayer.x.globalAlpha=st.stage==='glaze'?Number($('glazeOpacity').value)/100:dOpacity;topLayer.x.drawImage(strokeInk.c,0,0);topLayer.x.restore();}changed=true;last=h;topVersion++;texVer++;dirty=true;}
  function paintSide(p,first){var hit=hitSurface(p.x,p.y);if(!hit){ptr.last=null;return;}if(Number($('glazeOpacity').value)>0)changed=true;var saved={t:dTool,p:dPig,c:dColor,s:dSizeV.brush,o:dOpacity,r:dRing};dTool='brush';dPig='custom';dColor=brushColor();dOpacity=Number($('glazeOpacity').value)/100;dRing=false;dSizeV.brush=Math.log(Number($('glazeBrushSize').value)/RANGE.brush[0])/Math.log(RANGE.brush[1]/RANGE.brush[0]);if(checks){var col=Math.floor(hit.u*16),row=Math.floor((1-hit.v)*12),key=col+','+row;if(!visited[key]){paint.x.save();paint.x.globalAlpha=dOpacity;paint.x.fillStyle=css(dColor);paint.x.fillRect(col*TW/16,row*TH/12,TW/16+.5,TH/12+.5);paint.x.restore();visited[key]=true;hasPaint=true;texVer++;dirty=true;}}else applyDeco(hit,first||!ptr.last);dTool=saved.t;dPig=saved.p;dColor=saved.c;dSizeV.brush=saved.s;dOpacity=saved.o;dRing=saved.r;}
