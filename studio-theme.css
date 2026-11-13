@@ -78,3 +78,7 @@ input[type=range],input[type=checkbox]{accent-color:var(--cobalt)}
 #openKiln[hidden]{display:none!important}
 
 .soundToggle{display:inline-flex;align-items:center;justify-content:center;gap:6px}.soundToggle svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.soundToggle .soundWaves,.soundToggle[aria-pressed=true] .soundSlash{display:none}.soundToggle[aria-pressed=true] .soundWaves{display:block}.soundToggle[aria-pressed=true]{color:var(--cobalt);border-color:var(--cobalt)}
+
+/* Sound state is shown by its icon, never by a filled selection background. */
+.stageToolbar #sound,.stageToolbar #sound[aria-pressed="true"],.stageToolbar #sound:hover{background:#fff;color:var(--ink);border-color:var(--line);box-shadow:none}
+.stageToolbar #sound{min-width:74px;gap:6px}.stageToolbar #sound svg{display:block;flex:0 0 19px;width:19px;height:19px}.stageToolbar #sound span{display:inline;color:inherit}
