@@ -2688,6 +2688,10 @@ $("saveCard").addEventListener("click",function(){
 var store={db:null,uid:null,items:[],best:{}}, storeStarted=false, shelfSel=null, shelfArm=false;
 function lsLoad(){try{return JSON.parse(localStorage.getItem("mullebang.v1")||localStorage.getItem("todak.market-preview.personal.v1")||"null");}catch(_){return null;}}
 function lsSave(){try{localStorage.setItem("mullebang.v1",JSON.stringify({items:store.items,best:store.best}));}catch(_){}}
+window.addEventListener('todak-personal-imported',function(){
+  var saved=lsLoad(); if(!saved)return;
+  store.items=saved.items||[];store.best=saved.best||{};renderShelf();
+});
 function dbCol(){return store.db.collection("data/users/"+store.uid);}
 function dbPut(item){if(!store.db)return; try{dbCol().doc(item.id).set(JSON.parse(JSON.stringify(item))).catch(function(){});}catch(_){}}
 function dbDel(id){if(!store.db)return; try{dbCol().doc(id).delete().catch(function(){});}catch(_){}}
@@ -2736,7 +2740,7 @@ function shelfAddCurrent(){
   var it=itemFields({id:"w"+Date.now().toString(36),t:Date.now(),date:today()});
   if(!it.thumb)return;
   st.curId=it.id; store.items.unshift(it);
-  while(store.items.length>40){dbDel(store.items.pop().id);}
+  // Keep imported and newly created works; never evict older works on save.
   lsSave(); dbPut(it); renderShelf();
 }
 function shelfUpdateCurrent(){
@@ -4551,6 +4555,8 @@ if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
 
 </script>
 
+<script src="migration/transfer-core.js?v=20261113"></script>
+<script src="migration/domain-transfer.js?v=20261113"></script>
 </body>
 </html>
 

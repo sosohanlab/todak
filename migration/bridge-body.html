@@ -1,0 +1,29 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>토닥 · 기존 작품 가져오기</title>
+<style>body{margin:0;background:#faf8f2;color:#23304a;font:16px/1.7 system-ui}main{max-width:500px;margin:10vh auto;padding:28px}button,a{font:inherit}button{background:#243eb0;color:white;border:0;border-radius:10px;padding:12px 18px;cursor:pointer}button:disabled{opacity:.5}p{overflow-wrap:anywhere}</style>
+<main><h1>기존 작품 가져오기</h1><p id="status" role="status">이전에 작품을 만든 기기와 브라우저에서 진행해 주세요. 기존 작품은 그대로 두고 새 주소의 진열장에 합쳐요.</p><button id="transfer">작품 가져오기</button><p><button id="backup">백업 파일 저장</button></p><a href="https://todak.sosohanlab.com/">새 토닥으로 돌아가기</a></main>
+<!-- TRANSFER_CORE -->
+<script>
+(function(){
+'use strict';
+const target='https://todak.sosohanlab.com', oldOrigin='https://sosohanlab.github.io';
+const token=new URLSearchParams(location.hash.slice(1)).get('token');
+const status=document.getElementById('status'), button=document.getElementById('transfer');
+const validToken=typeof token==='string' && /^[a-f0-9]{32}$/.test(token);
+if(location.origin!==oldOrigin){status.textContent='이 페이지는 기존 GitHub 주소에서 열어야 작품을 찾을 수 있어요.';button.disabled=true;document.getElementById('backup').disabled=true;return;}
+// An iframe is only a readiness probe. Read storage exclusively in a top-level window.
+if(window.parent!==window){window.parent.postMessage({type:'todak-bridge-ready'},target);return;}
+let waiting=false;
+async function collect(){const data=TodakTransferCore.collect(localStorage);data.fragments=await TodakTransferCore.fragmentsFromDB();return data;}
+button.onclick=async function(){
+ if(!window.opener||!validToken){status.textContent='새 토닥의 “이전 주소 작품 가져오기” 버튼으로 열어 주세요. 백업 파일로 옮길 수도 있어요.';return;}
+ button.disabled=true;status.textContent='이 브라우저의 기존 작품을 확인하고 있어요.';
+ try{const data=await collect();waiting=true;window.opener.postMessage({type:'todak-transfer-data',token,payload:data},target);status.textContent='새 주소에 안전하게 저장하고 있어요.';}catch(e){status.textContent=e.message;button.disabled=false;}
+};
+window.addEventListener('message',function(e){
+ if(e.origin!==target||e.source!==window.opener||!waiting||!e.data||e.data.token!==token)return;
+ if(e.data.type==='todak-transfer-saved'){waiting=false;status.textContent=e.data.found?'저장했어요. 새 토닥 창에서 진열장을 확인해 주세요.':'이 브라우저에 저장된 기존 작품을 찾지 못했어요. 이전에 이용한 기기와 브라우저에서 다시 시도해 주세요.';button.disabled=false;}
+ if(e.data.type==='todak-transfer-error'){waiting=false;status.textContent='새 주소에 저장하지 못했어요. 새 토닥 창의 안내를 확인해 주세요. 기존 작품은 그대로 있어요.';button.disabled=false;}
+});
+document.getElementById('backup').onclick=async function(){try{const data=await collect(),url=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='todak-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status.textContent='백업 파일을 저장했어요. 새 토닥의 작품 가져오기에서 선택해 주세요.';}catch(e){status.textContent=e.message;}};
+})();
+</script></html>
