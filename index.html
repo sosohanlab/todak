@@ -4133,6 +4133,12 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
   var modalNode=!$('cardDlg').hidden?$('cardDlg').querySelector('.drawerIn'):!$('searchDlg').hidden?$('searchDlg').querySelector('[role=dialog]'):null;
   coach.classList.toggle('tutorialModal',!!modalNode);
   if(modalNode){var mb=modalNode.getBoundingClientRect(),tr=target?target.getBoundingClientRect():{top:viewportH*.5,bottom:0};if(mb.left>=230){coach.style.left='12px';coach.style.width=Math.min(300,mb.left-24)+'px';coach.style.top=Math.max(12,(viewportH-(coach.getBoundingClientRect().height||100))*.5)+'px';}else{coach.style.left='12px';coach.style.width=Math.max(180,viewportW-24)+'px';coach.style.top=tr.top<viewportH*.5?Math.max(8,viewportH-(coach.getBoundingClientRect().height||100)-8)+'px':'8px';}}
+  // Keep the full open sound menu visible, including its actual toggle button.
+  if(current().id==='sound'&&$('viewMenu').open){
+   var soundBox=$('viewMenu').querySelector('.viewMenuBody').getBoundingClientRect(),soundCoachH=coach.getBoundingClientRect().height||coachH;
+   var below=soundBox.bottom+12,above=soundBox.top-soundCoachH-12;
+   coach.style.top=(below+soundCoachH<=viewportH-8?below:above>=8?above:Math.max(8,viewportH-soundCoachH-8))+'px';
+  }
   if(!target||target.hidden||target===$('fireTitle')){hand.hidden=true;return;}
   var rect=target.getBoundingClientRect(),x=rect.left+rect.width*.5,y=rect.top+rect.height*.5,kind='tap';
   if(target===cv){var t=.55,radius=['inside','smoothInner'].includes(current().id)?innerAt(t):rAt(t),px=CX+radius*SV,py=BASE-st.height*t*SV;if(['brush','brushRing','stamp','carve','carveRing'].includes(current().id))px=CX+rAt(t)*SV*.12;
@@ -4212,6 +4218,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  cv.addEventListener('pointerdown',function(){if(active&&(gestureReady()||current().id==='load')){engaged=true;route();}},true);
  cv.addEventListener('pointerup',function(){if(active&&!done){engaged=false;refresh();}});
  cv.addEventListener('pointercancel',function(){if(active){engaged=false;refresh();}});
+ $('viewMenu').addEventListener('toggle',function(){if(active&&current().id==='sound')route();});
  document.addEventListener('scroll',function(){if(active)route();},true);
  window.addEventListener('resize',function(){if(active)route();});
  var helpText={throw:'모양 잡기: 바깥 옆면을 좌우로 끌어요. 속·두께: 오른쪽 안쪽 벽을 조절해요. 매끈하게: 벽을 문질러 굴곡을 다듬어요. 입체/단면 보기로 확인하세요.',deco:'붓·도장·조각칼로 작품 위에 꾸며요. 색·크기·불투명도를 바꿀 수 있어요. 지우개와 되돌리기로 고치고, 좌우 화살표로 돌려 반대편도 꾸미세요.',glaze:'유약 색과 유광/무광을 골라요. 담가서 덧입히기에서 색과 담그는 깊이를 조절하고, 표면 무늬와 불 세기를 정하세요.',fire:'작품을 누르거나 가마로 끌어 넣어요. 굽기가 끝나고 100℃ 이하로 식으면 가마 문을 열어 꺼내세요.',done:'드래그로 도자기 이동, 좌우 화살표로 회전, 휠·두 손가락으로 배경 확대·축소. 도자기 크기와 배경은 따로 조절해요. 카드 저장·공유, 닮은 물건 검색과 비교 카드도 사용할 수 있어요.'};
