@@ -85,7 +85,7 @@
 #potteryToolRack .rackTool[data-d="erase"][aria-pressed=true]{top:0}
 
 /* Wall rail with three cups. Buttons remain upright and do not overlap; only photographs lean. */
-#potteryToolRack{width:300px;height:222px;right:464px;left:auto;top:146px;transform:none;max-width:none;overflow:visible;isolation:isolate}
+#potteryToolRack{width:300px;height:222px;right:464px;left:auto;top:40px;transform:none;max-width:none;overflow:visible;isolation:isolate}
 #potteryToolRack::before,#potteryToolRack::after{left:0;right:auto;top:62px;bottom:auto;width:300px;height:148px;border:0;border-radius:0;background:transparent url("assets/wall-tool-holders.webp") center / 100% 100% no-repeat;box-shadow:none;pointer-events:none}
 #potteryToolRack::before{z-index:1;filter:drop-shadow(1px 3px 2px #71503230)}
 #potteryToolRack::after{z-index:3;clip-path:polygon(0 42%,10% 42%,12% 47%,22% 51%,32% 47%,34% 42%,38% 42%,40% 47%,50% 51%,60% 47%,62% 42%,67% 42%,69% 47%,79% 51%,89% 47%,92% 42%,100% 42%,100% 100%,0 100%)}
