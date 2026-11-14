@@ -6,7 +6,7 @@ s=source.read_text()
 # Rebuild only the local extension block; the original pottery mechanics remain intact.
 a=s.index('/* Private local prototype:');b=s.index('\nif(hot&&hot.ready){hot.ready(start);}',a)
 community=(ROOT/'community.js').read_text();marker=' window.TodakCommunity='
-addons='\n'.join((ROOT/name).read_text() for name in ['market.js','display-assets.js','shop.js','shelf-display.js','shelf-break.js','real-photo.js','wheel-freedom.js','home-layout.js','tutorial.js','trimming.js','mobile-sheet.js'])
+addons='\n'.join((ROOT/name).read_text() for name in ['market.js','display-assets.js','shop.js','shelf-display.js','shelf-break.js','real-photo.js','saved-work-viewer.js','wheel-freedom.js','home-layout.js','tutorial.js','trimming.js','mobile-sheet.js'])
 community=community.replace(marker,'\n'+addons+'\n'+marker)
 s=s[:a]+community+s[b:]
 for name in ['market.css','shop.css','brand.css','tutorial.css','shelf-display.css','wheel-freedom.css','shelf-break.css','home-layout.css','trimming.css','mobile-sheet.css']:
