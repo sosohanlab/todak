@@ -82,3 +82,4 @@ input[type=range],input[type=checkbox]{accent-color:var(--cobalt)}
 /* Sound state is shown by its icon, never by a filled selection background. */
 .stageToolbar #sound,.stageToolbar #sound[aria-pressed="true"],.stageToolbar #sound:hover{background:#fff;color:var(--ink);border-color:var(--line);box-shadow:none}
 .stageToolbar #sound{min-width:74px;gap:6px}.stageToolbar #sound svg{display:block;flex:0 0 19px;width:19px;height:19px}.stageToolbar #sound span{display:inline;color:inherit}
+.stageToolbar #sound{min-width:0;gap:3px;padding:7px 9px}.stageToolbar #sound span{order:0}.stageToolbar #sound svg{order:1;flex-basis:16px;width:16px;height:16px}

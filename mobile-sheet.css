@@ -1,0 +1,11 @@
+#sheetGrab{display:none}
+.stage[data-stage="done"] #viewToggle{display:none!important}
+@media(max-width:759px){
+ #sheetGrab{display:flex;align-items:center;justify-content:center;flex:0 0 24px;height:24px;cursor:ns-resize;touch-action:none;background:#faf8f2;outline-offset:-4px}
+ #sheetGrab::before{content:'';display:block;width:42px;height:4px;border-radius:4px;background:#aab1a1}
+ #sheetGrab:focus-visible{outline:2px solid #2947ad}
+ #sheet.open{height:var(--mobile-sheet-height,56dvh);max-height:calc(100dvh - 100px)}
+ #sheet .sheetHead{touch-action:none}
+ #sheet.sheetDragging{transition:none!important;user-select:none}
+ #sheet:not(.open){height:auto;max-height:none}
+}

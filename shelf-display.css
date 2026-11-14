@@ -10,3 +10,11 @@
 @media(max-width:759px){#workshopShelf{width:120px}.miniShelfLabel{font-size:9px;bottom:-19px}}
 
 .shop-swatch.actualAsset{height:auto!important;background-size:cover!important;background-position:center top!important;flex:none}.shop-item{display:flex;flex-direction:column}.shop-item-body{flex:1;display:flex;flex-direction:column}.shop-item-body button{margin-top:auto}#shelfShop{width:100%;min-height:42px}#workshopShelf{box-shadow:none!important;outline:none;background:none!important}#workshopShelf .miniShelfLabel{display:none!important}
+.shelfSwipeHint{display:none}
+.shelfToolbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:12px 0}.shelfToolbar #shelfShop,.shelfToolbar #shelfCommunity{width:100%;min-width:0;min-height:44px;margin:0!important;padding:9px 6px;white-space:nowrap;font-size:clamp(11px,3.05vw,14px);display:flex;align-items:center;justify-content:center;gap:5px}.shelfToolbar #shelfCommunity small,.shelfToolbar #shelfCommunity span{white-space:nowrap}
+@media(max-width:759px){
+ #shelfGrid{grid-template-columns:minmax(0,1fr);width:100%;max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;padding-bottom:14px;scrollbar-width:thin}
+ #shelfGrid .savedCabinet{width:max(100%,720px);min-width:720px}
+ .shelfSwipeHint{display:block;margin:10px 0;color:#657359;font-size:12px}
+ .shelfDetail{grid-template-columns:1fr}.shelfDetail>img{width:min(100%,280px);max-height:260px;object-fit:contain;justify-self:center}
+}

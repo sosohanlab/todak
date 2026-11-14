@@ -17,5 +17,7 @@
  var base=renderShelf;renderShelf=function(){var result=base.apply(this,arguments);paint();return result;};
  $('shelfGrid').addEventListener('click',function(e){if(e.target.closest('.piece'))setTimeout(function(){if(!$('shelfDetail').hidden&&typeof $('shelfDetail').scrollIntoView==='function')$('shelfDetail').scrollIntoView({block:'nearest',behavior:'smooth'});},0);});
  var shopButton=document.createElement('button');shopButton.id='shelfShop';shopButton.type='button';shopButton.className='ghost';shopButton.textContent='포인트 상점 · 진열장 꾸미기';shopButton.onclick=function(){TodakShop.open('shelf');};$('drawer').querySelector('.shelfHead').after(shopButton);
+ var toolbar=document.createElement('div');toolbar.className='shelfToolbar';$('drawer').querySelector('.shelfHead').after(toolbar);toolbar.append(shopButton);if($('shelfCommunity'))toolbar.append($('shelfCommunity'));
+ var swipeHint=document.createElement('p');swipeHint.className='shelfSwipeHint';swipeHint.textContent='선반을 좌우로 밀어 작품을 크게 둘러보세요.';$('shelfGrid').before(swipeHint);$('shelfGrid').setAttribute('aria-label','완성한 작품 진열장 · 좌우로 스크롤');
  window.TodakShelfDisplay={refresh:function(){paint();},slots:slots};renderShelf();
 })();

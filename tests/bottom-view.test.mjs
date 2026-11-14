@@ -1,0 +1,4 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import '../bottom-view.js';const b=globalThis.TodakBottom;
+test('a bowl underside separates the actual foot from the outer wall silhouette',()=>{const m=b.surface([2,3,5,8,10],7);assert.equal(m.fraction,.2);assert(m.rows[0]===0);assert(m.rows[200]>0);assert(b.shade(m,.05,0,0)>b.shade(m,.5,.5,0));});
+test('bottom painting maps to the foot and cannot paint the surrounding side wall',()=>{const l={x:100,y:100,r:100,fraction:.25};assert.deepEqual(b.hit(100,100,l),{x:384,y:384});assert.equal(b.hit(130,100,l),null);const edge=b.hit(124,100,l);assert(edge.x>740&&edge.x<768);});
+test('a straight cylinder retains its full flat base without invented openings',()=>{const m=b.surface([4,4,4],12);assert.equal(m.fraction,1);assert(m.rows.every(y=>y===0));assert(Number.isFinite(b.shade(m,1,0,1)));});

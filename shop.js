@@ -11,6 +11,5 @@
  var originalAdd=shelfAddCurrent;shelfAddCurrent=function(){originalAdd();award(curItem());};
  var pill=document.createElement('button');pill.type='button';pill.className='points-pill';pill.id='myPoints';pill.innerHTML='✦ <span data-wallet-balance>'+wallet.points+' P</span><span class="mk-shop-label"> · 공방 꾸미기</span>';pill.onclick=openShop;el('marketDlg').querySelector('.mk-head-actions').prepend(pill);
  var homeShop=document.createElement('button');homeShop.type='button';homeShop.id='homeShop';homeShop.className='home-shop';homeShop.innerHTML='✦ 공방 꾸미기 · <span data-wallet-balance>'+wallet.points+' P</span>';homeShop.onclick=openShop;el('home').appendChild(homeShop);
- var doneShop=document.createElement('button');doneShop.type='button';doneShop.className='ghost';doneShop.style.marginTop='10px';doneShop.innerHTML='✦ 포인트로 배경 · 진열장 꾸미기';doneShop.onclick=openShop;el('p-done').appendChild(doneShop);
  window.TodakShop={open:openShop,purchase:purchase,wallet:wallet,catalog:catalog,demo:demoPoints,award:award,apply:apply};apply();
 })();
