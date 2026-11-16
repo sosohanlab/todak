@@ -189,3 +189,6 @@ body.ui-throw-tight #ui-work-info #ui-moves{min-width:68px;padding-inline:4px;ga
 body.ui-throw-tight #ui-work-info #ui-moves .ui-move-label{font-size:9px}
 body.ui-throw-tight #ui-work-info #ui-live-score{padding-inline:4px}
 @media(max-width:599px){body.ui-edit-bar #ui-work-info #ui-piece-name{display:none}}
+/* Every throwing mode uses the shared information/view bar, including Free and desktop. */
+body.ui-throw-bar #ui-work-info{left:6px;width:calc(var(--ui-work-width,100vw) - 12px);max-width:none}
+body[data-ui-stage=fire] #ui-work-info{left:6px;width:calc(var(--ui-work-width,100vw) - 12px);box-sizing:border-box}

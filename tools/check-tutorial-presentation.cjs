@@ -1,0 +1,33 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const {chromium}=require('C:/Users/pppoi/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const base='http://127.0.0.1:8771';
+const fixture=`window.guideVisualQA={show:function(id){cancelAdvance();active=true;complete=false;index=steps.findIndex(function(s){return s.id===id;});if(index<0)throw Error('Unknown step '+id);done=false;engaged=false;$('cardDlg').hidden=true;$('searchDlg').hidden=true;stageBase(current().stage);st.height=12;st.floor=1;st.radii=Array.from({length:N},function(_,i){return 4+3*Math.sin(Math.PI*i/(N-1));});st.inner=st.radii.map(function(r){return r-.8;});st.trimReady=true;closeOverlays();if(['shape','inside','smooth','smoothInner'].includes(id)){document.querySelector('#tools [data-t="'+({shape:'shape',inside:'thick',smooth:'sponge',smoothInner:'sponge'})[id]+'"]').click();setSec(id==='inside'||id==='smoothInner',true);}if(['brush','stamp','carve','raised','glazePaint'].includes(id)){if(current().stage==='deco')document.querySelector('#dtools [data-d="'+({brush:'brush',stamp:'stamp',carve:'carve',raised:'carve'})[id]+'"]').click();else $('rackGlazeBrush').click();}if(id==='stampChoice')document.querySelector('#dtools [data-d="brush"]').click();if(id==='title'){ $('cardDlg').hidden=false;}done=false;cancelAdvance();window.TodakLayoutPreview.sync();window.TodakResponsive.refresh();focusStep();dirty=true;},view:function(){return {CX:CX,BASE:BASE,SV:SV,W:W,HC:HC,height:st.height};}};`;
+(async()=>{fs.mkdirSync('output/tutorial-review',{recursive:true});const browser=await chromium.launch({channel:'chrome',headless:true});const report=[];
+try{
+ for(const [width,height] of [[320,568],[390,844],[768,1024],[1440,900],[844,390]]){
+  const p=await browser.newPage({viewport:{width,height},locale:'ko-KR',hasTouch:width<600,isMobile:width<600});p.setDefaultTimeout(10000);const errors=[];p.on('pageerror',e=>errors.push(e.message));
+  await p.route('**/*clarity.ms/**',r=>r.fulfill({body:'',contentType:'application/javascript'}));
+  await p.route(base+'/?tutorial_review=1',r=>r.fulfill({contentType:'text/html',body:fs.readFileSync('release-site/index.html','utf8').replace('lockHome();window.TodakTutorial=',fixture+'\nlockHome();window.TodakTutorial=')}));
+  await p.goto(base+'/?tutorial_review=1',{waitUntil:'domcontentloaded'});assert(await p.locator('#goFree').isEnabled());assert(await p.locator('#goChallenge').isEnabled());await p.locator('#goTutorial').click();await p.waitForFunction(()=>window.TodakTutorialPresentation?.state().visible);
+  await p.waitForTimeout(180);await p.screenshot({path:'output/tutorial-review/'+width+'-initial.png'});
+  assert.equal(await p.locator('#ui-work-info').evaluate(e=>e.contains(document.getElementById('ui-work-views'))),true,'Free mode keeps views inside the shared bar');
+  assert(await p.locator('#ui-work-info').isVisible(),'tutorial keeps the shared bar visible');
+  if(width<600)assert.equal(await p.locator('#sheet').evaluate(e=>e.classList.contains('open')),false,'hands-on mobile step frees canvas');
+  assert.equal(await p.locator('#tutorialCoach').evaluate(e=>e.parentNode===document.body),true);
+  for(const id of ['shape','inside','brush','stampChoice','stamp','glazePaint','background','title']){
+   await p.evaluate(id=>guideVisualQA.show(id),id);await p.waitForTimeout(220);
+   const result=await p.evaluate(()=>{const ids=['tutorialCoach','tutorialAction'];const boxes=Object.fromEntries(ids.map(id=>{const r=document.getElementById(id).getBoundingClientRect();return[id,{x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}];}));return{state:TodakTutorialPresentation.state(),boxes,count:document.getElementById('tutorialCount').textContent};});
+   if(id!=='title')assert.equal(await p.locator('#ui-work-info').evaluate(e=>e.contains(document.getElementById('ui-work-views'))),true,id+' keeps the shared information/view bar');
+   for(const [name,r]of Object.entries(result.boxes)){assert(r.x>=0&&r.y>=0&&r.right<=width+1&&r.bottom<=height+1,width+' '+id+' '+name+' viewport bounds '+JSON.stringify(r));assert(r.width<320&&r.height<160,width+' '+id+' compact guide');}
+   if(['shape','inside','brush','stamp','glazePaint'].includes(id)){assert.equal(result.state.focus,'vessel');assert(result.state.path.length>200);assert(result.state.bounds.width<width*.95);}
+   if(id==='shape'){
+    const alpha=await p.evaluate(async()=>{const s=TodakTutorialPresentation.state(),b=s.bounds,svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+innerWidth+'" height="'+innerHeight+'"><defs><mask id="m" maskUnits="userSpaceOnUse" style="mask-type:luminance"><rect width="100%" height="100%" fill="white"/><path fill="black" d="'+s.path+'"/></mask></defs><rect width="100%" height="100%" fill="black" opacity=".43" mask="url(#m)"/></svg>',im=new Image();im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);await im.decode();const c=document.createElement('canvas');c.width=innerWidth;c.height=innerHeight;const x=c.getContext('2d');x.drawImage(im,0,0);const sample=(px,py)=>x.getImageData(Math.round(px),Math.round(py),1,1).data[3];return{inside:sample(b.left+b.width*.5,b.top+b.height*.5),outsideProfile:sample(b.left+2,b.top+b.height*.12),wheel:sample(b.left+b.width*.5,Math.min(innerHeight-2,b.bottom+10))};});
+    assert.equal(alpha.inside,0,'jar interior stays bright');assert(alpha.outsideProfile>80,'background inside the bounding box stays dim');assert(alpha.wheel>80,'wheel stays dim');
+   }
+   await p.screenshot({path:'output/tutorial-review/'+width+'-'+id+'.png'});report.push({width,height,id,...result});
+  }
+  await p.evaluate(()=>guideVisualQA.show('shape'));await p.locator('#homeBtn').click();assert(await p.locator('#tutorialCoach').isHidden());assert(await p.locator('#tutorialAction').isHidden());assert.equal(await p.locator('#tutorialVeil').isVisible(),false);
+  await p.locator('#homeClose').click();await p.waitForFunction(()=>TodakTutorialPresentation.state().visible);await p.locator('#tutorialSkip').click();assert.equal(await p.evaluate(()=>TodakTutorial.state().active),false);assert(await p.locator('#home').isVisible());assert(await p.locator('#tutorialAction').isHidden());assert.equal(await p.locator('#tutorialVeil').isVisible(),false);assert.deepEqual(errors,[]);await p.close();console.log('PASS '+width+' geometry focus, compact progress/callouts, modal, home pause/resume and exit');
+ }
+ fs.writeFileSync('output/tutorial-review/presentation-checks.json',JSON.stringify(report,null,2));
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

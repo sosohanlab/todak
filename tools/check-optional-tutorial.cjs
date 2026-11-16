@@ -1,0 +1,28 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const {chromium}=require('C:/Users/pppoi/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const base=process.argv.includes('--live')?'https://todak.sosohanlab.com':'http://127.0.0.1:8771';
+(async()=>{const b=await chromium.launch({channel:'chrome',headless:true});const report=[];try{
+ for(const [width,height]of [[320,568],[390,844],[768,1024],[1440,900]]){
+  const p=await b.newPage({viewport:{width,height},locale:'ko-KR',hasTouch:width<600,isMobile:width<600}),errors=[];p.setDefaultTimeout(12000);p.on('pageerror',e=>errors.push(e.message));
+  await p.route('**/*clarity.ms/**',r=>r.fulfill({body:'',contentType:'application/javascript'}));await p.goto(base+'/?optional_tutorial_check=1',{waitUntil:'domcontentloaded'});await p.waitForFunction(()=>!!window.TodakTutorialPresentation);
+  assert(await p.locator('#goFree').isEnabled());assert(await p.locator('#goChallenge').isEnabled());assert(await p.locator('#goTutorial').isVisible());assert(await p.locator('.ui-header').isHidden());
+  assert.equal(await p.locator('.homeMenus').evaluate(e=>Array.from(e.children).find(child=>child.getClientRects().length)?.classList.contains('homeTutorialEntry')),true,'tutorial is the first visible home menu');
+  await p.screenshot({path:'output/tutorial-review/home-'+(base.startsWith('https')?'live':'local')+'-'+width+'.png'});
+  await p.locator('#goFree').click();assert.equal(await p.evaluate(()=>TodakTutorial.state().active),false);assert(await p.locator('#tutorialCoach').isHidden());assert(await p.locator('#nextBtn').isEnabled());assert(await p.locator('#ui-work-info').evaluate(e=>e.contains(document.getElementById('ui-work-views'))));
+  await p.locator('#nextBtn').click();await p.waitForFunction(()=>document.body.dataset.uiStage==='deco');assert(await p.locator('#ui-work-info').evaluate(e=>e.contains(document.getElementById('ui-work-views'))));
+  await p.locator('#homeBtn').click();await p.locator('#goChallenge').click();assert(await p.locator('#chSel').isVisible());await p.locator('#chGrid .chCard').filter({has:p.locator('b',{hasText:'달항아리'})}).click();assert.equal(await p.evaluate(()=>TodakTutorial.state().active),false);
+  if(await p.locator('#chRules').isVisible())await p.locator('#chRules button').last().click();assert((await p.locator('#modeChip').innerText()).includes('달항아리'));await p.locator('#homeBtn').click();
+  await p.locator('#goTutorial').click();await p.waitForFunction(()=>TodakTutorial.state().active&&TodakTutorialPresentation.state().visible);assert.equal(await p.evaluate(()=>TodakTutorial.state().id),'shape');await p.waitForTimeout(150);
+  if(width===390)await p.screenshot({path:'output/tutorial-review/tutorial-'+(base.startsWith('https')?'live':'local')+'-390.png'});
+  if(width===390){
+   const s=await p.evaluate(()=>TodakTutorialPresentation.state()),r=s.bounds,x=r.right-10,y=r.top+r.height*.55;
+   await p.mouse.move(x,y);await p.mouse.down();await p.mouse.move(x-32,y,{steps:8});await p.waitForTimeout(100);assert(await p.locator('#tutorialAction').isHidden());assert(await p.locator('#tutorialCoach').isVisible());assert.notEqual(await p.evaluate(()=>TodakTutorialPresentation.state().path),s.path,'mask follows real clay deformation');await p.mouse.up();await p.waitForFunction(()=>TodakTutorial.state().id==='inside');
+  }
+  const before=await p.evaluate(()=>TodakTutorial.state().id);await p.locator('#homeBtn').click();assert((await p.locator('#goTutorial').innerText()).includes('이어하기'));await p.locator('#goTutorial').click();assert.equal(await p.evaluate(()=>TodakTutorial.state().id),before,'resume uses the current step');
+  await p.locator('#homeBtn').click();await p.locator('#restartTutorial').click();assert.equal(await p.evaluate(()=>TodakTutorial.state().id),'shape');await p.locator('#tutorialSkip').click();assert(await p.locator('#home').isVisible());assert.equal(await p.evaluate(()=>TodakTutorial.state().active),false);assert.equal(await p.evaluate(()=>localStorage.getItem('todak.tutorial.v1')),null,'leaving is not completing');
+  await p.locator('#goTutorial').click();assert.equal(await p.evaluate(()=>TodakTutorial.state().active),true);await p.locator('#homeBtn').click();await p.locator('#goFree').click();assert.equal(await p.evaluate(()=>TodakTutorial.state().active),false,'normal Free exits the paused tutorial');assert(await p.locator('#nextBtn').isEnabled());
+  await p.evaluate(()=>localStorage.setItem('todak.tutorial.v1','complete'));await p.reload({waitUntil:'domcontentloaded'});await p.waitForFunction(()=>!!window.TodakTutorialPresentation);assert.equal(await p.evaluate(()=>TodakTutorial.state().active),false);await p.locator('#goTutorial').click();assert.equal(await p.evaluate(()=>TodakTutorial.state().id),'shape','completed visitors can replay');await p.locator('#tutorialSkip').click();assert.equal(await p.evaluate(()=>localStorage.getItem('todak.tutorial.v1')),'complete','historical completion is preserved');
+  assert.deepEqual(errors,[]);report.push({width,height,pass:true});console.log('PASS '+width+' unlocked Free/Challenge, separate entry, real gesture, resume/restart/exit, completed-user replay and shared bars');await p.close();
+ }
+ fs.writeFileSync('output/tutorial-review/optional-'+(base.startsWith('https')?'live':'local')+'-checks.json',JSON.stringify(report,null,2));
+}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

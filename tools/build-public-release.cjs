@@ -9,7 +9,7 @@ for(const name of tracked){
 runtime.push('channel-attribution.js');
 for(const name of runtime){const dest=path.join(out,name);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(root,name),dest);}
 execFileSync(process.execPath,[path.join(root,'tools/build-studio-layout.cjs'),'--production'],{cwd:root,stdio:'inherit'});
-for(const name of ['studio-layout.css','responsive-layout.css','experience-polish.css','site-feedback.css'])fs.copyFileSync(path.join(root,'ui-layout-preview',name),path.join(out,name));
+for(const name of ['studio-layout.css','responsive-layout.css','experience-polish.css','site-feedback.css','tutorial-presentation.css'])fs.copyFileSync(path.join(root,'ui-layout-preview',name),path.join(out,name));
 for(const [slug,source] of [['threads','threads'],['insta','instagram']]){
  const target='/?utm_source='+source+'&utm_medium=social&utm_campaign=profile';
  const html='<!doctype html>\n<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>토닥으로 이동</title><link rel="canonical" href="https://todak.sosohanlab.com/"><meta http-equiv="refresh" content="0;url='+target.replaceAll('&','&amp;')+'"><script>location.replace('+JSON.stringify(target)+');</script></head><body><p><a href="'+target.replaceAll('&','&amp;')+'">토닥 시작하기</a></p></body></html>\n';
