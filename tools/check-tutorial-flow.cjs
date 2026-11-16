@@ -19,7 +19,7 @@ if(test==='tutorial-first-visit.cjs'){
 if(test==='tutorial-pause-home.cjs')source=source.replaceAll("d.getElementById('goFree').click();","d.getElementById('goTutorial').click();");
 if(test==='tutorial-skip-help.cjs'){
  source=source.replace("doc.getElementById('goFree').click();","doc.getElementById('goTutorial').click();");
- source=source.replace("assert(w.TodakTutorial.state().complete);","assert(!w.TodakTutorial.state().active);");
+ source=source.replace("assert(w.TodakTutorial.state().complete);","assert(w.TodakTutorial.state().active);assert(!doc.getElementById('home').hidden);doc.getElementById('goFree').click();");
  source=source.replace("assert.equal(w.localStorage.getItem('todak.tutorial.v1'),'complete');","assert.equal(w.localStorage.getItem('todak.tutorial.v1'),null);");
  source=source.replace('skip exits and persists unlock','exit returns home without falsely recording completion');
 }

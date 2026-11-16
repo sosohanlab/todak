@@ -16,5 +16,5 @@ var stopOptionalTutorial;
  ['goChallenge','goShelf','homeShop','openQuality'].forEach(function(id){var button=$(id);if(button)button.addEventListener('click',function(){if(active)stopOptionalTutorial();},true);});
  var finishGuide=finish;finish=function(skipped){if(skipped){stopOptionalTutorial();showHome(true);toast('튜토리얼을 나왔어요. 홈에서 언제든 다시 시작할 수 있어요.');return;}finishGuide(false);updateEntry();};
  var homeWithGuide=showHome;showHome=function(canClose){if(active)closeGuideWindows();var result=homeWithGuide(canClose);updateEntry();return result;};
- $('tutorialSkip').textContent='나가기';$('tutorialSkip').setAttribute('aria-label','튜토리얼을 나가고 홈으로 돌아가기');
+ $('tutorialSkip').textContent='홈으로';$('tutorialSkip').setAttribute('aria-label','튜토리얼을 잠시 쉬고 홈으로 돌아가기');$('tutorialSkip').onclick=function(){showHome(true);};
 })();

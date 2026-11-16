@@ -192,3 +192,14 @@ body.ui-throw-tight #ui-work-info #ui-live-score{padding-inline:4px}
 /* Every throwing mode uses the shared information/view bar, including Free and desktop. */
 body.ui-throw-bar #ui-work-info{left:6px;width:calc(var(--ui-work-width,100vw) - 12px);max-width:none}
 body[data-ui-stage=fire] #ui-work-info{left:6px;width:calc(var(--ui-work-width,100vw) - 12px);box-sizing:border-box}
+/* Let compact tools keep their shape; history scrolls with their settings. */
+.ui-header .ui-brand #homeBtn{display:flex;align-items:center;line-height:1.5;min-height:36px;flex:none}
+body.ui-touch-controls{--ui-tool-radius:14px;--ui-tool-height:66px}
+body.ui-touch-controls #sheet #tools .chip,body.ui-touch-controls #sheet #dtools .rackTool,body.ui-touch-controls #sheet #rackGlaze .rackTool{min-height:var(--ui-tool-height)!important;border-radius:var(--ui-tool-radius)!important;box-sizing:border-box;flex-shrink:0}
+body.ui-touch-controls #sheet #tools svg,body.ui-touch-controls #sheet #dtools svg,body.ui-touch-controls #sheet #rackGlaze svg{width:28px!important;height:28px!important;flex:none;object-fit:contain}
+.sheetBody>.panel>.ui-history{padding:0 0 10px;margin:0;gap:8px}
+.sheetBody>.panel>.ui-history button{min-height:36px;line-height:1.35;padding:6px 10px}
+body[data-ui-layout=sheet] .sheetBody{scroll-padding-block:8px 16px;scrollbar-width:thin}
+.app>.overlay{z-index:40}
+.app>.drawer{z-index:50}
+@media(max-width:759px){#home .homeMenus>.bigBtn b,#home #goMarket b{font-size:clamp(14px,4.7vw,21px);letter-spacing:normal;line-height:1.35;white-space:nowrap}#home .homeMenus>.bigBtn>span{word-break:keep-all;overflow-wrap:break-word}}
