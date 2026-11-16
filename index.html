@@ -4486,7 +4486,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
 (function(){
  'use strict';
  var stages=['throw','deco','glaze','fire','done'],names=['빚기','꾸미기','유약','굽기','완성'];
- var ns='http://www.w3.org/2000/svg',rendering=false,lastCanvasStep='',focusKind='',focusTarget=null,focusBox=null,geometryKey='',lastGeometry=null,vesselPreview=false,previewBox=null;
+ var ns='http://www.w3.org/2000/svg',rendering=false,lastCanvasStep='',focusKind='',focusTarget=null,focusBox=null,geometryKey='',lastGeometry=null,vesselPreview=false,previewBox=null,actionPlacementKey='',actionPlacementTarget=null;
  var top=coach.querySelector('.tutorialTop'),badge=document.createElement('span');badge.className='tutorialBadge';badge.textContent='처음 빚기';top.prepend(badge);
  var stageList=document.createElement('ol');stageList.id='tutorialStages';stageList.setAttribute('aria-label','튜토리얼 진행');
  stages.forEach(function(stage,i){var li=document.createElement('li');li.dataset.stage=stage;li.innerHTML='<span class="tutorialMeter"><i></i></span><span>'+names[i]+'</span>';stageList.appendChild(li);});
@@ -4567,7 +4567,12 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  }
  function positionProgress(){var mobile=innerWidth<600,short=innerHeight<560,width=mobile?Math.min(180,Math.floor((innerWidth-36)*.48)):short?180:220;coach.style.cssText='';coach.classList.remove('tutorialDocked','tutorialModal');if(coach.parentNode!==document.body)document.body.appendChild(coach);coach.style.width=width+'px';coach.style.left='12px';coach.style.top=Math.min(guideTop(),Math.max(8,innerHeight-110))+'px';return coach.getBoundingClientRect();}
  function positionAction(anchor,progress,canvasTarget){
-  var mobile=innerWidth<600,width=mobile?Math.min(230,innerWidth-24):226;action.dataset.side='none';
+  var mobile=innerWidth<600,width=mobile?Math.max(128,innerWidth-12-progress.right-10):226;
+  action.style.width=width+'px';var placementBox=canvasTarget?cv.getBoundingClientRect():anchor,wheel=window.TodakWheel;
+  var placementKey=[innerWidth,innerHeight,index,done,focusKind,width,action.getBoundingClientRect().height,progress.left,progress.top,progress.right,progress.bottom,Z,wheel&&wheel.top(),wheel&&wheel.bottom(),placementBox.left,placementBox.top,placementBox.right,placementBox.bottom].join('|');
+  // Wheel rotation and wobble update the spotlight, never the clickable callout.
+  if(actionPlacementTarget===focusTarget&&actionPlacementKey===placementKey)return;
+  actionPlacementTarget=focusTarget;actionPlacementKey=placementKey;action.dataset.side='none';
   if(mobile||vesselPreview&&innerHeight<560){var x=progress.right+10;width=mobile?Math.max(128,innerWidth-12-x):226;action.style.width=width+'px';action.style.left=x+'px';action.style.top=progress.top+'px';action.dataset.side=canvasTarget?'bottom':'none';action.style.setProperty('--tutorial-arrow','24px');return;}
   action.style.width=width+'px';var h=action.getBoundingClientRect().height||76,gap=16,header=document.querySelector('.ui-header'),headerBox=header&&header.getBoundingClientRect(),infoBox=$('ui-work-info').getBoundingClientRect();
   var candidates=[{left:anchor.left-gap-width,top:anchor.top+(anchor.height-h)/2,side:'right'},{left:anchor.right+gap,top:anchor.top+(anchor.height-h)/2,side:'left'},{left:anchor.left+(anchor.width-width)/2,top:anchor.top-gap-h,side:'bottom'},{left:anchor.left+(anchor.width-width)/2,top:anchor.bottom+gap,side:'top'}];
@@ -4575,7 +4580,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
   if(sheetBox){if(document.body.dataset.uiLayout==='sheet')candidates.unshift({left:anchor.left+(anchor.width-width)/2,top:sheetBox.top-gap-h,side:'bottom'});else candidates.unshift({left:sheetBox.left-gap-width,top:anchor.top+(anchor.height-h)/2,side:'right'});}
   if(sheetBox&&document.body.dataset.uiLayout!=='sheet'){var rack=document.querySelector('#potteryToolRack'),rackBox=rack&&rack.getClientRects().length?rack.getBoundingClientRect():null;if(rackBox)candidates.push({left:sheetBox.left-gap-width,top:Math.max(anchor.top+(anchor.height-h)/2,rackBox.bottom+gap),side:'right'});}
   if(vesselPreview&&previewBox){candidates.unshift({left:previewBox.left-gap-width,top:anchor.top+(anchor.height-h)/2,side:'right'},{left:previewBox.left+(previewBox.width-width)/2,top:previewBox.top-gap-h,side:'bottom'},{left:progress.right+12,top:progress.top,side:'bottom'});}
-  var controls=Array.from(document.querySelectorAll('button,input,select,summary,a')).filter(function(node){return node!==focusTarget&&!node.contains(focusTarget)&&!focusTarget.contains(node)&&!coach.contains(node)&&node.getClientRects().length;}).map(function(node){return node.getBoundingClientRect();});
+  var controls=Array.from(document.querySelectorAll('button,input,select,summary,a')).filter(function(node){return node!==focusTarget&&!node.contains(focusTarget)&&!focusTarget.contains(node)&&!coach.contains(node)&&!action.contains(node)&&node.getClientRects().length;}).map(function(node){return node.getBoundingClientRect();});
   if(mobile)candidates.push({left:12,top:progress.bottom+8,side:'bottom'});
   var sidebar=$('sheet').getBoundingClientRect(),rightLimit=!sheetTarget&&document.body.dataset.uiLayout==='sidebar'&&focusTarget.closest('#stage')?sidebar.left-gap:innerWidth-12;
   // Prefer the nearest clear position. Equal overlap scores used to send a
@@ -4596,7 +4601,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
   hand.hidden=false;hand.dataset.motion=kind;hand.dataset.targetKind=clip?'scroll':target===cv?'vessel':'control';hand.dataset.action=info[2]||'누르기';
   if(hand.dataset.targetKind==='control'){hand.style.left=clamp(x-9,r.left+2,r.right-20)+'px';hand.style.top=clamp(r.top+r.height*.3-9,r.top+2,r.bottom-20)+'px';}else{hand.style.left=clamp(x-8,8,innerWidth-48)+'px';hand.style.top=clamp(y-8,8,innerHeight-84)+'px';}
  }
- function hidePresentation(){veil.style.display='none';action.hidden=true;focusKind='';focusTarget=null;focusBox=null;vesselPreview=false;previewBox=null;document.body.classList.remove('tutorial-guided','tutorial-sheet-focus');}
+ function hidePresentation(){veil.style.display='none';action.hidden=true;focusKind='';focusTarget=null;focusBox=null;vesselPreview=false;previewBox=null;actionPlacementKey='';actionPlacementTarget=null;document.body.classList.remove('tutorial-guided','tutorial-sheet-focus');}
  positionHints=function(){};
  function present(){
   if(rendering)return;if(!active||!current()||!$('home').hidden){hidePresentation();return;}rendering=true;
