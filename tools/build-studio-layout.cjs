@@ -6,6 +6,18 @@ let html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 if(html.includes('<!-- todak-public-build:'))html=fs.readFileSync(path.join(root,'tools/studio-base.html'),'utf8');
 const marker='if(hot&&hot.ready){hot.ready(start);}';
 if(!html.includes(marker))throw Error('Missing startup');
+const shopAt=html.indexOf('var catalog={background:'),shopStart=html.lastIndexOf('(function(){',shopAt),shopEnd=html.indexOf('})();',html.indexOf('window.TodakShop={',shopAt));
+if(shopAt<0||shopStart<0||shopEnd<0)throw Error('Missing shop integration');
+html=html.slice(0,shopStart)+fs.readFileSync(path.join(root,'shop.js'),'utf8')+html.slice(shopEnd+5);
+// Replace the retired trimming feature while preserving interior depth controls.
+const trimStart=html.indexOf('/* Optional leather-hard trimming.'),trimEnd=html.indexOf('/* A continuously resizable mobile tool sheet.',trimStart);
+if(trimStart<0||trimEnd<0)throw Error('Missing retired-tool boundaries');
+html=html.slice(0,trimStart)+fs.readFileSync(path.join(sourceDir,'interior-depth-controls.js'),'utf8')+'\n'+html.slice(trimEnd);
+html=html.replaceAll("['trim','sponge']","['sponge']");
+html=html.replace("shapeTool('trim','깎아 만들기');",'');
+const scoreStart=html.indexOf('function roughnessSignal('),scoreEnd=html.indexOf('var ghostUntil=0;',scoreStart);
+if(scoreStart<0||scoreEnd<0)throw Error('Missing scoring boundaries');
+html=html.slice(0,scoreStart)+fs.readFileSync(path.join(sourceDir,'challenge-scoring.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'challenge-score-integration.js'),'utf8')+'\n'+html.slice(scoreEnd);
 html=html.replace('if(throwing&&tool!=="thick"&&st.target&&TARGETS[st.target]&&ghostOn())','if(throwing&&st.target&&TARGETS[st.target]&&ghostOn())');
 html=html.replace('ctx.moveTo(hp.x-17,hp.y); ctx.lineTo(CX+rAt(1)*SV,hp.y);', 'ctx.moveTo(hp.x+(hp.x<CX?17:-17),hp.y); ctx.lineTo(CX+(hp.x<CX?-1:1)*rAt(1)*SV,hp.y);');
 html=html.replace('var compact=window.innerWidth<=1440,host=compact?', 'var compact=window.innerWidth<760,host=compact?');
@@ -18,6 +30,30 @@ html=html.replace('openSaved:async function(item){var token=', "openSaved:async 
 html=html.replace("viewer.appendChild(orbitCanvas);var token=", "viewer.appendChild(orbitCanvas);orbitCanvas.hidden=false;fingers.clear();pinch=0;var token=");
 html=html.replace("render:renderOrbit,state:function()", "render:renderOrbit,turn:function(delta){yaw+=delta;renderOrbit();window.dispatchEvent(new Event('todak-inspection-rotated'));},state:function()");
 function required(before,after){if(!html.includes(before))throw Error('Missing integration hook: '+before.slice(0,80));html=html.replace(before,after);}
+// Setting an unchanged canvas width or height clears its bitmap on every UI click.
+required('cv.width=Math.round(W*dpr); cv.height=Math.round(HC*dpr);','var bitmapWidth=Math.round(W*dpr),bitmapHeight=Math.round(HC*dpr);if(cv.width!==bitmapWidth)cv.width=bitmapWidth;if(cv.height!==bitmapHeight)cv.height=bitmapHeight;');
+// The kiln already has a temperature on its control panel.
+required('$("temp").hidden=(s!=="fire");','$("temp").hidden=true;');
+required('$("temp").hidden=fstep!=="firing";','$("temp").hidden=true;');
+// Card/search exports must include the same object pan and size as the live photo.
+required('var image=TodakPhoto.export(photoData(),Math.min(2048,Math.max(dw,dh)),dw/dh);','var image=TodakPhoto.export(window.TodakRealPhoto?TodakRealPhoto.exportData():photoData(),Math.min(2048,Math.max(dw,dh)),dw/dh);');
+required('function imageCanvas(size,neutral){\n    var d=photoData();', 'function imageCanvas(size,neutral){\n    var d=window.TodakRealPhoto?TodakRealPhoto.exportData():photoData();');
+required('window.TodakRealPhoto={drawBackground:drawBackground,','window.TodakRealPhoto={exportData:function(){var data=photoData();data.zoom=1;data.panX=objectPan.x;data.panY=objectPan.y;data.objectScale=photoObjectScale;return data;},drawBackground:drawBackground,');
+required('dlg.hidden=false; cardDirty=true; dirty=true;','dlg.hidden=false; renderCard(); cardDirty=false; dirty=true;');
+required("target:'#realPhotoScene'","target:'#ui-background-picker'");
+// Search remains an explicit action; a delayed modal must not interrupt photo editing.
+required('autoTimer=setTimeout(prompt,12000);','');
+required("#sheet,[role=dialog],.drawer,.modal,.overlay","#sheet,dialog,[role=dialog],.drawer,.modal,.overlay");
+required('return (id||st.target)+((blind==null?st.blind:blind)?"_b":"")+"_v2";', 'return (id||st.target)+((blind==null?st.blind:blind)?"_b":"")+"_v3";');
+required('var oldBest=store.best[id+(st.blind?"_b":"")];', 'var previousKey=id+(st.blind?"_b":"");var oldBest=store.best[previousKey+"_v2"]!=null?store.best[previousKey+"_v2"]:store.best[previousKey];');
+required('var previous=store.best[CH_ORDER[i]+"_b"];', 'var previous=store.best[CH_ORDER[i]+"_b_v2"]!=null?store.best[CH_ORDER[i]+"_b_v2"]:store.best[CH_ORDER[i]+"_b"];');
+required('옆선 45점 · 높이 25점 · 속 깊이 10점 · 안팎 매끈함 20점으로 평가해요.', '옆선 40점 · 높이 20점 · 속 완성도 15점 · 안팎 매끈함 15점 · 남은 횟수 10점으로 평가해요. 모양 잡기 2번까지는 횟수 점수 10점, 이후에는 남은 비율로 계산해요. 속이 막혔거나 너무 좁으면 최대 59점이에요.');
+required('$("scoreDetail").textContent="옆선 "+parts.outline+"/45 · 높이 "+parts.height+"/25 · 속 깊이 "+parts.depth+"/10 · 매끈함 "+parts.surface+"/20"+(parts.solid?" · 속을 파지 않은 작품은 최대 59점":"");', 'renderChallengeScoreParts(parts);');
+required('(sc>=90?"본과 거의 똑같아요.":(sc>=75?"꽤 닮았어요.":(sc>=50?"느낌은 살렸어요.":"자기만의 길을 갔네요.")))', 'challengeScoreVerdict(parts)');
+required('" 모양 잡기 "+(st.touches||0)+"번"', '" 모양 잡기 "+(st.touches||0)+"/"+parts.limit+"번"');
+const oldScoreSummary=html.match(/^\s*\$\("scoreSub"\)\.innerHTML=.*$/m);if(!oldScoreSummary)throw Error('Missing score summary');required(oldScoreSummary[0],'    renderChallengeScoreSummary(parts,TT,best);');
+required('it.creationMode=st.target?"challenge":"free";', 'it.constructionMethod="wheel";it.creationMode=st.target?"challenge":"free";if(st.target&&TARGETS[st.target]){var scored=scoreBreakdown();it.challengeScoring={version:3,method:"wheel",targetId:st.target,mode:TARGETS[st.target].master?"master":st.blind?"blind":"guided",group:st.target+"|wheel|"+(st.blind?"blind":"guided")+"|v3",used:scored.used,limit:scored.limit,remaining:scored.remaining,verification:"local",geometry:{height:st.height,floor:st.floor,rimSoftness:st.rimSoftness||0,radii:st.radii.slice(),inner:st.inner.slice()},parts:{outline:scored.outline,height:scored.height,depth:scored.depth,surface:scored.surface,moves:scored.moves},total:scored.total};}else{delete it.challengeScoring;}');
+required('depthNeed:Math.max(.01,(work.profile.h-work.profile.floor)/work.profile.h),communityId:', 'depthNeed:Math.max(0,(work.profile.h-work.profile.floor)/work.profile.h),scoreProfile:{inner:work.profile.inner.slice(),floor:work.profile.floor,rimSoftness:work.visual&&work.visual.rimSoftness||0},communityId:');
 required('refresh:refresh,surface:function(){return topSurface(topLayout());}', 'refresh:refresh,cancelGesture:function(commit){if(commit){var event={preventDefault:function(){},stopImmediatePropagation:function(){}};if(active!==null){event.pointerId=active;end(event);}if(bottomActive!==null){event.pointerId=bottomActive;bottomEnd(event);}return;}if(active!==null&&top)history.pop();if(bottomActive!==null)bottomHistory.pop();active=bottomActive=null;pendingTop=bottomPending=null;last=bottomLast=null;changed=bottomChanged=false;activeCursor.hidden=true;},surface:function(){return topSurface(topLayout());}');
 // Selecting an already hollow work must not silently reshape its inner wall.
 required('if(st.height-st.floor>.05){constrainInterior();return;}','if(st.height-st.floor>.05)return;');
@@ -25,7 +61,7 @@ required('if(st.stage!=="deco"&&st.stage!=="done")return;','if(!["throw","deco",
 // Untranslated attributes must not re-trigger their own translation observer.
 required('if(v&&HAN.test(v)){n.setAttribute(a,T(v));}','if(v&&HAN.test(v)){var translated=T(v);if(translated!==v)n.setAttribute(a,translated);}');
 required('m.target.setAttribute(m.attributeName,T(v));','var translated=T(v);if(translated!==v)m.target.setAttribute(m.attributeName,translated);');
-required('  var RX=[','  Object.assign(D,{"원하는 색 고르기":"Choose a color","색상 코드 입력 (선택)":"Color code (optional)","물감 직접 고르기":"Custom paint color","바탕색 직접 고르기":"Custom base color","붓 유약 직접 고르기":"Custom brush glaze","덧입힐 색 직접 고르기":"Custom dip color"});\n  var RX=[');
+required('  var RX=[','  Object.assign(D,{"원하는 색 고르기":"Choose a color","색상 코드 입력 (선택)":"Color code (optional)","물감 직접 고르기":"Custom paint color","바탕색 직접 고르기":"Custom base color","붓 유약 직접 고르기":"Custom brush glaze","덧입힐 색 직접 고르기":"Custom dip color","속 완성도":"Interior quality","횟수 점수":"Moves","남은 횟수":"Moves left","속이 막혔거나 너무 좁으면 최대 59점":"Closed or nearly closed interiors are capped at 59"});\n  var RX=[');
 // Opening or cancelling a native colour picker is not an edit.
 required('$("pigColor").addEventListener("input",onPig); $("pigColor").addEventListener("click",onPig);','$("pigColor").addEventListener("input",onPig);');
 required('$("glazeColor").addEventListener("input",onGlaze); $("glazeColor").addEventListener("click",onGlaze);','$("glazeColor").addEventListener("input",onGlaze);');
@@ -64,7 +100,7 @@ const rule='function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&inn
 required("$('goFree').addEventListener('click',function(e){if(complete)return;if(active){e.preventDefault();e.stopImmediatePropagation();closeOverlays();focusStep();return;}active=true;index=0;done=false;contactMs=0;if(!routeTimer)routeTimer=setInterval(route,160);},true);", "$('goFree').addEventListener('click',function(){if(active)stopOptionalTutorial();},true);");
 required("var challengeBase=startChallenge;startChallenge=function(id){if(!complete){toast('첫 자유롭게 빚기 안내를 먼저 마쳐 주세요.');return;}return challengeBase(id);};", "var challengeBase=startChallenge;startChallenge=function(id){if(active)stopOptionalTutorial();return challengeBase(id);};");
 required('lockHome();window.TodakTutorial=',fs.readFileSync(path.join(sourceDir,'tutorial-sequence.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-presentation.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-entry.js'),'utf8')+'\n lockHome();window.TodakTutorial=');
-const modules=['history-tiles.js','studio-layout.js','responsive-layout.js','experience-polish.js','shelf-cutouts.js','site-feedback-config.js','site-feedback.js'];
+const modules=['history-tiles.js','studio-layout.js','responsive-layout.js','experience-polish.js','stage-navigation.js','appearance-picker.js','shelf-cutouts.js','site-feedback-config.js','site-feedback.js'];
 if(!production)modules.push('preview-scenes.js');
 const code=rule+modules.map(f=>fs.readFileSync(path.join(sourceDir,f),'utf8')).join('\n');
 html=html.replace(marker,code+'\n'+marker);

@@ -9,6 +9,9 @@ for(const name of tracked){
 runtime.push('channel-attribution.js');
 for(const name of runtime){const dest=path.join(out,name);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(root,name),dest);}
 execFileSync(process.execPath,[path.join(root,'tools/build-studio-layout.cjs'),'--production'],{cwd:root,stdio:'inherit'});
+fs.copyFileSync(path.join(root,'ui-layout-preview/pottery-renderer.js'),path.join(out,'pottery-renderer.js'));
+const rendererVersion=crypto.createHash('sha256').update(fs.readFileSync(path.join(out,'pottery-renderer.js'))).digest('hex').slice(0,12);
+fs.writeFileSync(path.join(out,'load-3d.js'),fs.readFileSync(path.join(out,'load-3d.js'),'utf8').replace(/pottery-renderer\.js\?v=[a-f0-9]+/g,'pottery-renderer.js?v='+rendererVersion));
 for(const name of ['studio-layout.css','responsive-layout.css','experience-polish.css','site-feedback.css','tutorial-presentation.css'])fs.copyFileSync(path.join(root,'ui-layout-preview',name),path.join(out,name));
 for(const [slug,source] of [['threads','threads'],['insta','instagram']]){
  const target='/?utm_source='+source+'&utm_medium=social&utm_campaign=profile';

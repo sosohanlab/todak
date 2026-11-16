@@ -208,6 +208,17 @@ body[data-ui-layout=sheet] .sheetBody{scroll-padding-block:8px 16px;scrollbar-wi
 /* Throwing uses text choices; decoration and glaze keep their existing pictures. */
 #sheet #tools>.chip:not([hidden]){display:flex!important}
 #sheet #tools svg,#sheet #tools img{display:none!important}
+#sheet #tools,body[data-ui-layout=sheet] #sheet #tools{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#sheet .quick-tools{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#scoreDetail{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin:8px 0;line-height:1.3}
+#scoreDetail .ui-score-part{display:flex;min-width:0;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 2px;border:1px solid var(--line);border-radius:8px;background:var(--paper);text-align:center}
+#scoreDetail .ui-score-part small{display:flex;align-items:center;justify-content:center;min-height:23px;font-size:9px;line-height:1.25;font-weight:500;white-space:normal;overflow-wrap:anywhere;color:var(--muted)}
+#scoreDetail .ui-score-part strong{font-size:13px;line-height:1.25;white-space:nowrap;color:var(--ink);font-variant-numeric:tabular-nums}
+#scoreDetail .ui-score-note{grid-column:1/-1;font-size:11px;color:var(--muted)}
+#scoreBox>div{min-width:0;flex:1}
+#scoreBox #scoreHead{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;line-height:1.35}
+#scoreBox #scoreSub{font-size:11px;line-height:1.35;white-space:pre-line}
+@media(max-height:560px){#scoreDetail .ui-score-part{padding-block:4px}#scoreDetail .ui-score-part small{min-height:12px}}
 body[data-ui-stage=throw] #potteryToolRack{display:none!important}
 body.ui-touch-controls #sheet #tools .chip{min-height:52px!important;gap:3px}
 body[data-ui-layout=sheet] .sheetBody>.panel{gap:8px}
@@ -219,4 +230,15 @@ body[data-ui-layout=sheet] .sheetBody>.panel>.ui-history{padding:0;margin:0}
 .ui-visual-color>span:last-child{margin-left:auto}.ui-color-chip{flex:none;width:24px;height:24px;border:1px solid var(--line);border-radius:50%;box-sizing:border-box}
 .ui-color-controls>input[type=color]:focus-visible+.ui-visual-color{outline:2px solid var(--cobalt);outline-offset:2px}
 .ui-color-code{min-width:0}.ui-color-code>summary{font-size:11px;line-height:1.5;cursor:pointer;color:var(--muted);min-height:28px;padding:5px 0;box-sizing:border-box}.ui-color-code>input[type=text]{margin:4px 0 0}
+#steps li[role=button]{cursor:pointer;touch-action:manipulation}#steps li[role=button]:focus-visible{outline:2px solid var(--cobalt);outline-offset:3px}
+.ui-appearance-open{display:flex;align-items:center;gap:10px;width:100%;min-width:0;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:8px}.ui-appearance-open img{width:60px;height:42px;object-fit:cover;border-radius:7px}.ui-appearance-open span{flex:1;min-width:0;font-size:13px}
+#ui-appearance-dialog{box-sizing:border-box;width:640px;max-width:calc(100vw - 28px);max-height:calc(100dvh - 28px);padding:22px;margin:auto;border:1px solid var(--line);border-radius:20px;background:var(--paper);color:var(--ink);overflow:auto}#ui-appearance-dialog::backdrop{background:#1f29375c}.ui-appearance-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.ui-appearance-head h2{font-size:22px;margin:0}#ui-appearance-balance,#ui-appearance-status{font-size:13px;line-height:1.6}#ui-appearance-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}#ui-appearance-options button{display:flex;flex-direction:column;align-items:stretch;gap:7px;min-width:0;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--paper);text-align:left;color:var(--ink)}#ui-appearance-options button[aria-pressed=true]{border-color:var(--cobalt);box-shadow:inset 0 0 0 1px var(--cobalt)}#ui-appearance-options img{width:100%;height:100px;object-fit:cover;border-radius:7px}#ui-appearance-options strong{font-size:13px;line-height:1.5}#ui-appearance-options span{font-size:12px;color:var(--muted)}#ui-appearance-apply{width:100%;min-height:44px}#ui-shelf-picker{margin:0 0 12px;min-height:36px;font-size:13px}@media(max-width:400px){#ui-appearance-dialog{padding:16px}#ui-appearance-options img{height:72px}.ui-appearance-head h2{font-size:19px}}
+#searchDlg,#cardDlg{align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
+#searchDlg>.drawerIn,#cardDlg>.drawerIn{width:100%;margin:auto;max-height:calc(100dvh - 32px);overflow:auto;box-sizing:border-box}
+#searchDlg>.drawerIn{max-width:640px}#cardDlg>.drawerIn{max-width:620px}
+#drawer{align-items:center;justify-content:center;padding:20px;box-sizing:border-box}#drawer>.drawerIn{display:block;width:100%;max-width:1040px;margin:auto;max-height:calc(100dvh - 40px);overflow:auto}#drawer .shelfHead{margin-bottom:14px}#drawer #shelfGrid{margin:14px 0}#drawer .shelfDetail{margin-top:14px}
+@media(max-width:599px){#drawer{padding:10px}#drawer>.drawerIn{max-height:calc(100dvh - 20px)}}
+#searchPreview{display:block;width:100%;max-width:360px;max-height:260px;margin:12px auto;object-fit:contain}
+#cardDlg #card{display:block;width:auto!important;max-width:100%;max-height:min(50dvh,500px);height:auto!important;margin:16px auto}
+@media(max-width:599px){#searchDlg,#cardDlg{padding:10px}#searchDlg>.drawerIn,#cardDlg>.drawerIn{max-height:calc(100dvh - 20px);padding:16px;border-radius:20px}}
 @media(max-width:599px) and (max-height:560px){body[data-ui-layout=sheet] #sheetGrab{height:18px;min-height:18px}body[data-ui-layout=sheet] .sheetHead{padding:2px 12px 6px}body[data-ui-layout=sheet] #ui-tool-footer{padding:5px 12px;gap:3px}body[data-ui-layout=sheet] #ui-tool-footer>#nextBtn{min-height:34px;font-size:14px}body[data-ui-layout=sheet] #ui-tool-footer .ui-secondary button{min-height:22px;font-size:11px}body[data-ui-layout=sheet] .sheetBody{padding:2px 12px 6px}body.ui-touch-controls #sheet #tools .chip{min-height:48px!important}body.ui-touch-controls #sheet #dtools .rackTool,body.ui-touch-controls #sheet #rackGlaze .rackTool{min-height:58px!important;padding:5px 4px!important;gap:3px}body.ui-touch-controls #sheet #dtools svg,body.ui-touch-controls #sheet #rackGlaze svg{width:22px!important;height:22px!important}body[data-ui-layout=sheet] .sheetBody>.panel{gap:6px}}

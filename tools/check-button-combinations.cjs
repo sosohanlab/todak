@@ -43,7 +43,7 @@ for(const [width,height]of sizes){
  async function scenario(name,fn){if(onlyArg&&!name.includes(onlyArg.split('=')[1]))return;const clicks=report.clicks,states=report.states;p.setDefaultTimeout(name.includes('completion')?20000:15000);console.log('Checking '+width+' '+name);try{await fn();report.scenarios.push({width,height,mode,stage,name,clicks:report.clicks-clicks,states:report.states-states,pass:true});console.log('Checked '+width+' '+name+' / '+(report.clicks-clicks)+' clicks');}catch(e){report.failures.push({width,height,mode,stage,name,error:e.message,trace:trace.slice(-8)});if(report.failures.length<=12)await p.screenshot({timeout:20000,path:'output/button-review/failure-'+report.failures.length+'.png'});console.log('FAIL '+width+' '+name+': '+e.message.split('\n')[0]);}fs.writeFileSync('output/button-review/progress-'+width+'.json',JSON.stringify({width,mode,stage,clicks:report.clicks,states:report.states,failures:report.failures,errors:report.errors},null,2));}
  for(const m of ['free','challenge']){
   await scenario(m+' throwing tool × view × size × help × sheet',async()=>{await prepare(m,'throw');
-   for(const tool of ['shape','thick','trim','sponge'])for(const view of ['solidView','sectionView']){
+   for(const tool of ['shape','thick','sponge'])for(const view of ['solidView','sectionView']){
     await click('#tools [data-t='+tool+']');await click('#'+view);
     await group('.ui-size-choices button');await group('#ui-smooth-surface button');await help();
     if(await p.locator('#sheetToggle').isVisible()){await click('#sheetToggle');await click('#sheetToggle');}

@@ -1,5 +1,6 @@
 /* Complete all base-glaze settings before selecting the brush once. */
 (function(){
+ steps=steps.filter(function(step){return step.id!=='trim';});
  var order=['glazeBase','color','finish','dip','effect','glazeBrush','glazeOpacity','glazePaint'];
  var glazing=steps.filter(function(step){return step.stage==='glaze';});
  var arranged=order.map(function(id){var step=glazing.find(function(item){return item.id===id;});if(!step)throw Error('Missing glaze tutorial step: '+id);return step;});

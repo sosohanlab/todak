@@ -13,3 +13,12 @@ test('honeypot submissions are not stored',async()=>{const {handler,calls}=setup
 test('limits and failures do not leak content, database errors or secrets',async()=>{let s=setup({accepted:false,reason:'rate_limit'});assert.equal((await s.handler(request())).status,429);s=setup({error:'SERVER_ONLY_SECRET private table failure'},500);const r=await s.handler(request());assert.equal(r.status,503);assert.deepEqual(await r.json(),{error:'unavailable'});});
 test('already sent submissions do not produce a second email',async()=>{const {handler,calls}=setup({accepted:true},200,{state:'sent'});assert.equal((await handler(request())).status,200);assert.equal(calls.filter(c=>c.url.startsWith('https://formsubmit.co/')).length,0);});
 test('activation pending is not reported as a successful send',async()=>{const {handler,calls}=setup({accepted:true},200,undefined,{success:'false',message:'This form needs Activation.'});const r=await handler(request());assert.equal(r.status,503);assert.deepEqual(await r.json(),{error:'setup_pending'});assert.equal(JSON.parse(calls.at(-1).options.body).p_sent,false);});
+test('image feedback is privately saved and delivered as a JPEG attachment',async()=>{
+ const attachment='data:image/jpeg;base64,'+Buffer.from([255,216,255,224,1,2,255,217]).toString('base64');
+ const {handler,calls}=setup({accepted:true},200,{state:'send',...payload,attachment});const r=await handler(request({...payload,attachment}));assert.equal(r.status,200);
+ assert(calls[0].url.endsWith('/todak_feedback_submit_with_image'));assert.equal(JSON.parse(calls[0].options.body).p_attachment,attachment);
+ const email=calls.find(c=>c.url.startsWith('https://formsubmit.co/'));assert(email.options.body instanceof FormData);assert.equal(email.options.body.get('attachment').type,'image/jpeg');assert.equal(email.options.body.get('attachment').size,8);assert.deepEqual(await r.json(),{ok:true});
+});
+test('invalid, disguised and oversized attachments are rejected without storage or mail',async()=>{
+ const {handler,calls}=setup();for(const attachment of ['data:image/svg+xml;base64,PHN2Zz4=', 'data:image/jpeg;base64,aGVsbG8=', 'data:image/jpeg;base64,'+'A'.repeat(680000),{},'https://evil.example/photo'])assert.equal((await handler(request({...payload,attachment}))).status,400);assert.equal(calls.length,0);
+});

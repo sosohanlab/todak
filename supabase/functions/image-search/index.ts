@@ -54,7 +54,7 @@ function limit(value:string|undefined,fallback:number,ceiling:number):number{con
 export function createHandler(deps:Dependencies){
   return async (req:Request):Promise<Response>=>{
     const origin=req.headers.get('origin')||'';
-    const allowed=(deps.env('ALLOWED_ORIGINS')||'https://sosohanlab.github.io').split(',').map(s=>s.trim()).filter(Boolean);
+    const allowed=Array.from(new Set(['https://todak.sosohanlab.com','https://sosohanlab.github.io',...(deps.env('ALLOWED_ORIGINS')||'').split(',').map(s=>s.trim()).filter(Boolean)]));
     const headers:Record<string,string>={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','Vary':'Origin','X-Content-Type-Options':'nosniff'};
     const reply=(status:number,body:Json)=>new Response(JSON.stringify(body),{status,headers});
     // Origin restricts browsers, not scripts. Shared global quotas below bound provider usage.

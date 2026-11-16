@@ -12,6 +12,7 @@ source=source.replace("assert(doc.getElementById('tutorialCoach').hidden,'instru
 source=source.replace('w.eval(main);',"w.eval(fs.readFileSync(root+'photo-backgrounds.js','utf8'));w.eval(main);");
 // The home entry is now optional; replay/resume uses its own button.
 if(test==='tutorial-first-visit.cjs'){
+ const retired=source.indexOf("state('trim');"),nextSmooth=source.indexOf("state('smooth');",retired);if(retired>=0&&nextSmooth>retired)source=source.slice(0,retired)+source.slice(nextSmooth);
  source=source.replace("assert(!doc.getElementById('tutorialNext'));","assert(doc.getElementById('tutorialContinue'));");
  source=source.replace("else await new Promise(r=>setTimeout(r,550));", "else {const before=t.state().id;await new Promise(r=>setTimeout(r,650));assert.equal(t.state().id,before,'no timed advance while practising');if(t.state().active)click('#tutorialContinue');}");
  source=source.replace("['solid','rotate','effect']","['solid','rotate','glazePaint']");

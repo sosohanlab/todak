@@ -1,0 +1,6 @@
+const fs=require('node:fs'),vm=require('node:vm'),html=fs.readFileSync(require('node:path').join(__dirname,'studio-base.html'),'utf8');
+const q={Math,JSON,N:56,st:{},clamp:(v,a,b)=>Math.max(a,Math.min(b,v))};vm.createContext(q);
+const snippets=[html.slice(html.indexOf('function sstep(a,b,t)'),html.indexOf('function roughnessSignal(')),html.slice(html.indexOf('function rAt(t){'),html.indexOf('\nfor(var m=0;m<18;',html.indexOf('function rAt(t){'))),html.slice(html.indexOf('function rimInsetAt(t){'),html.indexOf('function setHeight(')),html.slice(html.indexOf('var insetCache='),html.indexOf('function constrainInterior(')),html.slice(html.indexOf('TARGETS.triple='),html.indexOf('CH_ORDER.push(',html.indexOf('TARGETS.triple=')))];
+vm.runInContext(snippets.join('\n'),q);const limits=vm.runInContext('('+html.match(/var n=(\{cup:8[^;]+\})/)[1]+')',q);for(const [id,n]of Object.entries(limits))q.TARGETS[id].n=n;
+function ideal(id,touches=2){const T=q.TARGETS[id];q.st={target:id,height:T.h,floor:id==='goblet'?T.h*.6:id==='highstem'?T.h*.72:id==='lamp'?T.h*.8:.5,rimSoftness:0,touches,radii:Array.from({length:56},(_,i)=>T.f(i/55)),inner:Array(56).fill(0)};q.st.inner=q.st.radii.map((_,i)=>q.innerLimitAt(i/55,.65));return JSON.parse(JSON.stringify(q.st));}
+module.exports={targets:q.TARGETS,ideal,renderer:q};

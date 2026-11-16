@@ -16,7 +16,7 @@
   $('modeChip').textContent=T?(T.master?'명장 도전 · ':'도전 · ')+T.name:'자유롭게 빚기';$('modeChip').title=$('modeChip').textContent;
   result.hidden=!T;
   $('ui-result-360').checked=document.body.classList.contains('ui-inspecting');
-  if(lastStage!==st.stage){if(st.stage==='done'){if(uiUsesSheet())$('sheet').style.setProperty('--mobile-sheet-height',Math.min(innerHeight*.36,Math.max(250,innerHeight-310))+'px');$('sheetBody').scrollTop=0;}lastStage=st.stage;}
+  if(lastStage!==st.stage){if(st.stage==='done'){if(uiUsesSheet())$('sheet').style.setProperty('--mobile-sheet-height',Math.min(Math.max(innerHeight*.45,348),Math.max(220,innerHeight-220))+'px');$('sheetBody').scrollTop=0;}lastStage=st.stage;}
  }
  window.TodakPolish={sync:sync,updateMoves:updateMoves};sync();window.TodakResponsive.refresh();
 })();

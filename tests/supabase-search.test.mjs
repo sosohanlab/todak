@@ -26,6 +26,12 @@ test('allowed CORS preflight needs no key and makes no upstream request',async()
 test('unknown browser origins rejected before provider access',async()=>{
   const {handler,calls}=setup();const r=await handler(request(photo,'https://evil.example'));assert.equal(r.status,403);assert.equal(calls.length,0);
 });
+test('canonical domain is allowed even with an older explicit origin setting',async()=>{
+ const calls=[];const canonical='https://todak.sosohanlab.com';
+ const handler=createHandler({env:k=>k==='ALLOWED_ORIGINS'?origin:env[k],now:()=>0,fetch:async()=>{calls.push(1);throw Error('must not call');}});
+ const r=await handler(new Request('https://test.example',{method:'OPTIONS',headers:{Origin:canonical}}));
+ assert.equal(r.status,204);assert.equal(r.headers.get('Access-Control-Allow-Origin'),canonical);assert.equal(calls.length,0);
+});
 test('invalid images never reserve quota or reach the provider',async()=>{
   const {handler,calls}=setup();const r=await handler(request('data:image/jpeg;base64,aGVsbG8='));assert.equal(r.status,400);assert.equal(calls.length,0);assert.throws(()=>decodeImage('data:image/jpeg;base64,%%%%'));
 });

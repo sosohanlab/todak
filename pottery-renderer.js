@@ -119,10 +119,31 @@ function rebuild(d){
   }
   inside.map=tex(innerCanvas,true);inside.envMap=gloss?glossEnvironment.texture:null;inside.clearcoatRoughness=gloss?.09:.6;inside.roughness=gloss?.23:.86;inside.envMapIntensity=gloss?.65:.24;inside.clearcoat=gloss?.85:.04;
 
-  var underside=outer.clone();underside.map=null;underside.color.setRGB(d.color[0]/255,d.color[1]/255,d.color[2]/255,T.SRGBColorSpace);if(d.bottomOverlay){var bc=canvas(768,768),bx=bc.getContext('2d');bx.fillStyle='rgb('+d.color.join(',')+')';bx.fillRect(0,0,768,768);bx.globalAlpha=d.bottomOpacity==null?.8:d.bottomOpacity;bx.drawImage(d.bottomOverlay,0,0,768,768);underside.map=tex(bc,true);underside.color.setHex(0xffffff);}materials.push(outer,inside,underside);
+  // Closely spaced throwing ridges otherwise reflect the sharp studio panels as
+  // broken, near-black rings. Broaden only those reflections, preserving every
+  // profile sample, painted layer, carving and the gloss on smooth vessels.
+  if(gloss){
+    var outerBend=0,innerBend=0;
+    for(var sample=1;sample<64;sample++){
+      var level=sample/64,step=1/64;
+      outerBend+=Math.abs(d.rAt(level-step)-2*d.rAt(level)+d.rAt(level+step));
+      if(level*d.height>d.floor+step*d.height)innerBend+=Math.abs(d.innerAt(level-step)-2*d.innerAt(level)+d.innerAt(level+step));
+    }
+    var softenOuter=Math.max(0,Math.min(1,(outerBend/63-.015)/.045));
+    var softenInner=Math.max(0,Math.min(1,(innerBend/63-.015)/.045));
+    outer.roughness+=Math.max(0,.45-outer.roughness)*softenOuter;
+    outer.clearcoat+=(.25-outer.clearcoat)*softenOuter;
+    outer.clearcoatRoughness+=(.42-outer.clearcoatRoughness)*softenOuter;
+    outer.envMapIntensity+=(.6-outer.envMapIntensity)*softenOuter;
+    inside.roughness+=Math.max(0,.48-inside.roughness)*softenInner;
+    inside.clearcoat+=(.18-inside.clearcoat)*softenInner;
+    inside.clearcoatRoughness+=(.45-inside.clearcoatRoughness)*softenInner;
+    inside.envMapIntensity+=(.35-inside.envMapIntensity)*softenInner;
+  }
+  var underside=outer.clone();underside.bumpMap=null;underside.bumpScale=0;underside.map=null;underside.color.setRGB(d.color[0]/255,d.color[1]/255,d.color[2]/255,T.SRGBColorSpace);if(d.bottomOverlay){var bc=canvas(768,768),bx=bc.getContext('2d');bx.fillStyle='rgb('+d.color.join(',')+')';bx.fillRect(0,0,768,768);bx.globalAlpha=d.bottomOpacity==null?.8:d.bottomOpacity;bx.drawImage(d.bottomOverlay,0,0,768,768);underside.map=tex(bc,true);underside.color.setHex(0xffffff);}materials.push(outer,inside,underside);
   var carving=!!d.carve,n=carving?(low?224:320):128,H=d.height,ro=d.rAt(1),ri=d.innerAt(1),hollow=H-d.floor>.05;
   // Tiny rounded edges avoid a grazing, razor-sharp material seam at rim and foot.
-  var footBevel=Math.min(.045,H*.004,d.rAt(0)*.02),rimBevel=d.profileRounded?.001:hollow?Math.max(.001,Math.min(.045+(d.rimSoftness||0)*.16,(ro-ri)*.45,H*.018)):.02;
+  var footBevel=Math.min(.045,H*.004,d.rAt(0)*.02),rimBevel=d.profileRounded?Math.max(.001,Math.min(.025,(ro-ri)*.25,H*.004)):hollow?Math.max(.001,Math.min(.045+(d.rimSoftness||0)*.16,(ro-ri)*.45,H*.018)):.02;
   var points=[new T.Vector2(0,0)],baseR=Math.max(0,d.rAt(0)-footBevel),baseRows=d.bottomCarve?(low?80:128):1;for(var br=1;br<=baseRows;br++)points.push(new T.Vector2(baseR*br/baseRows,0));var outerStart=points.length-1;
   points.push(new T.Vector2(d.rAt(0)-footBevel*.25,footBevel*.25));
   points.push(new T.Vector2(d.rAt(footBevel/H),footBevel));
@@ -137,7 +158,7 @@ function rebuild(d){
   var geo=new T.LatheGeometry(points,carving?(low?320:512):(low?160:256)),uv=geo.attributes.uv,pos=geo.attributes.position;
   for(var z=0;z<uv.count;z++){
     uv.setY(z,Math.max(0,Math.min(1,pos.getY(z)/H)));
-    if((d.bottomOverlay||d.bottomCarve)&&z%points.length<=outerStart)uv.setXY(z,.5+pos.getX(z)/(2*d.rAt(0)),.5-pos.getZ(z)/(2*d.rAt(0)));
+    if((d.bottomOverlay||d.bottomCarve)&&z%points.length<=outerStart)uv.setXY(z,.5+pos.getX(z)/(2*d.rAt(0)),.5+pos.getZ(z)/(2*d.rAt(0)));
     if(d.topOverlay&&z%points.length>outerEnd){var topR=d.topRadius||d.rAt(1);uv.setXY(z,.5+pos.getX(z)/(2*topR),.5+pos.getZ(z)/(2*topR));}
   }
   geo.clearGroups();var segs=carving?(low?320:512):(low?160:256),rows=points.length-1,indices=[[],[],[]],old=geo.index.array;
@@ -166,7 +187,8 @@ function rebuild(d){
     // The first and last angular columns coincide; keep their normals identical.
     var normals=geo.attributes.normal;for(var row=0;row<points.length;row++){var first=row,last=segs*points.length+row,nx=normals.getX(first)+normals.getX(last),ny=normals.getY(first)+normals.getY(last),nz=normals.getZ(first)+normals.getZ(last),len=Math.hypot(nx,ny,nz)||1;normals.setXYZ(first,nx/len,ny/len,nz/len);normals.setXYZ(last,nx/len,ny/len,nz/len);}normals.needsUpdate=true;geo.computeBoundingSphere();
   }
-  if(d.bottomCarve){var bm=canvas(768,768),bmx=bm.getContext('2d');bmx.drawImage(d.bottomCarve,0,0,768,768);var bd=bmx.getImageData(0,0,768,768).data;for(var bv=0;bv<pos.count;bv++){if(bv%points.length>outerStart)continue;var bx=Math.max(0,Math.min(767,Math.round(uv.getX(bv)*767))),by=Math.max(0,Math.min(767,Math.round((1-uv.getY(bv))*767))),bi=(by*768+bx)*4,amount=(bd[bi]>127?-1:1)*bd[bi+3]/255,rad=Math.hypot(pos.getX(bv),pos.getZ(bv)),fade=Math.max(0,Math.min(1,(baseR-rad)/Math.max(.03,baseR*.04)));pos.setY(bv,amount*Math.min(.10,Math.max(.01,d.floor*.25))*fade);}pos.needsUpdate=true;geo.computeVertexNormals();geo.computeBoundingSphere();}
+  for(var baseNormal=0;baseNormal<pos.count;baseNormal++){if(baseNormal%points.length<=outerStart)geo.attributes.normal.setXYZ(baseNormal,0,-1,0);}
+  if(d.bottomCarve){var preservedNormals=geo.attributes.normal.array.slice();var bm=canvas(768,768),bmx=bm.getContext('2d');bmx.drawImage(d.bottomCarve,0,0,768,768);var bd=bmx.getImageData(0,0,768,768).data;for(var bv=0;bv<pos.count;bv++){if(bv%points.length>outerStart)continue;var bx=Math.max(0,Math.min(767,Math.round(uv.getX(bv)*767))),by=Math.max(0,Math.min(767,Math.round((1-uv.getY(bv))*767))),bi=(by*768+bx)*4,amount=(bd[bi]>127?-1:1)*bd[bi+3]/255,rad=Math.hypot(pos.getX(bv),pos.getZ(bv)),fade=Math.max(0,Math.min(1,(baseR-rad)/Math.max(.03,baseR*.04)));pos.setY(bv,amount*Math.min(.10,Math.max(.01,d.floor*.25))*fade);}pos.needsUpdate=true;geo.computeVertexNormals();for(var normalIndex=0;normalIndex<pos.count;normalIndex++){if(normalIndex%points.length>=outerStart||(Math.abs(pos.getY(normalIndex))<1e-8&&Math.hypot(pos.getX(normalIndex),pos.getZ(normalIndex))>baseR*.95)){geo.attributes.normal.setXYZ(normalIndex,preservedNormals[normalIndex*3],preservedNormals[normalIndex*3+1],preservedNormals[normalIndex*3+2]);}}geo.attributes.normal.needsUpdate=true;geo.computeBoundingSphere();}
   var mesh=new T.Mesh(geo,materials);mesh.castShadow=true;mesh.receiveShadow=false;mesh.userData.incision=incisionStats;pot.add(mesh);
   var contact=scene.getObjectByName('contact'),r=d.rAt(0);contact.scale.set(r*2.8,r*2.8,1);
 }
@@ -193,9 +215,9 @@ function configure(d,width,height){
   if(d.transparent){scene.background=null;renderer.setClearColor(0x000000,0);}
   var photoBG=!d.transparent&&window.TodakBackgrounds&&TodakBackgrounds.ready(d.background);
   if(photoBG){scene.background=null;renderer.setClearColor(0,0);floor.visible=false;cyclorama.visible=false;room.visible=false;}
-  renderer.setSize(width,height,false);var activeCamera=camera;if(d.overhead){var rr=d.topRadius||0;for(var ri=0;ri<=64;ri++)rr=Math.max(rr,d.rAt(ri/64));activeCamera=new T.OrthographicCamera(-rr,rr,rr,-rr,.01,1000);activeCamera.up.set(0,0,-1);activeCamera.position.set(0,d.height+100,0);activeCamera.lookAt(0,0,0);}renderer.render(scene,activeCamera);
+  renderer.setPixelRatio(Math.max(1,Math.min(low?1.5:2,Math.sqrt((low?2000000:4000000)/(width*height)))));renderer.setSize(width,height,false);var activeCamera=camera;if(d.overhead){var rr=d.topRadius||0;for(var ri=0;ri<=64;ri++)rr=Math.max(rr,d.rAt(ri/64));activeCamera=new T.OrthographicCamera(-rr,rr,rr,-rr,.01,1000);activeCamera.up.set(0,0,-1);activeCamera.position.set(0,d.height+100,0);activeCamera.lookAt(0,0,0);}renderer.render(scene,activeCamera);
 }
-window.TodakPhoto={available:true,render:function(d){if(!init()||lost)return null;try{if(signature!==d.key){rebuild(d);signature=d.key;}configure(d,d.pixelWidth,d.pixelHeight);if(!d.transparent&&window.TodakBackgrounds&&TodakBackgrounds.ready(d.background)){var out=canvas(renderer.domElement.width,renderer.domElement.height),cx=out.getContext('2d');if(window.TodakRealPhoto&&TodakRealPhoto.drawBackground)TodakRealPhoto.drawBackground(cx,out.width,out.height,d.background,d.backgroundZoom,d.backgroundPanX,d.backgroundPanY);else TodakBackgrounds.draw(cx,out.width,out.height,d.background);cx.drawImage(renderer.domElement,0,0);return out;}return renderer.domElement;}catch(e){console.warn('토닥 렌더링 오류',e);return null;}},export:function(d,size,aspect){if(!init())return null;var r=0;for(var i=0;i<=64;i++)r=Math.max(r,d.rAt(i/64));var ratio=aspect||1,w=Math.round(size*Math.min(1,ratio)),h=Math.round(size/Math.max(1,ratio)),sc=Math.min(h/(d.height*1.5),w/(r*2.8));return this.render(Object.assign({},d,{viewWidth:w,viewHeight:h,zoom:1,panX:0,panY:0,width:w,canvasHeight:h,pixelWidth:w,pixelHeight:h,scale:sc,cx:w/2,base:h/2+d.height*.45*sc,rotation:d.rotation}));}};
+window.TodakPhoto={available:true,render:function(d){if(!init()||lost)return null;try{if(signature!==d.key){rebuild(d);signature=d.key;}configure(d,d.pixelWidth,d.pixelHeight);if(!d.transparent&&window.TodakBackgrounds&&TodakBackgrounds.ready(d.background)){var out=canvas(renderer.domElement.width,renderer.domElement.height),cx=out.getContext('2d');if(window.TodakRealPhoto&&TodakRealPhoto.drawBackground)TodakRealPhoto.drawBackground(cx,out.width,out.height,d.background,d.backgroundZoom,d.backgroundPanX,d.backgroundPanY);else TodakBackgrounds.draw(cx,out.width,out.height,d.background);cx.drawImage(renderer.domElement,0,0);return out;}return renderer.domElement;}catch(e){console.warn('토닥 렌더링 오류',e);return null;}},export:function(d,size,aspect){if(!init())return null;var r=0;for(var i=0;i<=64;i++)r=Math.max(r,d.rAt(i/64));var ratio=aspect||1,w=Math.round(size*Math.min(1,ratio)),h=Math.round(size/Math.max(1,ratio)),sc=Math.min(h/(d.height*1.5),w/(r*2.8));return this.render(Object.assign({},d,{viewWidth:w,viewHeight:h,zoom:1,panX:(d.panX||0)*w/Math.max(1,d.viewWidth||d.width),panY:(d.panY||0)*h/Math.max(1,d.viewHeight||d.canvasHeight),width:w,canvasHeight:h,pixelWidth:w,pixelHeight:h,scale:sc,cx:w/2,base:h/2+d.height*.45*sc,rotation:d.rotation}));}};
 /* Break the actual lathed shell; outer glaze UVs and inner wall stay on each shard. */
 window.TodakPhoto.createFracture=function(d,seed){
  if(!init()||lost)return null;

@@ -11,7 +11,7 @@
   if(scene==='01'){freshClay();}
   if(Number(scene)>=4){paint.x.save();paint.x.translate(TW*.5,TH*.57);paint.x.scale(4,4);paint.x.strokeStyle='#356b54';paint.x.lineWidth=1.2;paint.x.stroke(new Path2D(STAMP_PATHS.sprig));paint.x.restore();hasPaint=true;texVer++;}
   if(['01','02','03'].includes(scene)){
-   var selected=scene==='02'?'trim':scene==='03'?'sponge':'shape';document.querySelector('#tools [data-t="'+selected+'"]').click();if(selected==='trim')st.trimReady=true;
+   var selected=scene==='02'?'sponge':scene==='03'?'thick':'shape';document.querySelector('#tools [data-t="'+selected+'"]').click();if(selected==='trim')st.trimReady=true;
   }else if(['04','05','06'].includes(scene)){
    setStage('deco');var selected=scene==='05'?'carve':scene==='06'?'stamp':'brush';document.querySelector('#dtools [data-d="'+selected+'"]').click();if(scene==='05')$('wheelBottom-deco').click();if(scene==='06')$('wheelTop-deco').click();
   }else if(['07','08'].includes(scene)){
