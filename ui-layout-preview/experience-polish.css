@@ -45,11 +45,11 @@ body.ui-throw-bar #ui-work-info .ui-score-row{grid-column:2;grid-row:1}
 body.ui-throw-bar #ui-work-views{position:static!important;inset:auto!important;transform:none!important;grid-column:1/-1;grid-row:2;width:auto!important;max-width:none!important;min-height:38px;margin:0!important;padding:0!important;justify-self:center;background:none;border:0;box-shadow:none;gap:7px;flex-wrap:nowrap}
 body.ui-throw-bar #ui-work-views button{padding:5px 9px!important;font-size:12px;min-height:34px!important}
 body.ui-throw-bar #ui-goal-switch{font-size:12px;padding-left:8px}
-body.ui-throw-bar #ui-rough-row{grid-column:1/-1;grid-row:3;margin:0}
+body.ui-throw-bar #ui-work-info #ui-rough-row{grid-column:1/-1;grid-row:3;margin:0}
 body.ui-throw-wide #ui-work-info{grid-template-columns:minmax(80px,1fr) auto auto}
 body.ui-throw-wide #ui-work-views{grid-column:2;grid-row:1}
 body.ui-throw-wide #ui-work-info .ui-score-row{grid-column:3;grid-row:1}
-body.ui-throw-wide #ui-rough-row{grid-column:1/-1;grid-row:2}
+body.ui-throw-wide #ui-work-info #ui-rough-row{grid-column:1/-1;grid-row:2}
 @media(max-width:959px){.ui-header .steps li[aria-current=step]{width:auto!important;min-width:0!important;flex:0 0 auto!important;display:flex!important;align-items:center;justify-content:center;padding:0 9px!important;border-radius:20px!important;gap:4px}.ui-header .steps li[aria-current=step] .ui-step-name{display:inline-block!important;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;line-height:1.3;margin:0}}
 @media(max-width:370px){.ui-header .steps{gap:4px}.ui-header .steps li:not([aria-current=step]){width:30px!important;min-width:30px!important;flex-basis:30px!important}}
 @media(max-width:330px){.ui-header .steps{gap:3px}.ui-header .steps li:not([aria-current=step]){width:28px!important;min-width:28px!important;flex-basis:28px!important}.ui-header .steps li[aria-current=step]{padding-inline:6px!important;gap:3px}.ui-header .steps li[aria-current=step] .ui-step-name{font-size:11px;max-width:48px}}
@@ -60,7 +60,7 @@ body.ui-throw-wide #ui-goal-switch{padding-left:6px;gap:5px}
 body.ui-throw-bar #ui-work-info{grid-template-columns:minmax(50px,1fr) max-content max-content;grid-auto-columns:max-content;column-gap:6px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:thin;scroll-padding-inline:8px}
 body.ui-throw-bar #ui-work-views{grid-column:2;grid-row:1}
 body.ui-throw-bar #ui-work-info .ui-score-row{grid-column:3;grid-row:1;flex-wrap:nowrap}
-body.ui-throw-bar #ui-rough-row{grid-column:4;grid-row:1;white-space:nowrap}
+body.ui-throw-bar #ui-work-info #ui-rough-row{grid-column:4;grid-row:1;white-space:nowrap}
 body.ui-throw-tight #ui-work-info{padding:8px 6px;column-gap:3px}
 body.ui-throw-tight #ui-work-info #modeChip{font-size:12px!important;line-height:1.3;overflow-wrap:anywhere}
 body.ui-throw-tight #ui-piece-name{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -199,6 +199,8 @@ body.ui-touch-controls #sheet #tools .chip,body.ui-touch-controls #sheet #dtools
 body.ui-touch-controls #sheet #tools svg,body.ui-touch-controls #sheet #dtools svg,body.ui-touch-controls #sheet #rackGlaze svg{width:28px!important;height:28px!important;flex:none;object-fit:contain}
 .sheetBody>.panel>.ui-history{padding:0 0 10px;margin:0;gap:8px}
 .sheetBody>.panel>.ui-history button{min-height:36px;line-height:1.35;padding:6px 10px}
+.sheetBody>.panel{grid-template-columns:minmax(0,1fr);grid-auto-flow:row}
+body.ui-throw-bar #p-throw>#ui-rough-row{grid-column:1;grid-row:auto;margin:0;min-width:0}
 body[data-ui-layout=sheet] .sheetBody{scroll-padding-block:8px 16px;scrollbar-width:thin}
 .app>.overlay{z-index:40}
 .app>.drawer{z-index:50}

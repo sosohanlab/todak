@@ -531,7 +531,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 <link rel="stylesheet" href="home-layout.css?v=06516c194877">
 <link rel="stylesheet" href="trimming.css?v=7560f129b1d9">
 <script src="saved-work-viewer.js?v=875c4c43eaf1"></script><script src="bottom-view.js?v=d969d4859280"></script><link rel="stylesheet" href="mobile-sheet.css?v=eea383aeb901">
-<link rel="stylesheet" href="studio-layout.css?v=379bde7a1f84"><link rel="stylesheet" href="responsive-layout.css?v=cd9349fb106c"><link rel="stylesheet" href="experience-polish.css?v=aa9f5c487401"><link rel="stylesheet" href="site-feedback.css?v=12d2a92e4483"><link rel="stylesheet" href="tutorial-presentation.css?v=ff4c78860ee4">
+<link rel="stylesheet" href="studio-layout.css?v=379bde7a1f84"><link rel="stylesheet" href="responsive-layout.css?v=cd9349fb106c"><link rel="stylesheet" href="experience-polish.css?v=6e10b7487132"><link rel="stylesheet" href="site-feedback.css?v=12d2a92e4483"><link rel="stylesheet" href="tutorial-presentation.css?v=ff4c78860ee4">
 <script src="channel-attribution.js?v=c815a8b33fc1"></script>
 </head>
 <body>
@@ -4816,19 +4816,42 @@ function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&innerHeight<=56
  document.querySelectorAll('#steps li').forEach(function(b){b.addEventListener('click',leaveInspection);});
  var photoStage=setStage;setStage=function(s){leaveInspection();return photoStage.apply(this,arguments);};
  // Full operation history, including separate top/bottom decoration layers.
- var undo=[],redo=[],pending=null,restoring=false,maxHistory=40,tileStore=TodakHistoryTiles.create(),historyPointers=new Set();
+ var undo=[],redo=[],pending=null,restoring=false,maxHistory=40,tileStore=TodakHistoryTiles.create(),historyPointers=new Set(),historyTimer=null,historyGesture=null;
  function layerCopy(layer){return tileStore.read(layer,texVer);}
  function capture(metadataOnly){var decorating=!metadataOnly&&st.stage!=='throw',wheel=window.TodakWheel;return {state:JSON.parse(JSON.stringify(st)),colors:{pig:dPig,pigRgb:dColor.slice(),brush:$('glazeBrushColor').value,brushRgb:brushCustom.c.slice(),dipRgb:dipCustom.c.slice()},grooves:grooves.slice(),paint:decorating?layerCopy(paint):null,carve:decorating?layerCopy(carve):null,top:decorating&&wheel?layerCopy(wheel.layer):null,bottom:decorating&&wheel?layerCopy(wheel.bottomLayer):null,relief:decorating&&wheel?layerCopy(wheel.bottomRelief):null,hp:hasPaint,hc:hasCarve,version:texVer};}
- function signature(s){return JSON.stringify([s.state,s.colors])+'|'+s.version+'|'+s.grooves.join(',');}
+ function signature(s,ignoreTouchCount){var state=s.state;if(ignoreTouchCount){state=Object.assign({},state);delete state.touches;}return JSON.stringify([state,s.colors])+'|'+s.version+'|'+s.grooves.join(',');}
  function begin(){if(restoring||pending||!['throw','deco','glaze'].includes(st.stage))return;pending=capture();}
- function finish(){if(!pending)return;var before=pending;pending=null;if(signature(before)!==signature(capture(true))){undo.push(before);if(undo.length>maxHistory)undo.shift();redo=[];}historyUI();}
+ function finish(gesturePart){
+  if(!pending)return;var before=pending;pending=null;
+  if(signature(before,gesturePart)!==signature(capture(true),gesturePart)){
+   undo.push(before);redo=[];
+   if(gesturePart&&historyGesture)historyGesture.records.push(before);
+   if(undo.length>maxHistory){var dropped=undo.shift();if(historyGesture){historyGesture.records=historyGesture.records.filter(function(frame){return frame!==dropped;});if(historyGesture.initial===dropped)historyGesture.initial=null;}}
+  }
+  historyUI();
+ }
+ function endHistoryGesture(){
+  if(historyTimer!==null){clearInterval(historyTimer);historyTimer=null;}
+  if(!historyGesture)return;
+  finish(true);
+  // A partial undo keeps this contact's challenge cost; undoing its first part refunds it.
+  historyGesture.records.forEach(function(frame){if(frame!==historyGesture.initial)frame.state.touches=st.touches;});
+  historyGesture=null;historyPointers.clear();
+ }
+ function startHistoryGesture(){
+  endHistoryGesture();finish();begin();if(!pending)return;
+  historyGesture={initial:pending,records:[]};
+  historyTimer=setInterval(function(){if(!historyPointers.size)return;finish(true);begin();},400);
+ }
+ function clearHistory(){if(historyTimer!==null)clearInterval(historyTimer);historyTimer=null;historyGesture=null;historyPointers.clear();undo=[];redo=[];pending=null;tileStore=TodakHistoryTiles.create();historyUI();}
  function restore(s){restoring=true;Object.assign(st,JSON.parse(JSON.stringify(s.state)));dPig=s.colors.pig;dColor=s.colors.pigRgb.slice();brushCustom.c=s.colors.brushRgb.slice();dipCustom.c=s.colors.dipRgb.slice();$('glazeBrushColor').value=s.colors.brush;[[ $('pigColor'),dColor],[$('glazeColor'),glaze().c],[brushInput,brushCustom.c],[dipInput,dipCustom.c]].forEach(function(pair){var value='#'+pair[1].map(function(v){return Math.round(clamp(v,0,255)).toString(16).padStart(2,'0');}).join('');pair[0].value=value;var hex=pair[0].parentElement.querySelector('input[type=text]');if(hex)hex.value=value.toUpperCase();});grooves=s.grooves.slice();[[paint,s.paint],[carve,s.carve],[window.TodakWheel?.layer,s.top],[window.TodakWheel?.bottomLayer,s.bottom],[window.TodakWheel?.bottomRelief,s.relief]].forEach(function(pair){tileStore.write(pair[0],pair[1]);});hasPaint=s.hp;hasCarve=s.hc;texVer++;hist.length=0;composeKey='';dipKey='';pvKey='';syncControls();window.TodakWheel?.refresh();updateReadout();dirty=cardDirty=true;restoring=false;sync();}
  function historyUI(){var blocked=!!TARGETS[st.target]?.master;$('ui-undo').disabled=blocked||!undo.length;$('ui-redo').disabled=blocked||!redo.length;}
- $('ui-undo').onclick=function(){finish();if(!undo.length)return;redo.push(capture());restore(undo.pop());historyUI();};$('ui-redo').onclick=function(){if(!redo.length)return;undo.push(capture());restore(redo.pop());historyUI();};
+ $('ui-undo').onclick=function(){endHistoryGesture();finish();if(!undo.length)return;redo.push(capture());restore(undo.pop());historyUI();};$('ui-redo').onclick=function(){endHistoryGesture();if(!redo.length)return;undo.push(capture());restore(redo.pop());historyUI();};
  undoIds.forEach(function(id){$(id)?.addEventListener('click',function(e){e.preventDefault();e.stopImmediatePropagation();$('ui-undo').click();},true);});
- stageEl.addEventListener('pointerdown',function(e){if(e.target!==cv||!['throw','deco','glaze'].includes(st.stage))return;var p=cpos(e),handle=handlePos(),heightGrip=st.stage==='throw'&&tool==='shape'&&Math.hypot(p.x-handle.x,p.y-handle.y)<30;if(heightGrip||hitSurface(p.x,p.y)||window.TodakWheel?.top()||window.TodakWheel?.bottom()||secOn){historyPointers.add(e.pointerId);begin();}},true);
- function finishPointer(e){historyPointers.delete(e.pointerId);if(!historyPointers.size)setTimeout(finish,0);}
- document.addEventListener('pointerup',finishPointer,true);document.addEventListener('pointercancel',finishPointer,true);
+ stageEl.addEventListener('pointerdown',function(e){if(e.target!==cv||!['throw','deco','glaze'].includes(st.stage))return;var p=cpos(e),handle=handlePos(),heightGrip=st.stage==='throw'&&tool==='shape'&&Math.hypot(p.x-handle.x,p.y-handle.y)<30;if(heightGrip||hitSurface(p.x,p.y)||window.TodakWheel?.top()||window.TodakWheel?.bottom()||secOn){if(!historyPointers.size)startHistoryGesture();historyPointers.add(e.pointerId);}},true);
+ function finishPointer(e){if(!historyPointers.delete(e.pointerId)||historyPointers.size)return;var gesture=historyGesture;setTimeout(function(){if(historyGesture===gesture&&!historyPointers.size)endHistoryGesture();},0);}
+ ['pointerup','pointercancel','lostpointercapture'].forEach(function(event){document.addEventListener(event,finishPointer,true);});
+ addEventListener('blur',endHistoryGesture);document.addEventListener('visibilitychange',function(){if(document.hidden)endHistoryGesture();});
  $('sheet').addEventListener('click',function(e){if(e.target.closest('#swatches,#swatches2,#finish,#dip,#dots,#fx,#lucky,#dClear')){begin();setTimeout(finish,0);}},true);
  $('cavityDepth').addEventListener('pointerdown',begin,true);$('cavityDepth').addEventListener('keydown',begin,true);$('cavityDepth').addEventListener('change',function(){setTimeout(finish,0);});
  // Mark the same alternating curvature that the existing roughness score measures.
@@ -4844,7 +4867,9 @@ function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&innerHeight<=56
  // The section needs its own inner-wall reference, independent of the outer target.
  // Use the original 6 mm normal wall inset and 5 mm floor recommendation.
  var claySection=drawSection;drawSection=function(){claySection();if(!ghostOn())return;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.save();ctx.setLineDash([8,5]);ctx.lineJoin='round';ctx.beginPath();var floor=Math.min(.5,st.height*.4);for(var j=0;j<=96;j++){var y=floor+(st.height-floor)*j/96,t=y/st.height,x=CX+innerLimitAt(t,.6)*SV;if(j)ctx.lineTo(x,BASE-y*SV);else ctx.moveTo(x,BASE-y*SV);}ctx.moveTo(CX,BASE-floor*SV);ctx.lineTo(CX+innerLimitAt(floor/st.height,.6)*SV,BASE-floor*SV);ctx.strokeStyle='#fffdf3';ctx.lineWidth=3.8;ctx.stroke();ctx.strokeStyle='#007c69';ctx.lineWidth=2;ctx.stroke();ctx.restore();ctx.setTransform(1,0,0,1,0,0);};
- var oldStage=setStage;setStage=function(s){if(st.stage!==s){undo=[];redo=[];pending=null;locate=false;historyPointers.clear();tileStore=TodakHistoryTiles.create();}oldStage.apply(this,arguments);sync();};
+ var oldStage=setStage;setStage=function(s){if(st.stage!==s){clearHistory();locate=false;}oldStage.apply(this,arguments);sync();};
+ var historyFree=startFree;startFree=function(){var result=historyFree.apply(this,arguments);clearHistory();return result;};
+ var historyChallenge=startChallenge;startChallenge=function(){var result=historyChallenge.apply(this,arguments);clearHistory();return result;};
  var oldReadout=updateReadout;updateReadout=function(){oldReadout.apply(this,arguments);schedule();};var oldTips=showTips;showTips=function(){oldTips.apply(this,arguments);schedule();};
  var raf=0;function schedule(){if(!raf)raf=requestAnimationFrame(function(){raf=0;sync();});}
  function sync(){var challenge=!!TARGETS[st.target],type=st.stage,T=TARGETS[st.target],o=classify();document.body.dataset.uiStage=type;document.body.dataset.uiTool=tool;$('sheet').dataset.uiStage=type;$('sheetTitle').textContent={throw:'빚기 도구',deco:'꾸미기 도구',glaze:'유약',fire:fstep==='prep'?'굽기':'불 때는 중',done:'완성'}[type];pieceName.textContent=o.full;$('ui-goal-info').hidden=!challenge;$('ui-goal-switch').hidden=type!=='throw'||!challenge;goal.querySelector('input').disabled=!!st.blind;info.querySelector('.ui-score-row').hidden=type!=='throw'||!challenge;$('ui-rough-row').hidden=type!=='throw'||!challenge||roughPts()===0;$('ui-live-score').textContent=st.blind?'?점':score()+'점';$('ui-moves').textContent='모양 잡기 '+touchLeft()+'번 남음';remaining.textContent=challenge?touchLeft()+'번 남음':'';formButton.disabled=challenge&&touchLeft()===0;$('ui-moves').classList.toggle('empty',challenge&&touchLeft()===0);$('ui-rough-text').textContent='표면 거침 −'+roughPts()+'점';$('ui-rough-locate').setAttribute('aria-pressed',String(locate));
@@ -4872,7 +4897,7 @@ function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&innerHeight<=56
  var baseResize=resize,baseFit=fitV;
  var basePhotoData=photoData;photoData=function(){var d=basePhotoData();if(innerWidth<1200&&st.stage==='done'){var box=cv.getBoundingClientRect(),unit=W/Math.max(1,box.width),safe=(Math.max($('ui-work-info').getBoundingClientRect().bottom,$('ui-work-views').getBoundingClientRect().bottom)-box.top+16)*unit;d.viewWidth=workWidth()*unit;d.viewHeight=Math.max(40,HC-safe-12*unit);d.panY=(d.panY||0)+safe;}return d;};
  function workWidth(){return uiUsesSheet()?innerWidth:Math.max(240,$('sheet').getBoundingClientRect().left-12);}
- function arrangeThrowBar(compact){var rough=$('ui-rough-row'),roughHost=compact&&st.stage==='throw'&&workWidth()<600?$('p-throw'):$('ui-work-info');if(rough.parentNode!==roughHost){if(roughHost.id==='p-throw')tools.closest('.field').after(rough);else roughHost.append(rough);}var info=$('ui-work-info'),views=$('ui-work-views'),embed=st.stage==='throw',done=st.stage==='done',editing=['deco','glaze'].includes(st.stage);document.body.classList.toggle('ui-edit-bar',editing);document.body.classList.toggle('ui-throw-bar',embed);document.body.classList.toggle('ui-done-bar',done);if(embed||done||editing){if(views.parentNode!==info)info.insertBefore(views,info.querySelector('.ui-score-row'));}else if(views.parentNode!==stageEl)stageEl.appendChild(views);document.body.classList.toggle('ui-throw-wide',embed);document.body.classList.toggle('ui-throw-tight',embed&&workWidth()<480);}
+ function arrangeThrowBar(compact){var rough=$('ui-rough-row'),roughHost=compact&&st.stage==='throw'&&workWidth()<600?$('p-throw'):$('ui-work-info');if(rough.parentNode!==roughHost){if(roughHost.id==='p-throw')$('tools').closest('.field').after(rough);else roughHost.append(rough);}var info=$('ui-work-info'),views=$('ui-work-views'),embed=st.stage==='throw',done=st.stage==='done',editing=['deco','glaze'].includes(st.stage);document.body.classList.toggle('ui-edit-bar',editing);document.body.classList.toggle('ui-throw-bar',embed);document.body.classList.toggle('ui-done-bar',done);if(embed||done||editing){if(views.parentNode!==info)info.insertBefore(views,info.querySelector('.ui-score-row'));}else if(views.parentNode!==stageEl)stageEl.appendChild(views);document.body.classList.toggle('ui-throw-wide',embed);document.body.classList.toggle('ui-throw-tight',embed&&workWidth()<480);}
  resize=function(){baseResize();var box=cv.getBoundingClientRect();if(innerWidth<1200&&box.width>0){var unit=W/box.width,next=workWidth()*unit/2,delta=next-CX0;CX0=next;if(Z<=1)CX=next;else CX+=delta;}};
  fitV=function(){var fitted=baseFit(),box=cv.getBoundingClientRect();if(!box.width||innerWidth>=1200&&innerHeight>=720)return fitted;var unit=W/box.width,top=Math.max($('ui-work-info').getBoundingClientRect().bottom,$('ui-work-views').hidden?0:$('ui-work-views').getBoundingClientRect().bottom)-box.top+18,roomH=Math.max(35,BASE0-top*unit),radius=Math.max.apply(null,st.radii),height=st.height,T=st.stage==='throw'&&TARGETS[st.target];if(T){height=Math.max(height,T.h);for(var i=0;i<=40;i++)radius=Math.max(radius,T.f(i/40));}if(st.stage==='fire')return Math.min(fitted,Math.max(.1,(HC-top*unit-25)/(30*S0)));return Math.max(.08,Math.min(fitted,roomH/(height+radius*TILT)/S0,(workWidth()-38)*unit/(2*radius*S0)));};
  function arrangeHistory(mode){
