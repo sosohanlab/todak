@@ -12,6 +12,12 @@ source=source.replace("assert(doc.getElementById('tutorialCoach').hidden,'instru
 source=source.replace('w.eval(main);',"w.eval(fs.readFileSync(root+'photo-backgrounds.js','utf8'));w.eval(main);");
 // The home entry is now optional; replay/resume uses its own button.
 if(test==='tutorial-first-visit.cjs'){
+ source=source.replace("['solid','rotate','effect']","['solid','rotate','glazePaint']");
+ const brushStart=source.indexOf("state('glazeBrush');click('#rackGlazeBrush');");
+ const obsoleteReturn=source.indexOf("state('glazeBaseReturn');",brushStart);
+ const dipStart=source.indexOf("state('dip');",obsoleteReturn),fireStart=source.indexOf("state('heat');",dipStart);
+ if(brushStart<0||obsoleteReturn<0||dipStart<0||fireStart<0)throw Error('Missing glaze flow test blocks');
+ source=source.slice(0,brushStart)+source.slice(dipStart,fireStart)+source.slice(brushStart,obsoleteReturn)+source.slice(fireStart);
  source=source.replace("assert(doc.getElementById('goChallenge').disabled);","assert(!doc.getElementById('goChallenge').disabled);");
  source=source.replace("assert(!doc.getElementById('tutorialHomeNote').hidden);assert(doc.querySelector('#tutorialHomeNote strong').textContent.includes('자유롭게 빚기'));assert(doc.getElementById('goFree').classList.contains('tutorialFirstStart'));click('#goFree');state('shape');","assert(doc.getElementById('tutorialHomeNote').hidden);assert(!doc.getElementById('goFree').classList.contains('tutorialFirstStart'));click('#goTutorial');state('shape');");
  source=source.replace('first visit locks other modes; real actions gate all 31 guide steps','optional home entry; real actions gate the full guided sequence');

@@ -4472,7 +4472,17 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  function closeHelp(){helpBox.hidden=true;helpButton.setAttribute('aria-expanded','false');}
  helpButton.onclick=function(){if(!helpBox.hidden){closeHelp();return;}$('stageBriefTitle').textContent=({throw:'빚기',deco:'꾸미기',glaze:'유약',fire:'굽기',done:'완성'})[st.stage]+' 도움말';$('stageBriefText').textContent=helpText[st.stage]||'';helpBox.hidden=false;helpButton.setAttribute('aria-expanded','true');setSheet(true);$('sheetBody').scrollTop=0;};$('stageHelpClose').onclick=closeHelp;
  var helpStage=setStage;setStage=function(stage){var before=st.stage,result=helpStage(stage);if(st.stage!==before)closeHelp();return result;};
- /* Runs inside the existing tutorial: action validation and saved progress remain authoritative. */
+ /* Complete all base-glaze settings before selecting the brush once. */
+(function(){
+ var order=['glazeBase','color','finish','dip','effect','glazeBrush','glazeOpacity','glazePaint'];
+ var glazing=steps.filter(function(step){return step.stage==='glaze';});
+ var arranged=order.map(function(id){var step=glazing.find(function(item){return item.id===id;});if(!step)throw Error('Missing glaze tutorial step: '+id);return step;});
+ var first=steps.findIndex(function(step){return step.stage==='glaze';});
+ steps.splice.apply(steps,[first,glazing.length].concat(arranged));
+ arranged[arranged.length-1].text='도자기 위에 원하는 선이나 무늬를 직접 칠해 보세요. 옆면과 위에서도 칠할 수 있어요. 붓질한 뒤 손을 떼면 굽기로 넘어갈 수 있어요. 불투명도가 0%라면 조금 올려 주세요.';
+})();
+
+/* Runs inside the existing tutorial: action validation and saved progress remain authoritative. */
 (function(){
  'use strict';
  var stages=['throw','deco','glaze','fire','done'],names=['빚기','꾸미기','유약','굽기','완성'];
