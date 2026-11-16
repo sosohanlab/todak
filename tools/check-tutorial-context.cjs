@@ -1,2 +1,2 @@
-/* Compatibility entry point for the consolidated real-action tutorial and search checks. */
-require('./check-tutorial-stage-flow.cjs');
+/* Compatibility entry point: the tutorial now uses grouped production-stage checkpoints. */
+require('./check-grouped-workshop.cjs');

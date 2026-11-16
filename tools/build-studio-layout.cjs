@@ -9,10 +9,10 @@ if(!html.includes(marker))throw Error('Missing startup');
 const shopAt=html.indexOf('var catalog={background:'),shopStart=html.lastIndexOf('(function(){',shopAt),shopEnd=html.indexOf('})();',html.indexOf('window.TodakShop={',shopAt));
 if(shopAt<0||shopStart<0||shopEnd<0)throw Error('Missing shop integration');
 html=html.slice(0,shopStart)+fs.readFileSync(path.join(root,'shop.js'),'utf8')+html.slice(shopEnd+5);
-// Replace the retired trimming feature while preserving interior depth controls.
+// Keep depth controls, replacing the former large-cut blade with a bounded finishing tool.
 const trimStart=html.indexOf('/* Optional leather-hard trimming.'),trimEnd=html.indexOf('/* A continuously resizable mobile tool sheet.',trimStart);
 if(trimStart<0||trimEnd<0)throw Error('Missing retired-tool boundaries');
-html=html.slice(0,trimStart)+fs.readFileSync(path.join(sourceDir,'interior-depth-controls.js'),'utf8')+'\n'+html.slice(trimEnd);
+html=html.slice(0,trimStart)+fs.readFileSync(path.join(sourceDir,'interior-depth-controls.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'fine-trimming.js'),'utf8')+'\n'+html.slice(trimEnd);
 html=html.replaceAll("['trim','sponge']","['sponge']");
 html=html.replace("shapeTool('trim','깎아 만들기');",'');
 const scoreStart=html.indexOf('function roughnessSignal('),scoreEnd=html.indexOf('var ghostUntil=0;',scoreStart);
@@ -21,8 +21,6 @@ html=html.slice(0,scoreStart)+fs.readFileSync(path.join(sourceDir,'challenge-sco
 html=html.replace('if(throwing&&tool!=="thick"&&st.target&&TARGETS[st.target]&&ghostOn())','if(throwing&&st.target&&TARGETS[st.target]&&ghostOn())');
 html=html.replace('ctx.moveTo(hp.x-17,hp.y); ctx.lineTo(CX+rAt(1)*SV,hp.y);', 'ctx.moveTo(hp.x+(hp.x<CX?17:-17),hp.y); ctx.lineTo(CX+(hp.x<CX?-1:1)*rAt(1)*SV,hp.y);');
 html=html.replace('var compact=window.innerWidth<=1440,host=compact?', 'var compact=window.innerWidth<760,host=compact?');
-// A stroke that starts just outside the clay can acquire contact on entry.
-html=html.replace('if(ptr.trimInvalid)return 0;',`if(ptr.trimInvalid){var contact=hitSurface(ptr.x,ptr.y),distance=Math.abs(ptr.x-CX)/SV,edge=rAt(clamp(t,0,1));if(!contact&&Math.abs(distance-edge)>Math.max(.65,15/SV))return 0;ptr.trimInvalid=false;ptr.trimSide=ptr.x<CX?-1:1;ptr.trimOffset=Math.max(0,distance-edge);ptr.trimLastRow=clamp(t,0,1)*(N-1);ptr.w0=st.radii.slice();}`);
 html=html.replace("if(!viewer.open||!window.TodakPhoto||savedOrbitEpoch", "if((!viewer.open&&orbitCanvas.dataset.inline!=='true')||!window.TodakPhoto||savedOrbitEpoch");
 html=html.replace("viewer.showModal();yaw=rot;pitch=.32;zoom=1;renderOrbit();", "orbitCanvas.dataset.inline='true';orbitCanvas.hidden=false;stageEl.appendChild(orbitCanvas);document.body.classList.add('ui-inspecting');orbitCanvas.style.backgroundImage='url('+TodakBackgrounds.url(photoScene)+')';yaw=rot;pitch=.32;zoom=1;renderOrbit();");
 html=html.replace("x.fillStyle='#e8e1d3';x.fillRect(0,0,600,540);x.drawImage(out,0,0,600,540);", "if(orbitCanvas.dataset.inline==='true'){x.clearRect(0,0,600,540);}else{x.fillStyle='#e8e1d3';x.fillRect(0,0,600,540);}x.drawImage(out,0,0,600,540);");
@@ -44,6 +42,13 @@ required("target:'#realPhotoScene'","target:'#ui-background-picker'");
 // Search remains an explicit action; a delayed modal must not interrupt photo editing.
 required('autoTimer=setTimeout(prompt,12000);','');
 required("#sheet,[role=dialog],.drawer,.modal,.overlay","#sheet,dialog,[role=dialog],.drawer,.modal,.overlay");
+// Shorter, readable kiln loading/firing/cooling and reveal animations.
+required('loadA=clamp((now-fT)/1300','loadA=clamp((now-fT)/950');
+required('fT=now+250; fireUI();','fT=now+150; fireUI();');
+required('doorA=1-clamp((now-fT)/900','doorA=1-clamp((now-fT)/650');
+required('(st.kilnType==="wood"?6400:5200)','3400');
+required('c=clamp((now-fT)/1400','c=clamp((now-fT)/950');
+required('(performance.now()-revealStart)/2600','(performance.now()-revealStart)/1900');
 // Tool selection is a radio choice, including when the same tool is chosen again.
 required("glazeMode=glazeMode==='base'?null:'base';", "glazeMode='base';");
 required("glazeMode=glazeMode==='brush'?null:'brush';", "glazeMode='brush';");
@@ -112,8 +117,8 @@ html=html.replace('function minimum(){return head.getBoundingClientRect().height
 const rule='function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&innerHeight<=560);}\n';
 required("$('goFree').addEventListener('click',function(e){if(complete)return;if(active){e.preventDefault();e.stopImmediatePropagation();closeOverlays();focusStep();return;}active=true;index=0;done=false;contactMs=0;if(!routeTimer)routeTimer=setInterval(route,160);},true);", "$('goFree').addEventListener('click',function(){if(active)stopOptionalTutorial();},true);");
 required("var challengeBase=startChallenge;startChallenge=function(id){if(!complete){toast('첫 자유롭게 빚기 안내를 먼저 마쳐 주세요.');return;}return challengeBase(id);};", "var challengeBase=startChallenge;startChallenge=function(id){if(active)stopOptionalTutorial();return challengeBase(id);};");
-required('lockHome();window.TodakTutorial=',fs.readFileSync(path.join(sourceDir,'tutorial-sequence.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-behavior.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-presentation.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-entry.js'),'utf8')+'\n lockHome();window.TodakTutorial=');
-const modules=['history-tiles.js','studio-layout.js','responsive-layout.js','experience-polish.js','stage-navigation.js','card-dialog-layout.js','appearance-picker.js','shelf-cutouts.js','site-feedback-config.js','site-feedback.js'];
+required('lockHome();window.TodakTutorial=',fs.readFileSync(path.join(sourceDir,'tutorial-sequence.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-behavior.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-presentation.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-entry.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'grouped-tutorial.js'),'utf8')+'\n lockHome();window.TodakTutorial=');
+const modules=['history-tiles.js','studio-layout.js','responsive-layout.js','experience-polish.js','stage-navigation.js','card-dialog-layout.js','appearance-picker.js','workshop-simplification.js','shelf-cutouts.js','site-feedback-config.js','site-feedback.js'];
 if(!production)modules.push('preview-scenes.js');
 const code=rule+modules.map(f=>fs.readFileSync(path.join(sourceDir,f),'utf8')).join('\n');
 html=html.replace(marker,code+'\n'+marker);

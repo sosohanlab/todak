@@ -76,6 +76,7 @@
   if(target===$('sheetToggle'))return['도구창을 열어 주세요','다음 도구를 여기서 골라요.','누르기'];
   if(target===$('openCard'))return['카드로 저장·공유를 열어 주세요','작품 이름과 용도를 적을 수 있어요.','누르기'];
   if(clip)return[clip.direction==='up'?'도구창을 위로 스크롤해 주세요':'도구창을 아래로 스크롤해 주세요','표시된 도구나 입력칸을 찾아요.',clip.direction==='up'?'↑ 스크롤':'↓ 스크롤'];
+  if(tutorialGuidance.describe){var overview=tutorialGuidance.describe(target);if(overview)return overview;}
   if(done&&lastInStage()&&['throw','deco','glaze'].indexOf(step.stage)>=0)return ['충분히 해본 뒤 다음 단계로 가세요',$('nextBtn').textContent.replace(/\s*→/,'')+' 버튼으로 이어가요.'];if(done)return tutorialGuidance.feedback();
   if(tutorialGuidance.status())return['닮은 물건을 찾는 중이에요','아래에 검색 결과나 연결 안내가 나타날 때까지 기다려 주세요.',''];
   if(step.id==='open'&&fstep!=='ready')return['가마가 식는 중이에요','100℃ 이하로 식으면 문을 열 수 있어요.',''];
@@ -137,7 +138,7 @@
    var target=intendedTarget();if(!target)return;if(engaged&&gestureReady())target=cv;
    if(target.closest('#sheet')&&!$('sheet').classList.contains('open')&&target!==$('sheetToggle'))target=$('sheetToggle');
    var clip=clippedTarget(target),canvasTarget=target===cv,step=current();
-   document.body.classList.toggle('tutorial-sheet-focus',!!target.closest('#sheet')&&['deco','glaze'].indexOf(st.stage)>=0);
+   document.body.classList.toggle('tutorial-sheet-focus',!done&&!!target.closest('#sheet')&&['deco','glaze'].indexOf(st.stage)>=0);
    // Free the mobile workspace once per hands-on step, before the gesture begins.
    if(canvasTarget&&innerWidth<600&&lastCanvasStep!==step.id&&!ptr.down){lastCanvasStep=step.id;var closingStep=step.id;setTimeout(function(){if(active&&current()&&current().id===closingStep&&gestureReady()&&!ptr.down){setSheet(false);resize();V=fitV();SV=S0*V*Z;dirty=true;route();}},0);}
    var modalOpen=!$('cardDlg').hidden||!$('searchDlg').hidden;coach.hidden=modalOpen;coach.setAttribute('aria-label','처음 빚기 진행');document.body.classList.add('tutorial-guided');var header=document.querySelector('.ui-header');if(header)document.body.style.setProperty('--tutorial-header-bottom',(header.getBoundingClientRect().bottom-stageEl.getBoundingClientRect().top)+'px');updateProgress();var progress=modalOpen?rect(0,0,0,0):positionProgress(),info=describe(target,clip);$('tutorialActionContext').hidden=!modalOpen;if(modalOpen)setText($('tutorialActionProgress'),'처음 빚기 · '+(index+1)+' / '+steps.length);
