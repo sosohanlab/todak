@@ -24,6 +24,7 @@ body.tutorialPresentationReady #tutorialCoach[data-done=true] #tutorialStatus{co
 #tutorialContinue[hidden]{display:none}
 #tutorialAction{position:fixed;z-index:1101;box-sizing:border-box;max-width:calc(100vw - 24px);margin:0;padding:12px;border:1.5px solid var(--cobalt);border-radius:14px;background:var(--paper);color:var(--ink);box-shadow:0 5px 16px #141e3625;pointer-events:none;font-family:inherit}
 #tutorialActionTitle{display:block;font-size:14px;line-height:1.4;font-weight:700;word-break:keep-all;overflow-wrap:anywhere}
+#tutorialActionContext{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}#tutorialActionContext[hidden]{display:none}#tutorialActionProgress{font-size:10px;line-height:1.4;color:var(--cobalt)}#tutorialActionHome{min-height:24px;padding:2px;border:0;background:none;color:var(--muted);font-size:10px;text-decoration:underline;text-underline-offset:3px;pointer-events:auto}
 #tutorialAction #tutorialText{font-size:11px;line-height:1.5;margin:4px 0 0;word-break:keep-all;overflow-wrap:anywhere;color:var(--muted)}
 #tutorialAction::after{content:'';position:absolute;width:10px;height:10px;background:var(--paper);transform:rotate(45deg)}
 #tutorialAction[data-side=right]::after{right:-6px;top:calc(var(--tutorial-arrow,50%) - 5px);border-top:1.5px solid var(--cobalt);border-right:1.5px solid var(--cobalt)}

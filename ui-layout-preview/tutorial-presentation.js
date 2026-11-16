@@ -11,10 +11,10 @@
  var nextGuide=document.createElement('button');nextGuide.id='tutorialContinue';nextGuide.type='button';nextGuide.textContent='다음 안내 →';nextGuide.hidden=true;coach.appendChild(nextGuide);
  // Completion unlocks the next instruction; it never starts a countdown.
  scheduleAdvance=function(){cancelAdvance();if(active&&current()&&current().id==='home'&&done){finish();return;}if(!ptr.down)engaged=false;route();};
- nextGuide.onclick=function(){if(!active||!done||ptr.down)return;if(index===steps.length-1)finish();else advance();};
+ nextGuide.onclick=function(){if(!active||ptr.down)return;if(tutorialGuidance.photoConfirmable()){tutorialGuidance.confirmPhoto();return;}if(!done)return;if(index===steps.length-1)finish();else advance();};
  ['pointerup','pointercancel'].forEach(function(type){document.addEventListener(type,function(){setTimeout(function(){if(active&&!ptr.down){engaged=false;route();}},0);},true);});
  $('tutorialStatus').removeAttribute('role');$('tutorialStatus').setAttribute('aria-hidden','true');
- var action=document.createElement('aside');action.id='tutorialAction';action.hidden=true;action.setAttribute('aria-live','polite');action.setAttribute('aria-atomic','true');action.innerHTML='<b id="tutorialActionTitle"></b>';action.append(oldText,nextGuide);document.body.appendChild(action);
+ var action=document.createElement('aside');action.id='tutorialAction';action.hidden=true;action.setAttribute('aria-live','polite');action.setAttribute('aria-atomic','true');action.innerHTML='<div id="tutorialActionContext" hidden><small id="tutorialActionProgress"></small><button type="button" id="tutorialActionHome">홈으로</button></div><b id="tutorialActionTitle"></b>';action.append(oldText,nextGuide);document.body.appendChild(action);$('tutorialActionHome').onclick=function(){$('tutorialSkip').click();};
  var veil=document.createElementNS(ns,'svg');veil.id='tutorialVeil';veil.setAttribute('aria-hidden','true');veil.setAttribute('focusable','false');veil.style.display='none';
  veil.innerHTML='<defs><clipPath id="tutorialControlClip" clipPathUnits="userSpaceOnUse"><rect id="tutorialControlClipBox"/></clipPath><mask id="tutorialFocusMask" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" style="mask-type:luminance"><rect id="tutorialMaskBase" fill="white"/><path id="tutorialVesselCutout" fill="black"/><path id="tutorialControlCutout" fill="black" clip-path="url(#tutorialControlClip)"/></mask></defs><rect id="tutorialDim" width="100%" height="100%" mask="url(#tutorialFocusMask)"/><path id="tutorialVesselOutline" fill="none"/><path id="tutorialControlOutline" fill="none" clip-path="url(#tutorialControlClip)"/>';
  document.body.appendChild(veil);var cut=veil.querySelector('#tutorialVesselCutout'),outline=veil.querySelector('#tutorialVesselOutline'),control=veil.querySelector('#tutorialControlCutout'),controlOutline=veil.querySelector('#tutorialControlOutline'),controlClip=veil.querySelector('#tutorialControlClipBox'),controlGeometry=null;
@@ -60,14 +60,15 @@
  var copy={
   shape:['옆면을 좌우로 끌어 보세요','끌면 굴곡이 생겨요.','↔ 끌기'],inside:['오른쪽 안쪽 벽을 끌어 보세요','벽 두께를 조절할 수 있어요.','↔ 끌기'],trim:['바깥 벽을 조금씩 깎아 보세요','도구를 안쪽으로 천천히 밀어요.','↔ 끌기'],smooth:['겉면을 가볍게 문질러 보세요','작은 굴곡과 물레 자국을 정리해요.','문지르기'],smoothInner:['오른쪽 안쪽 벽을 문질러 보세요','안쪽 표면을 매끈하게 다듬어요.','문지르기'],
   brush:['작품 위에 선을 그려 보세요','원하는 무늬를 자유롭게 그려요.','그리기'],brushRing:['작품 위에 띠를 그려 보세요','같은 높이로 한 바퀴 이어져요.','↔ 끌기'],stamp:['도자기를 눌러 도장을 찍어 보세요','고른 모양이 작품에 찍혀요.','누르기'],carve:['작품 위에 무늬를 새겨 보세요','문지른 자리에 홈이 생겨요.','↔ 끌기'],raised:['도자기에 선을 그려 보세요','흙 위로 솟은 무늬가 생겨요.','그리기'],carveRing:['작품 위를 끌어 띠를 새겨 보세요','둘레를 따라 홈이 이어져요.','↔ 끌기'],glazePaint:['원하는 부분에 유약을 칠해 보세요','원하는 만큼 더 칠할 수 있어요.','그리기'],load:['작품을 눌러 가마에 넣어 주세요','가마 문을 닫으면 굽기가 시작돼요.','누르기'],
-  smoothSection:['단면을 눌러 보세요','안쪽 벽의 두께를 볼 수 있어요.'],solid:['전체를 눌러 보세요','다듬은 전체 모양을 확인해요.'],stampChoice:['도장을 골라 보세요','꽃·잎 등 원하는 모양을 찍을 수 있어요.'],rotate:['화살표를 눌러 돌려 보세요','반대편도 꾸밀 수 있어요.'],glazeBase:['바탕 유약을 선택해 주세요','작품 전체에 입힐 유약을 골라요.'],color:['원하는 유약 색을 골라 보세요','직접 색상과 코드를 고를 수도 있어요.'],finish:['반짝임을 골라 보세요','유광과 무광의 느낌을 비교해요.'],glazeBrush:['붓칠을 선택해 주세요','원하는 부분에 유약을 칠할 수 있어요.'],glazeOpacity:['불투명도를 움직여 보세요','낮출수록 바탕이 비쳐 보여요.'],glazeBaseReturn:['바탕 유약으로 돌아가 주세요','칠한 무늬는 그대로 유지돼요.'],dip:['담그는 깊이를 움직여 보세요','입구만 또는 절반까지 덧입혀요.'],effect:['표면 무늬를 골라 보세요','원하는 질감을 비교해 보세요.'],heat:['불 세기를 골라 보세요','선택한 불로 작품을 구워요.'],open:['가마 문을 열어 주세요','식은 작품을 꺼내 볼 수 있어요.'],photo:['완성 사진을 확인해 보세요','스위치를 켜면 360도로 감상할 수 있어요.'],inspect360:['작품을 직접 돌려 보세요','끌거나 회전 화살표를 눌러요.'],size:['사진 속 작품 크기를 바꿔 보세요','슬라이더나 − / ＋ 버튼을 사용해요.'],background:['완성 사진 배경을 골라 보세요','작품에 어울리는 배경을 찾아요.'],title:['작품 이름을 적어 주세요','한글 입력을 마치면 이어집니다.'],purpose:['어디에 쓸 작품인가요?','찻잔·반지 보관함처럼 적어 보세요.'],save:['작품 카드를 저장해 보세요','이미지로 저장하거나 공유할 수 있어요.'],closeCard:['닫기를 눌러 작품으로 돌아가세요','작품은 내 진열장에도 남아 있어요.'],search:['내 작품 이미지로 찾기를 눌러 보세요','이때 작품 사진이 검색 서비스로 전송돼요.'],closeSearch:['닫기를 눌러 작품으로 돌아가세요','검색이 연결되지 않아도 이어갈 수 있어요.'],home:['홈으로 돌아가 볼까요?','홈에서 언제든 다시 연습할 수 있어요.']
+  smoothSection:['단면을 눌러 보세요','안쪽 벽의 두께를 볼 수 있어요.'],solid:['전체를 눌러 보세요','다듬은 전체 모양을 확인해요.'],stampChoice:['도장을 골라 보세요','꽃·잎 등 원하는 모양을 찍을 수 있어요.'],rotate:['화살표를 눌러 돌려 보세요','반대편도 꾸밀 수 있어요.'],glazeBase:['바탕 유약을 선택해 주세요','작품 전체에 입힐 유약을 골라요.'],color:['원하는 유약 색을 골라 보세요','직접 색상과 코드를 고를 수도 있어요.'],finish:['반짝임을 골라 보세요','유광과 무광의 느낌을 비교해요.'],glazeBrush:['붓칠을 선택해 주세요','원하는 부분에 유약을 칠할 수 있어요.'],glazeOpacity:['불투명도를 움직여 보세요','낮출수록 바탕이 비쳐 보여요.'],glazeBaseReturn:['바탕 유약으로 돌아가 주세요','칠한 무늬는 그대로 유지돼요.'],dip:['담그는 깊이를 움직여 보세요','담그기를 켜고 슬라이더로 범위를 조절해요.'],effect:['표면 무늬를 골라 보세요','원하는 질감을 비교해 보세요.'],heat:['불 세기를 골라 보세요','선택한 불로 작품을 구워요.'],open:['가마 문을 열어 주세요','식은 작품을 꺼내 볼 수 있어요.'],photo:['완성된 작품을 살펴보세요','확인했다면 아래의 사진 확인했어요를 눌러요.'],inspect360:['작품을 직접 돌려 보세요','끌거나 회전 화살표를 눌러요.'],size:['사진 속 작품 크기를 바꿔 보세요','− / 슬라이더 / ＋ 중 편한 방법을 사용해요.'],background:['완성 사진 배경을 골라 보세요','작품에 어울리는 배경을 찾아요.'],title:['작품 이름을 적어 주세요','입력을 마친 뒤 다음 안내를 눌러요.'],purpose:['어디에 쓸 작품인가요?','찻잔·반지 보관함처럼 적어 보세요.'],save:['작품 카드를 저장해 보세요','이미지로 저장하거나 공유할 수 있어요.'],closeCard:['닫기를 눌러 작품으로 돌아가세요','작품은 내 진열장에도 남아 있어요.'],search:['내 작품 이미지로 찾기를 눌러 보세요','이때 작품 사진이 검색 서비스로 전송돼요.'],closeSearch:['닫기를 눌러 작품으로 돌아가세요','검색이 연결되지 않아도 이어갈 수 있어요.'],home:['홈으로 돌아가 볼까요?','홈에서 언제든 다시 연습할 수 있어요.']
  };
  function describe(target,clip){
   var step=current(),info=(copy[step.id]||[step.title.replace(/^\d+\.\s*/,''),'표시된 곳을 직접 조작해 보세요.']).slice();
   if(target===$('sheetToggle'))return['도구창을 열어 주세요','다음 도구를 여기서 골라요.','누르기'];
   if(target===$('openCard'))return['카드로 저장·공유를 열어 주세요','작품 이름과 용도를 적을 수 있어요.','누르기'];
   if(clip)return[clip.direction==='up'?'도구창을 위로 스크롤해 주세요':'도구창을 아래로 스크롤해 주세요','표시된 도구나 입력칸을 찾아요.',clip.direction==='up'?'↑ 스크롤':'↓ 스크롤'];
-  if(done){if(lastInStage()&&['done','fire'].indexOf(step.stage)<0)return['충분히 해본 뒤 다음 단계로 가세요',$('nextBtn').textContent.replace(/\s*→/, '')+' 버튼으로 이어가요.','누르기'];return['잘했어요! 더 연습해도 좋아요','준비되면 아래의 다음 안내를 눌러요.',''];}
+  if(done)return tutorialGuidance.feedback();
+  if(tutorialGuidance.status())return['닮은 물건을 찾는 중이에요','아래에 검색 결과나 연결 안내가 나타날 때까지 기다려 주세요.',''];
   if(step.id==='open'&&fstep!=='ready')return['가마가 식는 중이에요','100℃ 이하로 식으면 문을 열 수 있어요.',''];
   if(target!==cv){
    if(gestureReady())return info;
@@ -80,10 +81,12 @@
  function updateProgress(){
   var step=current(),number=index+1;setText($('tutorialCount'),number+' / '+steps.length);setText($('tutorialTitle'),step.title.replace(/^\d+\.\s*/,''));setText($('tutorialStatus'),done?'완료':step.id==='open'&&fstep!=='ready'?'기다리는 중':'진행 중');
   coach.dataset.stage=step.stage;coach.dataset.done=String(done);nextGuide.hidden=!done||lastInStage()&&['throw','deco','glaze'].indexOf(step.stage)>=0;stageList.querySelectorAll('li').forEach(function(li){var list=steps.filter(function(s){return s.stage===li.dataset.stage;}),finished=steps.slice(0,index+(done?1:0)).filter(function(s){return s.stage===li.dataset.stage;}).length;li.querySelector('i').style.width=(Math.min(1,finished/list.length)*100)+'%';li.classList.toggle('is-current',step.stage===li.dataset.stage);li.classList.toggle('is-complete',finished>=list.length);if(step.stage===li.dataset.stage)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');});
+  if(tutorialGuidance.photoConfirmable()){nextGuide.hidden=false;nextGuide.textContent='사진 확인했어요 →';}else nextGuide.textContent='다음 안내 →';
+  if(tutorialGuidance.status())setText($('tutorialStatus'),tutorialGuidance.status());
  }
  function positionProgress(){var mobile=innerWidth<600,short=innerHeight<560,width=mobile?Math.min(180,Math.floor((innerWidth-36)*.48)):short?180:220;coach.style.cssText='';coach.classList.remove('tutorialDocked','tutorialModal');if(coach.parentNode!==document.body)document.body.appendChild(coach);coach.style.width=width+'px';coach.style.left='12px';coach.style.top=Math.min(guideTop(),Math.max(8,innerHeight-110))+'px';return coach.getBoundingClientRect();}
  function positionAction(anchor,progress,canvasTarget){
-  var mobile=innerWidth<600,width=mobile?Math.max(128,innerWidth-12-progress.right-10):226;
+  var mobile=innerWidth<600,width=mobile?Math.min(226,Math.max(128,innerWidth-12-progress.right-10)):226;
   action.style.width=width+'px';var placementBox=canvasTarget?cv.getBoundingClientRect():anchor,wheel=window.TodakWheel;
   var placementKey=[innerWidth,innerHeight,index,done,focusKind,width,action.getBoundingClientRect().height,progress.left,progress.top,progress.right,progress.bottom,Z,wheel&&wheel.top(),wheel&&wheel.bottom(),placementBox.left,placementBox.top,placementBox.right,placementBox.bottom].join('|');
   // Wheel rotation and wobble update the spotlight, never the clickable callout.
@@ -105,7 +108,7 @@
   action.style.left=best.left+'px';action.style.top=best.top+'px';action.dataset.side=best.side;action.style.setProperty('--tutorial-arrow',clamp(best.side==='left'||best.side==='right'?anchor.top+anchor.height/2-best.top:anchor.left+anchor.width/2-best.left,18,(best.side==='left'||best.side==='right'?h:width)-18)+'px');
  }
  function positionHand(target,clip,info){
-  if(done||engaged||ptr.down||target===$('fireTitle')){hand.hidden=true;return;}
+  if(done||engaged||ptr.down||target===$('fireTitle')||current().id==='photo'){hand.hidden=true;return;}
   var r=target.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,kind='tap';
   if(clip){r=clip.owner.getBoundingClientRect();x=r.right-38;y=(Math.max(r.top,0)+Math.min(r.bottom,innerHeight))/2;kind=clip.direction==='up'?'scrollUp':'scrollDown';hand.setAttribute('data-scroll-label',clip.direction==='up'?'↑ 위로 스크롤':'↓ 아래로 스크롤');}
   else if(target===cv){var t=.55,radius=['inside','smoothInner'].indexOf(current().id)>=0?innerAt(t):rAt(t)*.9,px=CX+radius*SV,py=BASE-st.height*t*SV,wheel=window.TodakWheel;
@@ -120,7 +123,7 @@
  function hidePresentation(){veil.style.display='none';action.hidden=true;focusKind='';focusTarget=null;focusBox=null;vesselPreview=false;previewBox=null;actionPlacementKey='';actionPlacementTarget=null;document.body.classList.remove('tutorial-guided','tutorial-sheet-focus');}
  positionHints=function(){};
  function present(){
-  if(rendering)return;if(!active||!current()||!$('home').hidden){hidePresentation();return;}rendering=true;
+  if(rendering)return;if(!active||!current()||!$('home').hidden){hidePresentation();return;}if(tutorialGuidance.waitingForPhoto()){hidePresentation();coach.hidden=true;hand.hidden=true;return;}rendering=true;
   try{
    var target=intendedTarget();if(!target)return;if(engaged&&gestureReady())target=cv;
    if(target.closest('#sheet')&&!$('sheet').classList.contains('open')&&target!==$('sheetToggle'))target=$('sheetToggle');
@@ -128,9 +131,9 @@
    document.body.classList.toggle('tutorial-sheet-focus',!!target.closest('#sheet')&&['deco','glaze'].indexOf(st.stage)>=0);
    // Free the mobile workspace once per hands-on step, before the gesture begins.
    if(canvasTarget&&innerWidth<600&&lastCanvasStep!==step.id&&!ptr.down){lastCanvasStep=step.id;var closingStep=step.id;setTimeout(function(){if(active&&current()&&current().id===closingStep&&gestureReady()&&!ptr.down){setSheet(false);resize();V=fitV();SV=S0*V*Z;dirty=true;route();}},0);}
-   coach.hidden=false;coach.setAttribute('aria-label','처음 빚기 진행');document.body.classList.add('tutorial-guided');var header=document.querySelector('.ui-header');if(header)document.body.style.setProperty('--tutorial-header-bottom',(header.getBoundingClientRect().bottom-stageEl.getBoundingClientRect().top)+'px');updateProgress();var progress=positionProgress(),info=describe(target,clip);
+   var modalOpen=!$('cardDlg').hidden||!$('searchDlg').hidden;coach.hidden=modalOpen;coach.setAttribute('aria-label','처음 빚기 진행');document.body.classList.add('tutorial-guided');var header=document.querySelector('.ui-header');if(header)document.body.style.setProperty('--tutorial-header-bottom',(header.getBoundingClientRect().bottom-stageEl.getBoundingClientRect().top)+'px');updateProgress();var progress=modalOpen?rect(0,0,0,0):positionProgress(),info=describe(target,clip);$('tutorialActionContext').hidden=!modalOpen;if(modalOpen)setText($('tutorialActionProgress'),'처음 빚기 · '+(index+1)+' / '+steps.length);
    setText($('tutorialActionTitle'),info[0]);setText(oldText,info[1]);action.hidden=engaged||ptr.down;
-   focusTarget=clip?clip.owner:target;focusKind=canvasTarget?'vessel':target===$('fireTitle')?'none':'control';vesselPreview=focusKind==='control'&&['deco','glaze'].indexOf(st.stage)>=0;previewBox=null;sizeVeil();updateFocus();veil.style.display=focusKind==='none'?'none':'block';
+   focusTarget=clip?clip.owner:target;focusKind=step.id==='photo'?'none':canvasTarget?'vessel':target===$('fireTitle')?'none':'control';if(focusKind==='none')focusBox=null;vesselPreview=focusKind==='control'&&['deco','glaze'].indexOf(st.stage)>=0;previewBox=null;sizeVeil();updateFocus();veil.querySelector('#tutorialDim').style.fillOpacity=tutorialGuidance.dim()?'.43':'0';veil.style.display=focusKind==='none'?'none':'block';
    var anchor=focusBox||limitedRect(target,0);if(!action.hidden)positionAction(anchor,progress,canvasTarget);positionHand(target,clip,info);
   }finally{rendering=false;}
  }

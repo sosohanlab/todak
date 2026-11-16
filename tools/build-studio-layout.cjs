@@ -44,6 +44,16 @@ required("target:'#realPhotoScene'","target:'#ui-background-picker'");
 // Search remains an explicit action; a delayed modal must not interrupt photo editing.
 required('autoTimer=setTimeout(prompt,12000);','');
 required("#sheet,[role=dialog],.drawer,.modal,.overlay","#sheet,dialog,[role=dialog],.drawer,.modal,.overlay");
+// Dip is one continuous operation; the slider owns its depth in every play mode.
+required('<button type="button" class="chip" data-dip="rim" aria-pressed="false">입구만</button>','<button type="button" class="chip" data-dip="custom" aria-pressed="false">담그기</button>');
+required('<button type="button" class="chip" data-dip="half" aria-pressed="false">절반까지</button>','');
+required('pick("dip",function(d){st.dip=d.dip;st.dipDepth=st.dip==="half"?.5:.2;', 'pick("dip",function(d){st.dip=d.dip;st.dipDepth=clamp(typeof st.dipDepth==="number"?st.dipDepth:.2,.01,1);');
+required('press("dip","dip",st.dip);','press("dip","dip",st.dip?"custom":"");');
+html=html.replaceAll('입구만 또는 절반까지를 고른 뒤','담그기를 켠 뒤');
+html=html.replaceAll('잘했어요! 다음 안내로 이어집니다.','이 단계를 확인했어요.');
+required("document.querySelector('#dip [data-dip=\"half\"]')","document.querySelector('#dip [data-dip=\"custom\"]')");
+required("function(error){if(active&&current().id==='save')mark('save');throw error;}","function(error){throw error;}");
+required('finally{clearTimeout(timeout);if(epoch===searchEpoch){btn.disabled=false;controller=null;}}',"finally{clearTimeout(timeout);if(epoch===searchEpoch){btn.disabled=false;controller=null;window.dispatchEvent(new CustomEvent('todak-image-search-finished',{detail:{matches:$('imageMatches').children.length,status:$('searchStatus').textContent}}));}}");
 required('return (id||st.target)+((blind==null?st.blind:blind)?"_b":"")+"_v2";', 'return (id||st.target)+((blind==null?st.blind:blind)?"_b":"")+"_v3";');
 required('var oldBest=store.best[id+(st.blind?"_b":"")];', 'var previousKey=id+(st.blind?"_b":"");var oldBest=store.best[previousKey+"_v2"]!=null?store.best[previousKey+"_v2"]:store.best[previousKey];');
 required('var previous=store.best[CH_ORDER[i]+"_b"];', 'var previous=store.best[CH_ORDER[i]+"_b_v2"]!=null?store.best[CH_ORDER[i]+"_b_v2"]:store.best[CH_ORDER[i]+"_b"];');
@@ -99,8 +109,8 @@ html=html.replace('function minimum(){return head.getBoundingClientRect().height
 const rule='function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&innerHeight<=560);}\n';
 required("$('goFree').addEventListener('click',function(e){if(complete)return;if(active){e.preventDefault();e.stopImmediatePropagation();closeOverlays();focusStep();return;}active=true;index=0;done=false;contactMs=0;if(!routeTimer)routeTimer=setInterval(route,160);},true);", "$('goFree').addEventListener('click',function(){if(active)stopOptionalTutorial();},true);");
 required("var challengeBase=startChallenge;startChallenge=function(id){if(!complete){toast('첫 자유롭게 빚기 안내를 먼저 마쳐 주세요.');return;}return challengeBase(id);};", "var challengeBase=startChallenge;startChallenge=function(id){if(active)stopOptionalTutorial();return challengeBase(id);};");
-required('lockHome();window.TodakTutorial=',fs.readFileSync(path.join(sourceDir,'tutorial-sequence.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-presentation.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-entry.js'),'utf8')+'\n lockHome();window.TodakTutorial=');
-const modules=['history-tiles.js','studio-layout.js','responsive-layout.js','experience-polish.js','stage-navigation.js','appearance-picker.js','shelf-cutouts.js','site-feedback-config.js','site-feedback.js'];
+required('lockHome();window.TodakTutorial=',fs.readFileSync(path.join(sourceDir,'tutorial-sequence.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-behavior.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-presentation.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-entry.js'),'utf8')+'\n lockHome();window.TodakTutorial=');
+const modules=['history-tiles.js','studio-layout.js','responsive-layout.js','experience-polish.js','stage-navigation.js','card-dialog-layout.js','appearance-picker.js','shelf-cutouts.js','site-feedback-config.js','site-feedback.js'];
 if(!production)modules.push('preview-scenes.js');
 const code=rule+modules.map(f=>fs.readFileSync(path.join(sourceDir,f),'utf8')).join('\n');
 html=html.replace(marker,code+'\n'+marker);

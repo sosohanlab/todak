@@ -5,6 +5,7 @@ if(!['tutorial-first-visit.cjs','tutorial-returning.cjs','tutorial-skip-help.cjs
 const originalRead=fs.readFileSync,html=originalRead(path.join(root,'release-site/index.html'),'utf8');
 fs.readFileSync=function(file,...args){if(typeof file==='string'&&path.resolve(file)===path.join(root,'index.html'))return args[0]==='utf8'?html:Buffer.from(html);return originalRead.call(this,file,...args);};
 let source=originalRead(path.join(root,'tests',test),'utf8');
+source=source.replace('frame:frame,store:store','confirmRenderedPhoto:function(){revealing=false;drawPhoto();},frame:frame,store:store');
 // Inspection now runs inline and finishes on actual rotation; narrow headers use the logo for Home.
 source=source.replace("assert(doc.getElementById('finished360').open);click('#closeFinished360');","assert(doc.body.classList.contains('ui-inspecting'));w.dispatchEvent(new w.Event('todak-inspection-rotated'));");
 source=source.replace("assert.equal(t.state().target,'menuBtn');click('#menuBtn');","assert(['menuBtn','homeBtn'].includes(t.state().target));click('#'+t.state().target);");
@@ -12,6 +13,8 @@ source=source.replace("assert(doc.getElementById('tutorialCoach').hidden,'instru
 source=source.replace('w.eval(main);',"w.eval(fs.readFileSync(root+'photo-backgrounds.js','utf8'));w.eval(main);");
 // The home entry is now optional; replay/resume uses its own button.
 if(test==='tutorial-first-visit.cjs'){
+ source=source.replaceAll('data-dip="half"','data-dip="custom"').replaceAll('data-dip="rim"','data-dip="custom"');
+ source=source.replace("assert(t.state().done,'photo view already active');await next();", "assert(!t.state().done,'photo observation requires confirmation');await new Promise(r=>setTimeout(r,2800));q.confirmRenderedPhoto();await new Promise(r=>setTimeout(r,20));assert(!t.state().done,'rendering a photo is not a user confirmation');click('#tutorialContinue');");
  const retired=source.indexOf("state('trim');"),nextSmooth=source.indexOf("state('smooth');",retired);if(retired>=0&&nextSmooth>retired)source=source.slice(0,retired)+source.slice(nextSmooth);
  source=source.replace("assert(!doc.getElementById('tutorialNext'));","assert(doc.getElementById('tutorialContinue'));");
  source=source.replace("else await new Promise(r=>setTimeout(r,550));", "else {const before=t.state().id;await new Promise(r=>setTimeout(r,650));assert.equal(t.state().id,before,'no timed advance while practising');if(t.state().active)click('#tutorialContinue');}");
