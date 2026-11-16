@@ -8,14 +8,14 @@ fs.mkdirSync('output/button-review',{recursive:true});
  await p.route(base+'/?tool_undo=1',r=>r.fulfill({contentType:'text/html',body:html.replace('if(hot&&hot.ready){hot.ready(start);}',fixture+'\nif(hot&&hot.ready){hot.ready(start);}')}));await p.goto(base+'/?tool_undo=1',{waitUntil:'domcontentloaded'});await p.waitForFunction(()=>!!window.toolUndoQA);
  async function open(){if(await p.locator('#sheetToggle').isVisible()&&!await p.locator('#sheet').evaluate(e=>e.classList.contains('open')))await p.locator('#sheetToggle').click();}
  for(const challenge of [false,true])for(const selected of ['shape','thick','trim','sponge']){
-  await p.evaluate(c=>toolUndoQA.prepare(c),challenge);await p.waitForTimeout(100);const states=[await p.evaluate(()=>toolUndoQA.state())];
+  await p.evaluate(c=>toolUndoQA.prepare(c),challenge);await p.waitForTimeout(100);const states=[await p.evaluate(()=>toolUndoQA.state())],boundaries=[(await p.evaluate(()=>TodakLayoutPreview.history())).undo];
   for(const tool of ['shape','trim','sponge']){
    await open();await p.locator('#tools [data-t='+tool+']').click();await p.evaluate(()=>toolUndoQA.ready());await p.waitForTimeout(50);const pt=await p.evaluate(outside=>toolUndoQA.point(outside),tool!=='shape');
    await p.mouse.move(pt.x,pt.y);await p.mouse.down();await p.mouse.move(pt.x+(tool==='shape'?-18:-40),pt.y+12,{steps:5});await p.waitForTimeout(80);await p.mouse.up();await p.waitForTimeout(25);
-   const after=await p.evaluate(()=>toolUndoQA.state());assert.notDeepEqual(after,states.at(-1),tool+' changes clay');states.push(after);
+   const after=await p.evaluate(()=>toolUndoQA.state()),count=(await p.evaluate(()=>TodakLayoutPreview.history())).undo;assert.notDeepEqual(after,states.at(-1),tool+' changes clay');assert(count>boundaries.at(-1),tool+' always creates its own history even when starting outside');states.push(after);boundaries.push(count);
   }
   await open();await p.locator('#tools [data-t='+selected+']').click();assert.deepEqual(await p.evaluate(()=>toolUndoQA.state()),states[3],'selecting a tool does not edit the work');
-  for(let i=2;i>=0;i--){await p.locator('#ui-undo').click();assert.deepEqual(await p.evaluate(()=>toolUndoQA.state()),states[i],width+' '+challenge+' selected '+selected+' undo restores only operation '+(i+1));}
-  for(let i=1;i<=3;i++){await p.locator('#ui-redo').click();assert.deepEqual(await p.evaluate(()=>toolUndoQA.state()),states[i],'exact redo '+i);}
+  for(let i=2;i>=0;i--){for(let part=0;part<boundaries[i+1]-boundaries[i];part++){await p.locator('#ui-undo').click();if(i===2&&part===0){const recent=await p.evaluate(()=>toolUndoQA.state());assert.notDeepEqual(recent,states[0],'first undo retains earlier shaping');assert.notDeepEqual(recent,states[1],'first undo retains the earlier trimming');}}assert.deepEqual(await p.evaluate(()=>toolUndoQA.state()),states[i],width+' '+challenge+' selected '+selected+' exact operation boundary '+(i+1));}
+  for(let i=1;i<=3;i++){for(let part=0;part<boundaries[i]-boundaries[i-1];part++)await p.locator('#ui-redo').click();assert.deepEqual(await p.evaluate(()=>toolUndoQA.state()),states[i],'exact redo '+i);}
   report.push({width,challenge,selected,pass:true});console.log('PASS '+width+' '+(challenge?'challenge':'free')+' shape → trim → sponge; undo with '+selected+' selected');
  }assert.deepEqual(errors,[]);await p.close();}fs.writeFileSync('output/button-review/tool-undo-'+(base.startsWith('https')?'live':'local')+'.json',JSON.stringify(report,null,2));}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1});
