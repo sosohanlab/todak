@@ -64,7 +64,7 @@
  // Full operation history, including separate top/bottom decoration layers.
  var undo=[],redo=[],pending=null,restoring=false,maxHistory=40,tileStore=TodakHistoryTiles.create(),historyPointers=new Set(),historyTimer=null,historyGesture=null;
  function layerCopy(layer){return tileStore.read(layer,texVer);}
- function capture(metadataOnly){var decorating=!metadataOnly&&st.stage!=='throw',wheel=window.TodakWheel;return {state:JSON.parse(JSON.stringify(st)),colors:{pig:dPig,pigRgb:dColor.slice(),brush:$('glazeBrushColor').value,brushRgb:brushCustom.c.slice(),dipRgb:dipCustom.c.slice()},grooves:grooves.slice(),paint:decorating?layerCopy(paint):null,carve:decorating?layerCopy(carve):null,top:decorating&&wheel?layerCopy(wheel.layer):null,bottom:decorating&&wheel?layerCopy(wheel.bottomLayer):null,relief:decorating&&wheel?layerCopy(wheel.bottomRelief):null,hp:hasPaint,hc:hasCarve,version:texVer};}
+ function capture(metadataOnly){var decorating=!metadataOnly,wheel=window.TodakWheel;return {state:JSON.parse(JSON.stringify(st)),colors:{pig:dPig,pigRgb:dColor.slice(),brush:$('glazeBrushColor').value,brushRgb:brushCustom.c.slice(),dipRgb:dipCustom.c.slice()},grooves:grooves.slice(),paint:decorating?layerCopy(paint):null,carve:decorating?layerCopy(carve):null,top:decorating&&wheel?layerCopy(wheel.layer):null,bottom:decorating&&wheel?layerCopy(wheel.bottomLayer):null,relief:decorating&&wheel?layerCopy(wheel.bottomRelief):null,hp:hasPaint,hc:hasCarve,version:texVer};}
  function signature(s,ignoreTouchCount){var state=Object.assign({},s.state);delete state.trimReady;if(ignoreTouchCount)delete state.touches;return JSON.stringify([state,s.colors])+'|'+s.version+'|'+s.grooves.join(',');}
  function begin(){if(restoring||pending||!['throw','deco','glaze'].includes(st.stage))return;pending=capture();}
  function finish(gesturePart){
@@ -86,10 +86,10 @@
  }
  function startHistoryGesture(){
   endHistoryGesture();finish();begin();if(!pending)return;
-  historyGesture={initial:pending,records:[]};
+  historyGesture={initial:pending,records:[],previousRedo:redo.slice()};
   historyTimer=setInterval(function(){if(!historyPointers.size)return;finish(true);begin();},400);
  }
- function clearHistory(){if(historyTimer!==null)clearInterval(historyTimer);historyTimer=null;historyGesture=null;historyPointers.clear();undo=[];redo=[];pending=null;tileStore=TodakHistoryTiles.create();historyUI();}
+ function clearHistory(){if(historyTimer!==null)clearInterval(historyTimer);historyTimer=null;historyGesture=null;historyPointers.clear();if(touchPoints)touchPoints.clear();touchPinch=null;touchNavigation=false;undo=[];redo=[];pending=null;tileStore=TodakHistoryTiles.create();historyUI();}
  function restore(s){restoring=true;Object.assign(st,JSON.parse(JSON.stringify(s.state)));dPig=s.colors.pig;dColor=s.colors.pigRgb.slice();brushCustom.c=s.colors.brushRgb.slice();dipCustom.c=s.colors.dipRgb.slice();$('glazeBrushColor').value=s.colors.brush;[[ $('pigColor'),dColor],[$('glazeColor'),glaze().c],[brushInput,brushCustom.c],[dipInput,dipCustom.c]].forEach(function(pair){var value='#'+pair[1].map(function(v){return Math.round(clamp(v,0,255)).toString(16).padStart(2,'0');}).join('');pair[0].value=value;var hex=pair[0].parentElement.querySelector('input[type=text]');if(hex)hex.value=value.toUpperCase();});grooves=s.grooves.slice();[[paint,s.paint],[carve,s.carve],[window.TodakWheel?.layer,s.top],[window.TodakWheel?.bottomLayer,s.bottom],[window.TodakWheel?.bottomRelief,s.relief]].forEach(function(pair){tileStore.write(pair[0],pair[1]);});hasPaint=s.hp;hasCarve=s.hc;texVer++;hist.length=0;composeKey='';dipKey='';pvKey='';syncControls();window.TodakWheel?.refresh();updateReadout();dirty=cardDirty=true;restoring=false;sync();}
  function historyUI(){var blocked=!!TARGETS[st.target]?.master;$('ui-undo').disabled=blocked||!undo.length;$('ui-redo').disabled=blocked||!redo.length;}
  $('ui-undo').onclick=function(){endHistoryGesture();finish();if(!undo.length)return;redo.push(capture());restore(undo.pop());historyUI();};$('ui-redo').onclick=function(){endHistoryGesture();if(!redo.length)return;undo.push(capture());restore(redo.pop());historyUI();};
@@ -101,6 +101,28 @@
  function finishPointer(e){if(!historyPointers.delete(e.pointerId)||historyPointers.size)return;var gesture=historyGesture;setTimeout(function(){if(historyGesture===gesture&&!historyPointers.size)endHistoryGesture();},0);}
  ['pointerup','pointercancel','lostpointercapture'].forEach(function(event){document.addEventListener(event,finishPointer,true);});
  addEventListener('blur',endHistoryGesture);document.addEventListener('visibilitychange',function(){if(document.hidden)endHistoryGesture();});
+ // Handle multi-touch before the separate side/top/bottom paint handlers. Roll
+ // back the first finger's dot, including its history records, before zooming.
+ var touchPoints=new Map(),touchPinch=null,touchNavigation=false;
+ addEventListener('blur',function(){touchPoints.clear();touchPinch=null;touchNavigation=false;});
+ function touchPosition(e){var r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*HC/r.height};}
+ function touchPair(){var p=Array.from(touchPoints.values());return{x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2,d:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)||1};}
+ stageEl.addEventListener('pointerdown',function(e){
+  if(e.target!==cv||e.pointerType!=='touch'||!['throw','deco','glaze'].includes(st.stage))return;
+  touchPoints.set(e.pointerId,touchPosition(e));if(touchPoints.size<2&&!touchNavigation)return;
+  if(!touchNavigation){
+   touchNavigation=true;var gesture=historyGesture,snapshot=gesture&&gesture.initial;if(historyTimer!==null)clearInterval(historyTimer);historyTimer=null;
+   if(gesture){undo=undo.filter(function(frame){return gesture.records.indexOf(frame)<0;});redo=gesture.previousRedo;}
+   pending=null;historyGesture=null;historyPointers.clear();window.TodakWheel?.cancelGesture();ptr.down=ptr.paint=ptr.rotating=ptr.dipping=false;pts={};pinch=null;
+   if(snapshot)restore(snapshot);historyUI();
+  }
+  touchPinch=touchPair();touchPinch.z=Z;e.preventDefault();e.stopImmediatePropagation();try{cv.setPointerCapture(e.pointerId);}catch(_){}
+ },true);
+ stageEl.addEventListener('pointermove',function(e){
+  if(!touchPoints.has(e.pointerId))return;touchPoints.set(e.pointerId,touchPosition(e));if(!touchNavigation)return;
+  e.preventDefault();e.stopImmediatePropagation();if(touchPoints.size<2||!touchPinch)return;var next=touchPair();CX+=next.x-touchPinch.x;BASE+=next.y-touchPinch.y;setZoom(touchPinch.z*next.d/touchPinch.d,next.x,next.y);touchPinch=next;touchPinch.z=Z;
+ },true);
+ ['pointerup','pointercancel','lostpointercapture'].forEach(function(type){stageEl.addEventListener(type,function(e){if(!touchPoints.delete(e.pointerId))return;if(touchNavigation){e.preventDefault();e.stopImmediatePropagation();touchPinch=null;if(!touchPoints.size){touchNavigation=false;endHistoryGesture();}}},true);});
  $('sheet').addEventListener('click',function(e){if(e.target.closest('#tools,#presets,#swatches,#swatches2,#finish,#dip,#dots,#fx,#lucky,#dClear')){begin();setTimeout(finish,0);}},true);
  $('cavityDepth').addEventListener('pointerdown',begin,true);$('cavityDepth').addEventListener('keydown',begin,true);$('cavityDepth').addEventListener('change',function(){setTimeout(finish,0);});
  // Mark the same alternating curvature that the existing roughness score measures.

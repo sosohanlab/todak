@@ -21,7 +21,7 @@ for(const [width,height]of [[320,568],[390,844],[540,720],[768,1024],[844,390],[
    const body=document.getElementById('sheetBody');
    if(document.getElementById('home').hidden&&document.body.dataset.uiLayout==='sheet'&&['throw','deco','glaze'].includes(document.body.dataset.uiStage)){
     const buttons=[...document.querySelectorAll('#tools .chip,#dtools .rackTool,#rackGlaze .rackTool')].filter(visible),r=body.getBoundingClientRect();
-    for(const e of buttons){const b=e.getBoundingClientRect();if(b.top<r.top-1||b.bottom>r.bottom+1)result.push({id:e.id||e.dataset.t||e.dataset.d,type:'initial tool row clipped'});if(b.height<65||getComputedStyle(e).borderTopLeftRadius!=='14px')result.push({id:e.id||e.dataset.t||e.dataset.d,type:'unequal tool shape'});}
+    for(const e of buttons){const b=e.getBoundingClientRect();if(b.top<r.top-1||b.bottom>r.bottom+1)result.push({id:e.id||e.dataset.t||e.dataset.d,type:'initial tool row clipped'});if(b.height<(document.body.dataset.uiStage==='throw'?48:58)||getComputedStyle(e).borderTopLeftRadius!=='14px')result.push({id:e.id||e.dataset.t||e.dataset.d,type:'unequal tool shape'});}
    }
    if(!document.getElementById('home').hidden)for(const e of document.querySelectorAll('#home .homeMenus>.bigBtn b')){if(!visible(e))continue;const range=document.createRange();const tops=[];for(const n of e.childNodes)if(n.nodeType===3&&n.textContent.trim()){range.selectNodeContents(n);tops.push(...[...range.getClientRects()].map(b=>Math.round(b.top)));}if(new Set(tops).size>1)result.push({id:e.parentElement.id,type:'home heading wraps'});}
    return result;

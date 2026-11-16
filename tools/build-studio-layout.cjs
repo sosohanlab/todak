@@ -18,6 +18,7 @@ html=html.replace('openSaved:async function(item){var token=', "openSaved:async 
 html=html.replace("viewer.appendChild(orbitCanvas);var token=", "viewer.appendChild(orbitCanvas);orbitCanvas.hidden=false;fingers.clear();pinch=0;var token=");
 html=html.replace("render:renderOrbit,state:function()", "render:renderOrbit,turn:function(delta){yaw+=delta;renderOrbit();window.dispatchEvent(new Event('todak-inspection-rotated'));},state:function()");
 function required(before,after){if(!html.includes(before))throw Error('Missing integration hook: '+before.slice(0,80));html=html.replace(before,after);}
+required('refresh:refresh,surface:function(){return topSurface(topLayout());}', 'refresh:refresh,cancelGesture:function(){if(active!==null&&top)history.pop();if(bottomActive!==null)bottomHistory.pop();active=bottomActive=null;pendingTop=bottomPending=null;last=bottomLast=null;changed=bottomChanged=false;activeCursor.hidden=true;},surface:function(){return topSurface(topLayout());}');
 // Selecting an already hollow work must not silently reshape its inner wall.
 required('if(st.height-st.floor>.05){constrainInterior();return;}','if(st.height-st.floor>.05)return;');
 required('if(st.stage!=="deco"&&st.stage!=="done")return;','if(!["throw","deco","glaze","done"].includes(st.stage))return;');

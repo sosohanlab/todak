@@ -1,0 +1,6 @@
+const fs=require('node:fs'),{spawn}=require('node:child_process');
+const jobs=[320,390,768,844,1440].map(width=>({name:'buttons-'+width,script:'tools/check-button-combinations.cjs',args:['--width='+width]}));
+fs.mkdirSync('output/full-review',{recursive:true});const report={startedAt:new Date().toISOString(),jobs:[]};let cursor=0;
+async function run(job){return new Promise(resolve=>{console.log('START '+job.name);const p=spawn(process.execPath,[job.script,...job.args],{stdio:['ignore','pipe','pipe'],windowsHide:true});let stdout='',stderr='';p.stdout.on('data',b=>{stdout+=b;process.stdout.write('['+job.name+'] '+b);});p.stderr.on('data',b=>stderr+=b);p.on('close',code=>{fs.writeFileSync('output/full-review/'+job.name+'.log',stdout+'\n'+stderr);report.jobs.push({...job,code,pass:code===0});fs.writeFileSync('output/full-review/button-runs.json',JSON.stringify(report,null,2));console.log((code===0?'PASS ':'FAIL ')+job.name);resolve();});});}
+async function worker(){while(cursor<jobs.length){const job=jobs[cursor++];await run(job);}}
+(async()=>{await worker();report.finishedAt=new Date().toISOString();fs.writeFileSync('output/full-review/button-runs.json',JSON.stringify(report,null,2));if(report.jobs.some(j=>!j.pass))process.exitCode=1;console.log('Completed '+report.jobs.length+' viewport button matrices');})();
