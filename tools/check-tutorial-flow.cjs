@@ -13,11 +13,14 @@ source=source.replace("assert(doc.getElementById('tutorialCoach').hidden,'instru
 source=source.replace('w.eval(main);',"w.eval(fs.readFileSync(root+'photo-backgrounds.js','utf8'));w.eval(main);");
 // The home entry is now optional; replay/resume uses its own button.
 if(test==='tutorial-first-visit.cjs'){
+ // The original state fixture ends its synthetic contact by clearing ptr.down.
+ // Also deliver its pointer release to the document, as a browser actually does.
+ source=source.replace('q.ptr.down=false;Object.assign(q.ptr,{sx:x','q.ptr.down=false;var released=new w.Event("pointerup",{bubbles:true});released.pointerId=99;doc.dispatchEvent(released);Object.assign(q.ptr,{sx:x');
  source=source.replaceAll('data-dip="half"','data-dip="custom"').replaceAll('data-dip="rim"','data-dip="custom"');
  source=source.replace("assert(t.state().done,'photo view already active');await next();", "assert(!t.state().done,'photo observation requires confirmation');await new Promise(r=>setTimeout(r,2800));q.confirmRenderedPhoto();await new Promise(r=>setTimeout(r,20));assert(!t.state().done,'rendering a photo is not a user confirmation');click('#tutorialContinue');");
  const retired=source.indexOf("state('trim');"),nextSmooth=source.indexOf("state('smooth');",retired);if(retired>=0&&nextSmooth>retired)source=source.slice(0,retired)+source.slice(nextSmooth);
  source=source.replace("assert(!doc.getElementById('tutorialNext'));","assert(doc.getElementById('tutorialContinue'));");
- source=source.replace("else await new Promise(r=>setTimeout(r,550));", "else {const before=t.state().id;await new Promise(r=>setTimeout(r,650));assert.equal(t.state().id,before,'no timed advance while practising');if(t.state().active)click('#tutorialContinue');}");
+ source=source.replace("else await new Promise(r=>setTimeout(r,550));", "else {const before=t.state().id,manual=w.TodakTutorialGuidance.state().confirmation;await new Promise(r=>setTimeout(r,650));if(manual){assert.equal(t.state().id,before,'no timed advance while practising or editing');if(t.state().active)click('#tutorialContinue');}else if(t.state().active)assert.notEqual(t.state().id,before,'selections continue without a redundant click');}");
  source=source.replace("['solid','rotate','effect']","['solid','rotate','glazePaint']");
  const brushStart=source.indexOf("state('glazeBrush');click('#rackGlazeBrush');");
  const obsoleteReturn=source.indexOf("state('glazeBaseReturn');",brushStart);

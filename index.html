@@ -502,7 +502,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 <link rel="stylesheet" href="shop.css?v=8d82a71690f7">
 <link rel="stylesheet" href="brand.css?v=ea50199753cb">
 <link rel="stylesheet" href="studio-theme.css?v=8ea595cf3a3d">
-<script src="tool-images.js?v=3c721c9c73ea"></script>
+<script src="tool-images.js?v=96b841b7f350"></script>
 <script src="photo-backgrounds.js?v=94219214082d"></script>
 <link rel="stylesheet" href="tutorial.css?v=3f0a08544695">
 <link rel="stylesheet" href="shelf-display.css?v=f742655ec868">
@@ -4616,7 +4616,9 @@ var tutorialGuidance;
   status:function(){return current()&&current().id==='search'&&ensureContext().searchPending?'검색 중':null;},
   practice:function(){return current()&&practice.indexOf(current().id)>=0;}
  };
- window.TodakTutorialGuidance={state:function(){return{photoReady:photoFrame&&!revealing,photoLoading:!photoFrame||revealing,searchPending:!!(context&&context.searchPending),searchReady:!!(context&&context.searchReady),step:current()&&current().id};}};
+ // Only hands-on practice and content that needs reading/editing require confirmation.
+ tutorialGuidance.manual=function(){return this.practice()||current()&&['photo','title','purpose','search'].indexOf(current().id)>=0;};
+ window.TodakTutorialGuidance={state:function(){return{photoReady:photoFrame&&!revealing,photoLoading:!photoFrame||revealing,searchPending:!!(context&&context.searchPending),searchReady:!!(context&&context.searchReady),step:current()&&current().id,confirmation:!!tutorialGuidance.manual()};}};
 })();
 
 /* Runs inside the existing tutorial: action validation and saved progress remain authoritative. */
@@ -4630,8 +4632,19 @@ var tutorialGuidance;
  var footer=document.createElement('div');footer.className='tutorialCurrent';var taskLabel=document.createElement('span');taskLabel.className='tutorialTaskLabel';taskLabel.textContent='지금 할 일';footer.append(taskLabel,$('tutorialTitle'),$('tutorialStatus'));
  var oldText=$('tutorialText');coach.append(stageList,footer);oldText.remove();
  var nextGuide=document.createElement('button');nextGuide.id='tutorialContinue';nextGuide.type='button';nextGuide.textContent='다음 안내 →';nextGuide.hidden=true;coach.appendChild(nextGuide);
- // Completion unlocks the next instruction; it never starts a countdown.
- scheduleAdvance=function(){cancelAdvance();if(active&&current()&&current().id==='home'&&done){finish();return;}if(!ptr.down)engaged=false;route();};
+ // Selections continue without another click; practice stays until the player is ready.
+ var heldPointers=new Set(),heldRangeKeys=new Set();
+ document.addEventListener('pointerdown',function(e){heldPointers.add(e.pointerId);},true);
+ ['pointerup','pointercancel'].forEach(function(type){document.addEventListener(type,function(e){heldPointers.delete(e.pointerId);},true);});
+ document.addEventListener('keydown',function(e){if(e.target.matches('input[type=range]')&&/^(Arrow|Page|Home|End)/.test(e.key))heldRangeKeys.add(e.key);},true);
+ document.addEventListener('keyup',function(e){heldRangeKeys.delete(e.key);},true);
+ window.addEventListener('blur',function(){heldPointers.clear();heldRangeKeys.clear();});
+ scheduleAdvance=function(){
+  cancelAdvance();if(active&&current()&&current().id==='home'&&done){finish();return;}if(!ptr.down)engaged=false;route();
+  if(!active||!current()||!done||tutorialGuidance.manual()||lastInStage()&&['throw','deco','glaze'].indexOf(current().stage)>=0)return;
+  var at=index;function proceed(){advanceTimer=null;if(!active||index!==at||!done)return;if(!$('home').hidden){hideGuide();return;}if(ptr.down||heldPointers.size||heldRangeKeys.size){advanceTimer=setTimeout(proceed,80);return;}if(index===steps.length-1)finish();else advance();}
+  advanceTimer=setTimeout(proceed,220);
+ };
  nextGuide.onclick=function(){if(!active||ptr.down)return;if(tutorialGuidance.photoConfirmable()){tutorialGuidance.confirmPhoto();return;}if(!done)return;if(index===steps.length-1)finish();else advance();};
  ['pointerup','pointercancel'].forEach(function(type){document.addEventListener(type,function(){setTimeout(function(){if(active&&!ptr.down){engaged=false;route();}},0);},true);});
  $('tutorialStatus').removeAttribute('role');$('tutorialStatus').setAttribute('aria-hidden','true');
@@ -4701,8 +4714,8 @@ var tutorialGuidance;
  }
  function updateProgress(){
   var step=current(),number=index+1;setText($('tutorialCount'),number+' / '+steps.length);setText($('tutorialTitle'),step.title.replace(/^\d+\.\s*/,''));setText($('tutorialStatus'),done?'완료':step.id==='open'&&fstep!=='ready'?'기다리는 중':'진행 중');
-  coach.dataset.stage=step.stage;coach.dataset.done=String(done);nextGuide.hidden=!done||lastInStage()&&['throw','deco','glaze'].indexOf(step.stage)>=0;stageList.querySelectorAll('li').forEach(function(li){var list=steps.filter(function(s){return s.stage===li.dataset.stage;}),finished=steps.slice(0,index+(done?1:0)).filter(function(s){return s.stage===li.dataset.stage;}).length;li.querySelector('i').style.width=(Math.min(1,finished/list.length)*100)+'%';li.classList.toggle('is-current',step.stage===li.dataset.stage);li.classList.toggle('is-complete',finished>=list.length);if(step.stage===li.dataset.stage)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');});
-  if(tutorialGuidance.photoConfirmable()){nextGuide.hidden=false;nextGuide.textContent='사진 확인했어요 →';}else nextGuide.textContent='다음 안내 →';
+  coach.dataset.stage=step.stage;coach.dataset.done=String(done);nextGuide.hidden=!done||!tutorialGuidance.manual()||lastInStage()&&['throw','deco','glaze'].indexOf(step.stage)>=0;stageList.querySelectorAll('li').forEach(function(li){var list=steps.filter(function(s){return s.stage===li.dataset.stage;}),finished=steps.slice(0,index+(done?1:0)).filter(function(s){return s.stage===li.dataset.stage;}).length;li.querySelector('i').style.width=(Math.min(1,finished/list.length)*100)+'%';li.classList.toggle('is-current',step.stage===li.dataset.stage);li.classList.toggle('is-complete',finished>=list.length);if(step.stage===li.dataset.stage)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');});
+  if(tutorialGuidance.photoConfirmable()){nextGuide.hidden=false;nextGuide.textContent='사진 확인했어요 →';}else nextGuide.textContent=step.id==='title'||step.id==='purpose'?'입력 완료 →':step.id==='search'?'결과 확인했어요 →':'다음 안내 →';
   if(tutorialGuidance.status())setText($('tutorialStatus'),tutorialGuidance.status());
  }
  function positionProgress(){var mobile=innerWidth<600,short=innerHeight<560,width=mobile?Math.min(180,Math.floor((innerWidth-36)*.48)):short?180:220;coach.style.cssText='';coach.classList.remove('tutorialDocked','tutorialModal');if(coach.parentNode!==document.body)document.body.appendChild(coach);coach.style.width=width+'px';coach.style.left='12px';coach.style.top=Math.min(guideTop(),Math.max(8,innerHeight-110))+'px';return coach.getBoundingClientRect();}

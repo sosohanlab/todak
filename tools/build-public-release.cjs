@@ -8,6 +8,7 @@ for(const name of tracked){
 }
 runtime.push('channel-attribution.js');
 for(const name of runtime){const dest=path.join(out,name);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(root,name),dest);}
+require('./build-tool-images.cjs')(out);
 execFileSync(process.execPath,[path.join(root,'tools/build-studio-layout.cjs'),'--production'],{cwd:root,stdio:'inherit'});
 fs.copyFileSync(path.join(root,'ui-layout-preview/pottery-renderer.js'),path.join(out,'pottery-renderer.js'));
 const rendererVersion=crypto.createHash('sha256').update(fs.readFileSync(path.join(out,'pottery-renderer.js'))).digest('hex').slice(0,12);

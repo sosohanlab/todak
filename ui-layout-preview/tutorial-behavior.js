@@ -86,5 +86,7 @@ var tutorialGuidance;
   status:function(){return current()&&current().id==='search'&&ensureContext().searchPending?'검색 중':null;},
   practice:function(){return current()&&practice.indexOf(current().id)>=0;}
  };
- window.TodakTutorialGuidance={state:function(){return{photoReady:photoFrame&&!revealing,photoLoading:!photoFrame||revealing,searchPending:!!(context&&context.searchPending),searchReady:!!(context&&context.searchReady),step:current()&&current().id};}};
+ // Only hands-on practice and content that needs reading/editing require confirmation.
+ tutorialGuidance.manual=function(){return this.practice()||current()&&['photo','title','purpose','search'].indexOf(current().id)>=0;};
+ window.TodakTutorialGuidance={state:function(){return{photoReady:photoFrame&&!revealing,photoLoading:!photoFrame||revealing,searchPending:!!(context&&context.searchPending),searchReady:!!(context&&context.searchReady),step:current()&&current().id,confirmation:!!tutorialGuidance.manual()};}};
 })();
