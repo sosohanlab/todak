@@ -1,0 +1,76 @@
+{
+  "checkedAt": "2026-11-16T08:24:33.769Z",
+  "runtimeBlob": "15d0a98f2b4888ac63503a5e23fb239a52481e17",
+  "buttons": {
+    "viewports": [
+      {
+        "width": 320,
+        "scenarios": 11,
+        "clicks": 1230,
+        "inputs": 191,
+        "states": 1426
+      },
+      {
+        "width": 390,
+        "scenarios": 11,
+        "clicks": 1230,
+        "inputs": 191,
+        "states": 1426
+      },
+      {
+        "width": 768,
+        "scenarios": 11,
+        "clicks": 1230,
+        "inputs": 191,
+        "states": 1426
+      },
+      {
+        "width": 844,
+        "scenarios": 11,
+        "clicks": 1198,
+        "inputs": 191,
+        "states": 1394
+      },
+      {
+        "width": 1440,
+        "scenarios": 11,
+        "clicks": 1196,
+        "inputs": 191,
+        "states": 1392
+      }
+    ],
+    "scenarios": 55,
+    "clicks": 6084,
+    "inputs": 955,
+    "states": 7064,
+    "failures": 0
+  },
+  "responsive": {
+    "viewports": 26,
+    "states": 312,
+    "failures": 0
+  },
+  "tutorial": {
+    "viewports": 8,
+    "states": 112,
+    "failures": 0,
+    "advancement": "explicit continue after successful action"
+  },
+  "visual": {
+    "screens": 72,
+    "failures": 0
+  },
+  "undo": {
+    "toolCombinations": 16,
+    "returnToShaping": 2
+  },
+  "mobileToolOrder": 21,
+  "zoomEditing": 7,
+  "touchViews": 6,
+  "visualColorPickers": 12,
+  "regressions": {
+    "suites": 14,
+    "failures": 0
+  },
+  "scope": "Chrome automation and touch emulation; real operating-system share and colour-picker dialogs and external submissions excluded"
+}

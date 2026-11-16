@@ -532,7 +532,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 <link rel="stylesheet" href="home-layout.css?v=06516c194877">
 <link rel="stylesheet" href="trimming.css?v=7560f129b1d9">
 <script src="saved-work-viewer.js?v=875c4c43eaf1"></script><script src="bottom-view.js?v=d969d4859280"></script><link rel="stylesheet" href="mobile-sheet.css?v=eea383aeb901">
-<link rel="stylesheet" href="studio-layout.css?v=379bde7a1f84"><link rel="stylesheet" href="responsive-layout.css?v=cd9349fb106c"><link rel="stylesheet" href="experience-polish.css?v=dc78e36694e0"><link rel="stylesheet" href="site-feedback.css?v=12d2a92e4483"><link rel="stylesheet" href="tutorial-presentation.css?v=aea106783fec">
+<link rel="stylesheet" href="studio-layout.css?v=379bde7a1f84"><link rel="stylesheet" href="responsive-layout.css?v=cd9349fb106c"><link rel="stylesheet" href="experience-polish.css?v=dc78e36694e0"><link rel="stylesheet" href="site-feedback.css?v=12d2a92e4483"><link rel="stylesheet" href="tutorial-presentation.css?v=4515cda94b76">
 <script src="channel-attribution.js?v=c815a8b33fc1"></script>
 </head>
 <body>
@@ -4568,7 +4568,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  function positionProgress(){var mobile=innerWidth<600,short=innerHeight<560,width=mobile?Math.min(180,Math.floor((innerWidth-36)*.48)):short?180:220;coach.style.cssText='';coach.classList.remove('tutorialDocked','tutorialModal');if(coach.parentNode!==document.body)document.body.appendChild(coach);coach.style.width=width+'px';coach.style.left='12px';coach.style.top=Math.min(guideTop(),Math.max(8,innerHeight-110))+'px';return coach.getBoundingClientRect();}
  function positionAction(anchor,progress,canvasTarget){
   var mobile=innerWidth<600,width=mobile?Math.min(230,innerWidth-24):226;action.dataset.side='none';
-  if(mobile||vesselPreview&&innerHeight<560){var x=progress.right+10;width=mobile?Math.max(128,innerWidth-12-x):226;action.style.width=width+'px';action.style.left=x+'px';action.style.top=progress.top+'px';action.dataset.side='bottom';action.style.setProperty('--tutorial-arrow','24px');return;}
+  if(mobile||vesselPreview&&innerHeight<560){var x=progress.right+10;width=mobile?Math.max(128,innerWidth-12-x):226;action.style.width=width+'px';action.style.left=x+'px';action.style.top=progress.top+'px';action.dataset.side=canvasTarget?'bottom':'none';action.style.setProperty('--tutorial-arrow','24px');return;}
   action.style.width=width+'px';var h=action.getBoundingClientRect().height||76,gap=16,header=document.querySelector('.ui-header'),headerBox=header&&header.getBoundingClientRect(),infoBox=$('ui-work-info').getBoundingClientRect();
   var candidates=[{left:anchor.left-gap-width,top:anchor.top+(anchor.height-h)/2,side:'right'},{left:anchor.right+gap,top:anchor.top+(anchor.height-h)/2,side:'left'},{left:anchor.left+(anchor.width-width)/2,top:anchor.top-gap-h,side:'bottom'},{left:anchor.left+(anchor.width-width)/2,top:anchor.bottom+gap,side:'top'}];
   var sheetTarget=focusKind==='control'&&focusTarget&&focusTarget.closest('#sheet'),sheetBox=sheetTarget&&$('sheet').getBoundingClientRect();
@@ -4619,7 +4619,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  var originalHide=hideGuide;hideGuide=function(){originalHide();hidePresentation();};
  var originalFinish=finish;finish=function(skipped){hidePresentation();return originalFinish(skipped);};
  var originalDraw=draw;draw=function(){var result=originalDraw.apply(this,arguments);if(active&&(focusKind==='vessel'||vesselPreview)&&$('home').hidden)updateFocus();return result;};
- var originalFit=fitV;fitV=function(){var value=originalFit();if(!active||!$('home').hidden||innerWidth>=600&&innerHeight>=560||!current()||st.stage==='done'||st.stage==='fire')return value;var box=cv.getBoundingClientRect();if(!box.width)return value;var unit=W/box.width,safe=(guideTop()+100-box.top)*unit,radius=Math.max.apply(null,st.radii),room=Math.max(40,BASE0-safe);return Math.max(.08,Math.min(value,room/Math.max(1,(st.height+radius*TILT)*S0)));};
+ var originalFit=fitV;fitV=function(){var value=originalFit();if(!active||!$('home').hidden||innerWidth>=600&&innerHeight>=560||!current()||st.stage==='done'||st.stage==='fire')return value;var box=cv.getBoundingClientRect();if(!box.width)return value;var unit=W/box.width,guideBottom=Math.max(guideTop()+100,coach.hidden?0:coach.getBoundingClientRect().bottom+12,action.hidden?0:action.getBoundingClientRect().bottom+12),safe=(guideBottom-box.top)*unit,radius=Math.max.apply(null,st.radii),room=Math.max(40,BASE0-safe);return Math.max(.08,Math.min(value,room/Math.max(1,(st.height+radius*TILT)*S0)));};
  window.TodakTutorialPresentation={state:function(){return{visible:veil.style.display!=='none',focus:focusKind,target:focusTarget?focusTarget.id||focusTarget.dataset.t||focusTarget.dataset.d:null,path:cut.getAttribute('d'),controlPath:control.getAttribute('d'),control:focusKind==='control'?controlGeometry:null,bounds:focusBox,preview:vesselPreview,previewBounds:previewBox,step:current()?current().id:null};}};
 })();
 
