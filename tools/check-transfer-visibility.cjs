@@ -1,0 +1,7 @@
+const fs=require('node:fs'),assert=require('node:assert/strict'),{JSDOM}=require('../ui-layout-preview/node_modules/jsdom');
+const core=fs.readFileSync('migration/transfer-core.js','utf8'),ui=fs.readFileSync('migration/domain-transfer.js','utf8');
+for(const [name,complete,hasWorks,query,shown]of [['new visitor',false,false,'',false],['old works',false,true,'',true],['old bridge no metadata',false,undefined,'',false],['blocked old storage',false,null,'',false],['completed import',true,true,'',false],['old first-party return',false,null,'?legacy_works=1',true]]){
+ const dom=new JSDOM('<div id="home"><div class="homeBox"><div class="homeMenus"></div></div></div>',{url:'https://todak.sosohanlab.com/'+query,runScripts:'outside-only'}),w=dom.window;
+ const shelf=JSON.stringify({items:[{id:'retained',name:'현재 진열장 작품',bottomPaint:'preserved'}],best:{cup:93}});w.localStorage.setItem('mullebang.v1',shelf);
+ if(complete)w.localStorage.setItem('todak.domain-transfer.v1','complete');w.eval(core);w.eval(ui);const entry=w.document.getElementById('importLegacyWorks'),probe=w.document.querySelector('iframe');if(probe)w.dispatchEvent(new w.MessageEvent('message',{origin:'https://sosohanlab.github.io',source:probe.contentWindow,data:{type:'todak-bridge-ready',hasWorks}}));assert.equal(!!entry&&!entry.hidden,shown,name);if(complete)assert.equal(probe,null,'completed import never probes again');assert.equal(w.localStorage.getItem('mullebang.v1'),shelf,'visibility never changes current works');console.log('PASS '+name);w.close();
+}

@@ -15,15 +15,19 @@ Enable GitHub Pages: Deploy from a branch → main → /(root).
 Do **not** set a custom domain or add CNAME in that bridge repository.
 Do not change the main site's custom domain or DNS.
 
-The main site's transfer button remains hidden until an old-origin iframe replies
-to a readiness check. No storage is read in this iframe. Users open a top-level
-popup to read the original (unpartitioned) storage and explicitly choose transfer.
+The main site's transfer button is hidden for completed imports and new visitors.
+The old-origin iframe reports only whether an old personal shelf exists; it never
+sends artwork or storage contents. If iframe storage is blocked or partitioned,
+the old bridge's top-level return link carries an availability flag instead.
+Users open a top-level popup to read the original (unpartitioned) storage and explicitly choose transfer.
 The data travels via postMessage to the exact new origin and opener window with a
 random session token. No artwork is sent to a server or put into a URL.
 
 Users must use the same device/browser/profile where they originally saved work.
 Cleared browser data cannot be recovered by this feature. The old records remain
 untouched. A JSON backup/export and import is also available.
+Hiding the entry never edits the current shelf. Repeated imports merge idempotently;
+an empty old shelf cannot replace or clear any current work.
 
 ## Data rules
 

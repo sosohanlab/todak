@@ -1,0 +1,21 @@
+const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=require('C:/Users/pppoi/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const base=process.argv.includes('--live')?'https://todak.sosohanlab.com':'http://127.0.0.1:8771';
+const fixture=`window.toolUndoQA={prepare:function(challenge){challenge?startChallenge('moon'):startFree();closeOverlays();$('chRules').hidden=true;st.height=12;st.floor=1;st.radii=Array.from({length:N},function(_,i){return 5+1.6*Math.sin(Math.PI*i/(N-1))+(i%2?.04:-.04);});st.inner=st.radii.map(function(r){return r-1;});st.trimReady=true;syncControls();updateReadout();TodakLayoutPreview.sync();TodakResponsive.refresh();dirty=true;},state:function(){return{r:st.radii.slice(),i:st.inner.slice(),h:st.height,f:st.floor,rim:st.rimSoftness||0,g:grooves.slice()};},point:function(outside){var t=.55,r=cv.getBoundingClientRect(),x=CX+rAt(t)*SV+(outside?35:-8),y=BASE-st.height*t*SV;return{x:r.left+x*r.width/W,y:r.top+y*r.height/HC};},ready:function(){st.trimReady=true;}};`;
+fs.mkdirSync('output/button-review',{recursive:true});
+(async()=>{const b=await chromium.launch({channel:'chrome',headless:true}),report=[];try{for(const width of [390,1440]){
+ const p=await b.newPage({viewport:{width,height:900},locale:'ko-KR'}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.route('**/*clarity.ms/**',r=>r.fulfill({body:''}));
+ const html=base.startsWith('https')?await (await p.request.get(base+'/?tool_undo_source=1')).text():fs.readFileSync('release-site/index.html','utf8');
+ await p.route(base+'/?tool_undo=1',r=>r.fulfill({contentType:'text/html',body:html.replace('if(hot&&hot.ready){hot.ready(start);}',fixture+'\nif(hot&&hot.ready){hot.ready(start);}')}));await p.goto(base+'/?tool_undo=1',{waitUntil:'domcontentloaded'});await p.waitForFunction(()=>!!window.toolUndoQA);
+ async function open(){if(await p.locator('#sheetToggle').isVisible()&&!await p.locator('#sheet').evaluate(e=>e.classList.contains('open')))await p.locator('#sheetToggle').click();}
+ for(const challenge of [false,true])for(const selected of ['shape','thick','trim','sponge']){
+  await p.evaluate(c=>toolUndoQA.prepare(c),challenge);await p.waitForTimeout(100);const states=[await p.evaluate(()=>toolUndoQA.state())];
+  for(const tool of ['shape','trim','sponge']){
+   await open();await p.locator('#tools [data-t='+tool+']').click();await p.evaluate(()=>toolUndoQA.ready());await p.waitForTimeout(50);const pt=await p.evaluate(outside=>toolUndoQA.point(outside),tool!=='shape');
+   await p.mouse.move(pt.x,pt.y);await p.mouse.down();await p.mouse.move(pt.x+(tool==='shape'?-18:-40),pt.y+12,{steps:5});await p.waitForTimeout(80);await p.mouse.up();await p.waitForTimeout(25);
+   const after=await p.evaluate(()=>toolUndoQA.state());assert.notDeepEqual(after,states.at(-1),tool+' changes clay');states.push(after);
+  }
+  await open();await p.locator('#tools [data-t='+selected+']').click();assert.deepEqual(await p.evaluate(()=>toolUndoQA.state()),states[3],'selecting a tool does not edit the work');
+  for(let i=2;i>=0;i--){await p.locator('#ui-undo').click();assert.deepEqual(await p.evaluate(()=>toolUndoQA.state()),states[i],width+' '+challenge+' selected '+selected+' undo restores only operation '+(i+1));}
+  for(let i=1;i<=3;i++){await p.locator('#ui-redo').click();assert.deepEqual(await p.evaluate(()=>toolUndoQA.state()),states[i],'exact redo '+i);}
+  report.push({width,challenge,selected,pass:true});console.log('PASS '+width+' '+(challenge?'challenge':'free')+' shape → trim → sponge; undo with '+selected+' selected');
+ }assert.deepEqual(errors,[]);await p.close();}fs.writeFileSync('output/button-review/tool-undo-'+(base.startsWith('https')?'live':'local')+'.json',JSON.stringify(report,null,2));}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1});

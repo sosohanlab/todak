@@ -10,8 +10,11 @@ const token=new URLSearchParams(location.hash.slice(1)).get('token');
 const status=document.getElementById('status'), button=document.getElementById('transfer');
 const validToken=typeof token==='string' && /^[a-f0-9]{32}$/.test(token);
 if(location.origin!==oldOrigin){status.textContent='이 페이지는 기존 GitHub 주소에서 열어야 작품을 찾을 수 있어요.';button.disabled=true;document.getElementById('backup').disabled=true;return;}
-// An iframe is only a readiness probe. Read storage exclusively in a top-level window.
-if(window.parent!==window){window.parent.postMessage({type:'todak-bridge-ready'},target);return;}
+function hasWorks(){try{const raw=localStorage.getItem('mullebang.v1')??localStorage.getItem('todak.market-preview.personal.v1');return !!(raw&&JSON.parse(raw).items?.length);}catch(_){return null;}}
+// The probe sends only availability metadata, never artwork or storage contents.
+if(window.parent!==window){window.parent.postMessage({type:'todak-bridge-ready',hasWorks:hasWorks()},target);return;}
+// This first-party route also works when iframe storage is partitioned or blocked.
+if(hasWorks()===true)document.querySelector('a[href="https://todak.sosohanlab.com/"]').href=target+'/?legacy_works=1';
 let waiting=false;
 async function collect(){const data=TodakTransferCore.collect(localStorage);data.fragments=await TodakTransferCore.fragmentsFromDB();return data;}
 button.onclick=async function(){

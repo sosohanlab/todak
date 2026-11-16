@@ -1,0 +1,15 @@
+const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=require('C:/Users/pppoi/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const base=process.argv.includes('--live')?'https://todak.sosohanlab.com':'http://127.0.0.1:8771';
+(async()=>{const b=await chromium.launch({channel:'chrome',headless:true}),report=[];try{for(const width of [320,390,1440]){
+ const p=await b.newPage({viewport:{width,height:900},locale:'ko-KR'});await p.route('**/*clarity.ms/**',r=>r.fulfill({body:''}));await p.goto(base+'/?visual_colors=1',{waitUntil:'domcontentloaded'});await p.locator('#goFree').click();await p.locator('#nextBtn').click();
+ for(const id of ['pigColor','glazeColor','ui-brush-color','ui-dip-color']){
+  if(id==='glazeColor')await p.locator('#nextBtn').click();if(await p.locator('#sheetToggle').isVisible()&&!await p.locator('#sheet').evaluate(e=>e.classList.contains('open')))await p.locator('#sheetToggle').click();
+  if(id==='ui-brush-color')await p.locator('#rackGlazeBrush').click();if(id==='ui-dip-color'){await p.locator('#rackGlazeBase').click();const summary=p.locator('#glazeBaseSettings > details.fold:not([hidden])>summary').last();if(!await summary.evaluate(e=>e.parentElement.open))await summary.click();await p.locator('#dip [data-dip=rim]').click();}
+  const input=p.locator('#'+id);await input.scrollIntoViewIfNeeded();const initial=await input.inputValue(),ui=await input.evaluate(e=>{const r=e.getBoundingClientRect(),parent=e.parentElement;return{w:r.width,h:r.height,text:parent.querySelector('.ui-visual-color').textContent,optional:!parent.querySelector('details').open,label:e.getAttribute('aria-label')};});
+  assert(ui.w>=180&&ui.h>=44,'large visual colour chooser');assert(ui.text.includes('원하는 색 고르기'));assert(ui.optional,'code starts collapsed');assert(ui.label.includes('원하는 색 고르기'));
+  await input.evaluate(e=>{e.value='#c77847';e.dispatchEvent(new Event('input',{bubbles:true}));});await p.waitForTimeout(30);
+  assert.equal(await input.evaluate(e=>e.parentElement.querySelector('.ui-color-chip').style.backgroundColor),'rgb(199, 120, 71)');await p.locator('#ui-undo').click();assert.equal(await input.inputValue(),initial,'visual selection can be undone');await p.locator('#ui-redo').click();assert.equal(await input.inputValue(),'#c77847','redo restores selected colour');
+  await input.locator('..').locator('summary').click();const hex=input.locator('..').locator('input[type=text]');await hex.fill('#2568a4');await hex.press('Tab');await p.waitForTimeout(30);assert.equal(await input.inputValue(),'#2568a4','optional code keeps the same picker in sync');await input.locator('..').locator('summary').click();
+  report.push({width,id,pass:true});await p.screenshot({path:'output/button-review/colour-'+width+'-'+id+'.png'});
+ }await p.close();console.log('PASS '+width+' four visual colour pickers, optional code and exact undo/redo');
+}fs.writeFileSync('output/button-review/visual-colors-'+(base.startsWith('https')?'live':'local')+'.json',JSON.stringify(report,null,2));}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1});

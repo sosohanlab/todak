@@ -28,7 +28,18 @@
  var glazeChoices=$('rackGlaze');$('potteryToolRack').appendChild(glazeChoices);$('p-glaze').appendChild($('freeGlaze'));$('rackGlazeBase').querySelector('span').textContent='바탕색 칠하기';$('rackGlazeBrush').querySelector('span').textContent='붓으로 유약 칠하기';$('glazePaintHint').hidden=true;
  // Reuse the existing paint/base colour handlers; add direct colours to the
  // independent dip and brush selections rather than substituting a preset.
- function directColor(input,parent,title){var row=document.createElement('div');row.className='ui-direct-color';var label=document.createElement('label');label.textContent=title;label.htmlFor=input.id;var controls=document.createElement('div');controls.className='ui-color-controls';var hex=document.createElement('input');hex.type='text';hex.value=input.value.toUpperCase();hex.maxLength=7;hex.pattern='#[0-9a-fA-F]{6}';hex.setAttribute('aria-label',title+' 색상 코드');input.setAttribute('aria-label',title);controls.append(input,hex);row.append(label,controls);parent.appendChild(row);input.addEventListener('input',function(){hex.value=input.value.toUpperCase();});hex.addEventListener('change',function(){var value=this.value.trim();if(!value.startsWith('#'))value='#'+value;if(!/^#[0-9a-f]{6}$/i.test(value)){this.setCustomValidity('#을 포함한 여섯 자리 색상 코드를 입력해 주세요.');this.reportValidity();return;}this.setCustomValidity('');input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));});row.addEventListener('input',function(){begin();setTimeout(finish,0);},true);return row;}
+ function refreshColorPickers(){document.querySelectorAll('.ui-color-controls>input[type=color]').forEach(function(input){var chip=input.parentElement.querySelector('.ui-color-chip');if(chip)chip.style.backgroundColor=input.value;});}
+ function directColor(input,parent,title){
+  var row=document.createElement('div');row.className='ui-direct-color';var label=document.createElement('label');label.textContent=title;label.htmlFor=input.id;
+  var controls=document.createElement('div');controls.className='ui-color-controls';
+  var visual=document.createElement('label');visual.className='ui-visual-color';visual.htmlFor=input.id;visual.innerHTML='<span class="ui-color-chip" aria-hidden="true"></span><span>원하는 색 고르기</span><span aria-hidden="true">▾</span>';
+  var advanced=document.createElement('details');advanced.className='ui-color-code';var summary=document.createElement('summary');summary.textContent='색상 코드 입력 (선택)';
+  var hex=document.createElement('input');hex.type='text';hex.value=input.value.toUpperCase();hex.maxLength=7;hex.pattern='#[0-9a-fA-F]{6}';hex.setAttribute('aria-label',title+' 색상 코드');
+  advanced.append(summary,hex);input.setAttribute('aria-label',title+' · 원하는 색 고르기');controls.append(input,visual,advanced);row.append(label,controls);parent.appendChild(row);
+  input.addEventListener('input',function(){hex.value=input.value.toUpperCase();refreshColorPickers();});
+  hex.addEventListener('change',function(){var value=this.value.trim();if(!value.startsWith('#'))value='#'+value;if(!/^#[0-9a-f]{6}$/i.test(value)){this.setCustomValidity('#을 포함한 여섯 자리 색상 코드를 입력해 주세요.');this.reportValidity();return;}this.setCustomValidity('');input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));});
+  row.addEventListener('input',function(){begin();setTimeout(finish,0);},true);refreshColorPickers();return row;
+ }
  directColor($('pigColor'),$('f-pig'),'물감 직접 고르기');$('pigCustom').hidden=true;directColor($('glazeColor'),$('swatches').closest('.field'),'바탕색 직접 고르기');$('glazeCustom').hidden=true;
  $('swatches2').closest('details').hidden=true;$('glazeBrushSwatchesMore').closest('details').hidden=true;
  function customGlaze(id){var g={id:id,name:'직접 고른 색',kw:'custom',c:[100,160,180]};GLAZES.push(g);return g;}
@@ -54,7 +65,7 @@
  var undo=[],redo=[],pending=null,restoring=false,maxHistory=40,tileStore=TodakHistoryTiles.create(),historyPointers=new Set(),historyTimer=null,historyGesture=null;
  function layerCopy(layer){return tileStore.read(layer,texVer);}
  function capture(metadataOnly){var decorating=!metadataOnly&&st.stage!=='throw',wheel=window.TodakWheel;return {state:JSON.parse(JSON.stringify(st)),colors:{pig:dPig,pigRgb:dColor.slice(),brush:$('glazeBrushColor').value,brushRgb:brushCustom.c.slice(),dipRgb:dipCustom.c.slice()},grooves:grooves.slice(),paint:decorating?layerCopy(paint):null,carve:decorating?layerCopy(carve):null,top:decorating&&wheel?layerCopy(wheel.layer):null,bottom:decorating&&wheel?layerCopy(wheel.bottomLayer):null,relief:decorating&&wheel?layerCopy(wheel.bottomRelief):null,hp:hasPaint,hc:hasCarve,version:texVer};}
- function signature(s,ignoreTouchCount){var state=s.state;if(ignoreTouchCount){state=Object.assign({},state);delete state.touches;}return JSON.stringify([state,s.colors])+'|'+s.version+'|'+s.grooves.join(',');}
+ function signature(s,ignoreTouchCount){var state=Object.assign({},s.state);delete state.trimReady;if(ignoreTouchCount)delete state.touches;return JSON.stringify([state,s.colors])+'|'+s.version+'|'+s.grooves.join(',');}
  function begin(){if(restoring||pending||!['throw','deco','glaze'].includes(st.stage))return;pending=capture();}
  function finish(gesturePart){
   if(!pending)return;var before=pending;pending=null;
@@ -83,11 +94,14 @@
  function historyUI(){var blocked=!!TARGETS[st.target]?.master;$('ui-undo').disabled=blocked||!undo.length;$('ui-redo').disabled=blocked||!redo.length;}
  $('ui-undo').onclick=function(){endHistoryGesture();finish();if(!undo.length)return;redo.push(capture());restore(undo.pop());historyUI();};$('ui-redo').onclick=function(){endHistoryGesture();if(!redo.length)return;undo.push(capture());restore(redo.pop());historyUI();};
  undoIds.forEach(function(id){$(id)?.addEventListener('click',function(e){e.preventDefault();e.stopImmediatePropagation();$('ui-undo').click();},true);});
- stageEl.addEventListener('pointerdown',function(e){if(e.target!==cv||!['throw','deco','glaze'].includes(st.stage))return;var p=cpos(e),handle=handlePos(),heightGrip=st.stage==='throw'&&tool==='shape'&&Math.hypot(p.x-handle.x,p.y-handle.y)<30;if(heightGrip||hitSurface(p.x,p.y)||window.TodakWheel?.top()||window.TodakWheel?.bottom()||secOn){if(!historyPointers.size)startHistoryGesture();historyPointers.add(e.pointerId);}},true);
+ // A tool can start outside the silhouette and acquire contact later. Record its
+ // starting state before hit-testing; unchanged gestures are discarded by finish.
+ stageEl.addEventListener('pointerdown',function(e){if(e.target!==cv||e.button>0||!['throw','deco','glaze'].includes(st.stage))return;if(!historyPointers.size)startHistoryGesture();historyPointers.add(e.pointerId);},true);
+ document.addEventListener('pointerdown',function(e){if(e.target!==cv)endHistoryGesture();},true);
  function finishPointer(e){if(!historyPointers.delete(e.pointerId)||historyPointers.size)return;var gesture=historyGesture;setTimeout(function(){if(historyGesture===gesture&&!historyPointers.size)endHistoryGesture();},0);}
  ['pointerup','pointercancel','lostpointercapture'].forEach(function(event){document.addEventListener(event,finishPointer,true);});
  addEventListener('blur',endHistoryGesture);document.addEventListener('visibilitychange',function(){if(document.hidden)endHistoryGesture();});
- $('sheet').addEventListener('click',function(e){if(e.target.closest('#swatches,#swatches2,#finish,#dip,#dots,#fx,#lucky,#dClear')){begin();setTimeout(finish,0);}},true);
+ $('sheet').addEventListener('click',function(e){if(e.target.closest('#tools,#presets,#swatches,#swatches2,#finish,#dip,#dots,#fx,#lucky,#dClear')){begin();setTimeout(finish,0);}},true);
  $('cavityDepth').addEventListener('pointerdown',begin,true);$('cavityDepth').addEventListener('keydown',begin,true);$('cavityDepth').addEventListener('change',function(){setTimeout(finish,0);});
  // Mark the same alternating curvature that the existing roughness score measures.
  var locate=false;
@@ -115,7 +129,7 @@
  handChoices.querySelectorAll('button').forEach(function(b,i){b.setAttribute('aria-pressed',String((Number($('hsize').value)<33?0:Number($('hsize').value)>80?2:1)===i));});
  if(type==='deco'&&dTool==='stamp')$('f-opacity').hidden=false;var wheel=window.TodakWheel,bottom=wheel?.bottom();baseNote.hidden=!(type==='deco'&&bottom);baseNote.textContent='안쪽 원이 실제 밑바닥이에요 · 지름 '+(rAt(0)*2).toFixed(0)+'cm';
  guidance.hidden=type!=='throw'||!challenge||!$('home').hidden;if(!guidance.hidden){var best={delta:0,t:.5};for(var i=5;i<95;i++){var t=i/100,delta=rAt(t)-T.f(t);if(Math.abs(delta)>Math.abs(best.delta))best={delta:delta,t:t};}guidance.textContent=locate?'표시된 부분을 천천히 매끈하게 다듬어요':Math.abs(best.delta)<.3?'목표선과 가까워졌어요':best.delta>0?'조금만 더 안쪽으로':'조금만 더 바깥쪽으로';var r=cv.getBoundingClientRect(),x=r.left+(CX+Math.min(rAt(best.t)*.55,5)*SV)*r.width/W,y=r.top+(BASE-best.t*st.height*SV)*r.height/HC;guidance.style.left=Math.max(340,Math.min(innerWidth-500,x))+'px';guidance.style.top=Math.max(170,Math.min(innerHeight-90,y))+'px';}
- historyUI();window.TodakPolish?.updateMoves();}
+ historyUI();refreshColorPickers();window.TodakPolish?.updateMoves();}
  document.addEventListener('click',schedule);document.addEventListener('input',schedule);window.addEventListener('resize',schedule);var oldFire=fireUI;fireUI=function(){oldFire.apply(this,arguments);schedule();};
  window.TodakLayoutPreview={sync:sync,roughLocations:roughLocations,history:function(){var frames=[];undo.concat(redo,pending?[pending]:[]).forEach(function(s){['paint','carve','top','bottom','relief'].forEach(function(k){if(s[k])frames.push(s[k]);});});return{undo:undo.length,redo:redo.length,limit:maxHistory,imageBytes:TodakHistoryTiles.bytes(frames)};}};
  sync();

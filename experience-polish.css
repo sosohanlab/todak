@@ -205,3 +205,18 @@ body[data-ui-layout=sheet] .sheetBody{scroll-padding-block:8px 16px;scrollbar-wi
 .app>.overlay{z-index:40}
 .app>.drawer{z-index:50}
 @media(max-width:759px){#home .homeMenus>.bigBtn b,#home #goMarket b{font-size:clamp(14px,4.7vw,21px);letter-spacing:normal;line-height:1.35;white-space:nowrap}#home .homeMenus>.bigBtn>span{word-break:keep-all;overflow-wrap:break-word}}
+/* Throwing uses text choices; decoration and glaze keep their existing pictures. */
+#sheet #tools>.chip:not([hidden]){display:flex!important}
+#sheet #tools svg,#sheet #tools img{display:none!important}
+body[data-ui-stage=throw] #potteryToolRack{display:none!important}
+body.ui-touch-controls #sheet #tools .chip{min-height:52px!important;gap:3px}
+body[data-ui-layout=sheet] .sheetBody>.panel{gap:8px}
+body[data-ui-layout=sheet] .sheetBody>.panel>.ui-history{padding:0;margin:0}
+@media(max-width:599px) and (max-height:560px){body[data-ui-layout=sheet] #sheet{max-height:calc(100dvh - 140px - var(--ui-safe-top))!important}body[data-ui-layout=sheet] .sheetBody>.panel>.ui-history button{min-height:32px}}
+.ui-direct-color .ui-color-controls{display:grid;grid-template-columns:minmax(0,1fr);gap:7px;position:relative}
+.ui-direct-color .ui-color-controls>input[type=color]{position:absolute!important;left:0;top:0;width:100%!important;height:44px!important;opacity:0!important;z-index:1;padding:0;border:0;cursor:pointer}
+.ui-direct-color .ui-visual-color{display:flex;align-items:center;gap:9px;box-sizing:border-box;width:100%;min-height:44px;margin:0;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font-size:13px;line-height:1.4;cursor:pointer}
+.ui-visual-color>span:last-child{margin-left:auto}.ui-color-chip{flex:none;width:24px;height:24px;border:1px solid var(--line);border-radius:50%;box-sizing:border-box}
+.ui-color-controls>input[type=color]:focus-visible+.ui-visual-color{outline:2px solid var(--cobalt);outline-offset:2px}
+.ui-color-code{min-width:0}.ui-color-code>summary{font-size:11px;line-height:1.5;cursor:pointer;color:var(--muted);min-height:28px;padding:5px 0;box-sizing:border-box}.ui-color-code>input[type=text]{margin:4px 0 0}
+@media(max-width:599px) and (max-height:560px){body[data-ui-layout=sheet] #sheetGrab{height:18px;min-height:18px}body[data-ui-layout=sheet] .sheetHead{padding:2px 12px 6px}body[data-ui-layout=sheet] #ui-tool-footer{padding:5px 12px;gap:3px}body[data-ui-layout=sheet] #ui-tool-footer>#nextBtn{min-height:34px;font-size:14px}body[data-ui-layout=sheet] #ui-tool-footer .ui-secondary button{min-height:22px;font-size:11px}body[data-ui-layout=sheet] .sheetBody{padding:2px 12px 6px}body.ui-touch-controls #sheet #tools .chip{min-height:48px!important}body.ui-touch-controls #sheet #dtools .rackTool,body.ui-touch-controls #sheet #rackGlaze .rackTool{min-height:58px!important;padding:5px 4px!important;gap:3px}body.ui-touch-controls #sheet #dtools svg,body.ui-touch-controls #sheet #rackGlaze svg{width:22px!important;height:22px!important}body[data-ui-layout=sheet] .sheetBody>.panel{gap:6px}}

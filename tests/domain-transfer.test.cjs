@@ -12,6 +12,19 @@ test('merge works, shapes and all painted surfaces without losing new work; repe
  assert.equal(core.apply(s,core.plan(s,p)).added,1);assert.equal(core.apply(s,core.plan(s,p)).added,0);
  const data=JSON.parse(s.getItem(key));assert.equal(data.items.length,2);assert.equal(data.items[1].bottomPaint,'paint');assert.equal(data.best.cup,90);
 });
+test('repeated imports and an empty old shelf always retain every current work',()=>{
+ const s=storage({[key]:personal([item('current','현재 작품')],{cup:96})});
+ const incoming=payload([item('previous','이전 작품')],{cup:83});
+ core.apply(s,core.plan(s,incoming));
+ const expected=JSON.parse(s.getItem(key));
+ for(let i=0;i<25;i++){
+  core.apply(s,core.plan(s,incoming));
+  core.apply(s,core.plan(s,payload([])));
+  core.apply(s,core.plan(s,core.collect(storage())));
+  assert.deepEqual(JSON.parse(s.getItem(key)),expected,'repeat/empty source never replaces the current shelf');
+ }
+ assert.deepEqual(expected.items.map(v=>v.id),['current','previous']);
+});
 test('conflicting IDs preserve both versions and do not duplicate on retry',()=>{
  const s=storage({[key]:personal([item('same','new')])}),p=payload([item('same','old')]);
  core.apply(s,core.plan(s,p));core.apply(s,core.plan(s,p));const data=JSON.parse(s.getItem(key));assert.equal(data.items.length,2);assert.notEqual(data.items[0].id,data.items[1].id);

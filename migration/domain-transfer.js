@@ -4,8 +4,11 @@
   const OLD = 'https://sosohanlab.github.io', BRIDGE = OLD + '/todak-transfer/';
   const core = window.TodakTransferCore, home = document.querySelector('#home .homeBox');
   if (!core || !home) return;
+  try { if (localStorage.getItem('todak.domain-transfer.v1') === 'complete') return; } catch (_) {}
+  const legacyReturn = new URLSearchParams(location.search).get('legacy_works') === '1';
   const entry = document.createElement('button');
-  entry.hidden = true; // Reveal only after the old-origin bridge is deployed and responds.
+  entry.hidden = !legacyReturn; // Only an old-work signal, not bridge availability, reveals this entry.
+  entry.id = 'importLegacyWorks';
   entry.type = 'button'; entry.className = 'ghost'; entry.textContent = '이전 주소 작품 가져오기';
   entry.style.cssText = 'grid-column:1/-1;justify-self:center;margin:8px 0;';
   (home.querySelector('.homeMenus') || home).appendChild(entry);
@@ -22,6 +25,7 @@
     core.apply(localStorage, result);
     if (result.found) {
       try { localStorage.setItem('todak.domain-transfer.v1', 'complete'); } catch (_) {}
+      entry.hidden = true;
       // Update the live personal store before any normal app save can overwrite the merged list.
       window.dispatchEvent(new Event('todak-personal-imported'));
       status.textContent = '작품 ' + result.added + '점을 추가했어요. 아래 버튼을 누르면 새 진열장에 반영돼요.';
@@ -40,7 +44,7 @@
   window.addEventListener('message', e => {
     if (e.origin !== OLD || !e.data) return;
     if (e.source === probe.contentWindow && e.data.type === 'todak-bridge-ready') {
-      ready = true; entry.hidden = false; probe.remove();
+      ready = true; entry.hidden = !(legacyReturn || e.data.hasWorks === true); probe.remove();
       // Display a non-modal reminder on home, never interrupt an in-progress pottery session.
       try { if (!localStorage.getItem('todak.domain-transfer.v1')) entry.textContent = '주소가 바뀌었어요 · 기존 작품 가져오기'; } catch (_) {}
       return;

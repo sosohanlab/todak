@@ -20,14 +20,14 @@ test('actual bridge and destination UI transfer via validated messages, retainin
   w.eval(fs.readFileSync('home-layout.js','utf8'));
   w.eval(ui);const entry=w.document.querySelector('.homeBox button'),probe=w.document.querySelector('iframe');assert.equal(entry.hidden,true);
   w.dispatchEvent(new w.MessageEvent('message',{origin:'https://evil.example',source:probe.contentWindow,data:{type:'todak-bridge-ready'}}));assert.equal(entry.hidden,true);
-  w.dispatchEvent(new w.MessageEvent('message',{origin:'https://sosohanlab.github.io',source:probe.contentWindow,data:{type:'todak-bridge-ready'}}));assert.equal(entry.hidden,false);
+  w.dispatchEvent(new w.MessageEvent('message',{origin:'https://sosohanlab.github.io',source:probe.contentWindow,data:{type:'todak-bridge-ready',hasWorks:true}}));assert.equal(entry.hidden,false);
   entry.click();const dialog=w.document.querySelector('dialog');assert.equal(dialog.open,true);dialog.querySelector('[data-open]').click();
   const token=new URLSearchParams(old.window.location.hash.slice(1)).get('token'),incoming=old.window.TodakTransferCore.collect(old.window.localStorage);
   for(const [origin,source,t] of [['https://evil.example',old.window,token],['https://sosohanlab.github.io',w,token],['https://sosohanlab.github.io',old.window,'bad']])w.dispatchEvent(new w.MessageEvent('message',{origin,source,data:{type:'todak-transfer-data',token:t,payload:incoming}}));
   assert.equal(JSON.parse(w.localStorage.getItem('mullebang.v1')).items.length,1);
   old.window.document.querySelector('#transfer').click();await tick();
   const saved=JSON.parse(w.localStorage.getItem('mullebang.v1'));assert.equal(saved.items.length,2);assert.equal(saved.items[1].bottomPaint,'bottom');assert.equal(JSON.parse(w.localStorage.getItem('todak.shards.v1')).length,1);assert(updated);
-  assert.equal(w.localStorage.getItem('todak.domain-transfer.v1'),'complete');assert.equal(dialog.querySelector('[data-close]').hidden,true);assert(dialog.querySelector('[data-open]').textContent.includes('진열장 확인'));
+  assert.equal(w.localStorage.getItem('todak.domain-transfer.v1'),'complete');assert.equal(entry.hidden,true);assert.equal(dialog.querySelector('[data-close]').hidden,true);assert(dialog.querySelector('[data-open]').textContent.includes('진열장 확인'));
   assert(old.window.document.querySelector('#status').textContent.includes('저장했어요'));assert.equal(JSON.parse(old.window.localStorage.getItem('mullebang.v1')).items.length,1);
   old.window.document.querySelector('#transfer').click();await tick();assert.equal(JSON.parse(w.localStorage.getItem('mullebang.v1')).items.length,2);
  }finally{if(old)old.window.close();w.close();}

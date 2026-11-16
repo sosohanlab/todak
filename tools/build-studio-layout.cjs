@@ -18,6 +18,13 @@ html=html.replace('openSaved:async function(item){var token=', "openSaved:async 
 html=html.replace("viewer.appendChild(orbitCanvas);var token=", "viewer.appendChild(orbitCanvas);orbitCanvas.hidden=false;fingers.clear();pinch=0;var token=");
 html=html.replace("render:renderOrbit,state:function()", "render:renderOrbit,turn:function(delta){yaw+=delta;renderOrbit();window.dispatchEvent(new Event('todak-inspection-rotated'));},state:function()");
 function required(before,after){if(!html.includes(before))throw Error('Missing integration hook: '+before.slice(0,80));html=html.replace(before,after);}
+// Selecting an already hollow work must not silently reshape its inner wall.
+required('if(st.height-st.floor>.05){constrainInterior();return;}','if(st.height-st.floor>.05)return;');
+required('if(st.stage!=="deco"&&st.stage!=="done")return;','if(!["throw","deco","glaze","done"].includes(st.stage))return;');
+// Untranslated attributes must not re-trigger their own translation observer.
+required('if(v&&HAN.test(v)){n.setAttribute(a,T(v));}','if(v&&HAN.test(v)){var translated=T(v);if(translated!==v)n.setAttribute(a,translated);}');
+required('m.target.setAttribute(m.attributeName,T(v));','var translated=T(v);if(translated!==v)m.target.setAttribute(m.attributeName,translated);');
+required('  var RX=[','  Object.assign(D,{"원하는 색 고르기":"Choose a color","색상 코드 입력 (선택)":"Color code (optional)","물감 직접 고르기":"Custom paint color","바탕색 직접 고르기":"Custom base color","붓 유약 직접 고르기":"Custom brush glaze","덧입힐 색 직접 고르기":"Custom dip color"});\n  var RX=[');
 // Opening or cancelling a native colour picker is not an edit.
 required('$("pigColor").addEventListener("input",onPig); $("pigColor").addEventListener("click",onPig);','$("pigColor").addEventListener("input",onPig);');
 required('$("glazeColor").addEventListener("input",onGlaze); $("glazeColor").addEventListener("click",onGlaze);','$("glazeColor").addEventListener("input",onGlaze);');
@@ -49,8 +56,8 @@ html=html.replace("ctx.fillText('내 도자기 · 밑바닥 '+(st.stage==='done'
 html=html.replace("ctx.fillText('안쪽 원이 실제 밑바닥이에요 · 지름 '+Math.round(l.cm*2)+'cm',l.x,l.y+l.r+19);",'');
 // Share one layout rule between the canvas, tool sheet, and physical tool holder.
 html=html.replaceAll('window.innerWidth<760','uiUsesSheet()').replaceAll('innerWidth<760','uiUsesSheet()').replaceAll('stageEl.clientWidth>=760','!uiUsesSheet()').replaceAll('stageEl.clientWidth<760','uiUsesSheet()').replaceAll('cw>=760','!uiUsesSheet()').replaceAll('cw<760','uiUsesSheet()');
-html=html.replaceAll('innerHeight*.56','innerHeight*.43');
-html=html.replace('innerHeight-100);}', 'innerHeight-180);}');
+html=html.replaceAll('innerHeight*.56','Math.min(Math.max(innerHeight*.43,300),Math.max(180,innerHeight-140))');
+html=html.replace('innerHeight-100);}', 'innerHeight-(innerWidth<600&&innerHeight<=560?140:180));}');
 html=html.replace('function minimum(){return head.getBoundingClientRect().height+26;}', 'function minimum(){return head.getBoundingClientRect().height+26;}');
 const rule='function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&innerHeight<=560);}\n';
 required("$('goFree').addEventListener('click',function(e){if(complete)return;if(active){e.preventDefault();e.stopImmediatePropagation();closeOverlays();focusStep();return;}active=true;index=0;done=false;contactMs=0;if(!routeTimer)routeTimer=setInterval(route,160);},true);", "$('goFree').addEventListener('click',function(){if(active)stopOptionalTutorial();},true);");

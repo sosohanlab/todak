@@ -67,6 +67,7 @@ if(["todak.sosohanlab.com","sosohanlab.github.io"].includes(location.hostname)){
     if(e==null)return null;
     return e.replace(/#/g,function(){return nums[i++];});
   }
+  Object.assign(D,{"원하는 색 고르기":"Choose a color","색상 코드 입력 (선택)":"Color code (optional)","물감 직접 고르기":"Custom paint color","바탕색 직접 고르기":"Custom base color","붓 유약 직접 고르기":"Custom brush glaze","덧입힐 색 직접 고르기":"Custom dip color"});
   var RX=[
     [/^(.+) 닮음 (\d+)%$/,function(m){return cap(name(m[1]))+" match "+m[2]+"%";}],
     [/^⚠ 흔들려요: (.+)$/,function(m){return "⚠ Wobbling: "+one(m[1]);}],
@@ -105,7 +106,7 @@ if(["todak.sosohanlab.com","sosohanlab.github.io"].includes(location.hostname)){
       if(HAN.test(n.nodeValue)&&!skip(n)){var t=T(n.nodeValue); if(t!==n.nodeValue){n.nodeValue=t;}}
     }else if(n.nodeType===1){
       if(skip(n))return;
-      ["placeholder","aria-label","title"].forEach(function(a){var v=n.getAttribute&&n.getAttribute(a); if(v&&HAN.test(v)){n.setAttribute(a,T(v));}});
+      ["placeholder","aria-label","title"].forEach(function(a){var v=n.getAttribute&&n.getAttribute(a); if(v&&HAN.test(v)){var translated=T(v);if(translated!==v)n.setAttribute(a,translated);}});
       for(var c=n.firstChild;c;c=c.nextSibling){fix(c);}
     }
   }
@@ -120,7 +121,7 @@ if(["todak.sosohanlab.com","sosohanlab.github.io"].includes(location.hostname)){
       for(var i=0;i<ms.length;i++){
         var m=ms[i];
         if(m.type==="characterData"){fix(m.target);}
-        else if(m.type==="attributes"){var v=m.target.getAttribute(m.attributeName); if(v&&HAN.test(v)&&!skip(m.target)){m.target.setAttribute(m.attributeName,T(v));}}
+        else if(m.type==="attributes"){var v=m.target.getAttribute(m.attributeName); if(v&&HAN.test(v)&&!skip(m.target)){var translated=T(v);if(translated!==v)m.target.setAttribute(m.attributeName,translated);}}
         else{for(var j=0;j<m.addedNodes.length;j++){fix(m.addedNodes[j]);}}
       }
     }).observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["placeholder","aria-label","title"]});
@@ -531,7 +532,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 <link rel="stylesheet" href="home-layout.css?v=06516c194877">
 <link rel="stylesheet" href="trimming.css?v=7560f129b1d9">
 <script src="saved-work-viewer.js?v=875c4c43eaf1"></script><script src="bottom-view.js?v=d969d4859280"></script><link rel="stylesheet" href="mobile-sheet.css?v=eea383aeb901">
-<link rel="stylesheet" href="studio-layout.css?v=379bde7a1f84"><link rel="stylesheet" href="responsive-layout.css?v=cd9349fb106c"><link rel="stylesheet" href="experience-polish.css?v=6e10b7487132"><link rel="stylesheet" href="site-feedback.css?v=12d2a92e4483"><link rel="stylesheet" href="tutorial-presentation.css?v=ff4c78860ee4">
+<link rel="stylesheet" href="studio-layout.css?v=379bde7a1f84"><link rel="stylesheet" href="responsive-layout.css?v=cd9349fb106c"><link rel="stylesheet" href="experience-polish.css?v=dc78e36694e0"><link rel="stylesheet" href="site-feedback.css?v=12d2a92e4483"><link rel="stylesheet" href="tutorial-presentation.css?v=ff4c78860ee4">
 <script src="channel-attribution.js?v=c815a8b33fc1"></script>
 </head>
 <body>
@@ -1198,7 +1199,7 @@ function innerLimitAt(t,thickness){
 function wallNormalThickness(radius,y){var closest=Infinity,step=st.height/(N-1);for(var i=0;i<N-1;i++){var ax=st.radii[i],ay=i*step,dx=st.radii[i+1]-ax,dy=step,u=clamp(((radius-ax)*dx+(y-ay)*dy)/(dx*dx+dy*dy),0,1);closest=Math.min(closest,Math.hypot(radius-ax-u*dx,y-ay-u*dy));}return closest;}
 function constrainInterior(){for(var j=0;j<N;j++)st.inner[j]=clamp(st.inner[j],0,innerLimitAt(j/(N-1),wallLimit()));}
 function prepareInterior(){
- if(st.height-st.floor>.05){constrainInterior();return;}
+ if(st.height-st.floor>.05)return;
  pushHist();st.floor=Math.min(.5,st.height*.12);st.inner=st.radii.map(function(r,j){return Math.min(.6,innerLimitAt(j/(N-1),wallLimit()));});markPreset(null);updateReadout();dirty=true;
 }
 function touchClay(dt){
@@ -3693,7 +3694,7 @@ function handControlUI(){var el=$('hsize');if(!el)return;var v=Number(el.value)/
 /* ---------- 꾸미기 확대: 컴퓨터는 마우스 휠, 폰은 두 손가락 ---------- */
 cv.addEventListener("contextmenu",function(e){if(st.stage==="done")e.preventDefault();});
 cv.addEventListener("wheel",function(e){
-  if(st.stage!=="deco"&&st.stage!=="done")return;
+  if(!["throw","deco","glaze","done"].includes(st.stage))return;
   e.preventDefault();
   var r=cv.getBoundingClientRect();
   setZoom(Z*Math.exp(-e.deltaY*0.0016),(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*HC/r.height);
@@ -4552,7 +4553,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  function positionProgress(){var mobile=innerWidth<600,short=innerHeight<560,width=mobile?Math.min(180,Math.floor((innerWidth-36)*.48)):short?180:220;coach.style.cssText='';coach.classList.remove('tutorialDocked','tutorialModal');if(coach.parentNode!==document.body)document.body.appendChild(coach);coach.style.width=width+'px';coach.style.left='12px';coach.style.top=Math.min(guideTop(),Math.max(8,innerHeight-110))+'px';return coach.getBoundingClientRect();}
  function positionAction(anchor,progress,canvasTarget){
   var mobile=innerWidth<600,width=mobile?Math.min(230,innerWidth-24):226;action.dataset.side='none';
-  if(mobile&&(canvasTarget||vesselPreview)||vesselPreview&&innerHeight<560){var x=progress.right+10;width=mobile?Math.max(128,innerWidth-12-x):226;action.style.width=width+'px';action.style.left=x+'px';action.style.top=progress.top+'px';action.dataset.side='bottom';action.style.setProperty('--tutorial-arrow','24px');return;}
+  if(mobile||vesselPreview&&innerHeight<560){var x=progress.right+10;width=mobile?Math.max(128,innerWidth-12-x):226;action.style.width=width+'px';action.style.left=x+'px';action.style.top=progress.top+'px';action.dataset.side='bottom';action.style.setProperty('--tutorial-arrow','24px');return;}
   action.style.width=width+'px';var h=action.getBoundingClientRect().height||76,gap=16,header=document.querySelector('.ui-header'),headerBox=header&&header.getBoundingClientRect(),infoBox=$('ui-work-info').getBoundingClientRect();
   var candidates=[{left:anchor.left-gap-width,top:anchor.top+(anchor.height-h)/2,side:'right'},{left:anchor.right+gap,top:anchor.top+(anchor.height-h)/2,side:'left'},{left:anchor.left+(anchor.width-width)/2,top:anchor.top-gap-h,side:'bottom'},{left:anchor.left+(anchor.width-width)/2,top:anchor.bottom+gap,side:'top'}];
   var sheetTarget=focusKind==='control'&&focusTarget&&focusTarget.closest('#sheet'),sheetBox=sheetTarget&&$('sheet').getBoundingClientRect();
@@ -4711,13 +4712,13 @@ var stopOptionalTutorial;
  var sheet=$('sheet'),head=sheet.querySelector('.sheetHead'),grab=document.createElement('div'),savedHeight=0,drag=null,frame=0;grab.id='sheetGrab';grab.tabIndex=0;grab.setAttribute('role','slider');grab.setAttribute('aria-label','도구창 높이 · 위아래로 끌어 조절');grab.setAttribute('aria-controls','sheetBody');grab.setAttribute('aria-orientation','vertical');sheet.prepend(grab);
  function mobile(){return uiUsesSheet();}
  function minimum(){return head.getBoundingClientRect().height+26;}
- function maximum(){return Math.max(minimum()+40,innerHeight-180);}
+ function maximum(){return Math.max(minimum()+40,innerHeight-(innerWidth<600&&innerHeight<=560?140:180));}
  function height(value){var h=Math.max(minimum(),Math.min(maximum(),value));sheet.style.setProperty('--mobile-sheet-height',Math.round(h)+'px');grab.setAttribute('aria-valuemin',Math.round(minimum()));grab.setAttribute('aria-valuemax',Math.round(maximum()));grab.setAttribute('aria-valuenow',Math.round(h));grab.setAttribute('aria-valuetext','화면의 '+Math.round(h/innerHeight*100)+'%');if(!frame)frame=requestAnimationFrame(function(){frame=0;layoutWorkspace();});return h;}
- var baseSetSheet=setSheet;setSheet=function(open){if(mobile()){if(!open&&sheet.classList.contains('open')&&!drag){var h=sheet.getBoundingClientRect().height;if(h>minimum()+35)savedHeight=h;}if(open)height(savedHeight||innerHeight*.43);}baseSetSheet(open);};
+ var baseSetSheet=setSheet;setSheet=function(open){if(mobile()){if(!open&&sheet.classList.contains('open')&&!drag){var h=sheet.getBoundingClientRect().height;if(h>minimum()+35)savedHeight=h;}if(open)height(savedHeight||Math.min(Math.max(innerHeight*.43,300),Math.max(180,innerHeight-140)));}baseSetSheet(open);};
  function start(e){if(!mobile()||e.button>0||e.target.closest('button,input,select,a'))return;e.preventDefault();drag={id:e.pointerId,y:e.clientY,height:sheet.getBoundingClientRect().height,open:sheet.classList.contains('open'),moved:false};setSheet(true);height(drag.height);sheet.classList.add('sheetDragging');grab.setPointerCapture(e.pointerId);}
  function move(e){if(!drag||e.pointerId!==drag.id)return;e.preventDefault();if(Math.abs(e.clientY-drag.y)>3)drag.moved=true;drag.value=height(drag.height+drag.y-e.clientY);}
  function end(e){if(!drag||e.pointerId!==drag.id)return;var d=drag;drag=null;sheet.classList.remove('sheetDragging');if(!d.moved){setSheet(!d.open);return;}if((d.value||d.height)<minimum()+35)setSheet(false);else{savedHeight=d.value||d.height;height(savedHeight);}}
- grab.addEventListener('pointerdown',start);head.addEventListener('pointerdown',start);grab.addEventListener('pointermove',move);grab.addEventListener('pointerup',end);grab.addEventListener('pointercancel',end);grab.addEventListener('lostpointercapture',end);grab.addEventListener('keydown',function(e){if(!mobile()||!['ArrowUp','ArrowDown','Home','End'].includes(e.key))return;e.preventDefault();if(e.key==='End'){setSheet(false);return;}var value=e.key==='Home'?maximum():(sheet.classList.contains('open')?sheet.getBoundingClientRect().height:minimum())+(e.key==='ArrowUp'?40:-40);if(value<minimum()+35)setSheet(false);else{savedHeight=height(value);setSheet(true);}});addEventListener('resize',function(){if(mobile()&&sheet.classList.contains('open'))height(savedHeight||innerHeight*.43);});
+ grab.addEventListener('pointerdown',start);head.addEventListener('pointerdown',start);grab.addEventListener('pointermove',move);grab.addEventListener('pointerup',end);grab.addEventListener('pointercancel',end);grab.addEventListener('lostpointercapture',end);grab.addEventListener('keydown',function(e){if(!mobile()||!['ArrowUp','ArrowDown','Home','End'].includes(e.key))return;e.preventDefault();if(e.key==='End'){setSheet(false);return;}var value=e.key==='Home'?maximum():(sheet.classList.contains('open')?sheet.getBoundingClientRect().height:minimum())+(e.key==='ArrowUp'?40:-40);if(value<minimum()+35)setSheet(false);else{savedHeight=height(value);setSheet(true);}});addEventListener('resize',function(){if(mobile()&&sheet.classList.contains('open'))height(savedHeight||Math.min(Math.max(innerHeight*.43,300),Math.max(180,innerHeight-140)));});
 })();
 
 function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&innerHeight<=560);}
@@ -4793,7 +4794,18 @@ function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&innerHeight<=56
  var glazeChoices=$('rackGlaze');$('potteryToolRack').appendChild(glazeChoices);$('p-glaze').appendChild($('freeGlaze'));$('rackGlazeBase').querySelector('span').textContent='바탕색 칠하기';$('rackGlazeBrush').querySelector('span').textContent='붓으로 유약 칠하기';$('glazePaintHint').hidden=true;
  // Reuse the existing paint/base colour handlers; add direct colours to the
  // independent dip and brush selections rather than substituting a preset.
- function directColor(input,parent,title){var row=document.createElement('div');row.className='ui-direct-color';var label=document.createElement('label');label.textContent=title;label.htmlFor=input.id;var controls=document.createElement('div');controls.className='ui-color-controls';var hex=document.createElement('input');hex.type='text';hex.value=input.value.toUpperCase();hex.maxLength=7;hex.pattern='#[0-9a-fA-F]{6}';hex.setAttribute('aria-label',title+' 색상 코드');input.setAttribute('aria-label',title);controls.append(input,hex);row.append(label,controls);parent.appendChild(row);input.addEventListener('input',function(){hex.value=input.value.toUpperCase();});hex.addEventListener('change',function(){var value=this.value.trim();if(!value.startsWith('#'))value='#'+value;if(!/^#[0-9a-f]{6}$/i.test(value)){this.setCustomValidity('#을 포함한 여섯 자리 색상 코드를 입력해 주세요.');this.reportValidity();return;}this.setCustomValidity('');input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));});row.addEventListener('input',function(){begin();setTimeout(finish,0);},true);return row;}
+ function refreshColorPickers(){document.querySelectorAll('.ui-color-controls>input[type=color]').forEach(function(input){var chip=input.parentElement.querySelector('.ui-color-chip');if(chip)chip.style.backgroundColor=input.value;});}
+ function directColor(input,parent,title){
+  var row=document.createElement('div');row.className='ui-direct-color';var label=document.createElement('label');label.textContent=title;label.htmlFor=input.id;
+  var controls=document.createElement('div');controls.className='ui-color-controls';
+  var visual=document.createElement('label');visual.className='ui-visual-color';visual.htmlFor=input.id;visual.innerHTML='<span class="ui-color-chip" aria-hidden="true"></span><span>원하는 색 고르기</span><span aria-hidden="true">▾</span>';
+  var advanced=document.createElement('details');advanced.className='ui-color-code';var summary=document.createElement('summary');summary.textContent='색상 코드 입력 (선택)';
+  var hex=document.createElement('input');hex.type='text';hex.value=input.value.toUpperCase();hex.maxLength=7;hex.pattern='#[0-9a-fA-F]{6}';hex.setAttribute('aria-label',title+' 색상 코드');
+  advanced.append(summary,hex);input.setAttribute('aria-label',title+' · 원하는 색 고르기');controls.append(input,visual,advanced);row.append(label,controls);parent.appendChild(row);
+  input.addEventListener('input',function(){hex.value=input.value.toUpperCase();refreshColorPickers();});
+  hex.addEventListener('change',function(){var value=this.value.trim();if(!value.startsWith('#'))value='#'+value;if(!/^#[0-9a-f]{6}$/i.test(value)){this.setCustomValidity('#을 포함한 여섯 자리 색상 코드를 입력해 주세요.');this.reportValidity();return;}this.setCustomValidity('');input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));});
+  row.addEventListener('input',function(){begin();setTimeout(finish,0);},true);refreshColorPickers();return row;
+ }
  directColor($('pigColor'),$('f-pig'),'물감 직접 고르기');$('pigCustom').hidden=true;directColor($('glazeColor'),$('swatches').closest('.field'),'바탕색 직접 고르기');$('glazeCustom').hidden=true;
  $('swatches2').closest('details').hidden=true;$('glazeBrushSwatchesMore').closest('details').hidden=true;
  function customGlaze(id){var g={id:id,name:'직접 고른 색',kw:'custom',c:[100,160,180]};GLAZES.push(g);return g;}
@@ -4819,7 +4831,7 @@ function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&innerHeight<=56
  var undo=[],redo=[],pending=null,restoring=false,maxHistory=40,tileStore=TodakHistoryTiles.create(),historyPointers=new Set(),historyTimer=null,historyGesture=null;
  function layerCopy(layer){return tileStore.read(layer,texVer);}
  function capture(metadataOnly){var decorating=!metadataOnly&&st.stage!=='throw',wheel=window.TodakWheel;return {state:JSON.parse(JSON.stringify(st)),colors:{pig:dPig,pigRgb:dColor.slice(),brush:$('glazeBrushColor').value,brushRgb:brushCustom.c.slice(),dipRgb:dipCustom.c.slice()},grooves:grooves.slice(),paint:decorating?layerCopy(paint):null,carve:decorating?layerCopy(carve):null,top:decorating&&wheel?layerCopy(wheel.layer):null,bottom:decorating&&wheel?layerCopy(wheel.bottomLayer):null,relief:decorating&&wheel?layerCopy(wheel.bottomRelief):null,hp:hasPaint,hc:hasCarve,version:texVer};}
- function signature(s,ignoreTouchCount){var state=s.state;if(ignoreTouchCount){state=Object.assign({},state);delete state.touches;}return JSON.stringify([state,s.colors])+'|'+s.version+'|'+s.grooves.join(',');}
+ function signature(s,ignoreTouchCount){var state=Object.assign({},s.state);delete state.trimReady;if(ignoreTouchCount)delete state.touches;return JSON.stringify([state,s.colors])+'|'+s.version+'|'+s.grooves.join(',');}
  function begin(){if(restoring||pending||!['throw','deco','glaze'].includes(st.stage))return;pending=capture();}
  function finish(gesturePart){
   if(!pending)return;var before=pending;pending=null;
@@ -4848,11 +4860,14 @@ function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&innerHeight<=56
  function historyUI(){var blocked=!!TARGETS[st.target]?.master;$('ui-undo').disabled=blocked||!undo.length;$('ui-redo').disabled=blocked||!redo.length;}
  $('ui-undo').onclick=function(){endHistoryGesture();finish();if(!undo.length)return;redo.push(capture());restore(undo.pop());historyUI();};$('ui-redo').onclick=function(){endHistoryGesture();if(!redo.length)return;undo.push(capture());restore(redo.pop());historyUI();};
  undoIds.forEach(function(id){$(id)?.addEventListener('click',function(e){e.preventDefault();e.stopImmediatePropagation();$('ui-undo').click();},true);});
- stageEl.addEventListener('pointerdown',function(e){if(e.target!==cv||!['throw','deco','glaze'].includes(st.stage))return;var p=cpos(e),handle=handlePos(),heightGrip=st.stage==='throw'&&tool==='shape'&&Math.hypot(p.x-handle.x,p.y-handle.y)<30;if(heightGrip||hitSurface(p.x,p.y)||window.TodakWheel?.top()||window.TodakWheel?.bottom()||secOn){if(!historyPointers.size)startHistoryGesture();historyPointers.add(e.pointerId);}},true);
+ // A tool can start outside the silhouette and acquire contact later. Record its
+ // starting state before hit-testing; unchanged gestures are discarded by finish.
+ stageEl.addEventListener('pointerdown',function(e){if(e.target!==cv||e.button>0||!['throw','deco','glaze'].includes(st.stage))return;if(!historyPointers.size)startHistoryGesture();historyPointers.add(e.pointerId);},true);
+ document.addEventListener('pointerdown',function(e){if(e.target!==cv)endHistoryGesture();},true);
  function finishPointer(e){if(!historyPointers.delete(e.pointerId)||historyPointers.size)return;var gesture=historyGesture;setTimeout(function(){if(historyGesture===gesture&&!historyPointers.size)endHistoryGesture();},0);}
  ['pointerup','pointercancel','lostpointercapture'].forEach(function(event){document.addEventListener(event,finishPointer,true);});
  addEventListener('blur',endHistoryGesture);document.addEventListener('visibilitychange',function(){if(document.hidden)endHistoryGesture();});
- $('sheet').addEventListener('click',function(e){if(e.target.closest('#swatches,#swatches2,#finish,#dip,#dots,#fx,#lucky,#dClear')){begin();setTimeout(finish,0);}},true);
+ $('sheet').addEventListener('click',function(e){if(e.target.closest('#tools,#presets,#swatches,#swatches2,#finish,#dip,#dots,#fx,#lucky,#dClear')){begin();setTimeout(finish,0);}},true);
  $('cavityDepth').addEventListener('pointerdown',begin,true);$('cavityDepth').addEventListener('keydown',begin,true);$('cavityDepth').addEventListener('change',function(){setTimeout(finish,0);});
  // Mark the same alternating curvature that the existing roughness score measures.
  var locate=false;
@@ -4880,7 +4895,7 @@ function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&innerHeight<=56
  handChoices.querySelectorAll('button').forEach(function(b,i){b.setAttribute('aria-pressed',String((Number($('hsize').value)<33?0:Number($('hsize').value)>80?2:1)===i));});
  if(type==='deco'&&dTool==='stamp')$('f-opacity').hidden=false;var wheel=window.TodakWheel,bottom=wheel?.bottom();baseNote.hidden=!(type==='deco'&&bottom);baseNote.textContent='안쪽 원이 실제 밑바닥이에요 · 지름 '+(rAt(0)*2).toFixed(0)+'cm';
  guidance.hidden=type!=='throw'||!challenge||!$('home').hidden;if(!guidance.hidden){var best={delta:0,t:.5};for(var i=5;i<95;i++){var t=i/100,delta=rAt(t)-T.f(t);if(Math.abs(delta)>Math.abs(best.delta))best={delta:delta,t:t};}guidance.textContent=locate?'표시된 부분을 천천히 매끈하게 다듬어요':Math.abs(best.delta)<.3?'목표선과 가까워졌어요':best.delta>0?'조금만 더 안쪽으로':'조금만 더 바깥쪽으로';var r=cv.getBoundingClientRect(),x=r.left+(CX+Math.min(rAt(best.t)*.55,5)*SV)*r.width/W,y=r.top+(BASE-best.t*st.height*SV)*r.height/HC;guidance.style.left=Math.max(340,Math.min(innerWidth-500,x))+'px';guidance.style.top=Math.max(170,Math.min(innerHeight-90,y))+'px';}
- historyUI();window.TodakPolish?.updateMoves();}
+ historyUI();refreshColorPickers();window.TodakPolish?.updateMoves();}
  document.addEventListener('click',schedule);document.addEventListener('input',schedule);window.addEventListener('resize',schedule);var oldFire=fireUI;fireUI=function(){oldFire.apply(this,arguments);schedule();};
  window.TodakLayoutPreview={sync:sync,roughLocations:roughLocations,history:function(){var frames=[];undo.concat(redo,pending?[pending]:[]).forEach(function(s){['paint','carve','top','bottom','relief'].forEach(function(k){if(s[k])frames.push(s[k]);});});return{undo:undo.length,redo:redo.length,limit:maxHistory,imageBytes:TodakHistoryTiles.bytes(frames)};}};
  sync();
@@ -4902,14 +4917,13 @@ function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&innerHeight<=56
  fitV=function(){var fitted=baseFit(),box=cv.getBoundingClientRect();if(!box.width||innerWidth>=1200&&innerHeight>=720)return fitted;var unit=W/box.width,top=Math.max($('ui-work-info').getBoundingClientRect().bottom,$('ui-work-views').hidden?0:$('ui-work-views').getBoundingClientRect().bottom)-box.top+18,roomH=Math.max(35,BASE0-top*unit),radius=Math.max.apply(null,st.radii),height=st.height,T=st.stage==='throw'&&TARGETS[st.target];if(T){height=Math.max(height,T.h);for(var i=0;i<=40;i++)radius=Math.max(radius,T.f(i/40));}if(st.stage==='fire')return Math.min(fitted,Math.max(.1,(HC-top*unit-25)/(30*S0)));return Math.max(.08,Math.min(fitted,roomH/(height+radius*TILT)/S0,(workWidth()-38)*unit/(2*radius*S0)));};
  function arrangeHistory(mode){
   var history=document.querySelector('.ui-history'),panel=$('p-'+st.stage);
-  var picker=st.stage==='throw'?$('tools').closest('.field'):st.stage==='deco'?$('ui-touch-deco'):st.stage==='glaze'?$('ui-touch-glaze'):null;
-  // In a short sheet, fixed history consumed the space needed by the tool row.
-  if(mode==='sheet'&&picker&&panel){
-   if(history.parentNode!==panel||picker.nextElementSibling!==history)picker.after(history);
+  // Keep undo above the choices in every editable mobile panel, in its scroll flow.
+  if(mode==='sheet'&&panel&&['throw','deco','glaze'].includes(st.stage)){
+   if(history.parentNode!==panel||panel.firstElementChild!==history)panel.prepend(history);
   }else if(history.parentNode!==$('sheet'))$('sheetBody').before(history);
  }
  var frame=0,lastMode='';
- function arrange(){frame=0;window.TodakPolish?.sync();arrangeMenu();var mode=uiUsesSheet()?'sheet':'sidebar',changed=lastMode!==mode;lastMode=mode;document.body.dataset.uiLayout=mode;arrangeHistory(mode);var compact=innerWidth<1200||innerHeight<720;document.body.classList.toggle('ui-compact',compact);arrangeThrowBar(compact);document.body.classList.toggle('ui-context-row',compact&&!['throw','fire','deco','glaze'].includes(st.stage));document.documentElement.style.setProperty('--ui-work-width',workWidth()+'px');document.body.style.setProperty('--ui-view-row-width',(st.stage==='done'&&innerWidth<600?Math.max(180,Math.min(210,workWidth()*.55)):Math.max(st.stage==='done'?210:198,Math.min(st.stage==='done'?330:310,workWidth()*(st.stage==='done'?.7:.64))))+'px');$('ui-work-info').style.top=compact?(document.querySelector('.ui-header').getBoundingClientRect().bottom-stageEl.getBoundingClientRect().top+8)+'px':'';var inlineRow=document.body.classList.contains('ui-context-row');$('ui-work-views').style.top=compact?(inlineRow?$('ui-work-info').getBoundingClientRect().top-stageEl.getBoundingClientRect().top: $('ui-work-info').getBoundingClientRect().bottom-stageEl.getBoundingClientRect().top+10)+'px':'';$('resetPhoto').textContent=innerWidth<421?'↺':'보기 초기화';$('resetPhoto').setAttribute('aria-label','보기 초기화');$('resetPhoto').title='보기 초기화';if(changed&&mode==='sheet'){$('sheet').style.setProperty('--mobile-sheet-height',Math.min(innerHeight*.43,Math.max(180,innerHeight-310))+'px');}if(mode==='sidebar'&&!$('sheet').classList.contains('open'))setSheet(true);layoutWorkspace();resize();V=fitV();SV=S0*V*Z;dirty=true;}
+ function arrange(){frame=0;window.TodakPolish?.sync();arrangeMenu();var mode=uiUsesSheet()?'sheet':'sidebar',changed=lastMode!==mode;lastMode=mode;document.body.dataset.uiLayout=mode;arrangeHistory(mode);var compact=innerWidth<1200||innerHeight<720;document.body.classList.toggle('ui-compact',compact);arrangeThrowBar(compact);document.body.classList.toggle('ui-context-row',compact&&!['throw','fire','deco','glaze'].includes(st.stage));document.documentElement.style.setProperty('--ui-work-width',workWidth()+'px');document.body.style.setProperty('--ui-view-row-width',(st.stage==='done'&&innerWidth<600?Math.max(180,Math.min(210,workWidth()*.55)):Math.max(st.stage==='done'?210:198,Math.min(st.stage==='done'?330:310,workWidth()*(st.stage==='done'?.7:.64))))+'px');$('ui-work-info').style.top=compact?(document.querySelector('.ui-header').getBoundingClientRect().bottom-stageEl.getBoundingClientRect().top+8)+'px':'';var inlineRow=document.body.classList.contains('ui-context-row');$('ui-work-views').style.top=compact?(inlineRow?$('ui-work-info').getBoundingClientRect().top-stageEl.getBoundingClientRect().top: $('ui-work-info').getBoundingClientRect().bottom-stageEl.getBoundingClientRect().top+10)+'px':'';$('resetPhoto').textContent=innerWidth<421?'↺':'보기 초기화';$('resetPhoto').setAttribute('aria-label','보기 초기화');$('resetPhoto').title='보기 초기화';if(changed&&mode==='sheet'){$('sheet').style.setProperty('--mobile-sheet-height',Math.min(Math.max(innerHeight*.43,300),Math.max(180,innerHeight-140))+'px');}if(mode==='sidebar'&&!$('sheet').classList.contains('open'))setSheet(true);layoutWorkspace();resize();V=fitV();SV=S0*V*Z;dirty=true;}
  function scheduleResponsive(){if(!frame)frame=requestAnimationFrame(arrange);}
  var baseStage=setStage;setStage=function(s){var r=baseStage.apply(this,arguments);scheduleResponsive();return r;};
  addEventListener('resize',scheduleResponsive);addEventListener('orientationchange',scheduleResponsive);window.visualViewport?.addEventListener('resize',scheduleResponsive);document.addEventListener('click',scheduleResponsive);document.addEventListener('input',function(e){if(e.target.matches('input[type=color],input[type=text]'))scheduleResponsive();});
@@ -5018,7 +5032,7 @@ if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
 </script>
 
 <script src="migration/transfer-core.js?v=27297eedc978"></script>
-<script src="migration/domain-transfer.js?v=2856c53c564c"></script>
+<script src="migration/domain-transfer.js?v=2c957daad9b7"></script>
 </body>
 </html>
 
