@@ -62,6 +62,7 @@ export function createHandler(deps:Dependencies){
     headers['Access-Control-Allow-Origin']=origin;
     headers['Access-Control-Allow-Methods']='POST, OPTIONS';
     headers['Access-Control-Allow-Headers']='content-type, apikey, authorization, x-client-info';
+    headers['Access-Control-Max-Age']='86400';
     if(req.method==='OPTIONS')return new Response(null,{status:204,headers});
     if(req.method!=='POST')return reply(405,{error:'method_not_allowed'});
     const apiKey=deps.env('SERPAPI_API_KEY'),base=deps.env('SUPABASE_URL'),admin=deps.env('SUPABASE_SERVICE_ROLE_KEY');

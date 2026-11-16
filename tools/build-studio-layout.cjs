@@ -44,6 +44,9 @@ required("target:'#realPhotoScene'","target:'#ui-background-picker'");
 // Search remains an explicit action; a delayed modal must not interrupt photo editing.
 required('autoTimer=setTimeout(prompt,12000);','');
 required("#sheet,[role=dialog],.drawer,.modal,.overlay","#sheet,dialog,[role=dialog],.drawer,.modal,.overlay");
+// Tool selection is a radio choice, including when the same tool is chosen again.
+required("glazeMode=glazeMode==='base'?null:'base';", "glazeMode='base';");
+required("glazeMode=glazeMode==='brush'?null:'brush';", "glazeMode='brush';");
 // Dip is one continuous operation; the slider owns its depth in every play mode.
 required('<button type="button" class="chip" data-dip="rim" aria-pressed="false">입구만</button>','<button type="button" class="chip" data-dip="custom" aria-pressed="false">담그기</button>');
 required('<button type="button" class="chip" data-dip="half" aria-pressed="false">절반까지</button>','');
@@ -117,6 +120,7 @@ html=html.replace(marker,code+'\n'+marker);
 html=html.replace('</head>','<link rel="stylesheet" href="studio-layout.css?v=20261115-layout-3"><link rel="stylesheet" href="responsive-layout.css?v=1"><link rel="stylesheet" href="experience-polish.css?v=1"><link rel="stylesheet" href="site-feedback.css?v=1"><link rel="stylesheet" href="tutorial-presentation.css?v=1">\n'+(production?'<script src="channel-attribution.js"></script>':'<script>if(/^(0[1-9]|10|11|section)$/.test(new URLSearchParams(location.search).get("screen")||"")){try{localStorage.setItem("todak.tutorial.v1","complete");}catch(_){}}</script>')+'\n</head>');
 html=html.replace(/<title>[^<]*<\/title>/,production?'<title>토닥 · 온라인 도자기 공방</title>':'<title>토닥 · UI 레이아웃 미리보기</title>');
 if(production)html=html.replace('<head>','<head>\n<!-- todak-public-build: 2026-11-16 -->');
+html=require('./integrate-search-speed.cjs')(html);
 if(production){
  required('if(location.hostname==="sosohanlab.github.io"){','if(["todak.sosohanlab.com","sosohanlab.github.io"].includes(location.hostname)){');
  html=html.replaceAll('content="https://sosohanlab.github.io/todak/','content="https://todak.sosohanlab.com/').replace('rel="canonical" href="https://sosohanlab.github.io/todak/"','rel="canonical" href="https://todak.sosohanlab.com/"');

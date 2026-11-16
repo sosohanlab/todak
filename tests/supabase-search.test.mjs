@@ -21,7 +21,7 @@ function setup(override={}){
   return {handler,calls};
 }
 test('allowed CORS preflight needs no key and makes no upstream request',async()=>{
-  const {handler,calls}=setup();const r=await handler(new Request('https://test-project.supabase.co/functions/v1/image-search',{method:'OPTIONS',headers:{Origin:origin}}));assert.equal(r.status,204);assert.equal(r.headers.get('Access-Control-Allow-Origin'),origin);assert.equal(calls.length,0);
+  const {handler,calls}=setup();const r=await handler(new Request('https://test-project.supabase.co/functions/v1/image-search',{method:'OPTIONS',headers:{Origin:origin}}));assert.equal(r.status,204);assert.equal(r.headers.get('Access-Control-Allow-Origin'),origin);assert.equal(r.headers.get('Access-Control-Max-Age'),'86400');assert.equal(calls.length,0);
 });
 test('unknown browser origins rejected before provider access',async()=>{
   const {handler,calls}=setup();const r=await handler(request(photo,'https://evil.example'));assert.equal(r.status,403);assert.equal(calls.length,0);
