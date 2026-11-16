@@ -48,6 +48,7 @@
  function describe(target,clip){
   var step=current(),info=(copy[step.id]||[step.title.replace(/^\d+\.\s*/,''),'표시된 곳을 직접 조작해 보세요.']).slice();
   if(target===$('sheetToggle'))return['도구창을 열어 주세요','다음 도구를 여기서 골라요.','누르기'];
+  if(target===$('openCard'))return['카드로 저장·공유를 열어 주세요','작품 이름과 용도를 적을 수 있어요.','누르기'];
   if(clip)return[clip.direction==='up'?'도구창을 위로 스크롤해 주세요':'도구창을 아래로 스크롤해 주세요','표시된 도구나 입력칸을 찾아요.',clip.direction==='up'?'↑ 스크롤':'↓ 스크롤'];
   if(done){if(lastInStage()&&['done','fire'].indexOf(step.stage)<0)return[$('nextBtn').textContent.replace(/\s*→/, '')+'를 눌러 주세요','지금 만든 작품을 다음 단계로 이어가요.','누르기'];return['잘했어요!','다음 안내로 이어집니다.',''];}
   if(step.id==='open'&&fstep!=='ready')return['가마가 식는 중이에요','100℃ 이하로 식으면 문을 열 수 있어요.',''];

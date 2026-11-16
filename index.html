@@ -4521,6 +4521,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  function describe(target,clip){
   var step=current(),info=(copy[step.id]||[step.title.replace(/^\d+\.\s*/,''),'표시된 곳을 직접 조작해 보세요.']).slice();
   if(target===$('sheetToggle'))return['도구창을 열어 주세요','다음 도구를 여기서 골라요.','누르기'];
+  if(target===$('openCard'))return['카드로 저장·공유를 열어 주세요','작품 이름과 용도를 적을 수 있어요.','누르기'];
   if(clip)return[clip.direction==='up'?'도구창을 위로 스크롤해 주세요':'도구창을 아래로 스크롤해 주세요','표시된 도구나 입력칸을 찾아요.',clip.direction==='up'?'↑ 스크롤':'↓ 스크롤'];
   if(done){if(lastInStage()&&['done','fire'].indexOf(step.stage)<0)return[$('nextBtn').textContent.replace(/\s*→/, '')+'를 눌러 주세요','지금 만든 작품을 다음 단계로 이어가요.','누르기'];return['잘했어요!','다음 안내로 이어집니다.',''];}
   if(step.id==='open'&&fstep!=='ready')return['가마가 식는 중이에요','100℃ 이하로 식으면 문을 열 수 있어요.',''];
@@ -4591,8 +4592,9 @@ var stopOptionalTutorial;
  var menus=document.querySelector('#home .homeMenus')||$('homeClose').parentNode;menus.insertBefore(entry,$('goFree'));
  function updateEntry(){setEntryText($('tutorialEntryTitle'),active?'튜토리얼 이어하기':'튜토리얼');setEntryText($('tutorialEntryDescription'),active?'홈에 머무는 동안에는 안내가 잠시 쉬어요.':'빚기부터 완성까지 따라 배워요. 언제든 다시 볼 수 있어요.');$('goTutorial').setAttribute('aria-label',active?'튜토리얼 이어하기':'튜토리얼 시작');$('restartTutorial').hidden=!active;$('homeClose').textContent=active?'튜토리얼로 돌아가기':'하던 작업으로 돌아가기';}
  function setEntryText(element,text){if(element.textContent!==text)element.textContent=text;}
+ function closeGuideWindows(){if(!$('cardDlg').hidden)$('cardClose').click();if(!$('searchDlg').hidden)$('closeSearch').click();if($('finished360')&&$('finished360').open)$('closeFinished360').click();}
  lockHome=function(){note.hidden=true;$('goFree').classList.remove('tutorialFirstStart');$('goFree').removeAttribute('aria-describedby');updateEntry();};
- stopOptionalTutorial=function(){cancelAdvance();if(routeTimer){clearInterval(routeTimer);routeTimer=null;}active=false;engaged=false;done=false;contactMs=0;hideGuide();if(highlight)highlight.classList.remove('tutorialTarget');highlight=null;$('nextBtn').disabled=false;try{complete=localStorage.getItem(KEY)==='complete';}catch(_){}lockHome();};
+ stopOptionalTutorial=function(){cancelAdvance();if(routeTimer){clearInterval(routeTimer);routeTimer=null;}active=false;engaged=false;done=false;contactMs=0;closeGuideWindows();hideGuide();if(highlight)highlight.classList.remove('tutorialTarget');highlight=null;$('nextBtn').disabled=false;try{complete=localStorage.getItem(KEY)==='complete';}catch(_){}lockHome();};
  function begin(restart){
   if(active&&!restart){closeOverlays();focusStep();if(done)scheduleAdvance();return;}
   stopOptionalTutorial();startFree();active=true;complete=false;index=0;done=false;engaged=false;contactMs=0;if(!routeTimer)routeTimer=setInterval(route,160);focusStep();lockHome();
@@ -4600,7 +4602,7 @@ var stopOptionalTutorial;
  $('goTutorial').onclick=function(){begin(false);};$('restartTutorial').onclick=function(){begin(true);};
  ['goChallenge','goShelf','homeShop','openQuality'].forEach(function(id){var button=$(id);if(button)button.addEventListener('click',function(){if(active)stopOptionalTutorial();},true);});
  var finishGuide=finish;finish=function(skipped){if(skipped){stopOptionalTutorial();showHome(true);toast('튜토리얼을 나왔어요. 홈에서 언제든 다시 시작할 수 있어요.');return;}finishGuide(false);updateEntry();};
- var homeWithGuide=showHome;showHome=function(canClose){var result=homeWithGuide(canClose);updateEntry();return result;};
+ var homeWithGuide=showHome;showHome=function(canClose){if(active)closeGuideWindows();var result=homeWithGuide(canClose);updateEntry();return result;};
  $('tutorialSkip').textContent='나가기';$('tutorialSkip').setAttribute('aria-label','튜토리얼을 나가고 홈으로 돌아가기');
 })();
 
