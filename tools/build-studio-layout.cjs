@@ -28,6 +28,15 @@ html=html.replace('openSaved:async function(item){var token=', "openSaved:async 
 html=html.replace("viewer.appendChild(orbitCanvas);var token=", "viewer.appendChild(orbitCanvas);orbitCanvas.hidden=false;fingers.clear();pinch=0;var token=");
 html=html.replace("render:renderOrbit,state:function()", "render:renderOrbit,turn:function(delta){yaw+=delta;renderOrbit();window.dispatchEvent(new Event('todak-inspection-rotated'));},state:function()");
 function required(before,after){if(!html.includes(before))throw Error('Missing integration hook: '+before.slice(0,80));html=html.replace(before,after);}
+// Coalesce breakage dragging into one draw per display frame; show the dialog before preparation.
+required("function sample(a,t){var p=Math.max(0,Math.min(1,t))*(a.length-1)","var pointerFrame=0,wholeImage=null;function queueBreakDraw(){if(!pointerFrame)pointerFrame=requestAnimationFrame(function(){pointerFrame=0;if(dlg.open)draw();});}\n function sample(a,t){var p=Math.max(0,Math.min(1,t))*(a.length-1)");
+required("if(view){var rendered=view.render(640,450,progress);", "if(view){var rendered=progress==null&&wholeImage?wholeImage:view.render(640,450,progress);");
+required("async function open(item){epoch++;var token=epoch;", "async function open(item){epoch++;wholeImage=null;var token=epoch;");
+required("view=made;pileThumb=view.pileImage();ready=true;", "view=made;wholeImage=document.createElement('canvas');wholeImage.width=640;wholeImage.height=450;wholeImage.getContext('2d').drawImage(view.render(640,450,null),0,0,640,450);pileThumb=view.pileImage();ready=true;");
+required("dlg.showModal();queuePile();draw();try{if(!window.TodakPhoto", "dlg.showModal();queuePile();draw();await new Promise(function(resolve){requestAnimationFrame(function(){setTimeout(resolve,0);});});try{if(!window.TodakPhoto");
+required("object.y=Math.max(110,Math.min(310,p.y+swing.oy));draw();e.preventDefault();", "object.y=Math.max(110,Math.min(310,p.y+swing.oy));queueBreakDraw();e.preventDefault();");
+required("flight.z+=dt*1.65;object.x+=flight.vx*dt;", "flight.z=(now-flight.start)/1000*1.65;object.x+=flight.vx*dt;");
+required("dlg.addEventListener('close',function(){epoch++;cancelAnimationFrame(raf);swing=null;flight=null;work=null;ready=false;", "dlg.addEventListener('close',function(){if(dlg.open)return;epoch++;cancelAnimationFrame(raf);cancelAnimationFrame(pointerFrame);pointerFrame=0;swing=null;flight=null;work=null;ready=false;");
 // Setting an unchanged canvas width or height clears its bitmap on every UI click.
 required('cv.width=Math.round(W*dpr); cv.height=Math.round(HC*dpr);','var bitmapWidth=Math.round(W*dpr),bitmapHeight=Math.round(HC*dpr);if(cv.width!==bitmapWidth)cv.width=bitmapWidth;if(cv.height!==bitmapHeight)cv.height=bitmapHeight;');
 // The kiln already has a temperature on its control panel.

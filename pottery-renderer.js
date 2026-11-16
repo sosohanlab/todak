@@ -141,10 +141,10 @@ function rebuild(d){
     inside.envMapIntensity+=(.35-inside.envMapIntensity)*softenInner;
   }
   var underside=outer.clone();underside.bumpMap=null;underside.bumpScale=0;underside.map=null;underside.color.setRGB(d.color[0]/255,d.color[1]/255,d.color[2]/255,T.SRGBColorSpace);if(d.bottomOverlay){var bc=canvas(768,768),bx=bc.getContext('2d');bx.fillStyle='rgb('+d.color.join(',')+')';bx.fillRect(0,0,768,768);bx.globalAlpha=d.bottomOpacity==null?.8:d.bottomOpacity;bx.drawImage(d.bottomOverlay,0,0,768,768);underside.map=tex(bc,true);underside.color.setHex(0xffffff);}materials.push(outer,inside,underside);
-  var carving=!!d.carve,n=carving?(low?224:320):128,H=d.height,ro=d.rAt(1),ri=d.innerAt(1),hollow=H-d.floor>.05;
+  var carving=!!d.carve,fracture=!!d.fracturePreview,n=fracture?(carving?64:48):carving?(low?224:320):128,H=d.height,ro=d.rAt(1),ri=d.innerAt(1),hollow=H-d.floor>.05;
   // Tiny rounded edges avoid a grazing, razor-sharp material seam at rim and foot.
   var footBevel=Math.min(.045,H*.004,d.rAt(0)*.02),rimBevel=d.profileRounded?Math.max(.001,Math.min(.025,(ro-ri)*.25,H*.004)):hollow?Math.max(.001,Math.min(.045+(d.rimSoftness||0)*.16,(ro-ri)*.45,H*.018)):.02;
-  var points=[new T.Vector2(0,0)],baseR=Math.max(0,d.rAt(0)-footBevel),baseRows=d.bottomCarve?(low?80:128):1;for(var br=1;br<=baseRows;br++)points.push(new T.Vector2(baseR*br/baseRows,0));var outerStart=points.length-1;
+  var points=[new T.Vector2(0,0)],baseR=Math.max(0,d.rAt(0)-footBevel),baseRows=d.bottomCarve?(fracture?12:low?80:128):1;for(var br=1;br<=baseRows;br++)points.push(new T.Vector2(baseR*br/baseRows,0));var outerStart=points.length-1;
   points.push(new T.Vector2(d.rAt(0)-footBevel*.25,footBevel*.25));
   points.push(new T.Vector2(d.rAt(footBevel/H),footBevel));
   for(var a=1;a<n;a++){var outerY=H*a/n;if(outerY>footBevel&&outerY<H-rimBevel)points.push(new T.Vector2(d.rAt(a/n),outerY));}
@@ -155,13 +155,13 @@ function rebuild(d){
     for(var b=n-1;b>=0;b--){var yy=d.floor+(H-d.floor)*b/n;if(yy<H-rimBevel)points.push(new T.Vector2(d.innerAt(yy/H),yy));}
     points.push(new T.Vector2(0,d.floor));
   }else points.push(new T.Vector2(0,H));
-  var geo=new T.LatheGeometry(points,carving?(low?320:512):(low?160:256)),uv=geo.attributes.uv,pos=geo.attributes.position;
+  var segments=fracture?96:carving?(low?320:512):(low?160:256),geo=new T.LatheGeometry(points,segments),uv=geo.attributes.uv,pos=geo.attributes.position;
   for(var z=0;z<uv.count;z++){
     uv.setY(z,Math.max(0,Math.min(1,pos.getY(z)/H)));
     if((d.bottomOverlay||d.bottomCarve)&&z%points.length<=outerStart)uv.setXY(z,.5+pos.getX(z)/(2*d.rAt(0)),.5+pos.getZ(z)/(2*d.rAt(0)));
     if(d.topOverlay&&z%points.length>outerEnd){var topR=d.topRadius||d.rAt(1);uv.setXY(z,.5+pos.getX(z)/(2*topR),.5+pos.getZ(z)/(2*topR));}
   }
-  geo.clearGroups();var segs=carving?(low?320:512):(low?160:256),rows=points.length-1,indices=[[],[],[]],old=geo.index.array;
+  geo.clearGroups();var segs=segments,rows=points.length-1,indices=[[],[],[]],old=geo.index.array;
   for(var s=0;s<segs;s++)for(var row=0;row<rows;row++){
     var material=row<outerStart?2:(row<outerEnd?0:1),offset=(s*rows+row)*6;
     for(var q=0;q<6;q++)indices[material].push(old[offset+q]);
@@ -222,7 +222,7 @@ window.TodakPhoto={available:true,render:function(d){if(!init()||lost)return nul
 window.TodakPhoto.createFracture=function(d,seed){
  if(!init()||lost)return null;
  var randomState=seed||1731;function rnd(){randomState=(Math.imul(randomState,1664525)+1013904223)|0;return (randomState>>>0)/4294967296;}
- rebuild(d);signature='';var source=pot.children[0],original=source.geometry.clone(),ownedTextures=[],mats=source.material.map(function(base){var m=base.clone();m.onBeforeCompile=base.onBeforeCompile;m.customProgramCacheKey=base.customProgramCacheKey;Object.keys(m).forEach(function(k){if(k!=='envMap'&&m[k]&&m[k].isTexture){m[k]=m[k].clone();m[k].needsUpdate=true;ownedTextures.push(m[k]);}});return m;});
+ rebuild(Object.assign({},d,{fracturePreview:true}));signature='';var source=pot.children[0],original=source.geometry.clone(),ownedTextures=[],mats=source.material.map(function(base){var m=base.clone();m.onBeforeCompile=base.onBeforeCompile;m.customProgramCacheKey=base.customProgramCacheKey;Object.keys(m).forEach(function(k){if(k!=='envMap'&&m[k]&&m[k].isTexture){m[k]=m[k].clone();m[k].needsUpdate=true;ownedTextures.push(m[k]);}});return m;});
  mats.push(new T.MeshStandardMaterial({color:0xd6c8b5,roughness:.96,side:T.DoubleSide}));
  var world=new T.Scene();world.environment=environment.texture;world.add(new T.HemisphereLight(0xfff5e7,0x9e9389,.9));var light=new T.DirectionalLight(0xfff5e8,2.4);light.position.set(-15,28,20);world.add(light);var fill=new T.DirectionalLight(0xe3eaff,.45);fill.position.set(18,10,-8);world.add(fill);
  var root=new T.Group();root.rotation.y=-(d.rotation||0);world.add(root);var whole=new T.Mesh(original,mats.slice(0,3));root.add(whole);var broken=new T.Group();root.add(broken);broken.visible=false;
@@ -231,7 +231,7 @@ window.TodakPhoto.createFracture=function(d,seed){
  var buckets=seeds.map(function(){return [[],[],[],[]];}),edges=new Map(),group=0,triangles=0;
  function vertex(i){return {p:[pa.getX(i),pa.getY(i),pa.getZ(i)],n:[na.getX(i),na.getY(i),na.getZ(i)],u:[uv.getX(i),uv.getY(i)]};}
  function key(v){return v.p.map(function(x){return Math.round(x*10000);}).join(',');}
- function owner(a,b,c){var x=(a.p[0]+b.p[0]+c.p[0])/3,y=(a.p[1]+b.p[1]+c.p[1])/3,z=(a.p[2]+b.p[2]+c.p[2])/3,angle=Math.atan2(x,z),best=Infinity,at=0;seeds.forEach(function(s,i){var delta=Math.atan2(Math.sin(angle-s.a),Math.cos(angle-s.a))*Math.max(radius*.65,.5),distance=delta*delta+Math.pow((y-s.y)*1.05,2);if(distance<best){best=distance;at=i;}});return at;}
+ function owner(a,b,c){var x=(a.p[0]+b.p[0]+c.p[0])/3,y=(a.p[1]+b.p[1]+c.p[1])/3,z=(a.p[2]+b.p[2]+c.p[2])/3,angle=Math.atan2(x,z),best=Infinity,at=0,scale=Math.max(radius*.65,.5);for(var i=0;i<seeds.length;i++){var s=seeds[i],delta=angle-s.a;if(delta>Math.PI)delta-=Math.PI*2;else if(delta<-Math.PI)delta+=Math.PI*2;delta*=scale;var dy=(y-s.y)*1.05,distance=delta*delta+dy*dy;if(distance<best){best=distance;at=i;}}return at;}
  for(var i=0;i<idx.length;i+=3){while(group<g.groups.length-1&&i>=g.groups[group].start+g.groups[group].count)group++;var mat=g.groups[group].materialIndex,a=vertex(idx[i]),b=vertex(idx[i+1]),cc=vertex(idx[i+2]),o=owner(a,b,cc);buckets[o][mat].push(a,b,cc);triangles++;
   if(mat===0)[[a,b],[b,cc],[cc,a]].forEach(function(pair){var ka=key(pair[0]),kb=key(pair[1]),k=ka<kb?ka+'|'+kb:kb+'|'+ka;if(!edges.has(k))edges.set(k,{a:pair[0],b:pair[1],owners:[]});var e=edges.get(k);if(e.owners.indexOf(o)<0)e.owners.push(o);});
  }
@@ -244,7 +244,8 @@ window.TodakPhoto.createFracture=function(d,seed){
  var steps=126,dt=2.1/steps;parts.forEach(function(p){var pos=p.center.clone(),vel=p.velocity.clone().multiplyScalar(2),rot=new T.Vector3(),spin=p.spin.clone();p.frames=[];for(var step=0;step<=steps;step++){p.mesh.position.copy(pos);p.mesh.rotation.set(rot.x,rot.y,rot.z);p.mesh.updateMatrixWorld(true);bounds.setFromObject(p.mesh);if(bounds.min.y<.02){pos.y+=.02-bounds.min.y;if(vel.y<0)vel.y=-vel.y*.27;vel.x*=.76;vel.z*=.76;spin.multiplyScalar(.72);if(Math.abs(vel.y)<d.height*.045)vel.y=0;}p.frames.push({pos:pos.clone(),rot:rot.clone()});vel.y-=d.height*2.1*dt;pos.addScaledVector(vel,dt);rot.addScaledVector(spin,dt);}});
  function pose(t){whole.visible=t==null;broken.visible=t!=null;if(t==null)return;t=Math.max(0,Math.min(1,t));var at=Math.min(steps,Math.floor(t*steps));parts.forEach(function(p){var state=p.frames[at];p.mesh.position.copy(state.pos);p.mesh.rotation.set(state.rot.x,state.rot.y,state.rot.z);});}
 
- function render(width,height,t,cameraOverride){if(disposed)return null;pose(t);var active=cameraOverride||cam;active.aspect=width/height;if(active.isPerspectiveCamera)active.updateProjectionMatrix();var shadows=renderer.shadowMap.enabled;renderer.shadowMap.enabled=false;renderer.setClearColor(0,0);renderer.setSize(width,height,false);try{renderer.render(world,active);}finally{renderer.shadowMap.enabled=shadows;}return renderer.domElement;}
+ var renderSize=new T.Vector2();
+ function render(width,height,t,cameraOverride){if(disposed)return null;pose(t);var active=cameraOverride||cam;active.aspect=width/height;if(active.isPerspectiveCamera)active.updateProjectionMatrix();var shadows=renderer.shadowMap.enabled;renderer.shadowMap.enabled=false;renderer.setClearColor(0,0);if(renderer.getPixelRatio()!==1)renderer.setPixelRatio(1);renderer.getSize(renderSize);if(renderSize.x!==width||renderSize.y!==height)renderer.setSize(width,height,false);try{renderer.render(world,active);}finally{renderer.shadowMap.enabled=shadows;}return renderer.domElement;}
  function pileImage(){var pc=new T.OrthographicCamera(-radius*2.2,radius*2.2,radius*1.5,-radius*1.5,.1,Math.max(200,d.height*20));pc.position.set(0,radius*4+5,radius*4+5);pc.lookAt(0,.1,0);var out=canvas(180,120),cx=out.getContext('2d');cx.drawImage(render(180,120,1,pc),0,0);pose(null);return out.toDataURL('image/png');}
  return {render:render,pileImage:pileImage,parts:parts,stats:{sourceTriangles:triangles,shards:parts.length},dispose:function(){if(disposed)return;disposed=true;original.dispose();parts.forEach(function(p){p.mesh.geometry.dispose();});mats.forEach(function(m){m.dispose();});ownedTextures.forEach(function(t){t.dispose();});}};
 };

@@ -532,7 +532,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 <link rel="stylesheet" href="home-layout.css?v=06516c194877">
 <link rel="stylesheet" href="trimming.css?v=7560f129b1d9">
 <script src="saved-work-viewer.js?v=875c4c43eaf1"></script><script src="bottom-view.js?v=d969d4859280"></script><link rel="stylesheet" href="mobile-sheet.css?v=eea383aeb901">
-<link rel="stylesheet" href="studio-layout.css?v=379bde7a1f84"><link rel="stylesheet" href="responsive-layout.css?v=cd9349fb106c"><link rel="stylesheet" href="experience-polish.css?v=99977103db66"><link rel="stylesheet" href="site-feedback.css?v=f15c860043ef"><link rel="stylesheet" href="tutorial-presentation.css?v=16e5ee98d73b">
+<link rel="stylesheet" href="studio-layout.css?v=379bde7a1f84"><link rel="stylesheet" href="responsive-layout.css?v=cd9349fb106c"><link rel="stylesheet" href="experience-polish.css?v=6d4ff116df78"><link rel="stylesheet" href="site-feedback.css?v=f15c860043ef"><link rel="stylesheet" href="tutorial-presentation.css?v=16e5ee98d73b">
 <script src="channel-attribution.js?v=c815a8b33fc1"></script>
 </head>
 <body>
@@ -921,7 +921,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 <script src="config.js?v=d8d1bce54c84"></script>
 
 <script src="ceramic-surface.js?v=81ce19636b80"></script>
-<script src="load-3d.js?v=88d3cb793dc7"></script>
+<script src="load-3d.js?v=341e8eea4e27"></script>
 <script>
 
 (function(){
@@ -4047,14 +4047,15 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  function paintPile(){pc.clearRect(0,0,224,84);pileSnapshot.forEach(function(rec,i){var im=pileCache.get(rec.id);if(!im)return;var r=random(rec.seed||1),w=66+r()*30,h=w*.58,x=112+(r()-.5)*115,y=74-Math.min(26,i*.9)-r()*13;pc.drawImage(im,x-w/2,y-h,w,h);});if(dlg.open&&!pileDrawTimer)pileDrawTimer=setTimeout(function(){pileDrawTimer=0;if(dlg.open)draw();},24);}
  function queuePile(){var token=++pileToken;paintPile();pileSnapshot.forEach(function(rec){if(pileCache.has(rec.id))return;picture(rec.thumb).then(function(im){if(token!==pileToken||!window.document)return;pileCache.set(rec.id,rec.version===2?im:legacyChips(im,rec));paintPile();}).catch(function(){});});}
  function draw(){c.clearRect(0,0,640,450);var bg=c.createLinearGradient(0,0,0,450);bg.addColorStop(0,'#e5dfd3');bg.addColorStop(1,'#f3ede1');c.fillStyle=bg;c.fillRect(0,0,640,450);c.fillStyle='#cfc0aa';c.fillRect(0,326,640,124);c.strokeStyle='#b9ab96';c.lineWidth=2;c.beginPath();c.moveTo(0,326);c.lineTo(640,326);c.stroke();c.fillStyle='#746b5c';c.font='13px sans-serif';c.textAlign='center';c.fillText('이 벽을 향해 던져요',320,38);if(pileSnapshot.length)c.drawImage(pile,472,76,132,50);
-  if(view){var rendered=view.render(640,450,progress);if(rendered){c.save();c.translate(object.x,object.y);c.rotate(object.angle);c.scale(object.scale,object.scale);c.drawImage(rendered,-320,-260,640,450);c.restore();}}
+  if(view){var rendered=progress==null&&wholeImage?wholeImage:view.render(640,450,progress);if(rendered){c.save();c.translate(object.x,object.y);c.rotate(object.angle);c.scale(object.scale,object.scale);c.drawImage(rendered,-320,-260,640,450);c.restore();}}
   if(flight&&flight.impactAt){var age=(performance.now()-flight.impactAt)/1000;if(age<.24){c.fillStyle='rgba(255,249,232,'+(.24-age)+')';c.beginPath();c.arc(object.x,object.y,32+age*140,0,Math.PI*2);c.fill();}}
  }
+ var pointerFrame=0,wholeImage=null;function queueBreakDraw(){if(!pointerFrame)pointerFrame=requestAnimationFrame(function(){pointerFrame=0;if(dlg.open)draw();});}
  function sample(a,t){var p=Math.max(0,Math.min(1,t))*(a.length-1),i=Math.min(a.length-2,Math.floor(p));return a[i]+(a[i+1]-a[i])*(p-i);}
  async function dataFor(item){var rs=item.full2&&item.full2.radii||item.shape&&item.shape.r,inner=item.full2&&item.full2.inner,h=item.shape&&item.shape.h;if(!Array.isArray(rs)||rs.length<2||!h||rs.some(function(v){return !Number.isFinite(v);}))throw Error('missing_geometry');rs=rs.slice();inner=Array.isArray(inner)&&inner.length>1?inner.slice():rs.map(function(r){return Math.max(0,r-.5);});var floor=item.full2&&Number.isFinite(item.full2.floor)?item.full2.floor:.8,visual=item.communityVisual||{},images=await Promise.all([visual.overlay,visual.carve,item.topPaint||visual.topPaint,item.bottomPaint||visual.bottomPaint,item.bottomCarve||visual.bottomCarve].map(function(url){return url?picture(url).catch(function(){return null;}):Promise.resolve(null);}));
   return {key:'break-'+item.id,height:h,floor:floor,rAt:function(t){return sample(rs,t);},innerAt:function(t){return Math.max(0,Math.min(sample(inner,t),sample(rs,t)-.12));},color:item.c||[230,225,214],inside:item.c||[230,225,214],glazeId:visual.glazeId||'baekja',finish:visual.finish||'gloss',dipDepth:visual.dipDepth||0,dipColor:visual.dipColor||item.c||[230,225,214],overlay:images[0],carve:images[1],topOverlay:images[2],bottomOverlay:images[3],bottomCarve:images[4],topRadius:Math.max.apply(null,rs),rotation:visual.rotation||0};
  }
- async function open(item){epoch++;var token=epoch;if(view)view.dispose();view=null;work=item;ready=false;busy=false;progress=null;pileThumb=null;pileSnapshot=records.slice();object={x:320,y:260,scale:1,angle:0};flight=null;seed=(Date.now()^Math.floor(Math.random()*2147483647))>>>0;$('breakClose').disabled=false;$('breakStatus').textContent='저장된 도자기의 입체 형태를 불러오고 있어요. 닫기는 언제든 가능해요.';dlg.showModal();queuePile();draw();try{if(!window.TodakPhoto||!TodakPhoto.createFracture){if(window.TodakLoad3D)await TodakLoad3D();}if(token!==epoch||!dlg.open)return;var data=await dataFor(item);if(token!==epoch||!dlg.open)return;if(!window.TodakPhoto||!TodakPhoto.createFracture)throw Error('no_3d');var made=TodakPhoto.createFracture(data,seed);if(!made)throw Error('no_3d');if(token!==epoch||!dlg.open){made.dispose();return;}view=made;pileThumb=view.pileImage();ready=true;$('breakStatus').textContent='도자기를 잡아 위쪽 벽으로 던져 보세요. 깨뜨리기 전에 닫으면 작품은 그대로 보관돼요.';draw();}catch(e){if(token!==epoch)return;$('breakStatus').textContent=e.message==='missing_geometry'?'이 작품에는 입체 형태 기록이 없어 깨뜨릴 수 없어요. 작품은 그대로 보관됩니다.':'이 기기에서는 입체 깨뜨리기를 불러오지 못했어요. 작품은 그대로 보관됩니다.';}}
+ async function open(item){epoch++;wholeImage=null;var token=epoch;if(view)view.dispose();view=null;work=item;ready=false;busy=false;progress=null;pileThumb=null;pileSnapshot=records.slice();object={x:320,y:260,scale:1,angle:0};flight=null;seed=(Date.now()^Math.floor(Math.random()*2147483647))>>>0;$('breakClose').disabled=false;$('breakStatus').textContent='저장된 도자기의 입체 형태를 불러오고 있어요. 닫기는 언제든 가능해요.';dlg.showModal();queuePile();draw();await new Promise(function(resolve){requestAnimationFrame(function(){setTimeout(resolve,0);});});try{if(!window.TodakPhoto||!TodakPhoto.createFracture){if(window.TodakLoad3D)await TodakLoad3D();}if(token!==epoch||!dlg.open)return;var data=await dataFor(item);if(token!==epoch||!dlg.open)return;if(!window.TodakPhoto||!TodakPhoto.createFracture)throw Error('no_3d');var made=TodakPhoto.createFracture(data,seed);if(!made)throw Error('no_3d');if(token!==epoch||!dlg.open){made.dispose();return;}view=made;wholeImage=document.createElement('canvas');wholeImage.width=640;wholeImage.height=450;wholeImage.getContext('2d').drawImage(view.render(640,450,null),0,0,640,450);pileThumb=view.pileImage();ready=true;$('breakStatus').textContent='도자기를 잡아 위쪽 벽으로 던져 보세요. 깨뜨리기 전에 닫으면 작품은 그대로 보관돼요.';draw();}catch(e){if(token!==epoch)return;$('breakStatus').textContent=e.message==='missing_geometry'?'이 작품에는 입체 형태 기록이 없어 깨뜨릴 수 없어요. 작품은 그대로 보관됩니다.':'이 기기에서는 입체 깨뜨리기를 불러오지 못했어요. 작품은 그대로 보관됩니다.';}}
  function impact(){if(!flight||flight.impactAt||!view||!work)return;flight.impactAt=performance.now();flight.hitY=object.y;flight.hitAngle=object.angle;progress=0;var token=epoch,item=work,record={id:item.id,t:Date.now(),thumb:pileThumb,seed:seed,name:item.name||item.full||'작품',version:2};
   $('breakStatus').textContent='벽에 부딪혀 깨졌어요. 조각이 바닥에 떨어지고 있어요.';
   persist(record).then(function(okay){if(!okay){if(token===epoch&&dlg.open){busy=false;ready=true;progress=null;flight=null;object={x:320,y:260,scale:1,angle:0};$('breakStatus').textContent='조각을 저장할 공간이 부족해 작품은 그대로 보관했어요.';draw();}return;}
@@ -4063,17 +4064,17 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  }
  function launch(vx,vy){busy=true;ready=false;flight={vx:vx,vy:vy,z:0,start:performance.now(),last:performance.now(),impactAt:0};var token=epoch;
   function animate(now){if(token!==epoch||!dlg.open||!flight)return;var dt=Math.min(.035,Math.max(0,(now-flight.last)/1000));flight.last=now;
-   if(!flight.impactAt){flight.z+=dt*1.65;object.x+=flight.vx*dt;object.y+=flight.vy*dt;object.x=Math.max(115,Math.min(525,object.x));object.y=Math.max(120,object.y);flight.vy+=65*dt;object.scale=1-Math.min(1,flight.z)*.38;object.angle+=flight.vx*dt*.0012;if(flight.z>=1)impact();}
+   if(!flight.impactAt){flight.z=(now-flight.start)/1000*1.65;object.x+=flight.vx*dt;object.y+=flight.vy*dt;object.x=Math.max(115,Math.min(525,object.x));object.y=Math.max(120,object.y);flight.vy+=65*dt;object.scale=1-Math.min(1,flight.z)*.38;object.angle+=flight.vx*dt*.0012;if(flight.z>=1)impact();}
    else{var age=(now-flight.impactAt)/1000;progress=Math.min(1,age/2.1);object.y=flight.hitY+(270-flight.hitY)*Math.min(1,age*age*2);object.angle=flight.hitAngle*Math.max(0,1-age*2);}
    draw();if(flight&&(!flight.impactAt||progress<1))raf=requestAnimationFrame(animate);else{busy=false;$('breakStatus').textContent='조각은 여기 남아 있어요. 다음에 이 창을 열면 오른쪽 위 더미에 모여 있어요.';}
   }raf=requestAnimationFrame(animate);
  }
  function point(e){var b=canvas.getBoundingClientRect();return {x:(e.clientX-b.left)*640/b.width,y:(e.clientY-b.top)*450/b.height,t:performance.now()};}
  canvas.addEventListener('pointerdown',function(e){if(!ready||busy||e.button>0)return;var p=point(e);if(Math.abs(p.x-object.x)>130||Math.abs(p.y-object.y)>165)return;swing={id:e.pointerId,start:p,last:p,samples:[p],ox:object.x-p.x,oy:object.y-p.y};canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing';e.preventDefault();});
- canvas.addEventListener('pointermove',function(e){if(!swing||swing.id!==e.pointerId)return;var p=point(e);swing.last=p;swing.samples.push(p);swing.samples=swing.samples.filter(function(a){return p.t-a.t<110;});object.x=Math.max(100,Math.min(540,p.x+swing.ox));object.y=Math.max(110,Math.min(310,p.y+swing.oy));draw();e.preventDefault();});
+ canvas.addEventListener('pointermove',function(e){if(!swing||swing.id!==e.pointerId)return;var p=point(e);swing.last=p;swing.samples.push(p);swing.samples=swing.samples.filter(function(a){return p.t-a.t<110;});object.x=Math.max(100,Math.min(540,p.x+swing.ox));object.y=Math.max(110,Math.min(310,p.y+swing.oy));queueBreakDraw();e.preventDefault();});
  canvas.addEventListener('pointerup',function(e){if(!swing||swing.id!==e.pointerId)return;var p=point(e),first=swing.samples[0],dt=Math.max(16,p.t-first.t)/1000,vx=(p.x-first.x)/dt,vy=(p.y-first.y)/dt,dist=Math.hypot(p.x-swing.start.x,p.y-swing.start.y);swing=null;canvas.style.cursor='grab';if(dist>=45&&vy < -160){launch(Math.max(-300,Math.min(300,vx)),Math.max(-480,vy));}else{object={x:320,y:260,scale:1,angle:0};$('breakStatus').textContent='도자기를 잡고 위쪽 벽으로 빠르게 던져 주세요.';draw();}});
  canvas.addEventListener('pointercancel',function(){swing=null;canvas.style.cursor='grab';if(!busy){object={x:320,y:260,scale:1,angle:0};draw();}});
- $('breakClose').onclick=function(){dlg.close();};dlg.addEventListener('close',function(){epoch++;cancelAnimationFrame(raf);swing=null;flight=null;work=null;ready=false;if(view)view.dispose();view=null;});
+ $('breakClose').onclick=function(){dlg.close();};dlg.addEventListener('close',function(){if(dlg.open)return;epoch++;cancelAnimationFrame(raf);cancelAnimationFrame(pointerFrame);pointerFrame=0;swing=null;flight=null;work=null;ready=false;if(view)view.dispose();view=null;});
  var oldShelf=renderShelf;renderShelf=function(){var ids={};records.forEach(function(r){ids[r.id]=true;});var removed=store.items.filter(function(it){return ids[it.id];});if(removed.length){store.items=store.items.filter(function(it){return !ids[it.id];});if(st.curId&&ids[st.curId])st.curId=null;removed.forEach(function(it){dbDel(it.id);});lsSave();}return oldShelf.apply(this,arguments);};
  window.TodakBreakage={open:open,records:function(){return records.slice();},ready:load()};
 })();
@@ -4857,15 +4858,20 @@ var stopOptionalTutorial;
 /* Fine exterior finishing only. Existing hand forming, smoothing and history stay in charge. */
 (function(){
  'use strict';
- var MAX_CUT=.035,GAIN=.06,stroke=null;
- TOOLS.trim={f:.16+Number($('hsize').value)/100*.32,sm:0};
- TIPS.trim='<b>좁은 부분의 흙을 얇게 덜어내요.</b> 안쪽으로 밀거나 위아래로 움직여 손질해요. 가만히 누르거나 바깥으로 빼면 깎이지 않아요. 한 손길로 한곳에서 최대 0.35mm만 깎고, 안쪽 공간·높이·바닥은 유지해요.';
+ var stroke=null;
+ TOOLS.trim={f:.25,sm:0};
+ TIPS.trim='<b>날이 닿는 좁은 부분의 흙만 덜어내요.</b> 날 두께와 깎는 강도를 따로 조절해 홈·기둥·굽을 만들어요. 최대 강도는 같은 안쪽 이동의 약 1/3만 깎여요. 가만히 누르거나 바깥으로 빼면 깎이지 않아요. 기둥은 속·두께에서 속 깊이를 줄여 아래쪽 흙을 채운 뒤 깎아 보세요.';
  var button=document.createElement('button');button.type='button';button.className='chip';button.dataset.t='trim';button.setAttribute('aria-pressed','false');button.textContent='깎기';button.title='좁은 부분을 얇게 덜어내기';$('tools').insertBefore(button,document.querySelector('#tools [data-t="sponge"]'));
  var quick=document.createElement('button');quick.type='button';quick.dataset.quick='trim';quick.setAttribute('aria-pressed','false');quick.textContent='3 깎기';document.querySelector('.quick-tools').insertBefore(quick,document.querySelector('[data-quick="sponge"]'));quick.onclick=function(){button.click();};document.querySelector('[data-quick="sponge"]').textContent='4 매끈하게';
- var hint=document.createElement('p');hint.id='fineTrimHint';hint.className='tip';hint.hidden=true;hint.textContent='좁은 곳을 얇게 덜어내요 · 한 손길로 한곳에서 최대 0.35mm';$('hsize').closest('.field').appendChild(hint);
- var oldTips=showTips;showTips=function(){oldTips();hint.hidden=tool!=='trim';if(tool==='trim'){var h=document.querySelector('.quick-tool-hint');if(h)h.textContent='안쪽으로 조금 밀거나 위아래로 손질해요 · 가만히 누르면 깎이지 않아요.';}};
+ var controls=document.createElement('div');controls.id='trimControls';controls.className='trim-controls';controls.hidden=true;
+ controls.innerHTML='<div class="rangehead"><label class="label" for="trimWidth">날 두께</label><output id="trimWidthOut" for="trimWidth"></output></div><input type="range" id="trimWidth" min="2" max="14" step="0.5" value="5"><div class="rangehead"><label class="label" for="trimStrength">깎는 강도</label><output id="trimStrengthOut" for="trimStrength"></output></div><input type="range" id="trimStrength" min="5" max="100" step="5" value="40"><p class="tip" id="fineTrimHint">좁게 덜어내 홈·기둥·굽을 만들어요. 최대 강도도 모양 잡기의 약 1/3이에요.</p><p class="tip">기둥을 만들려면 속·두께에서 속 깊이를 줄여 아래쪽 흙을 채워 주세요.</p>';
+ $('hsize').after(controls);$('hsize').previousElementSibling.classList.add('ui-hand-size-label');
+ function settings(){return{widthMm:Number($('trimWidth').value),strength:Number($('trimStrength').value),gain:Number($('trimStrength').value)/300};}
+ function sync(){var s=settings();TOOLS.trim.f=s.widthMm/20;$('trimWidthOut').textContent=s.widthMm.toFixed(1)+'mm';$('trimStrengthOut').textContent=s.strength+'%';controls.hidden=tool!=='trim';}
+ ['trimWidth','trimStrength'].forEach(function(id){$(id).addEventListener('input',function(){stroke=null;sync();dirty=true;});});
+ var oldTips=showTips;showTips=function(){oldTips();sync();if(tool==='trim'){var h=document.querySelector('.quick-tool-hint');if(h)h.textContent='날 두께·강도를 고르고 좁게 깎아요 · 가만히 누르면 깎이지 않아요.';}};
  function contact(x,y){var t=clayLevel(x,y);if(t<0||t>1)return null;if(secOn){if(Math.abs(Math.abs(x-CX)/SV-rAt(t))>Math.min(.25,Math.max(.10,6/SV)))return null;}else if(!hitSurface(x,y))return null;return clamp(t,0,1);}
- function begin(x,y){var t=contact(x,y);if(t===null)return false;stroke={base:st.radii.slice(),x:x,y:y,t:t,side:x<CX?-1:1};if(ptr.surfaceAnchorT==null&&!secOn){ptr.surfaceAnchorT=t;ptr.surfaceAnchorY=y;}return true;}
+ function begin(x,y){var t=contact(x,y);if(t===null)return false;stroke={x:x,y:y,t:t,side:x<CX?-1:1};if(ptr.surfaceAnchorT==null&&!secOn){ptr.surfaceAnchorT=t;ptr.surfaceAnchorY=y;}return true;}
  function trim(){
   ptr.contact=false;ptr.maxD=0;
   if(!stroke){if(!begin(ptr.sx,ptr.sy)){begin(ptr.x,ptr.y);return 0;}}
@@ -4874,12 +4880,13 @@ var stopOptionalTutorial;
   if(t<0||t>1||dx>.001)return 0;
   if(!secOn&&!hitSurface(ptr.x,ptr.y))return 0;
   var travel=Math.max(0,-dx)+Math.abs(dy)*.3;if(travel<.00001)return 0;
-  var width=TOOLS.trim.f,rowH=st.height/(N-1),samples=Math.max(1,Math.min(512,Math.ceil(Math.abs(dy)/Math.max(.025,width/4)))),beforeProfile=st.radii.slice(),moved=0;
+  var setting=settings(),width=setting.widthMm/20,rowH=st.height/(N-1),samples=Math.max(1,Math.min(512,Math.ceil(Math.abs(dy)/Math.max(.025,width/4)))),beforeProfile=st.radii.slice(),moved=0;
   for(var j=0;j<N;j++){
-   var weight=0;for(var sample=0;sample<samples;sample++){var level=lastT+(t-lastT)*(sample+.5)/samples,distance=Math.abs(j*rowH-level*st.height);if(distance<width)weight+=Math.pow(1-distance/width,.7)/samples;}if(!weight)continue;
-   var before=beforeProfile[j],minimum=Math.max(.025,stroke.base[j]-MAX_CUT);
+   // Integrate the rounded edge over each profile row so a thin blade cannot fall between rows.
+   var weight=0;for(var sample=0;sample<samples;sample++){var level=lastT+(t-lastT)*(sample+.5)/samples,offset=j*rowH-level*st.height,a=Math.max(-width,offset-rowH/2),b=Math.min(width,offset+rowH/2);if(b>a)weight+=((b-a)/2+width/(2*Math.PI)*(Math.sin(Math.PI*b/width)-Math.sin(Math.PI*a/width)))/Math.min(rowH,width)/samples;}if(!weight)continue;
+   var before=beforeProfile[j],minimum=.12;
    if(j*rowH>=st.floor&&st.height-st.floor>.05){var a=Math.max(0,j-1),b=Math.min(N-1,j+1),slope=(beforeProfile[b]-beforeProfile[a])/Math.max(rowH,(b-a)*rowH);minimum=Math.max(minimum,st.inner[j]+.08*Math.sqrt(1+slope*slope));}
-   var next=Math.min(before,Math.max(minimum,before-travel*GAIN*weight)),cut=before-next;
+   var next=Math.min(before,Math.max(minimum,before-travel*setting.gain*weight)),cut=before-next;
    if(cut>1e-9){st.radii[j]=next;grooves[j]=Math.max(0,grooves[j]-cut);moved+=cut;ptr.maxD=Math.max(ptr.maxD,cut);}
   }
   if(moved>0){ptr.contact=true;ptr.changed=true;markPreset(null);updateReadout();dirty=true;window.dispatchEvent(new CustomEvent('todak-trimmed'));}
@@ -4891,7 +4898,7 @@ var stopOptionalTutorial;
  cv.addEventListener('pointermove',function(){if(st.stage==='throw'&&tool==='trim'&&ptr.down&&ptr.decided)trim();});
  ['pointerup','pointercancel','lostpointercapture'].forEach(function(event){cv.addEventListener(event,function(){stroke=null;});});
  $('tools').addEventListener('click',function(){stroke=null;});
- window.TodakFineTrimming={limits:function(){return{maximumPerPointMm:MAX_CUT*10,gain:GAIN};}};
+ window.TodakFineTrimming={limits:function(){return{maximumGain:1/3,minimumRadiusCm:.12};},settings:settings};
  showTips();
 })();
 
@@ -4986,10 +4993,9 @@ function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&innerHeight<=56
  function directColor(input,parent,title){
   var row=document.createElement('div');row.className='ui-direct-color';var label=document.createElement('label');label.textContent=title;label.htmlFor=input.id;
   var controls=document.createElement('div');controls.className='ui-color-controls';
-  var visual=document.createElement('label');visual.className='ui-visual-color';visual.htmlFor=input.id;visual.innerHTML='<span class="ui-color-chip" aria-hidden="true"></span><span>원하는 색 고르기</span><span aria-hidden="true">▾</span>';
-  var advanced=document.createElement('details');advanced.className='ui-color-code';var summary=document.createElement('summary');summary.textContent='색상 코드 입력 (선택)';
+  var visual=document.createElement('label');visual.className='ui-visual-color';visual.htmlFor=input.id;visual.innerHTML='<span class="ui-color-chip" aria-hidden="true"></span><span>색 고르기</span><span aria-hidden="true">▾</span>';
   var hex=document.createElement('input');hex.type='text';hex.value=input.value.toUpperCase();hex.maxLength=7;hex.pattern='#[0-9a-fA-F]{6}';hex.setAttribute('aria-label',title+' 색상 코드');
-  advanced.append(summary,hex);input.setAttribute('aria-label',title+' · 원하는 색 고르기');controls.append(input,visual,advanced);row.append(label,controls);parent.appendChild(row);
+  hex.className='ui-color-code';hex.title='색상 코드 입력 (선택)';hex.spellcheck=false;input.setAttribute('aria-label',title+' · 원하는 색 고르기');controls.append(input,visual,hex);row.append(label,controls);parent.appendChild(row);
   input.addEventListener('input',function(){hex.value=input.value.toUpperCase();refreshColorPickers();});
   hex.addEventListener('change',function(){var value=this.value.trim();if(!value.startsWith('#'))value='#'+value;if(!/^#[0-9a-f]{6}$/i.test(value)){this.setCustomValidity('#을 포함한 여섯 자리 색상 코드를 입력해 주세요.');this.reportValidity();return;}this.setCustomValidity('');input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));});
   row.addEventListener('input',function(){begin();setTimeout(finish,0);},true);refreshColorPickers();return row;
@@ -5231,7 +5237,8 @@ function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&innerHeight<=56
  primary.forEach(function(id){var b=document.querySelector('#swatches [data-g="'+id+'"],#swatches2 [data-g="'+id+'"]');if(b)$('swatches').appendChild(b);});
  primary.forEach(function(id){var b=document.querySelector('#glazeBrushPalette [data-brush-glaze="'+id+'"]');if(b)$('glazeBrushSwatches').appendChild(b);});
  document.querySelectorAll('#swatches [data-g],#swatches2 [data-g],#dots [data-g],#glazeBrushPalette [data-brush-glaze]').forEach(function(b){if(primary.indexOf(b.dataset.g||b.dataset.brushGlaze)<0)b.remove();});
- var handle=$('dipHandle');if(handle)handle.remove();var privacy=$('dipDepth').parentElement.querySelector('p');if(privacy)privacy.textContent='슬라이더나 작품을 위아래로 끌어 색이 입혀지는 깊이를 조절해요.';
+ var handle=$('dipHandle');if(handle)handle.remove();var privacy=$('dipDepth').parentElement.querySelector('p');if(privacy)privacy.remove();
+ var fold=$('dip').closest('details');if(fold){var panel=document.createElement('section');panel.className='ui-dip-settings';panel.setAttribute('aria-label','담가서 덧입히기·표면 무늬');var inside=fold.querySelector(':scope > .in');if(inside)while(inside.firstChild)panel.appendChild(inside.firstChild);fold.replaceWith(panel);}
  $('fire').closest('.field').classList.add('ui-retired-fire');
  var beginFire=fireBegin;fireBegin=function(){st.fire='mid';beginFire();$('fireCaption').textContent='작품을 고르게 굽고 있어요.';};
  rollKiln=function(){st.kiln={type:'plain',seed:0,gold:false,fire:'mid',kt:'electric',thin:false,cause:'',openT:40,preserveChosenColor:true};};

@@ -15,7 +15,7 @@
   }else if(['04','05','06'].includes(scene)){
    setStage('deco');var selected=scene==='05'?'carve':scene==='06'?'stamp':'brush';document.querySelector('#dtools [data-d="'+selected+'"]').click();if(scene==='05')$('wheelBottom-deco').click();if(scene==='06')$('wheelTop-deco').click();
   }else if(['07','08'].includes(scene)){
-   st.glaze='baekja';setStage('glaze');if(scene==='08'){st.dip='custom';st.dipDepth=.03;st.glaze2='sky';$('glazeBaseSettings').querySelector('details:last-child').open=true;syncControls();}
+   st.glaze='baekja';setStage('glaze');if(scene==='08'){st.dip='custom';st.dipDepth=.03;st.glaze2='sky';var dipFold=$('dip').closest('details');if(dipFold)dipFold.open=true;syncControls();}
   }else if(['09','10'].includes(scene)){
    st.glaze='baekja';setStage('fire');if(scene==='10'){fstep='firing';fT=performance.now();fireUI();}
   }else if(scene==='11'){

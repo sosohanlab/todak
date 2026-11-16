@@ -32,10 +32,9 @@
  function directColor(input,parent,title){
   var row=document.createElement('div');row.className='ui-direct-color';var label=document.createElement('label');label.textContent=title;label.htmlFor=input.id;
   var controls=document.createElement('div');controls.className='ui-color-controls';
-  var visual=document.createElement('label');visual.className='ui-visual-color';visual.htmlFor=input.id;visual.innerHTML='<span class="ui-color-chip" aria-hidden="true"></span><span>원하는 색 고르기</span><span aria-hidden="true">▾</span>';
-  var advanced=document.createElement('details');advanced.className='ui-color-code';var summary=document.createElement('summary');summary.textContent='색상 코드 입력 (선택)';
+  var visual=document.createElement('label');visual.className='ui-visual-color';visual.htmlFor=input.id;visual.innerHTML='<span class="ui-color-chip" aria-hidden="true"></span><span>색 고르기</span><span aria-hidden="true">▾</span>';
   var hex=document.createElement('input');hex.type='text';hex.value=input.value.toUpperCase();hex.maxLength=7;hex.pattern='#[0-9a-fA-F]{6}';hex.setAttribute('aria-label',title+' 색상 코드');
-  advanced.append(summary,hex);input.setAttribute('aria-label',title+' · 원하는 색 고르기');controls.append(input,visual,advanced);row.append(label,controls);parent.appendChild(row);
+  hex.className='ui-color-code';hex.title='색상 코드 입력 (선택)';hex.spellcheck=false;input.setAttribute('aria-label',title+' · 원하는 색 고르기');controls.append(input,visual,hex);row.append(label,controls);parent.appendChild(row);
   input.addEventListener('input',function(){hex.value=input.value.toUpperCase();refreshColorPickers();});
   hex.addEventListener('change',function(){var value=this.value.trim();if(!value.startsWith('#'))value='#'+value;if(!/^#[0-9a-f]{6}$/i.test(value)){this.setCustomValidity('#을 포함한 여섯 자리 색상 코드를 입력해 주세요.');this.reportValidity();return;}this.setCustomValidity('');input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));});
   row.addEventListener('input',function(){begin();setTimeout(finish,0);},true);refreshColorPickers();return row;
