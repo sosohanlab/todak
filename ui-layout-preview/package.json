@@ -1,0 +1,9 @@
+{
+  "name": "todak-layout-preview",
+  "private": true,
+  "type": "commonjs",
+  "devDependencies": {
+    "jsdom": "26.1.0",
+    "@napi-rs/canvas": "0.1.100"
+  }
+}

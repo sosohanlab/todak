@@ -4,3 +4,7 @@ project_id = "todak"
 # Never expose the service_role key or SERPAPI_API_KEY in the browser.
 [functions.image-search]
 verify_jwt = false
+
+# The browser presents this project's public anon JWT. No user login or secret is exposed.
+[functions.site-feedback]
+verify_jwt = true

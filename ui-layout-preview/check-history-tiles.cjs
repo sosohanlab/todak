@@ -1,0 +1,9 @@
+const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict'),{createCanvas}=require('@napi-rs/canvas');
+const box={window:{},WeakMap,Set,Uint32Array};vm.runInNewContext(fs.readFileSync(__dirname+'/history-tiles.js','utf8'),box);
+const api=box.window.TodakHistoryTiles,store=api.create(),c=createCanvas(257,259),x=c.getContext('2d'),layer={c,x};
+const blank=store.read(layer,0);assert(api.bytes([blank])<=36,'blank layers compress to one colour per tile');
+const image=x.createImageData(c.width,c.height);let seed=17;for(let y=0;y<c.height;y++)for(let q=0;q<c.width;q++){const i=(y*c.width+q)*4;if(q<128&&y<128){seed=(Math.imul(seed,1664525)+1013904223)>>>0;image.data.set([seed&255,(seed>>>8)&255,(seed>>>16)&255,255],i);}else if(q>=128&&q<256&&y<128)image.data.set([y,90,12,180],i);else image.data.set([20,80,140,200],i);}
+x.putImageData(image,0,0);const first=store.read(layer,1),original=Buffer.from(x.getImageData(0,0,c.width,c.height).data);assert(first.tiles.some(t=>t.kind==='raw'));assert(first.tiles.some(t=>t.kind==='runs'));assert(first.tiles.some(t=>t.kind==='solid'));assert.equal(store.read(layer,1),first);
+x.fillStyle='#ff0088';x.fillRect(10,10,7,9);const second=store.read(layer,2),changed=Buffer.from(x.getImageData(0,0,c.width,c.height).data);assert.notEqual(second.tiles[0],first.tiles[0]);for(let i=1;i<first.tiles.length;i++)assert.equal(second.tiles[i],first.tiles[i],'unchanged tiles are shared');
+store.write(layer,first);assert.deepEqual(Buffer.from(x.getImageData(0,0,c.width,c.height).data),original,'all original pixels restored');store.write(layer,second);assert.deepEqual(Buffer.from(x.getImageData(0,0,c.width,c.height).data),changed,'all changed pixels restored');store.write(layer,blank);assert(x.getImageData(0,0,c.width,c.height).data.every(v=>v===0));
+console.log('PASS lossless solid/raw/run snapshots, partial edge tiles, sharing and exact pixel restoration');
