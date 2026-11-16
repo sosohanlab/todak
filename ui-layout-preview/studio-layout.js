@@ -103,23 +103,24 @@
  addEventListener('blur',endHistoryGesture);document.addEventListener('visibilitychange',function(){if(document.hidden)endHistoryGesture();});
  // Handle multi-touch before the separate side/top/bottom paint handlers. Roll
  // back the first finger's dot, including its history records, before zooming.
- var touchPoints=new Map(),touchPinch=null,touchNavigation=false;
+ var touchPoints=new Map(),touchPinch=null,touchNavigation=false,touchStartPoint=null,touchTravel=0;
  addEventListener('blur',function(){touchPoints.clear();touchPinch=null;touchNavigation=false;});
  function touchPosition(e){var r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*HC/r.height};}
  function touchPair(){var p=Array.from(touchPoints.values());return{x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2,d:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)||1};}
  stageEl.addEventListener('pointerdown',function(e){
   if(e.target!==cv||e.pointerType!=='touch'||!['throw','deco','glaze'].includes(st.stage))return;
-  touchPoints.set(e.pointerId,touchPosition(e));if(touchPoints.size<2&&!touchNavigation)return;
+  touchPoints.set(e.pointerId,touchPosition(e));if(touchPoints.size<2&&!touchNavigation){touchStartPoint=touchPosition(e);touchTravel=0;return;}
   if(!touchNavigation){
-   touchNavigation=true;var gesture=historyGesture,snapshot=gesture&&gesture.initial;if(historyTimer!==null)clearInterval(historyTimer);historyTimer=null;
-   if(gesture){undo=undo.filter(function(frame){return gesture.records.indexOf(frame)<0;});redo=gesture.previousRedo;}
-   pending=null;historyGesture=null;historyPointers.clear();window.TodakWheel?.cancelGesture();ptr.down=ptr.paint=ptr.rotating=ptr.dipping=false;pts={};pinch=null;
-   if(snapshot)restore(snapshot);historyUI();
+   touchNavigation=true;var gesture=historyGesture,snapshot=gesture&&gesture.initial,hasStroke=touchTravel>6;if(historyTimer!==null)clearInterval(historyTimer);historyTimer=null;
+   window.TodakWheel?.cancelGesture(hasStroke);
+   if(hasStroke){endDrag();endHistoryGesture();}
+   else{if(gesture){undo=undo.filter(function(frame){return gesture.records.indexOf(frame)<0;});redo=gesture.previousRedo;}pending=null;historyGesture=null;historyPointers.clear();if(snapshot)restore(snapshot);}
+   ptr.down=ptr.paint=ptr.rotating=ptr.dipping=false;pts={};pinch=null;historyUI();
   }
   touchPinch=touchPair();touchPinch.z=Z;e.preventDefault();e.stopImmediatePropagation();try{cv.setPointerCapture(e.pointerId);}catch(_){}
  },true);
  stageEl.addEventListener('pointermove',function(e){
-  if(!touchPoints.has(e.pointerId))return;touchPoints.set(e.pointerId,touchPosition(e));if(!touchNavigation)return;
+  if(!touchPoints.has(e.pointerId))return;var point=touchPosition(e);touchPoints.set(e.pointerId,point);if(!touchNavigation){if(touchStartPoint){var box=cv.getBoundingClientRect();touchTravel=Math.max(touchTravel,Math.hypot((point.x-touchStartPoint.x)*box.width/W,(point.y-touchStartPoint.y)*box.height/HC));}return;}
   e.preventDefault();e.stopImmediatePropagation();if(touchPoints.size<2||!touchPinch)return;var next=touchPair();CX+=next.x-touchPinch.x;BASE+=next.y-touchPinch.y;setZoom(touchPinch.z*next.d/touchPinch.d,next.x,next.y);touchPinch=next;touchPinch.z=Z;
  },true);
  ['pointerup','pointercancel','lostpointercapture'].forEach(function(type){stageEl.addEventListener(type,function(e){if(!touchPoints.delete(e.pointerId))return;if(touchNavigation){e.preventDefault();e.stopImmediatePropagation();touchPinch=null;if(!touchPoints.size){touchNavigation=false;endHistoryGesture();}}},true);});
