@@ -6,11 +6,15 @@ const tracked=execFileSync('git',['ls-tree','-r','--name-only','origin/main'],{c
 for(const name of tracked){
  if(/^(assets|vendor|quality-samples|migration)\//.test(name)||(!name.includes('/')&&/\.(html|css|js|png|webmanifest)$/.test(name))||name==='CNAME')runtime.push(name);
 }
-runtime.push('channel-attribution.js');
+runtime.push('channel-attribution.js','photo-texture-worker.js');
 for(const name of runtime){const dest=path.join(out,name);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(root,name),dest);}
 require('./build-tool-images.cjs')(out);
 execFileSync(process.execPath,[path.join(root,'tools/build-studio-layout.cjs'),'--production'],{cwd:root,stdio:'inherit'});
 fs.copyFileSync(path.join(root,'ui-layout-preview/pottery-renderer.js'),path.join(out,'pottery-renderer.js'));
+const surfaceVersion=crypto.createHash('sha256').update(fs.readFileSync(path.join(out,'ceramic-surface.js'))).digest('hex').slice(0,12);
+const workerPath=path.join(out,'photo-texture-worker.js');fs.writeFileSync(workerPath,fs.readFileSync(workerPath,'utf8').replace(/ceramic-surface\.js(?:\?v=[a-f0-9]+)*/g, 'ceramic-surface.js?v='+surfaceVersion));
+const workerVersion=crypto.createHash('sha256').update(fs.readFileSync(workerPath)).digest('hex').slice(0,12);
+const rendererPath=path.join(out,'pottery-renderer.js');fs.writeFileSync(rendererPath,fs.readFileSync(rendererPath,'utf8').replace('photo-texture-worker.js','photo-texture-worker.js?v='+workerVersion));
 const rendererVersion=crypto.createHash('sha256').update(fs.readFileSync(path.join(out,'pottery-renderer.js'))).digest('hex').slice(0,12);
 fs.writeFileSync(path.join(out,'load-3d.js'),fs.readFileSync(path.join(out,'load-3d.js'),'utf8').replace(/pottery-renderer\.js\?v=[a-f0-9]+/g,'pottery-renderer.js?v='+rendererVersion));
 for(const name of ['studio-layout.css','responsive-layout.css','experience-polish.css','site-feedback.css','tutorial-presentation.css'])fs.copyFileSync(path.join(root,'ui-layout-preview',name),path.join(out,name));

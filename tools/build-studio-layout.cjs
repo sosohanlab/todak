@@ -145,6 +145,7 @@ html=html.replace('</head>','<link rel="stylesheet" href="studio-layout.css?v=20
 html=html.replace(/<title>[^<]*<\/title>/,production?'<title>토닥 · 온라인 도자기 공방</title>':'<title>토닥 · UI 레이아웃 미리보기</title>');
 if(production)html=html.replace('<head>','<head>\n<!-- todak-public-build: 2026-11-16 -->');
 html=require('./integrate-search-speed.cjs')(html);
+html=require('./optimize-photo-html.cjs')(html);
 if(production){
  required('if(location.hostname==="sosohanlab.github.io"){','if(["todak.sosohanlab.com","sosohanlab.github.io"].includes(location.hostname)){');
  html=html.replaceAll('content="https://sosohanlab.github.io/todak/','content="https://todak.sosohanlab.com/').replace('rel="canonical" href="https://sosohanlab.github.io/todak/"','rel="canonical" href="https://todak.sosohanlab.com/"');

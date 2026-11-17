@@ -19,7 +19,7 @@
 <meta property="og:image:width" content="1731">
 <meta property="og:image:height" content="909">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="manifest" href="manifest.webmanifest?v=ae979007611f">
+<link rel="manifest" href="manifest.webmanifest?v=547f334bff93">
 <link rel="apple-touch-icon" href="icon-180.png?v=3ac1d9008497">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -497,15 +497,15 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 
 
 </style>
-<link rel="stylesheet" href="community.css?v=caa2893a018c">
-<link rel="stylesheet" href="market.css?v=3d160975f43c">
-<link rel="stylesheet" href="shop.css?v=8d82a71690f7">
-<link rel="stylesheet" href="brand.css?v=ea50199753cb">
-<link rel="stylesheet" href="studio-theme.css?v=8ea595cf3a3d">
+<link rel="stylesheet" href="community.css?v=475961f8199a">
+<link rel="stylesheet" href="market.css?v=f96055eea7d1">
+<link rel="stylesheet" href="shop.css?v=2a36d87a785c">
+<link rel="stylesheet" href="brand.css?v=e6836a19c0e4">
+<link rel="stylesheet" href="studio-theme.css?v=2c41cb0f7c88">
 <script src="tool-images.js?v=96b841b7f350"></script>
-<script src="photo-backgrounds.js?v=94219214082d"></script>
-<link rel="stylesheet" href="tutorial.css?v=3f0a08544695">
-<link rel="stylesheet" href="shelf-display.css?v=f742655ec868">
+<script src="photo-backgrounds.js?v=9182549c8aba"></script>
+<link rel="stylesheet" href="tutorial.css?v=0423e7e31007">
+<link rel="stylesheet" href="shelf-display.css?v=1cd1d61ff0c9">
 
 
 
@@ -521,18 +521,18 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 
 
 
-<link rel="stylesheet" href="wheel-freedom.css?v=d1be61b12ca3">
+<link rel="stylesheet" href="wheel-freedom.css?v=c601d3ee02ec">
 
 
 
 
 
 
-<link rel="stylesheet" href="shelf-break.css?v=dc12496c4b5b">
-<link rel="stylesheet" href="home-layout.css?v=06516c194877">
-<link rel="stylesheet" href="trimming.css?v=7560f129b1d9">
+<link rel="stylesheet" href="shelf-break.css?v=992bd7e7a9f6">
+<link rel="stylesheet" href="home-layout.css?v=462afd77c8af">
+<link rel="stylesheet" href="trimming.css?v=e60d0b0f0e54">
 <script src="saved-work-viewer.js?v=875c4c43eaf1"></script><script src="bottom-view.js?v=d969d4859280"></script><link rel="stylesheet" href="mobile-sheet.css?v=eea383aeb901">
-<link rel="stylesheet" href="studio-layout.css?v=379bde7a1f84"><link rel="stylesheet" href="responsive-layout.css?v=cd9349fb106c"><link rel="stylesheet" href="experience-polish.css?v=3b0c29e5c43c"><link rel="stylesheet" href="site-feedback.css?v=f15c860043ef"><link rel="stylesheet" href="tutorial-presentation.css?v=16e5ee98d73b">
+<link rel="stylesheet" href="studio-layout.css?v=379bde7a1f84"><link rel="stylesheet" href="responsive-layout.css?v=291cd59192d9"><link rel="stylesheet" href="experience-polish.css?v=3b0c29e5c43c"><link rel="stylesheet" href="site-feedback.css?v=f15c860043ef"><link rel="stylesheet" href="tutorial-presentation.css?v=16e5ee98d73b">
 <script src="channel-attribution.js?v=c815a8b33fc1"></script>
 </head>
 <body>
@@ -918,10 +918,10 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 </main>
 
 
-<script src="config.js?v=d8d1bce54c84"></script>
+<script src="config.js?v=523e84644e38"></script>
 
-<script src="ceramic-surface.js?v=81ce19636b80"></script>
-<script src="load-3d.js?v=341e8eea4e27"></script>
+<script src="ceramic-surface.js?v=2002fd9c1ce6"></script>
+<script src="load-3d.js?v=1635cdd9d64f"></script>
 <script>
 
 (function(){
@@ -1678,12 +1678,13 @@ function photoData(){
   var viewWidth=wide?Math.max(W*.45,W-440*unit):W,viewHeight=HC;
   return {viewWidth:viewWidth,viewHeight:viewHeight,key:[texVer,st.rimSoftness||0,st.height,st.radii.join(','),st.inner.join(','),st.floor,st.glaze,(st.customC||[]).join(','),st.glaze2,st.dip,st.dipDepth,st.fx,st.finish,kilnSig()].join('|'),profileRounded:true,rimSoftness:st.rimSoftness||0,glazeId:st.glaze,surface:st.fx,height:st.height,floor:st.floor,rAt:rAt,innerAt:innerAt,color:glaze().c,dipDepth:st.dip?(typeof st.dipDepth==="number"?st.dipDepth:(st.dip==="half"?.5:.2)):0,dipColor:byId(GLAZES,st.glaze2).c,inside:glaze().c,finish:st.finish,overlay:fin.c,carve:hasCarve?carve.c:null,rotation:rot,objectScale:window.TodakRealPhoto?TodakRealPhoto.objectScale():1,zoom:Z,panX:window.TodakRealPhoto?TodakRealPhoto.renderPan().x:CX-CX0,panY:window.TodakRealPhoto?TodakRealPhoto.renderPan().y:BASE-BASE0,background:photoScene,width:W,canvasHeight:HC,pixelWidth:cv.width,pixelHeight:cv.height,scale:SV,cx:CX,base:BASE};
 }
-var photo3DPending=false;
+var photo3DPending=false,photo3DFailed=false;
 function drawPhoto(){
-  if(!window.TodakPhoto&&window.TodakLoad3D&&!photo3DPending){photo3DPending=true;TodakLoad3D().then(function(){dirty=cardDirty=true;pvKey="";}).catch(function(){photo3DPending=false;});}
+  if(!window.TodakPhoto&&window.TodakLoad3D&&!photo3DPending&&!photo3DFailed){photo3DPending=true;TodakLoad3D().then(function(){dirty=cardDirty=true;pvKey="";window.dispatchEvent(new Event("todak-photo-resources-ready"));}).catch(function(){photo3DPending=false;photo3DFailed=true;dirty=true;});}
 
+  if(!window.TodakPhoto&&photo3DPending&&!photo3DFailed)return;
   if(window.TodakPhoto&&TodakPhoto.available){
-    var rendered=TodakPhoto.render(photoData());
+    var rendered=TodakPhoto.preview?TodakPhoto.preview(photoData()):TodakPhoto.render(photoData());
     if(rendered){ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(rendered,0,0,cv.width,cv.height);return;}
     $("photoHelp").textContent="이 기기에서는 기본 보기로 보여 드려요.";
   }
@@ -1947,7 +1948,7 @@ function frame(ts){
   }
   if(dirty){draw(); dirty=false;}
   if(st.stage==="done"&&cardDirty&&!revealing){
-    cardDirty=false; renderCard();
+    if(!$("cardDlg").hidden)renderCard();cardDirty=false;
     if(pendingShelf){pendingShelf=false; shelfAddCurrent();}
   }
   requestAnimationFrame(frame);
@@ -2728,8 +2729,9 @@ function thumbNow(){
  if(rendered)t.x.drawImage(rendered,0,0,300,280);else{drawPhoto();photoCrop(t.x,0,0,300,280);}
  dirty=true;try{return t.c.toDataURL('image/png');}catch(_){return '';}
 }
-$("saveCard").addEventListener("click",function(){
+$("saveCard").addEventListener("click",async function(){
   if(!dl)return;
+  await photoResourcesReady();
   renderCard();
   var nm=((st.name||"").trim()||"작품").replace(/[\\/:*?"<>|]/g,"");
   cardC.toBlob(function(b){
@@ -3664,19 +3666,12 @@ var SITE={name:"토닥",url:"https://sosohanlab.github.io/todak/",contact:""};
     if(!u){toast("사이트를 올린 뒤에 쓸 수 있어요");return;}
     copyText(u).then(function(){toast("링크를 복사했어요");},function(){toast("복사하지 못했어요. 주소창의 주소를 복사해 주세요");});
   }
-  function cardFile(){
-    try{renderCard();
-      var d=cardC.toDataURL("image/png"), bin=atob(d.slice(d.indexOf(",")+1)), n=bin.length, u8=new Uint8Array(n), i;
-      for(i=0;i<n;i++){u8[i]=bin.charCodeAt(i);}
-      var nm=((st.name||"").trim()||"작품").replace(/[\\/:*?"<>|]/g,"");
-      return new File([u8],"토닥-"+nm+".png",{type:"image/png"});
-    }catch(_){return null;}
-  }
-  function share(){
+  async function cardFile(){try{await photoResourcesReady();renderCard();var blob=await new Promise(function(resolve){cardC.toBlob(resolve,'image/png');});if(!blob)return null;var nm=((st.name||'').trim()||'작품').replace(/[\\/:*?"<>|]/g,'');return new File([blob],'토닥-'+nm+'.png',{type:'image/png'});}catch(_){return null;}}
+  async function share(){
     var u=siteUrl(), nm=(st.name||"").trim(), data={title:nm||"나의 도자기",text:[nm,(st.purpose||"").trim(),comparisonMode&&cardComparison?(cardComparison.title+" "+cardComparison.url):""].filter(Boolean).join(" · ")}, f;
     if(u){data.url=u;}
     if(!navigator.share){copyLink();return;}
-    f=cardFile();
+    f=await cardFile();
     if(f&&navigator.canShare&&navigator.canShare({files:[f]})){data.files=[f];}
     navigator.share(data).catch(function(err){
       if(err&&err.name==="AbortError")return;
@@ -4098,14 +4093,15 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  try{var response=await fetch('/api/render',{method:'POST',headers:{'Content-Type':'application/json'},body:serialized});if(!response.ok)throw Error('server');var job=await response.json();if(epoch!==renderEpoch)return;if(job.state==='ready')return accept(job.image,epoch);for(var attempts=0;attempts<95;attempts++){await new Promise(function(r){setTimeout(r,2000);});if(epoch!==renderEpoch||st.stage!=='done')return;var poll=await fetch('/api/render/'+job.job,{cache:'no-store'});if(!poll.ok)throw Error('poll');var result=await poll.json();if(result.state==='ready'){await accept(result.image,epoch);return;}if(result.state==='error')throw Error(result.message||'render');}throw Error('timeout');}
  catch(error){if(epoch!==renderEpoch)return;pending=null;status('촬영을 완료하지 못했어요. 로컬 Blender 서버가 실행 중인지 확인하고 다시 촬영해 주세요.');}
  }
- function browserPreview(){photoOn=true;displayPhoto=false;syncView();drawPhoto();var image=window.TodakPhoto&&TodakPhoto.available?TodakPhoto.export(photoData(),1200,1):null;if(!image)image=cv;el('realPhotoImage').src=image.toDataURL('image/png');status('');dirty=true;}
+ var previewURL=null,previewEpoch=0;el('realPhotoDlg').addEventListener('close',function(){if(el('realPhotoDlg').open)return;previewEpoch++;if(previewURL){URL.revokeObjectURL(previewURL);previewURL=null;}el('realPhotoImage').removeAttribute('src');});async function browserPreview(){var epoch=++previewEpoch;photoOn=true;displayPhoto=false;syncView();drawPhoto();if(!el('realPhotoDlg').open){status('');return;}if(window.TodakPhoto?.ready)await TodakPhoto.ready(window.TodakRealPhoto?.exportData?TodakRealPhoto.exportData():photoData());if(epoch!==previewEpoch||!el('realPhotoDlg').open)return;var image=window.TodakPhoto&&TodakPhoto.available?TodakPhoto.export(window.TodakRealPhoto?.exportData?TodakRealPhoto.exportData():photoData(),1200,1):cv;if(!image)image=cv;image.toBlob(function(blob){if(epoch!==previewEpoch||!blob||!el('realPhotoDlg').open)return;if(previewURL)URL.revokeObjectURL(previewURL);previewURL=URL.createObjectURL(blob);el('realPhotoImage').src=previewURL;status('');},'image/png');}
+
  function syncView(){el('viewToggle').textContent='물레에서 보기';el('viewToggle').setAttribute('aria-pressed',String(!photoOn));el('finishedPhoto').setAttribute('aria-pressed',String(photoOn));}
  function selectView(mode){photoOn=mode==='photo';displayPhoto=photoOn&&!!readyImage;syncView();ovKey='';dirty=true;}
  function openPhoto(){if(st.stage!=='done')return;scenes();modal('realPhotoDlg');browserPreview();}
- var button=document.createElement('button');button.type='button';button.className='primary';button.id='openRealPhoto';button.style.width='100%';button.style.margin='14px 0 4px';button.textContent='고화질 사진';button.hidden=true;button.style.display='none';button.onclick=openPhoto;var objectField=document.createElement('div');objectField.className='field';var objectLabel=document.createElement('label');objectLabel.htmlFor='photoObjectSize';objectLabel.className='label';objectLabel.textContent='사진 속 도자기 크기 ';var objectOutput=document.createElement('output');objectOutput.id='photoObjectSizeOut';objectOutput.textContent='100%';objectLabel.appendChild(objectOutput);var objectInput=document.createElement('input');objectInput.id='photoObjectSize';objectInput.type='range';objectInput.min='50';objectInput.max='180';objectInput.step='5';objectInput.value='100';objectInput.style.width='100%';objectInput.style.touchAction='none';objectInput.style.minWidth='0';var sizeRow=document.createElement('div');sizeRow.style.cssText='display:flex;align-items:center;gap:9px';function sizeButton(text,id,label,delta){var b=document.createElement('button');b.type='button';b.className='ghost';b.id=id;b.textContent=text;b.setAttribute('aria-label',label);b.style.cssText='min-width:44px;min-height:44px;touch-action:manipulation';b.onclick=function(){var next=Math.max(50,Math.min(180,Number(objectInput.value)+delta));if(next!==Number(objectInput.value)){objectInput.value=next;objectInput.dispatchEvent(new Event('input',{bubbles:true}));}};return b;}sizeRow.append(sizeButton('−','photoSizeLess','도자기 작게',-5),objectInput,sizeButton('＋','photoSizeMore','도자기 크게',5));objectField.append(objectLabel,sizeRow);function applyObjectSize(value){photoObjectScale=Math.max(.5,Math.min(1.8,Number(value)||1));objectInput.value=Math.round(photoObjectScale*100);objectOutput.textContent=Math.round(photoObjectScale*100)+'%';displayPhoto=false;dirty=cardDirty=true;}objectInput.oninput=function(){applyObjectSize(Number(this.value)/100);};el('resetPhoto').addEventListener('click',function(){objectPan={x:0,y:0};applyObjectSize(1);});
+ var button=document.createElement('button');button.type='button';button.className='primary';button.id='openRealPhoto';button.style.width='100%';button.style.margin='14px 0 4px';button.textContent='고화질 사진';button.hidden=true;button.style.display='none';button.onclick=openPhoto;var objectField=document.createElement('div');objectField.className='field';var objectLabel=document.createElement('label');objectLabel.htmlFor='photoObjectSize';objectLabel.className='label';objectLabel.textContent='사진 속 도자기 크기 ';var objectOutput=document.createElement('output');objectOutput.id='photoObjectSizeOut';objectOutput.textContent='100%';objectLabel.appendChild(objectOutput);var objectInput=document.createElement('input');objectInput.id='photoObjectSize';objectInput.type='range';objectInput.min='50';objectInput.max='180';objectInput.step='5';objectInput.value='100';objectInput.style.width='100%';objectInput.style.touchAction='none';objectInput.style.minWidth='0';var sizeRow=document.createElement('div');sizeRow.style.cssText='display:flex;align-items:center;gap:9px';function sizeButton(text,id,label,delta){var b=document.createElement('button');b.type='button';b.className='ghost';b.id=id;b.textContent=text;b.setAttribute('aria-label',label);b.style.cssText='min-width:44px;min-height:44px;touch-action:manipulation';b.onclick=function(){var next=Math.max(50,Math.min(180,Number(objectInput.value)+delta));if(next!==Number(objectInput.value)){objectInput.value=next;objectInput.dispatchEvent(new Event('input',{bubbles:true}));}};return b;}sizeRow.append(sizeButton('−','photoSizeLess','도자기 작게',-5),objectInput,sizeButton('＋','photoSizeMore','도자기 크게',5));objectField.append(objectLabel,sizeRow);function applyObjectSize(value){photoObjectScale=Math.max(.5,Math.min(1.8,Number(value)||1));objectInput.value=Math.round(photoObjectScale*100);objectOutput.textContent=Math.round(photoObjectScale*100)+'%';displayPhoto=false;dirty=true;cardDirty=true;window.TodakPhoto?.interact();}objectInput.oninput=function(){applyObjectSize(Number(this.value)/100);};el('resetPhoto').addEventListener('click',function(){objectPan={x:0,y:0};applyObjectSize(1);});
  var backgroundField=document.createElement('div');backgroundField.className='field';var backgroundLabel=document.createElement('label');backgroundLabel.htmlFor='realPhotoScene';backgroundLabel.textContent='완성 사진 배경';backgroundLabel.className='label';var backgroundSelect=document.createElement('select');backgroundSelect.id='realPhotoScene';backgroundSelect.className='cm-ghost';backgroundSelect.style.width='100%';backgroundField.append(backgroundLabel,backgroundSelect);el('openCard').closest('.actions').before(objectField,backgroundField,button);var inline=document.createElement('p');inline.id='photoRenderInline';inline.className='photo-render-explain';button.after(inline);
  el('finishedPhoto').onclick=function(){selectView('photo');};
- el('realPhotoClose').onclick=function(){el('realPhotoDlg').close();};el('realPhotoRetry').onclick=function(){render(true);};el('realPhotoScene').onchange=function(){var result=TodakShop.purchase('background',this.value);if(result.ok){photoScene=this.value==='gallery'?'dark':this.value==='warm'?'warm':'studio';browserPreview();}};
+ el('realPhotoClose').onclick=function(){el('realPhotoDlg').close();previewEpoch++;if(previewURL){URL.revokeObjectURL(previewURL);previewURL=null;}el('realPhotoImage').removeAttribute('src');};el('realPhotoRetry').onclick=function(){render(true);};el('realPhotoScene').onchange=function(){var result=TodakShop.purchase('background',this.value);if(result.ok){photoScene=this.value==='gallery'?'dark':this.value==='warm'?'warm':'studio';displayPhoto=false;dirty=cardDirty=true;}};
  var basePhotoData=photoData;photoData=function(){photoScene=chosenBackground();var data=basePhotoData();data.background=photoScene;var v=backgroundView||{zoom:Z,x:CX-CX0,y:BASE-BASE0};data.backgroundZoom=v.zoom;data.backgroundPanX=v.x/Math.max(1,data.viewWidth);data.backgroundPanY=v.y/Math.max(1,HC);return data;};
  function drawBackground(c,width,height,id,zoom,panX,panY){
   // At the widest view the source still covers the frame; never tile or reflect it.
@@ -4123,7 +4119,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
 
  var baseFields=itemFields;itemFields=function(it){it=baseFields(it);if(readyImage&&readyItem===st.curId&&st.stage==='done')it.thumb=thumb();return it;};
  var oldStage=setStage;setStage=function(stage){if(stage!=='done'){objectPan={x:0,y:0};applyObjectSize(1);renderEpoch++;pending=null;readyImage=null;readyItem=null;}oldStage(stage);if(stage==='done'){photoOn=true;displayPhoto=!!readyImage;scenes();syncView();dirty=true;}};
- window.TodakRealPhoto={exportData:function(){var data=photoData();data.zoom=1;data.panX=objectPan.x;data.panY=objectPan.y;data.objectScale=photoObjectScale;return data;},drawBackground:drawBackground,renderPan:function(){return baseDrawing?{x:CX-CX0,y:BASE-BASE0}:{x:objectPan.x,y:objectPan.y};},viewport:function(){return {x:CX-CX0,y:BASE-BASE0,zoom:Z,width:photoData().viewWidth,height:HC};},moveObject:function(dx,dy){var width=photoData().viewWidth;objectPan.x=clamp(objectPan.x+dx,-width*.4,width*.4);objectPan.y=clamp(objectPan.y+dy,-HC*.4,HC*.4);displayPhoto=false;dirty=true;},objectScale:function(){return photoObjectScale;},open:openPhoto,select:selectView,live:function(){displayPhoto=false;dirty=true;},invalidate:function(){photoScene=chosenBackground();if(el('realPhotoScene'))el('realPhotoScene').value=TodakShop.wallet.background;pending=null;readyImage=null;readyItem=null;displayPhoto=false;dirty=true;},snapshot:function(){return snapshot;},render:render};
+ window.TodakRealPhoto={exportData:function(){var data=photoData();data.zoom=1;data.panX=objectPan.x;data.panY=objectPan.y;data.objectScale=photoObjectScale;return data;},drawBackground:drawBackground,renderPan:function(){return baseDrawing?{x:CX-CX0,y:BASE-BASE0}:{x:objectPan.x,y:objectPan.y};},viewport:function(){return {x:CX-CX0,y:BASE-BASE0,zoom:Z,width:photoData().viewWidth,height:HC};},moveObject:function(dx,dy){var width=photoData().viewWidth;objectPan.x=clamp(objectPan.x+dx,-width*.4,width*.4);objectPan.y=clamp(objectPan.y+dy,-HC*.4,HC*.4);window.TodakPhoto?.interact();displayPhoto=false;dirty=true;},objectScale:function(){return photoObjectScale;},open:openPhoto,select:selectView,live:function(){displayPhoto=false;dirty=true;},invalidate:function(){photoScene=chosenBackground();if(el('realPhotoScene'))el('realPhotoScene').value=TodakShop.wallet.background;pending=null;readyImage=null;readyItem=null;displayPhoto=false;dirty=true;},snapshot:function(){return snapshot;},render:render};
  el('qualityClose').onclick=function(){el('qualityDlg').close();};
 })();
 
@@ -4323,16 +4319,28 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
 
  var rackRefresh=refresh;refresh=function(){rackRefresh();rackSync();};var rackStage=setStage;setStage=function(stage){rackStage(stage);rackSync();};var rackSheet=setSheet;setSheet=function(open){var result=rackSheet(open);rackSync();setTimeout(rackSync,300);return result;};window.addEventListener('resize',rackSync);rackSync();
  // A separate 3D inspection camera; dragging rotates the object instead of moving the photo.
- var viewer=document.createElement('dialog');viewer.id='finished360';viewer.innerHTML='<button type="button" id="closeFinished360">닫기 ×</button><h2>완성 작품 · 360° 감상</h2><p>좌우로 돌리고 위아래로 기울여 안쪽과 바닥까지 살펴보세요.</p><canvas id="finished360Canvas" width="600" height="540" aria-label="도자기 360도 감상"></canvas><small id="finished360Status">드래그로 회전 · 휠 또는 두 손가락으로 확대</small>';document.body.appendChild(viewer);
+ var viewer=document.createElement('dialog');viewer.id='finished360';viewer.innerHTML='<button type="button" id="closeFinished360">닫기 ×</button><h2>완성 작품 · 360° 감상</h2><p>원하는 방향으로 돌리고 뒤집어 안쪽과 바닥까지 살펴보세요.</p><canvas id="finished360Canvas" width="600" height="540" aria-label="도자기 360도 감상"></canvas><small id="finished360Status">끌어서 자유 회전 · 두 손가락으로 확대·비틀기</small>';document.body.appendChild(viewer);
  var inspect=document.createElement('button');inspect.id='openFinished360';inspect.type='button';inspect.className='corner';inspect.textContent='360° 감상';document.querySelector('.resultViewDock').appendChild(inspect);
  var savedOrbitData=null,savedOrbitEpoch=0;var orbitCanvas=$('finished360Canvas'),yaw=0,pitch=.32,zoom=1,orbitPointer=null;
- function renderOrbit(){if((!viewer.open&&orbitCanvas.dataset.inline!=='true')||!window.TodakPhoto||savedOrbitEpoch&&viewer.dataset.savedLoading==='true')return;var data=savedOrbitData||photoData();Object.assign(data,{width:600,canvasHeight:540,viewWidth:600,viewHeight:540,pixelWidth:600,pixelHeight:540,rotation:yaw,elevation:pitch,zoom:zoom,objectScale:1,panX:0,panY:0,background:'studio',transparent:true,inspection:true});var out=TodakPhoto.render(data);if(out){var x=orbitCanvas.getContext('2d');if(orbitCanvas.dataset.inline==='true'){x.clearRect(0,0,600,540);}else{x.fillStyle='#e8e1d3';x.fillRect(0,0,600,540);}x.drawImage(out,0,0,600,540);}}
- inspect.onclick=function(){savedOrbitData=null;viewer.dataset.savedLoading='false';savedOrbitEpoch++;viewer.querySelector('h2').textContent='완성 작품 · 360° 감상';orbitCanvas.dataset.inline='true';orbitCanvas.hidden=false;stageEl.appendChild(orbitCanvas);document.body.classList.add('ui-inspecting');orbitCanvas.style.backgroundImage='url('+TodakBackgrounds.url(photoScene)+')';yaw=rot;pitch=.32;zoom=1;renderOrbit();if(!window.TodakPhoto&&window.TodakLoad3D){$('finished360Status').textContent='3D 작품을 불러오는 중…';TodakLoad3D().then(function(){$('finished360Status').textContent='드래그로 회전 · 휠로 확대';renderOrbit();}).catch(function(){$('finished360Status').textContent='3D 감상을 열 수 없어요. 잠시 후 다시 시도해 주세요.';});}};
- $('closeFinished360').onclick=function(){viewer.close();dirty=true;};viewer.addEventListener('close',function(){savedOrbitEpoch++;savedOrbitData=null;fingers.clear();dirty=true;});
- var fingers=new Map(),pinch=0;orbitCanvas.addEventListener('pointerdown',function(e){fingers.set(e.pointerId,{x:e.clientX,y:e.clientY});orbitPointer={id:e.pointerId,x:e.clientX,y:e.clientY};orbitCanvas.setPointerCapture(e.pointerId);if(fingers.size===2){var p=Array.from(fingers.values());pinch=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);}});
- orbitCanvas.addEventListener('pointermove',function(e){if(!fingers.has(e.pointerId))return;var previous=fingers.get(e.pointerId);fingers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(fingers.size===2){var p=Array.from(fingers.values()),next=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);if(pinch>0)zoom=clamp(zoom*next/pinch,.5,2.5);pinch=next;}else{yaw+=(e.clientX-previous.x)*.012;pitch=clamp(pitch+(e.clientY-previous.y)*.008,-1.45,1.5);}renderOrbit();window.dispatchEvent(new Event('todak-inspection-rotated'));});
- ['pointerup','pointercancel','lostpointercapture'].forEach(function(event){orbitCanvas.addEventListener(event,function(e){fingers.delete(e.pointerId);pinch=0;});});orbitCanvas.addEventListener('wheel',function(e){e.preventDefault();zoom=clamp(zoom*Math.exp(-e.deltaY*.001),.5,2.5);renderOrbit();},{passive:false});
- window.TodakFinished360={openSaved:async function(item){orbitCanvas.dataset.inline='false';document.body.classList.remove('ui-inspecting');viewer.appendChild(orbitCanvas);orbitCanvas.hidden=false;fingers.clear();pinch=0;var token=++savedOrbitEpoch;savedOrbitData=null;viewer.dataset.savedLoading='true';yaw=0;pitch=.32;zoom=1.22;viewer.querySelector('h2').textContent=(item.name||item.full||'내 작품')+' · 360° 감상';$('finished360Status').textContent='저장된 작품을 크게 불러오고 있어요…';if(!viewer.open)viewer.showModal();var cx=orbitCanvas.getContext('2d');cx.fillStyle='#e8e1d3';cx.fillRect(0,0,600,540);try{var data=await TodakSavedWorkData(item);if(!window.TodakPhoto&&window.TodakLoad3D)await TodakLoad3D();if(token!==savedOrbitEpoch||!viewer.open)return;if(!window.TodakPhoto?.available)throw Error('no_renderer');savedOrbitData=data;viewer.dataset.savedLoading='false';$('finished360Status').textContent='드래그로 회전 · 휠 또는 두 손가락으로 확대';renderOrbit();}catch(error){if(token!==savedOrbitEpoch)return;$('finished360Status').textContent=error.message==='missing_geometry'?'이 작품에는 입체 형태 기록이 없어 저장된 사진으로 보여드려요.':'3D 감상을 불러오지 못했어요. 잠시 후 다시 열어 주세요.';var im=new Image();im.onload=function(){if(token!==savedOrbitEpoch||!viewer.open)return;var scale=Math.min(560/im.width,490/im.height);cx.drawImage(im,(600-im.width*scale)/2,(540-im.height*scale)/2,im.width*scale,im.height*scale);};im.src=item.thumb;}},render:renderOrbit,turn:function(delta){yaw+=delta;renderOrbit();window.dispatchEvent(new Event('todak-inspection-rotated'));},state:function(){return {yaw:yaw,pitch:pitch,zoom:zoom};}};
+ // A virtual trackball rotates the viewing frame without changing any saved work.
+ var orbitOrientation=[Math.sin(-.16),0,0,Math.cos(.16)],orbitBaseYaw=0,orbitFrame=0,twist=0;
+ function orbitMultiply(a,b){var q=[a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1],a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0],a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3],a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2]],n=Math.hypot.apply(Math,q)||1;return q.map(function(v){return v/n;});}
+ function orbitReset(rotation){orbitBaseYaw=rotation;yaw=rotation;pitch=.32;orbitOrientation=[Math.sin(-.16),0,0,Math.cos(.16)];fingers.clear();pinch=twist=0;}
+ function orbitPoint(p){var r=orbitCanvas.getBoundingClientRect(),scale=Math.max(1,Math.min(r.width,r.height)*.5),x=(p.x-r.left-r.width*.5)/scale,y=(r.top+r.height*.5-p.y)/scale,l=x*x+y*y;if(l>1){var n=Math.sqrt(l);return [x/n,y/n,0];}return [x,y,Math.sqrt(1-l)];}
+ function orbitDrag(previous,next){var a=orbitPoint(previous),b=orbitPoint(next),w=1+a[0]*b[0]+a[1]*b[1]+a[2]*b[2],q;if(w<1e-8){q=Math.abs(a[0])>Math.abs(a[2])?[-a[1],a[0],0,0]:[0,-a[2],a[1],0];}else q=[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0],w];var n=Math.hypot.apply(Math,q)||1;q=q.map(function(v){return v/n;});orbitOrientation=orbitMultiply(orbitOrientation,[-q[0],-q[1],-q[2],q[3]]);yaw+=(next.x-previous.x)*.012;pitch+=(next.y-previous.y)*.008;}
+ function orbitQueue(){if(orbitFrame)return;orbitFrame=requestAnimationFrame(function(){orbitFrame=0;renderOrbit();});}
+ function orbitPair(){var p=Array.from(fingers.values());pinch=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);twist=Math.atan2(p[1].y-p[0].y,p[1].x-p[0].x);}
+ orbitCanvas.style.touchAction='none';
+ function renderOrbit(){if((!viewer.open&&orbitCanvas.dataset.inline!=='true')||!window.TodakPhoto||savedOrbitEpoch&&viewer.dataset.savedLoading==='true')return;var data=savedOrbitData||photoData();Object.assign(data,{width:600,canvasHeight:540,viewWidth:600,viewHeight:540,pixelWidth:600,pixelHeight:540,rotation:orbitBaseYaw,elevation:.32,inspectionOrientation:orbitOrientation.slice(),zoom:zoom,objectScale:1,panX:0,panY:0,background:'studio',transparent:true,inspection:true});var out=TodakPhoto.render(data);if(out){var x=orbitCanvas.getContext('2d');if(orbitCanvas.dataset.inline==='true'){x.clearRect(0,0,600,540);}else{x.fillStyle='#e8e1d3';x.fillRect(0,0,600,540);}x.drawImage(out,0,0,600,540);}}
+ inspect.onclick=function(){savedOrbitData=null;viewer.dataset.savedLoading='false';savedOrbitEpoch++;viewer.querySelector('h2').textContent='완성 작품 · 360° 감상';orbitCanvas.dataset.inline='true';orbitCanvas.hidden=false;stageEl.appendChild(orbitCanvas);document.body.classList.add('ui-inspecting');orbitCanvas.style.backgroundImage='url('+TodakBackgrounds.url(photoScene)+')';orbitReset(rot);zoom=1;renderOrbit();if(!window.TodakPhoto&&window.TodakLoad3D){$('finished360Status').textContent='3D 작품을 불러오는 중…';TodakLoad3D().then(function(){$('finished360Status').textContent='끌어서 자유 회전 · 휠로 확대';renderOrbit();}).catch(function(){$('finished360Status').textContent='3D 감상을 열 수 없어요. 잠시 후 다시 시도해 주세요.';});}};
+ $('closeFinished360').onclick=function(){viewer.close();dirty=true;};viewer.addEventListener('close',function(){if(viewer.open)return;savedOrbitEpoch++;savedOrbitData=null;fingers.clear();cancelAnimationFrame(orbitFrame);orbitFrame=0;dirty=true;});
+ var fingers=new Map(),pinch=0;
+ orbitCanvas.addEventListener('pointerdown',function(e){e.preventDefault();fingers.set(e.pointerId,{x:e.clientX,y:e.clientY});orbitPointer={id:e.pointerId,x:e.clientX,y:e.clientY};orbitCanvas.setPointerCapture(e.pointerId);if(fingers.size===2)orbitPair();});
+ orbitCanvas.addEventListener('pointermove',function(e){if(!fingers.has(e.pointerId))return;e.preventDefault();var previous=fingers.get(e.pointerId),nextPoint={x:e.clientX,y:e.clientY};fingers.set(e.pointerId,nextPoint);if(fingers.size===2){var points=Array.from(fingers.values()),next=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y),angle=Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x);if(pinch>0&&next>1){zoom=clamp(zoom*next/pinch,.5,2.5);var delta=Math.atan2(Math.sin(angle-twist),Math.cos(angle-twist));orbitOrientation=orbitMultiply(orbitOrientation,[0,0,Math.sin(delta*.5),Math.cos(delta*.5)]);}pinch=next;twist=angle;}else if(fingers.size===1)orbitDrag(previous,nextPoint);orbitQueue();window.dispatchEvent(new Event('todak-inspection-rotated'));});
+ ['pointerup','pointercancel','lostpointercapture'].forEach(function(event){orbitCanvas.addEventListener(event,function(e){fingers.delete(e.pointerId);pinch=twist=0;if(fingers.size===2)orbitPair();});});
+ orbitCanvas.addEventListener('wheel',function(e){e.preventDefault();zoom=clamp(zoom*Math.exp(-e.deltaY*.001),.5,2.5);orbitQueue();},{passive:false});
+
+ window.TodakFinished360={openSaved:async function(item){orbitCanvas.dataset.inline='false';document.body.classList.remove('ui-inspecting');viewer.appendChild(orbitCanvas);orbitCanvas.hidden=false;fingers.clear();pinch=0;var token=++savedOrbitEpoch;savedOrbitData=null;viewer.dataset.savedLoading='true';orbitReset(0);zoom=1.22;viewer.querySelector('h2').textContent=(item.name||item.full||'내 작품')+' · 360° 감상';$('finished360Status').textContent='저장된 작품을 크게 불러오고 있어요…';if(!viewer.open)viewer.showModal();var cx=orbitCanvas.getContext('2d');cx.fillStyle='#e8e1d3';cx.fillRect(0,0,600,540);try{var data=await TodakSavedWorkData(item);if(!window.TodakPhoto&&window.TodakLoad3D)await TodakLoad3D();if(token!==savedOrbitEpoch||!viewer.open)return;if(!window.TodakPhoto?.available)throw Error('no_renderer');if(TodakPhoto.ready)await TodakPhoto.ready(data);if(token!==savedOrbitEpoch||!viewer.open)return;savedOrbitData=data;viewer.dataset.savedLoading='false';$('finished360Status').textContent='끌어서 자유 회전 · 두 손가락으로 확대·비틀기';renderOrbit();}catch(error){if(token!==savedOrbitEpoch)return;$('finished360Status').textContent=error.message==='missing_geometry'?'이 작품에는 입체 형태 기록이 없어 저장된 사진으로 보여드려요.':'3D 감상을 불러오지 못했어요. 잠시 후 다시 열어 주세요.';var im=new Image();im.onload=function(){if(token!==savedOrbitEpoch||!viewer.open)return;var scale=Math.min(560/im.width,490/im.height);cx.drawImage(im,(600-im.width*scale)/2,(540-im.height*scale)/2,im.width*scale,im.height*scale);};im.src=item.thumb;}},render:renderOrbit,turn:function(delta){yaw+=delta;orbitOrientation=orbitMultiply(orbitOrientation,[0,Math.sin(delta*.5),0,Math.cos(delta*.5)]);orbitQueue();window.dispatchEvent(new Event('todak-inspection-rotated'));},state:function(){return {yaw:yaw,pitch:pitch,zoom:zoom,orientation:orbitOrientation.slice()};}};
  window.TodakWheel={exportDraft:function(){return {top:top,bottom:bottom,glazeBrush:glazeBrush,glazeMode:glazeMode,checks:checks};},restoreDraft:function(s){s=s||{};active=null;last=null;pendingTop=null;bottomActive=null;bottomPending=null;history=[];bottomHistory=[];loaded=st.topPaint||null;bottomLoaded={bottomPaint:st.bottomPaint||null,bottomCarve:st.bottomCarve||null};topVersion++;bottomVersion++;bottomReliefVersion++;topSurfaceKey=topBaseKey=bottomKey="";top=!!s.top;bottom=!top&&!!s.bottom;glazeBrush=!!s.glazeBrush;glazeMode=s.glazeMode==="brush"?"brush":s.glazeMode==="base"?"base":null;checks=!!s.checks;$("glazeBrush").checked=glazeBrush;refresh();},forms:forms,brushing:function(){return glazeBrush;},top:function(){return top;},layout:topLayout,bottom:function(){return bottom;},bottomLayout:bottomLayout,bottomLayer:bottomPaint,bottomRelief:bottomCarve,layer:topLayer,refresh:refresh,cancelGesture:function(commit){if(commit){var event={preventDefault:function(){},stopImmediatePropagation:function(){}};if(active!==null){event.pointerId=active;end(event);}if(bottomActive!==null){event.pointerId=bottomActive;bottomEnd(event);}return;}if(active!==null&&top)history.pop();if(bottomActive!==null)bottomHistory.pop();active=bottomActive=null;pendingTop=bottomPending=null;last=bottomLast=null;changed=bottomChanged=false;activeCursor.hidden=true;},surface:function(){return topSurface(topLayout());}};
 })();
 
@@ -4611,7 +4619,7 @@ var tutorialGuidance;
  }
  function resultReady(){var ready=photoFrame&&!revealing,control=$('ui-result-360');if(control)control.disabled=!!(active&&current()&&current().stage==='done'&&!ready);if(ready&&active&&current()&&current().id==='photo'&&!done)setTimeout(function(){if(active&&current()&&current().id==='photo')mark('photo');},0);return ready;}
  var stageBefore=setStage;setStage=function(stage){var entering=stage==='done'&&st.stage!=='done';if(entering)beginPhoto();var result=stageBefore.apply(this,arguments);resultReady();return result;};
- var photoBefore=drawPhoto;drawPhoto=function(){var result=photoBefore.apply(this,arguments);if(st.stage==='done'&&photoOn&&photoLoadSettled&&!photoFrame){photoFrame=true;setTimeout(function(){if(active)route();},0);}return result;};
+ var photoBefore=drawPhoto;drawPhoto=function(){var result=photoBefore.apply(this,arguments);if(st.stage==='done'&&photoOn&&photoLoadSettled&&!(window.TodakPhoto?.isReady&&!TodakPhoto.isReady(photoData()))&&!photoFrame){photoFrame=true;setTimeout(function(){if(active)route();},0);}return result;};
  var sizeRow=$('photoSizeMore').parentElement;sizeRow.id='ui-photo-size-controls';sizeRow.style.borderRadius='12px';sizeRow.setAttribute('role','group');sizeRow.setAttribute('aria-label','사진 속 도자기 크기: 줄이기, 슬라이더, 늘리기');
  var targetBefore=intendedTarget;intendedTarget=function(){
   if(current()){
@@ -5258,15 +5266,15 @@ function uiUsesSheet(){return innerWidth<960&&!(innerWidth>=600&&innerHeight<=56
  var jobs=new Map(),running=Promise.resolve(),saveTimer=0,thumbnailReady=false;
  function key(item){var s=JSON.stringify([item.id,item.shape,item.full2,item.c,item.communityVisual,item.topPaint,item.bottomPaint,item.bottomCarve]),h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return 'reflection-3-'+(h>>>0).toString(36);}
  function cropped(source){var c=document.createElement('canvas');c.width=source.width;c.height=source.height;var x=c.getContext('2d');x.drawImage(source,0,0);var pixels=x.getImageData(0,0,c.width,c.height).data,left=c.width,top=c.height,right=-1,bottom=-1;for(var y=0;y<c.height;y++)for(var q=0;q<c.width;q++)if(pixels[(y*c.width+q)*4+3]>12){left=Math.min(left,q);right=Math.max(right,q);top=Math.min(top,y);bottom=Math.max(bottom,y);}if(right<left)throw Error('empty_render');var out=document.createElement('canvas');out.width=out.height=320;var pad=10,w=right-left+1,h=bottom-top+1,scale=Math.min((320-pad*2)/w,(320-pad*2)/h);out.getContext('2d').drawImage(c,left,top,w,h,(320-w*scale)/2,320-pad-h*scale,w*scale,h*scale);return out.toDataURL('image/png');}
- thumbNow=function(){thumbnailReady=false;var d=photoData(),out=null;d.transparent=true;d.objectScale=1;d.zoom=1;d.panX=d.panY=0;d.inspection=true;if(window.TodakPhoto?.available)out=TodakPhoto.export(d,320,1);if(out){var url=cropped(out);thumbnailReady=true;return url;}var previous={CX:CX,BASE:BASE,SV:SV};try{var radius=Math.max.apply(null,st.radii);SV=Math.min(W/(radius*2.5),HC/(st.height+radius*.6+2));CX=W/2;BASE=(HC+st.height*SV)/2;renderPhotoBody();return cropped(pv.c);}finally{CX=previous.CX;BASE=previous.BASE;SV=previous.SV;pvKey='';dirty=true;}};
+ thumbNow=function(){thumbnailReady=false;if(photo3DPending&&!window.TodakPhoto&&!photo3DFailed){var temporary=document.createElement("canvas");temporary.width=temporary.height=320;temporary.getContext("2d").fillStyle="#e8e1d3";temporary.getContext("2d").fillRect(0,0,320,320);return temporary.toDataURL("image/png");}var d=photoData(),out=null;d.transparent=true;d.objectScale=1;d.zoom=1;d.panX=d.panY=0;d.inspection=true;if(window.TodakPhoto?.available&&(!TodakPhoto.isReady||TodakPhoto.isReady(d)))out=TodakPhoto.export(d,320,1);if(out){var url=cropped(out);thumbnailReady=true;return url;}var previous={CX:CX,BASE:BASE,SV:SV};try{var radius=Math.max.apply(null,st.radii);SV=Math.min(W/(radius*2.5),HC/(st.height+radius*.6+2));CX=W/2;BASE=(HC+st.height*SV)/2;renderPhotoBody();return cropped(pv.c);}finally{CX=previous.CX;BASE=previous.BASE;SV=previous.SV;pvKey='';dirty=true;}};
  var fields=itemFields;itemFields=function(item){item=fields(item);if(!item.thumb?.startsWith('data:image/png'))item.thumb=thumbNow();item.shelfCutoutKey=thumbnailReady?key(item):null;return item;};
  function persist(item){try{dbPut(item);}catch(_){}clearTimeout(saveTimer);saveTimer=setTimeout(function(){lsSave();},250);}
- function make(item){var stamp=key(item);if(item.shelfCutoutKey===stamp&&item.thumb?.startsWith('data:image/png'))return Promise.resolve(item.thumb);if(jobs.has(stamp))return jobs.get(stamp);var task=running.then(async function(){if(!window.TodakPhoto?.available&&window.TodakLoad3D)await TodakLoad3D();var d=await TodakSavedWorkData(item);if(!window.TodakPhoto?.available)throw Error('renderer_unavailable');Object.assign(d,{key:'shelf-'+stamp,transparent:true,objectScale:1,zoom:1,panX:0,panY:0,inspection:true});var out=TodakPhoto.export(d,320,1);if(!out)throw Error('renderer_unavailable');var url=cropped(out);if(key(item)!==stamp)throw Error('stale_work');item.thumb=url;item.shelfCutoutKey=stamp;persist(item);dirty=true;return url;});running=task.catch(function(){});jobs.set(stamp,task);task.catch(function(){jobs.delete(stamp);});return task;}
+ function make(item){var stamp=key(item);if(item.shelfCutoutKey===stamp&&item.thumb?.startsWith('data:image/png'))return Promise.resolve(item.thumb);if(jobs.has(stamp))return jobs.get(stamp);var task=running.then(async function(){if(!window.TodakPhoto?.available&&window.TodakLoad3D)await TodakLoad3D();var d=await TodakSavedWorkData(item);if(!window.TodakPhoto?.available)throw Error('renderer_unavailable');if(TodakPhoto.ready)await TodakPhoto.ready(d);Object.assign(d,{key:'shelf-'+stamp,transparent:true,objectScale:1,zoom:1,panX:0,panY:0,inspection:true});var out=TodakPhoto.export(d,320,1);if(!out)throw Error('renderer_unavailable');var url=cropped(out);if(key(item)!==stamp)throw Error('stale_work');item.thumb=url;item.shelfCutoutKey=stamp;persist(item);dirty=true;return url;});running=task.catch(function(){});jobs.set(stamp,task);task.catch(function(){jobs.delete(stamp);});return task;}
  // A legacy photo without shape data stays available in its original viewer.
  // Do not put a photographic rectangle over the cabinet while it is being rebuilt.
  var blank='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M30 20h40l10 20-5 40q-25 14-50 0l-5-40z" fill="none" stroke="#879789" stroke-width="3"/></svg>');
  function refresh(){if($('drawer').hidden)return;Array.from($('shelfGrid').querySelectorAll('.piece')).forEach(function(node,i){var item=store.items[i],im=node.querySelector('img');if(!item||!im)return;if(item.shelfCutoutKey===key(item)){im.src=item.thumb;return;}im.src=blank;make(item).then(function(url){if(im.isConnected)im.src=url;}).catch(function(){im.title='원본 사진은 작품을 열어 확인할 수 있어요.';});});}
- var shelfRender=renderShelf;renderShelf=function(){var value=shelfRender.apply(this,arguments);refresh();return value;};$('shelfBtn').addEventListener('click',refresh);window.TodakShelfCutouts={make:make,refresh:refresh};
+ var shelfRender=renderShelf;renderShelf=function(){var value=shelfRender.apply(this,arguments);refresh();return value;};$('shelfBtn').addEventListener('click',refresh);window.TodakShelfCutouts={make:make,refresh:refresh,updateCurrent:function(item){if(curItem()!==item)return;var url=thumbNow();if(thumbnailReady){item.thumb=url;item.shelfCutoutKey=key(item);persist(item);refresh();}}};
 })();
 
 // Public anon JWT only. Private storage is accessible exclusively through the server.
@@ -5444,13 +5452,23 @@ function freeReferenceTarget(){
  window.TodakWorkInProgress={ready:ready,flush:save,available:function(){return !!available;},status:function(){return {active:inSession,savedAt:available?.updatedAt||null,stage:available?.state.stage||null};}};
 })();
 
+
+async function photoResourcesReady(){try{if(window.TodakLoad3D)await TodakLoad3D();if(window.TodakPhoto?.ready)await TodakPhoto.ready(window.TodakRealPhoto?TodakRealPhoto.exportData():photoData());}catch(_){}}
+(function(){
+ var oldData=photoData;photoData=function(){var d=oldData();d.geometryKey=[st.height,st.floor,st.rimSoftness||0,st.radii.join(','),st.inner.join(','),hasCarve?texVer:0,st.bottomCarve||''].join('|');d.textureKey=[st.glaze,(st.customC||[]).join(','),st.fx,texVer].join('|');d.materialKey=[d.textureKey,st.glaze2,st.dip,st.dipDepth,st.finish,st.topPaint||'',st.bottomPaint||'',d.topOpacity,d.bottomOpacity].join('|');return d;};
+ addEventListener('todak-photo-settled',function(){if(st.stage==='done'&&photoOn)dirty=true;});
+ document.addEventListener('input',function(){if(st.stage==='glaze'&&window.TodakPhoto?.ready)TodakPhoto.ready(photoData());});document.addEventListener('click',function(e){if(st.stage==='glaze'&&e.target.closest('#swatches,#fx,#finish')&&window.TodakPhoto?.ready)TodakPhoto.ready(photoData());});
+ addEventListener('todak-photo-resources-ready',function(){if(st.stage==='done'){dirty=cardDirty=true;var item=curItem();if(item&&!item.shelfCutoutKey&&window.TodakShelfCutouts)requestAnimationFrame(function(){requestAnimationFrame(function(){if(st.stage==='done'&&st.curId===item.id&&!item.shelfCutoutKey&&TodakPhoto.isReady(photoData()))TodakShelfCutouts.updateCurrent(item);});});}});
+ var fresh=freshClay;freshClay=function(){if(st.stage==='done'&&pendingShelf){pendingShelf=false;shelfAddCurrent();}return fresh.apply(this,arguments);};
+ var stage=setStage;setStage=function(s){var result=stage.apply(this,arguments);if(s==='done'||s==='glaze'){if(window.TodakPhoto?.ready)TodakPhoto.ready(photoData());else if(window.TodakLoad3D)TodakLoad3D().then(function(){if(['done','glaze'].includes(st.stage)&&TodakPhoto.ready)TodakPhoto.ready(photoData());}).catch(function(){});}return result;};
+})();
 if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
 })();
 
 
 </script>
 
-<script src="migration/transfer-core.js?v=27297eedc978"></script>
+<script src="migration/transfer-core.js?v=fb1718e4f591"></script>
 <script src="migration/domain-transfer.js?v=2c957daad9b7"></script>
 </body>
 </html>
