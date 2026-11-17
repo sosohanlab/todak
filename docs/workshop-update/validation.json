@@ -1,0 +1,590 @@
+{
+  "baseCommit": "0883223af8bf5528330fe92c2a31770d8f4ee342",
+  "date": "2026-11-18",
+  "mobileHardwareTested": false,
+  "input": [
+    {
+      "width": 1440,
+      "form": "plate",
+      "check": "stationary shape does not deform profile",
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "form": "plate",
+      "check": "quick inward shape drag edits",
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "form": "bowl",
+      "check": "stationary shape does not deform profile",
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "form": "bowl",
+      "check": "quick inward shape drag edits",
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "form": "cup",
+      "check": "stationary shape does not deform profile",
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "form": "cup",
+      "check": "quick inward shape drag edits",
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "form": "moon",
+      "check": "stationary shape does not deform profile",
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "form": "moon",
+      "check": "quick inward shape drag edits",
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "check": "range display, normal hand reset, left/right thickness preserves exterior",
+      "pass": true
+    },
+    {
+      "width": 390,
+      "form": "plate",
+      "check": "stationary shape does not deform profile",
+      "pass": true
+    },
+    {
+      "width": 390,
+      "form": "plate",
+      "check": "quick inward shape drag edits",
+      "pass": true
+    },
+    {
+      "width": 390,
+      "form": "bowl",
+      "check": "stationary shape does not deform profile",
+      "pass": true
+    },
+    {
+      "width": 390,
+      "form": "bowl",
+      "check": "quick inward shape drag edits",
+      "pass": true
+    },
+    {
+      "width": 390,
+      "form": "cup",
+      "check": "stationary shape does not deform profile",
+      "pass": true
+    },
+    {
+      "width": 390,
+      "form": "cup",
+      "check": "quick inward shape drag edits",
+      "pass": true
+    },
+    {
+      "width": 390,
+      "form": "moon",
+      "check": "stationary shape does not deform profile",
+      "pass": true
+    },
+    {
+      "width": 390,
+      "form": "moon",
+      "check": "quick inward shape drag edits",
+      "pass": true
+    },
+    {
+      "width": 390,
+      "check": "range display, normal hand reset, left/right thickness preserves exterior",
+      "pass": true
+    }
+  ],
+  "thickness": [
+    {
+      "mobile": false,
+      "side": -1,
+      "dashedRange": true,
+      "matchesInfluenceRadius": true,
+      "followsContact": true,
+      "innerChangesOnly": true,
+      "clearsOnRelease": true
+    },
+    {
+      "mobile": false,
+      "side": 1,
+      "dashedRange": true,
+      "matchesInfluenceRadius": true,
+      "followsContact": true,
+      "innerChangesOnly": true,
+      "clearsOnRelease": true
+    },
+    {
+      "mobile": false,
+      "threeSizes": true,
+      "clearsOnBlur": true,
+      "lowestFootTrimmed": true,
+      "footSmoothed": true,
+      "heightAndInteriorPreserved": true
+    },
+    {
+      "mobile": true,
+      "side": -1,
+      "dashedRange": true,
+      "matchesInfluenceRadius": true,
+      "followsContact": true,
+      "innerChangesOnly": true,
+      "clearsOnRelease": true
+    },
+    {
+      "mobile": true,
+      "side": 1,
+      "dashedRange": true,
+      "matchesInfluenceRadius": true,
+      "followsContact": true,
+      "innerChangesOnly": true,
+      "clearsOnRelease": true
+    },
+    {
+      "mobile": true,
+      "threeSizes": true,
+      "clearsOnBlur": true,
+      "lowestFootTrimmed": true,
+      "footSmoothed": true,
+      "heightAndInteriorPreserved": true
+    }
+  ],
+  "bottomAndDip": [
+    {
+      "width": 1440,
+      "actualUndersideCut": true,
+      "stationarySafe": true,
+      "rimPreserved": true,
+      "outerAndInteriorUnchanged": true,
+      "undoRedo": true,
+      "savedAndLoaded": true,
+      "meshChanges": true
+    },
+    {
+      "width": 1440,
+      "topBottomMasksSixCases": true,
+      "gpuInteriorAndUndersideShader": true,
+      "dipSavedAndResumed": true
+    },
+    {
+      "width": 390,
+      "actualUndersideCut": true,
+      "stationarySafe": true,
+      "rimPreserved": true,
+      "outerAndInteriorUnchanged": true,
+      "undoRedo": true,
+      "savedAndLoaded": true,
+      "meshChanges": true
+    },
+    {
+      "width": 390,
+      "topBottomMasksSixCases": true,
+      "gpuInteriorAndUndersideShader": true,
+      "dipSavedAndResumed": true
+    }
+  ],
+  "tutorial": [
+    {
+      "width": 1440,
+      "input": "mouse",
+      "shapingTools": 4,
+      "decorationTools": 5,
+      "orderedExercises": 37,
+      "centeredGuide": true,
+      "pauseResume": true,
+      "pngSaved": true,
+      "complete": true
+    },
+    {
+      "width": 390,
+      "input": "CDP touch",
+      "shapingTools": 4,
+      "decorationTools": 5,
+      "orderedExercises": 37,
+      "centeredGuide": true,
+      "pauseResume": true,
+      "pngSaved": true,
+      "complete": true
+    }
+  ],
+  "buttonCue": [
+    {
+      "width": 390,
+      "height": 520,
+      "trimButtonPulses": true,
+      "pulseMovesToActualSetting": true,
+      "noAddedTextOrOverlay": true,
+      "drawerStaysOpen": true,
+      "stopsOnHome": true,
+      "reducedMotionStatic": true
+    },
+    {
+      "width": 720,
+      "height": 620,
+      "trimButtonPulses": true,
+      "pulseMovesToActualSetting": true,
+      "noAddedTextOrOverlay": true,
+      "drawerStaysOpen": true,
+      "stopsOnHome": true,
+      "reducedMotionStatic": true
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "trimButtonPulses": true,
+      "pulseMovesToActualSetting": true,
+      "noAddedTextOrOverlay": true,
+      "drawerStaysOpen": true,
+      "stopsOnHome": true,
+      "reducedMotionStatic": true
+    },
+    {
+      "stage": "deco",
+      "actualControlCue": true
+    },
+    {
+      "stage": "glaze",
+      "actualControlCue": true
+    }
+  ],
+  "mobilePanel": [
+    {
+      "baseline": false,
+      "width": 390,
+      "height": 520,
+      "stage": "throw",
+      "tool": "trim",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 390,
+      "height": 520,
+      "stage": "throw",
+      "tool": "thick",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 390,
+      "height": 520,
+      "stage": "throw",
+      "tool": "sponge",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 390,
+      "height": 520,
+      "stage": "deco",
+      "tool": "stamp",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 390,
+      "height": 520,
+      "stage": "deco",
+      "tool": "carve",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 390,
+      "height": 520,
+      "stage": "deco",
+      "tool": "erase",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 390,
+      "height": 520,
+      "stage": "glaze",
+      "tool": "brush",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 360,
+      "height": 640,
+      "stage": "throw",
+      "tool": "trim",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 360,
+      "height": 640,
+      "stage": "throw",
+      "tool": "thick",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 360,
+      "height": 640,
+      "stage": "throw",
+      "tool": "sponge",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 360,
+      "height": 640,
+      "stage": "deco",
+      "tool": "stamp",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 360,
+      "height": 640,
+      "stage": "deco",
+      "tool": "carve",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 360,
+      "height": 640,
+      "stage": "deco",
+      "tool": "erase",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 360,
+      "height": 640,
+      "stage": "glaze",
+      "tool": "brush",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 720,
+      "height": 620,
+      "stage": "throw",
+      "tool": "trim",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 720,
+      "height": 620,
+      "stage": "throw",
+      "tool": "thick",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 720,
+      "height": 620,
+      "stage": "throw",
+      "tool": "sponge",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 720,
+      "height": 620,
+      "stage": "deco",
+      "tool": "stamp",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 720,
+      "height": 620,
+      "stage": "deco",
+      "tool": "carve",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 720,
+      "height": 620,
+      "stage": "deco",
+      "tool": "erase",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    },
+    {
+      "baseline": false,
+      "width": 720,
+      "height": 620,
+      "stage": "glaze",
+      "tool": "brush",
+      "openAfterSelection": true,
+      "zoomUnchanged": true,
+      "scaleRatio": 1,
+      "settingAdjusted": true,
+      "onlyExplicitClose": true
+    }
+  ],
+  "surfaceTiming": [
+    {
+      "width": 1440,
+      "variant": "private",
+      "form": "cup",
+      "drawP50": 15.799999997019768,
+      "drawP95": 18.900000005960464,
+      "max": 25.099999994039536,
+      "over50": 0
+    },
+    {
+      "width": 1440,
+      "variant": "private",
+      "form": "goblet",
+      "drawP50": 15.5,
+      "drawP95": 17.299999997019768,
+      "max": 19.5,
+      "over50": 0
+    },
+    {
+      "width": 1440,
+      "variant": "candidate",
+      "form": "cup",
+      "drawP50": 6.600000008940697,
+      "drawP95": 9.899999991059303,
+      "max": 15.799999997019768,
+      "over50": 0
+    },
+    {
+      "width": 1440,
+      "variant": "candidate",
+      "form": "goblet",
+      "drawP50": 6.600000008940697,
+      "drawP95": 9.200000002980232,
+      "max": 9.200000002980232,
+      "over50": 0
+    },
+    {
+      "width": 390,
+      "variant": "private",
+      "form": "cup",
+      "drawP50": 6,
+      "drawP95": 9,
+      "max": 14.900000005960464,
+      "over50": 0
+    },
+    {
+      "width": 390,
+      "variant": "private",
+      "form": "goblet",
+      "drawP50": 7.200000002980232,
+      "drawP95": 8.099999994039536,
+      "max": 8.100000008940697,
+      "over50": 0
+    },
+    {
+      "width": 390,
+      "variant": "candidate",
+      "form": "cup",
+      "drawP50": 2,
+      "drawP95": 3.5,
+      "max": 10.899999991059303,
+      "over50": 0
+    },
+    {
+      "width": 390,
+      "variant": "candidate",
+      "form": "goblet",
+      "drawP50": 2.5999999940395355,
+      "drawP95": 3.4000000059604645,
+      "max": 4,
+      "over50": 0
+    }
+  ]
+}

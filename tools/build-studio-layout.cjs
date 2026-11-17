@@ -6,6 +6,10 @@ let html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 if(html.includes('<!-- todak-public-build:'))html=fs.readFileSync(path.join(root,'tools/studio-base.html'),'utf8');
 const marker='if(hot&&hot.ready){hot.ready(start);}';
 if(!html.includes(marker))throw Error('Missing startup');
+const wheelStart=html.indexOf('/* Free wheel throwing: axisymmetric profiles and a separate, planar inner surface. */');
+const wheelEnd=html.indexOf('})();',html.indexOf('window.TodakWheel={',wheelStart));
+if(wheelStart<0||wheelEnd<0)throw Error('Missing wheel integration');
+html=html.slice(0,wheelStart)+fs.readFileSync(path.join(root,'wheel-freedom.js'),'utf8')+html.slice(wheelEnd+5);
 const shopAt=html.indexOf('var catalog={background:'),shopStart=html.lastIndexOf('(function(){',shopAt),shopEnd=html.indexOf('})();',html.indexOf('window.TodakShop={',shopAt));
 if(shopAt<0||shopStart<0||shopEnd<0)throw Error('Missing shop integration');
 html=html.slice(0,shopStart)+fs.readFileSync(path.join(root,'shop.js'),'utf8')+html.slice(shopEnd+5);
@@ -138,6 +142,7 @@ required("var challengeBase=startChallenge;startChallenge=function(id){if(!compl
 required('lockHome();window.TodakTutorial=',fs.readFileSync(path.join(sourceDir,'tutorial-sequence.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-behavior.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-presentation.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-entry.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'grouped-tutorial.js'),'utf8')+'\n lockHome();window.TodakTutorial=');
 const modules=['history-tiles.js','studio-layout.js','responsive-layout.js','experience-polish.js','stage-navigation.js','card-dialog-layout.js','appearance-picker.js','workshop-simplification.js','shelf-cutouts.js','site-feedback-config.js','site-feedback.js'];
 modules.push('personal-challenges.js','free-reference.js','work-in-progress.js');
+modules.push('workshop-input-polish.js','tool-flow.js','dip-angle.js','bottom-trimming.js','view-context.js','tool-size-preview.js','mobile-workspace-focus.js');
 if(!production)modules.push('preview-scenes.js');
 const code=rule+modules.map(f=>fs.readFileSync(path.join(sourceDir,f),'utf8')).join('\n');
 html=html.replace(marker,code+'\n'+marker);

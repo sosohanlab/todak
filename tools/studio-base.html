@@ -1198,12 +1198,13 @@ function prepareInterior(){
  if(st.height-st.floor>.05){constrainInterior();return;}
  pushHist();st.floor=Math.min(.5,st.height*.12);st.inner=st.radii.map(function(r,j){return Math.min(.6,innerLimitAt(j/(N-1),wallLimit()));});markPreset(null);updateReadout();dirty=true;
 }
+function heldProfileAt(values,t,cubic){var p=clamp(t,0,1)*(N-1),i=Math.min(Math.floor(p),N-1),f=p-i,a=values[Math.max(0,i-1)],b=values[i],c=values[Math.min(N-1,i+1)],d=values[Math.min(N-1,i+2)];return cubic?.5*((2*b)+(-a+c)*f+(2*a-5*b+4*c-d)*f*f+(-a+3*b-3*c+d)*f*f*f):b+(c-b)*f;}
 function touchClay(dt){
   var h=st.height, t=clayLevel(ptr.x,ptr.y);
   ptr.contact=false; ptr.maxD=0;
   if(tool!=="thick"&&t<-0.12)return 0;
   var d=clamp(Math.abs(ptr.x-CX)/SV,0.3,RMAX), row=clamp(t,0,1)*(N-1), rowH=h/(N-1);
-  var F=TOOLS[tool].f, SM=TOOLS[tool].sm, k=1-Math.exp(-dt/42);
+  var F=TOOLS[tool].f, SM=TOOLS[tool].sm, k=ptr.flushTarget?1:1-Math.exp(-dt/42);
   var moved=0, sumB=0, sumA=0, j, dist, surf, delta, hj, outerMoved=false;
   if(tool==="sponge"){
     var rimX=(ptr.x-CX)/SV,rimY=(ptr.y-(BASE-st.height*SV))/SV,rimDistance=Math.hypot(rimX,rimY/TILT),lipContact=Math.abs(rimDistance-rAt(1))<.65||st.height-st.floor>.05&&Math.abs(rimDistance-innerAt(1))<.65;
@@ -1236,7 +1237,7 @@ function touchClay(dt){
       var startX=ptr.sx==null?ptr.x:ptr.sx,startY=ptr.sy==null?ptr.y:ptr.sy;
       var startT=clayLevel(startX,startY),startD=Math.abs(startX-CX)/SV;
       ptr.shapeInvalid=startT<-.05||startT>1.1||startD>rAt(clamp(startT,0,1))+1;
-      ptr.w0=st.radii.slice();ptr.shapeInner=st.inner.slice();ptr.shapeWeights=Array(N).fill(0);ptr.shapeTargets=st.radii.slice();ptr.shapeSide=startX<CX?-1:1;ptr.shapeOffset=startD-rAt(clamp(startT,0,1));ptr.shapeLastRow=clamp(startT,0,1)*(N-1);ptr.shapeLastRadius=startD-ptr.shapeOffset;
+      ptr.w0=st.radii.slice();ptr.shapeInner=st.inner.slice();ptr.shapeWeights=Array(N).fill(0);ptr.shapeTargets=st.radii.slice();ptr.shapeSide=startX<CX?-1:1;ptr.shapeOffset=startD-heldProfileAt(ptr.w0,clamp(startT,0,1),true);ptr.shapeLastRow=clamp(startT,0,1)*(N-1);ptr.shapeLastRadius=startD-ptr.shapeOffset;
     }
     if(ptr.shapeInvalid)return 0;
     var surfaceRadius=(ptr.x-CX)*ptr.shapeSide/SV-ptr.shapeOffset;
@@ -1249,7 +1250,7 @@ function touchClay(dt){
         var travel=row-ptr.shapeLastRow;
         var progress=Math.abs(travel)>.001?clamp((nearestRow-ptr.shapeLastRow)/travel,0,1):1;
         var localRadius=ptr.shapeLastRadius+(surfaceRadius-ptr.shapeLastRadius)*progress;
-        ptr.shapeTargets[j]=clamp(ptr.w0[j]+(localRadius-ptr.w0[j])*weight,j<2?.10:.025,RMAX);
+        ptr.shapeTargets[j]=clamp(ptr.w0[j]+(localRadius-heldProfileAt(ptr.w0,nearestRow/(N-1),true))*weight,j<2?.10:.025,RMAX);
         ptr.shapeWeights[j]=weight;
       }
       var targetRadius=ptr.shapeTargets[j];
@@ -1266,9 +1267,9 @@ function touchClay(dt){
     if(st.height-st.floor<=.05)return 0;
     if(ptr.w0==null){
       var startX=ptr.sx==null?ptr.x:ptr.sx,startY=ptr.sy==null?ptr.y:ptr.sy,startYcm=(BASE-startY)/SV,startT=clamp(startYcm/h,0,1),startD=Math.abs(startX-CX)/SV,iw=innerAt(startT),pad=clamp(16/SV,.4,1);
-      ptr.invalidThickness=startX<CX||startYcm<st.floor+.15||startYcm>h+.2||Math.abs(startD-iw)>pad*2;
-      ptr.w0=st.inner.slice();ptr.wg=Array(N).fill(0);ptr.innerStart=st.inner.slice();ptr.innerTargets=st.inner.slice();ptr.innerLastRow=startT*(N-1);ptr.innerOffset=startD-iw;ptr.innerLastRadius=iw;ptr.innerSide=1;
-      $("toolTip").textContent=ptr.invalidThickness?"오른쪽 단면의 안쪽 벽을 잡아 주세요. 바닥은 움직이지 않아요.":"안쪽 벽을 따라 밀고 당겨 다듬어요. 바깥 윤곽과 바닥 높이는 바뀌지 않아요.";
+      ptr.invalidThickness=startYcm<st.floor+.02||startYcm>h+.25||Math.abs(startD-iw)>Math.max(pad*2,24/SV);
+      ptr.w0=st.inner.slice();ptr.wg=Array(N).fill(0);ptr.innerStart=st.inner.slice();ptr.innerTargets=st.inner.slice();ptr.innerLastRow=startT*(N-1);ptr.innerOffset=startD-heldProfileAt(st.inner,startT,false);ptr.innerLastRadius=heldProfileAt(st.inner,startT,false);ptr.innerSide=startX<CX?-1:1;
+      $("toolTip").textContent=ptr.invalidThickness?"단면의 안쪽 벽을 잡고 밀고 당겨 주세요. 바닥은 움직이지 않아요.":"안쪽 벽을 따라 밀고 당겨 다듬어요. 바깥 윤곽과 바닥 높이는 바뀌지 않아요.";
     }
     if(ptr.invalidThickness)return 0;
     var heldRadius=(ptr.x-CX)*ptr.innerSide/SV-ptr.innerOffset;
@@ -1276,7 +1277,7 @@ function touchClay(dt){
       if(j*rowH<st.floor-.01)continue;
       var nearest=clamp(j,Math.min(row,ptr.innerLastRow),Math.max(row,ptr.innerLastRow));dist=(j-nearest)*rowH;
       var weight=Math.abs(dist)>F*2.2?0:Math.exp(-dist*dist/(F*F*1.4));
-      if(weight>=ptr.wg[j]&&weight>0){var travel=row-ptr.innerLastRow,progress=Math.abs(travel)>.001?clamp((nearest-ptr.innerLastRow)/travel,0,1):1;var localRadius=ptr.innerLastRadius+(heldRadius-ptr.innerLastRadius)*progress;ptr.innerTargets[j]=clamp(ptr.innerStart[j]+(localRadius-ptr.innerStart[j])*weight,0,innerLimitAt(j/(N-1),wallLimit()));ptr.wg[j]=weight;}
+      if(weight>=ptr.wg[j]&&weight>0){var travel=row-ptr.innerLastRow,progress=Math.abs(travel)>.001?clamp((nearest-ptr.innerLastRow)/travel,0,1):1;var localRadius=ptr.innerLastRadius+(heldRadius-ptr.innerLastRadius)*progress;ptr.innerTargets[j]=clamp(ptr.innerStart[j]+(localRadius-heldProfileAt(ptr.innerStart,nearest/(N-1),false))*weight,0,innerLimitAt(j/(N-1),wallLimit()));ptr.wg[j]=weight;}
       if(!ptr.wg[j])continue;
       var before=st.inner[j];st.inner[j]+=(ptr.innerTargets[j]-before)*k;delta=Math.abs(st.inner[j]-before);moved+=delta;
       if(delta>.0001)ptr.contact=true;
@@ -1445,9 +1446,10 @@ function clearDeco(){
 
 /* ---------- 유약 효과용 그림판 ---------- */
 function buildDip(){
-  var key=st.dip+":"+st.dipDepth; if(key===dipKey)return; dipKey=key;
+  var angle=Number(st.dipAngle)||0;var key=st.dip+":"+st.dipDepth+":"+angle+(angle?":"+st.height+":"+st.radii.join(","):""); if(key===dipKey)return; dipKey=key;
   var c=dipM.x, x, y, base=(typeof st.dipDepth==="number"?st.dipDepth:(st.dip==="half"?0.5:0.2))*TH;
   c.clearRect(0,0,TW,TH); if(!st.dip)return;
+  if(angle){var slope=Math.abs(Math.tan(angle*Math.PI/180)),offset=angle>0?.25:.75,cut=st.height*(1-base/TH);c.fillStyle="#000";for(var row=0;row<TH;row++){var level=1-row/(TH-1),span=slope*Math.max(.0001,rAt(level)),delta=(level*st.height-cut)/span;if(delta>=1){c.fillRect(0,row,TW,1);continue;}if(delta<=-1)continue;var edge=Math.acos(delta)/TWO,start=(edge+offset)%1,length=1-2*edge,end=start+length;c.fillRect(start*TW,row,Math.min(1,end)*TW-start*TW,1);if(end>1)c.fillRect(0,row,(end-1)*TW,1);}return;}
   c.fillStyle="#000"; c.beginPath(); c.moveTo(0,0);
   for(x=0;x<=TW;x+=4){
     var a=x/TW*TWO;
@@ -1510,7 +1512,7 @@ function reliefPreview(){
  }reliefPreviewLayer.x.putImageData(out,0,0);reliefPreviewKey=texVer;return reliefPreviewLayer.c;
 }
 function compose(geometryCarve){
-  var ph=phase(), key=[ph,texVer,st.dip,st.dipDepth,st.glaze2,st.glaze,st.fx,(st.customC||"")+"",kilnSig()].join("|");
+  var ph=phase(), key=[ph,texVer,st.dip,st.dipDepth,st.dipAngle||0,st.glaze2,st.glaze,st.fx,(st.customC||"")+"",kilnSig()].join("|");
   key+=geometryCarve?"|mesh-carve":"";
   if(key===composeKey&&finalData)return false;
   composeKey=key;
@@ -1577,8 +1579,8 @@ function resize(){
   if(Z<=1&&st.stage!=="done"){CX=CX0; BASE=BASE0;}else{CX+=CX0-oldX; BASE+=BASE0-oldB;}
   ovKey=""; pvKey=""; bgKey=""; dirty=true;
 }
-function bodyGrad(c,gloss){
-  var g=ctx.createLinearGradient(-1,0,1,0);
+function bodyGrad(c,gloss,radius){
+  var g=ctx.createLinearGradient(CX-radius,0,CX+radius,0);
   if(gloss){
     g.addColorStop(0,css(c,.52));g.addColorStop(.16,css(c,.82));
     g.addColorStop(.26,css(c,1.08,22));g.addColorStop(.33,css(c,1.04,12));
@@ -1599,11 +1601,32 @@ function stageColor(c){
   if(st.stage==="fire"){var raw=mix(c,RAW,0.55); return fireU<0.55?mix(raw,GLOW,fireU/0.55):mix(GLOW,c,(fireU-0.55)/0.45);}
   return c;
 }
+// Clip each visible clay ring against the same object-space dipping plane as 3D.
+function tiltedDipDisc(x,y,rx,ry,worldY,fill){
+ var angle=Number(st.dipAngle)||0,below=st.dipFrom==='bottom';if(!st.dip||rx<=0||ry<=0)return;if(!angle){if(below&&worldY<=st.height*st.dipDepth)disc(x,y,rx,ry,fill);return;}var slope=Math.tan(angle*Math.PI/180),side=slope>0?1:-1,edge=(worldY-st.height*(below?st.dipDepth:1-st.dipDepth))/(Math.abs(slope)*rx/SV);if(edge<=-1){if(below)disc(x,y,rx,ry,fill);return;}if(edge>=1){if(!below)disc(x,y,rx,ry,fill);return;}
+ ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.translate(x,y);ctx.scale(rx,ry);var direction=Math.atan2(Math.sin(rot)*side,Math.cos(rot)*side);ctx.rotate(direction);ctx.beginPath();ctx.rect(below?edge:-2,-2,below?2-edge:edge+2,4);ctx.clip();ctx.rotate(-direction);ctx.fillStyle=fill;ctx.beginPath();ctx.arc(0,0,1,0,TWO);ctx.fill();ctx.restore();
+}
+// Reuse a small height image of the visible interior; shade the dipping plane once.
+var tiltedInteriorCache=null;
+function paintTiltedInterior(look,rin,topY,hpx,fpx){
+ var angle=Number(st.dipAngle)||0,below=st.dipFrom==='bottom';if(!st.dip||(!angle&&!below)||!rin||TILT<=0)return;
+ var x0=Math.max(0,Math.floor((CX-rin)*dpr)),y0=Math.max(0,Math.floor((topY-rin*TILT)*dpr)),w=Math.max(0,Math.min(cv.width,Math.ceil((CX+rin)*dpr)+2)-x0),h=Math.max(0,Math.min(cv.height,Math.ceil((topY+rin*TILT)*dpr)+2)-y0);if(!w||!h)return;var key=[SV,dpr,rin,w,h,st.height,st.floor,st.inner.join(','),CX*dpr-x0,topY*dpr-y0].join('|');
+ if(!tiltedInteriorCache||tiltedInteriorCache.key!==key){
+  var mask=mk(w,h),m=mask.x;m.setTransform(dpr,0,0,dpr,-x0,-y0);m.beginPath();m.ellipse(CX,topY,rin,rin*TILT,0,0,TWO);m.clip();
+  for(var yy=hpx;yy>=fpx;yy-=1.5){var r=innerAt(yy/hpx)*SV,level=Math.round(255*yy/hpx);m.fillStyle='rgb('+level+','+level+','+level+')';m.beginPath();m.ellipse(CX,BASE-yy,r,r*TILT,0,0,TWO);m.fill();}
+  var rf=innerAt(st.floor/st.height)*SV,value=Math.round(st.floor/st.height*255);m.fillStyle='rgb('+value+','+value+','+value+')';m.beginPath();m.ellipse(CX,BASE-fpx,rf,rf*TILT,0,0,TWO);m.fill();
+  tiltedInteriorCache={key:key,data:m.getImageData(0,0,w,h).data};
+ }
+ var field=tiltedInteriorCache.data,image=ctx.getImageData(x0,y0,w,h),pixels=image.data,color=stageColor(byId(GLAZES,st.glaze2).c),base=Math.max(1,.2126*look.c[0]+.7152*look.c[1]+.0722*look.c[2]),slope=Math.tan(angle*Math.PI/180),cut=st.height*(below?st.dipDepth:1-st.dipDepth),cs=Math.cos(rot),sn=Math.sin(rot),feather=Math.max(.015,.9/(SV*dpr));
+ for(var y=0;y<h;y++)for(var x=0;x<w;x++){var at=(y*w+x)*4;if(!field[at+3])continue;var worldY=field[at]/255*st.height,screenX=((x0+x+.5)/dpr-CX)/SV,screenZ=((y0+y+.5)/dpr-BASE+worldY*SV)/(SV*TILT),worldX=screenX*cs+screenZ*sn,coverage=clamp(.5+(worldY-cut-slope*worldX)*(below?-1:1)/feather,0,1)*field[at+3]/255;if(!coverage)continue;var shade=clamp((.2126*pixels[at]+.7152*pixels[at+1]+.0722*pixels[at+2])/base,.1,1.5);for(var k=0;k<3;k++)pixels[at+k]+=(color[k]*shade-pixels[at+k])*coverage;}
+ ctx.putImageData(image,x0,y0);
+}
+
 function currentLook(){
   if(st.stage==="throw")return {c:CLAY,ci:CLAY,gloss:false,rings:true};
   if(st.stage==="deco")return {c:DRY,ci:DRY,gloss:false,rings:false};
   var c=stageColor(glaze().c);
-  return {c:c,ci:st.dip?stageColor(byId(GLAZES,st.glaze2).c):c,
+  return {c:c,ci:st.dip&&!Number(st.dipAngle)&&st.dipFrom!=='bottom'?stageColor(byId(GLAZES,st.glaze2).c):c,
     gloss:st.finish==="gloss"&&(st.stage==="glaze"||st.stage==="done"||(st.stage==="fire"&&fireU>0.8)),rings:false};
 }
 /* ---------- 실사 보기: 스튜디오 조명 아래 놓인 모습을 점 하나하나 계산해 그린다 ---------- */
@@ -1672,7 +1695,7 @@ function photoData(){
   compose(true);
   var wide=stageEl.clientWidth>=760,unit=W/(stageEl.clientWidth||360),sheetH=$('sheet').getBoundingClientRect().height||126;
   var viewWidth=wide?Math.max(W*.45,W-440*unit):W,viewHeight=HC;
-  return {viewWidth:viewWidth,viewHeight:viewHeight,key:[texVer,st.rimSoftness||0,st.height,st.radii.join(','),st.inner.join(','),st.floor,st.glaze,(st.customC||[]).join(','),st.glaze2,st.dip,st.dipDepth,st.fx,st.finish,kilnSig()].join('|'),profileRounded:true,rimSoftness:st.rimSoftness||0,glazeId:st.glaze,surface:st.fx,height:st.height,floor:st.floor,rAt:rAt,innerAt:innerAt,color:glaze().c,dipDepth:st.dip?(typeof st.dipDepth==="number"?st.dipDepth:(st.dip==="half"?.5:.2)):0,dipColor:byId(GLAZES,st.glaze2).c,inside:glaze().c,finish:st.finish,overlay:fin.c,carve:hasCarve?carve.c:null,rotation:rot,objectScale:window.TodakRealPhoto?TodakRealPhoto.objectScale():1,zoom:Z,panX:window.TodakRealPhoto?TodakRealPhoto.renderPan().x:CX-CX0,panY:window.TodakRealPhoto?TodakRealPhoto.renderPan().y:BASE-BASE0,background:photoScene,width:W,canvasHeight:HC,pixelWidth:cv.width,pixelHeight:cv.height,scale:SV,cx:CX,base:BASE};
+  return {viewWidth:viewWidth,viewHeight:viewHeight,key:[texVer,st.rimSoftness||0,st.height,st.radii.join(','),st.inner.join(','),st.floor,st.glaze,(st.customC||[]).join(','),st.glaze2,st.dip,st.dipDepth,st.dipAngle||0,st.dipFrom||'top',st.fx,st.finish,kilnSig()].join('|'),profileRounded:true,rimSoftness:st.rimSoftness||0,glazeId:st.glaze,surface:st.fx,dipFrom:st.dipFrom||'top',bottomTrim:st.bottomTrim||null,height:st.height,floor:st.floor,rAt:rAt,innerAt:innerAt,color:glaze().c,dipDepth:st.dip?(typeof st.dipDepth==="number"?st.dipDepth:(st.dip==="half"?.5:.2)):0,dipColor:byId(GLAZES,st.glaze2).c,dipAngle:st.dip?Number(st.dipAngle)||0:0,inside:glaze().c,finish:st.finish,overlay:fin.c,carve:hasCarve?carve.c:null,rotation:rot,objectScale:window.TodakRealPhoto?TodakRealPhoto.objectScale():1,zoom:Z,panX:window.TodakRealPhoto?TodakRealPhoto.renderPan().x:CX-CX0,panY:window.TodakRealPhoto?TodakRealPhoto.renderPan().y:BASE-BASE0,background:photoScene,width:W,canvasHeight:HC,pixelWidth:cv.width,pixelHeight:cv.height,scale:SV,cx:CX,base:BASE};
 }
 var photo3DPending=false;
 function drawPhoto(){
@@ -1683,9 +1706,9 @@ function drawPhoto(){
     if(rendered){ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(rendered,0,0,cv.width,cv.height);return;}
     $("photoHelp").textContent="이 기기에서는 기본 보기로 보여 드려요.";
   }
-  var key=[rot.toFixed(3),st.rimSoftness||0,SV.toFixed(2),texVer,st.glaze,(st.customC||"")+"",st.glaze2,st.dip,st.dipDepth,st.fx,st.finish,dpr,st.height.toFixed(2),kilnSig(),W,HC].join("|");
+  var key=[rot.toFixed(3),st.rimSoftness||0,SV.toFixed(2),texVer,st.glaze,(st.customC||"")+"",st.glaze2,st.dip,st.dipDepth,st.dipAngle||0,st.dipFrom||'top',st.fx,st.finish,dpr,st.height.toFixed(2),kilnSig(),W,HC].join("|");
   if(key!==pvKey){pvKey=key; renderPhotoBody();}
-  var gloss=st.finish==="gloss", ci=st.dip?byId(GLAZES,st.glaze2).c:glaze().c;
+  var gloss=st.finish==="gloss", ci=st.dip&&!Number(st.dipAngle)&&st.dipFrom!=='bottom'?byId(GLAZES,st.glaze2).c:glaze().c;
   var hpx=st.height*SV, rb=rAt(0)*SV, rm=0, i;
   for(i=0;i<N;i++){if(st.radii[i]>rm)rm=st.radii[i];}
   rm*=SV;
@@ -1714,6 +1737,7 @@ function drawPhoto(){
   var lg=ctx.createLinearGradient(-1,0,1,0);
   lg.addColorStop(0,css(lipC,1.02,10)); lg.addColorStop(0.5,css(lipC,0.95,4)); lg.addColorStop(1,css(lipC,0.72));
   disc(CX,topY,rt,rt*TILT,lg);
+  tiltedDipDisc(CX,topY,rt,rt*TILT,st.height,innerGrad(byId(GLAZES,st.glaze2).c,.92));
   var hollow=st.height-st.floor;
   if(hollow>0.05){
     var rin=Math.max(2,Math.min(innerAt(1)*SV,rt-1.5)), fpx=st.floor*SV, yy, tt, ri2, dk, deep=Math.min(1,hollow/5);
@@ -1727,6 +1751,7 @@ function drawPhoto(){
     var rf=innerAt(st.floor/st.height)*SV, f0=0.92-0.36*deep, fg=ctx.createRadialGradient(0.3,0.1,0,0,0,1);
     fg.addColorStop(0,css(ci,f0)); fg.addColorStop(1,css(ci,f0-0.26));
     disc(CX,BASE-fpx,rf,rf*TILT,fg);
+    paintTiltedInterior({c:glaze().c},rin,topY,hpx,fpx);
     ctx.restore();
     if(gloss){
       ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -1786,18 +1811,14 @@ function draw(){
   disc(CX+4,BASE+5,rAt(0)*SV*1.12,rAt(0)*SV*1.12*TILT,"rgba(30,36,32,.28)");
 
   /* 몸통: 얇은 원판을 아래에서 위로 쌓는다. 막 만진 흙은 살짝 휘청인다 */
-  var hpx=st.height*SV, g1=bodyGrad(look.c,look.gloss);
+  ctx.setTransform(dpr,0,0,dpr,0,0);var maxBodyR=Math.max.apply(null,st.radii)*SV,hpx=st.height*SV,g1=bodyGrad(look.c,look.gloss,maxBodyR);
   var y,t,r,n=0,xo,sw=Math.sin(spin*1.4);
   var cutR=throwing&&secOn;
   {
-  for(y=0;y<=hpx;y+=1.5){
-    t=y/hpx; r=rAt(t)*SV; xo=spinning?wob*SV*t*sw:0;
-    disc(CX+xo,BASE-y,r,r*TILT,g1);
-    if(look.rings&&(n%7===0)){
-      ctx.fillStyle="rgba(58,38,22,"+(0.006+0.13*grooves[Math.round(t*(N-1))]).toFixed(3)+")"; ctx.fill();
-    }
-    n++;
-  }
+  ctx.beginPath();
+  for(y=0;y<=hpx;y+=1.5){t=y/hpx;r=rAt(t)*SV;xo=spinning?wob*SV*t*sw:0;ctx.moveTo(CX+xo+r,BASE-y);ctx.ellipse(CX+xo,BASE-y,r,r*TILT,0,0,TWO);ctx.closePath();}
+  // One opaque union avoids the false concentric seams between stacked discs.
+  ctx.fillStyle=g1;ctx.fill();
   ctx.setTransform(dpr,0,0,dpr,0,0);
   if(throwing){
     for(var i=0;i<marks.length;i++){
@@ -1820,18 +1841,13 @@ function draw(){
   /* 반사: 구운 유광, 또는 물 묻은 흙 */
   var spec=look.gloss?0.65:(throwing?0.12+0.22*wet:0);
   if(spec>0){
-    for(y=4;y<=hpx-2;y+=1.5){
-      t=y/hpx; r=rAt(t)*SV; xo=spinning?wob*SV*t*sw:0;
-      ctx.fillStyle="rgba(255,255,255,"+(0.34*spec).toFixed(3)+")";
-      ctx.fillRect(CX+xo-r*0.56,BASE-y+r*TILT*0.83,r*0.13,1.7);
-      ctx.fillStyle="rgba(255,255,255,"+(0.72*spec).toFixed(3)+")";
-      ctx.fillRect(CX+xo-r*0.53,BASE-y+r*TILT*0.85,r*0.05,1.7);
-    }
+    for(var ribbon=0;ribbon<2;ribbon++){var strip=[];ctx.beginPath();for(y=4;y<=hpx-2;y+=1.5){t=y/hpx;r=rAt(t)*SV;xo=spinning?wob*SV*t*sw:0;var start=CX+xo-r*(ribbon?.53:.56),screenY=BASE-y+r*TILT*(ribbon?.85:.83),width=r*(ribbon?.05:.13);strip.push([start,screenY,width]);if(strip.length===1)ctx.moveTo(start,screenY);else ctx.lineTo(start,screenY);}for(var k=strip.length-1;k>=0;k--)ctx.lineTo(strip[k][0]+strip[k][2],strip[k][1]);ctx.closePath();var shine=ctx.createLinearGradient(0,BASE-hpx,0,BASE);shine.addColorStop(0,'rgba(255,255,255,0)');shine.addColorStop(.12,'rgba(255,255,255,'+(spec*(ribbon?.5:.24))+')');shine.addColorStop(.85,'rgba(255,255,255,'+(spec*(ribbon?.5:.24))+')');shine.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=shine;ctx.fill();}
   }
   /* 윗면과 속: 입구 모양으로 오려 낸 뒤, 안쪽 벽을 위에서 아래로 쌓고 바닥을 그린다 */
   var xt=spinning?wob*SV*sw:0, rt=rAt(1)*SV, topY=BASE-hpx;
   var topClay=ctx.createRadialGradient(-.3,-.2,0,0,0,1);topClay.addColorStop(0,css(look.ci,1.02,5));topClay.addColorStop(1,css(look.ci,.77));
   disc(CX+xt,topY,rt,rt*TILT,topClay);
+  if(st.dip&&(Number(st.dipAngle)||st.dipFrom==='bottom')){var dipC=stageColor(byId(GLAZES,st.glaze2).c),dipTop=ctx.createRadialGradient(-.3,-.2,0,0,0,1);dipTop.addColorStop(0,css(dipC,1.02,5));dipTop.addColorStop(1,css(dipC,.77));tiltedDipDisc(CX+xt,topY,rt,rt*TILT,st.height,dipTop);}
   if(st.rimSoftness){ctx.save();ctx.beginPath();ctx.ellipse(CX+xt,topY+.8,Math.max(0,rt-1),Math.max(1,rt*TILT),0,0,Math.PI);ctx.strokeStyle='rgba(237,218,190,'+(.10+.20*st.rimSoftness)+')';ctx.lineWidth=1+st.rimSoftness*2;ctx.stroke();ctx.restore();}
   var hollow=st.height-st.floor;
   if(hollow>0.05){
@@ -1847,6 +1863,7 @@ function draw(){
     var rf=innerAt(st.floor/st.height)*SV, f0=0.9-0.3*deep, fg=ctx.createRadialGradient(-0.2,-0.2,0,0,0,1);
     fg.addColorStop(0,css(look.ci,f0)); fg.addColorStop(1,css(look.ci,f0-0.18));
     disc(CX,BASE-fpx,rf,rf*TILT,fg);
+    paintTiltedInterior(look,rin,topY,hpx,fpx);
     if(st.stage==="fire"){
       var heat=fireU<0.55?fireU/0.55:1-(fireU-0.55)/0.45;
       disc(CX,topY,rin,rin*TILT,"rgba(255,190,90,"+(0.35*heat).toFixed(3)+")");
@@ -1857,8 +1874,7 @@ function draw(){
   ctx.setTransform(dpr,0,0,dpr,0,0);
 
   if(st.stage==="glaze"&&look.gloss){
-    ctx.save();ctx.strokeStyle="rgba(255,255,255,.72)";ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.ellipse(CX,topY,rt-1,Math.max(1,rt*TILT-1),0,Math.PI*.58,Math.PI*.91);ctx.stroke();ctx.restore();
+    ctx.save();ctx.lineWidth=1.3;ctx.lineCap="round";for(var rimPart=0;rimPart<32;rimPart++){var fade=Math.pow(Math.sin(Math.PI*(rimPart+.5)/32),2)*.38;ctx.strokeStyle="rgba(255,255,255,"+fade+")";ctx.beginPath();ctx.ellipse(CX,topY,rt-1,Math.max(1,rt*TILT-1),0,Math.PI*(.55+.43*rimPart/32),Math.PI*(.55+.43*(rimPart+1)/32));ctx.stroke();}ctx.restore();
   }
   if(throwing&&secOn){drawSection(); ctx.setTransform(dpr,0,0,dpr,0,0);}
   /* 따라 빚기: 파란 점선 본 */
@@ -2065,6 +2081,11 @@ cv.addEventListener("pointermove",function(e){
   }
 });
 function endDrag(e){
+  // A short drag can finish before the next animation tick. Commit its final
+  // target once, through the same sculpt/history/challenge path as a long drag.
+  if(ptr.down&&ptr.decided&&st.stage==='throw'&&!pinch&&(tool==='shape'||tool==='thick')&&e&&e.type==='pointerup'){
+    pos(e);ptr.flushTarget=true;sculptStep(16,performance.now());ptr.flushTarget=false;
+  }
   if(e&&pts[e.pointerId])delete pts[e.pointerId];
   if(nPts()<2)pinch=null;
   if(st.stage==="throw"&&ptr.down&&!ptr.changed&&Math.abs(st.height-ptr.h0)<0.01){hist.pop();}
@@ -2141,7 +2162,7 @@ function setStage(s){
   setSheet(true);
   $("sheetBody").scrollTop=0;
   if(s==="deco"){$("hintText").textContent="도자기 위에 바로 그려 보세요"; touched=false; $("hint").classList.remove("gone");}
-  if(s==="throw"){$("hintText").textContent=tool==="thick"?"오른쪽 안쪽 벽을 잡고 밀고 당겨 다듬어요":"옆면을 좌우로 끌어 모양을 바꿔요"; ghostShow();}
+  if(s==="throw"){$("hintText").textContent=tool==="thick"?"단면의 안쪽 벽을 잡고 밀고 당겨 다듬어요":"옆면을 좌우로 끌어 모양을 바꿔요"; ghostShow();}
   ptr.down=false; drops.length=0; wob=0; if(s!=="throw"){hist.length=0;}
   if(s!=="fire")stageEl.style.setProperty("--heat","0");
   if(s==="fire"){fireBegin();}
@@ -2203,7 +2224,7 @@ var DTIPS={
 var RTIPS=["손이 지나간 자리에 그려져요.","한 곳에 대면 그 높이로 한 바퀴 줄이 생겨요."];
 function showTips(){
   handControlUI();
-  var quickHint=document.querySelector(".quick-tool-hint");if(quickHint)quickHint.textContent=tool==="shape"?"옆면을 다듬고, 다음엔 ② 속·두께를 조절해요.":tool==="thick"?"오른쪽 안쪽 벽을 잡고 밀고 당겨 다듬어요.":"안쪽·바깥쪽 벽을 문질러 매끈하게 정리해요.";
+  var quickHint=document.querySelector(".quick-tool-hint");if(quickHint)quickHint.textContent=tool==="shape"?"옆면을 다듬고, 다음엔 ② 속·두께를 조절해요.":tool==="thick"?"단면의 안쪽 벽을 잡고 밀고 당겨 다듬어요.":"안쪽·바깥쪽 벽을 문질러 매끈하게 정리해요.";
   document.querySelectorAll("[data-quick]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.quick===tool));});
   $("heightHelp").hidden=tool!=="shape";
   $("toolTip").innerHTML=tool==="thick"&&st.height-st.floor<=.05?"오른쪽 단면의 안쪽 벽을 잡고 좌우·위아래로 움직여 다듬어요. 바닥은 움직이지 않아요.":TIPS[tool]; $("dToolTip").innerHTML=DTIPS[dTool]; $("ringTip").innerHTML=RTIPS[dRing?1:0];
@@ -2310,7 +2331,7 @@ $("reGlaze").addEventListener("click",function(){
   toast("모양과 무늬는 그대로예요. 다른 색으로 한 점 더 만들어 봐요");
 });
 $("again").addEventListener("click",function(){
-  applyPreset("lump"); clearDeco(); decoHist.length=0; st.name=""; st.purpose=""; st.kiln=null; st.curId=null; st.touches=0; st.falls=0; rot=rotTarget=0; markPreset("lump"); syncControls(); setStage("throw");
+  freshClay(); setSec(false,true); syncControls(); setStage("throw");
 });
 $("title").addEventListener("input",function(){st.name=this.value; cardDirty=true;});
 $("title").addEventListener("change",function(){shelfUpdateCurrent();});
@@ -3561,7 +3582,7 @@ function start(saved){
     st.radii=saved.radii.slice(); st.height=saved.height||12;
     if(Array.isArray(saved.inner)&&saved.inner.length===N){st.inner=saved.inner.slice(); st.floor=saved.floor||0.8;}
     else{st.inner=st.radii.map(function(r){return Math.max(0.6,r-0.5);}); st.floor=0.8;}
-    st.trimReady=false; st.topPaint=saved.topPaint||null;st.bottomPaint=saved.bottomPaint||null;st.bottomCarve=saved.bottomCarve||null; st.customC=saved.customC||null; st.glaze=(saved.glaze==="custom"&&!st.customC)?"baekja":(saved.glaze||"baekja"); st.glaze2=saved.glaze2||"cobalt"; st.dip=saved.dip||"";st.dipDepth=typeof saved.dipDepth==="number"?saved.dipDepth:(st.dip==="half"?.5:.2);
+    st.trimReady=false; st.topPaint=saved.topPaint||null;st.bottomPaint=saved.bottomPaint||null;st.bottomCarve=saved.bottomCarve||null;st.bottomTrim=Array.isArray(saved.bottomTrim)?saved.bottomTrim.slice():null; st.customC=saved.customC||null; st.glaze=(saved.glaze==="custom"&&!st.customC)?"baekja":(saved.glaze||"baekja"); st.glaze2=saved.glaze2||"cobalt"; st.dipFrom=saved.dipFrom==='bottom'?'bottom':'top';st.dipAngle=Number(saved.dipAngle)||0;st.dip=saved.dip||"";st.dipDepth=typeof saved.dipDepth==="number"?saved.dipDepth:(st.dip==="half"?.5:.2);
     st.finish=saved.finish||"gloss"; st.fx=saved.fx||"none"; st.kiln=saved.kiln||null; st.fire=FIRE_NAME[saved.fire]?saved.fire:"mid"; st.blind=!!saved.blind; st.touches=saved.touches||0; st.falls=saved.falls||0; st.target=TARGETS[saved.target]?saved.target:""; st.curId=saved.curId||null; st.name=saved.name||""; st.purpose=saved.purpose||""; st.used=saved.used||{};
     st.stage=saved.stage==="fire"?"glaze":(ORDER.indexOf(saved.stage)>=0?saved.stage:"throw");
     loadTex(saved.paint,paint,function(){hasPaint=!!saved.paint; texVer++; dirty=true;});
@@ -3576,7 +3597,7 @@ function start(saved){
 var hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot){
   hot.snapshot(function(){
-    var o={bottomPaint:st.bottomPaint||null,bottomCarve:st.bottomCarve||null,topPaint:st.topPaint||null,radii:st.radii,inner:st.inner,floor:st.floor,height:st.height,customC:st.customC,kiln:st.kiln,fire:st.fire,blind:st.blind,touches:st.touches,falls:st.falls,target:st.target,curId:st.curId,glaze:st.glaze,glaze2:st.glaze2,dip:st.dip,dipDepth:st.dipDepth,finish:st.finish,fx:st.fx,name:st.name,purpose:st.purpose,stage:st.stage,used:st.used};
+    var o={bottomTrim:st.bottomTrim||null,bottomPaint:st.bottomPaint||null,bottomCarve:st.bottomCarve||null,topPaint:st.topPaint||null,radii:st.radii,inner:st.inner,floor:st.floor,height:st.height,customC:st.customC,kiln:st.kiln,fire:st.fire,blind:st.blind,touches:st.touches,falls:st.falls,target:st.target,curId:st.curId,glaze:st.glaze,glaze2:st.glaze2,dip:st.dip,dipDepth:st.dipDepth,dipFrom:st.dipFrom||'top',dipAngle:Number(st.dipAngle)||0,finish:st.finish,fx:st.fx,name:st.name,purpose:st.purpose,stage:st.stage,used:st.used};
     try{if(hasPaint)o.paint=paint.c.toDataURL(); if(hasCarve)o.carve=carve.c.toDataURL();}catch(_){}
     return o;
   });
@@ -3842,7 +3863,7 @@ document.addEventListener('pointercancel',function(){sheetOutsideTap=null;});
  function profile(p){return {h:p.h,r:p.r.slice(),inner:p.inner.slice(),floor:p.floor};}
  function drawingData(work,size,rotation){
   var p=work.profile,visual=work.visual||{};
-  return {key:'community-'+work.id+'-'+(work.revision||0),height:p.h,floor:p.floor,rAt:function(t){return sample(p.r,t);},innerAt:function(t){return sample(p.inner,t);},color:work.color,inside:work.color,glazeId:visual.glazeId||'custom',surface:visual.surface||'none',finish:visual.finish||'gloss',overlay:cache[work.id+'overlay']||null,carve:cache[work.id+'carve']||null,dipDepth:visual.dipDepth||0,dipColor:visual.dipColor||work.color,rotation:rotation||0,zoom:1,panX:0,panY:0,background:'studio',transparent:false,width:size,canvasHeight:size,pixelWidth:size,pixelHeight:size,viewWidth:size,viewHeight:size,scale:10,cx:size/2,base:size*.75};
+  return {key:'community-'+work.id+'-'+(work.revision||0),height:p.h,floor:p.floor,rAt:function(t){return sample(p.r,t);},innerAt:function(t){return sample(p.inner,t);},color:work.color,inside:work.color,glazeId:visual.glazeId||'custom',surface:visual.surface||'none',finish:visual.finish||'gloss',overlay:cache[work.id+'overlay']||null,carve:cache[work.id+'carve']||null,bottomTrim:visual.bottomTrim||null,dipFrom:visual.dipFrom||'top',dipAngle:visual.dipAngle||0,dipDepth:visual.dipDepth||0,dipColor:visual.dipColor||work.color,rotation:rotation||0,zoom:1,panX:0,panY:0,background:'studio',transparent:false,width:size,canvasHeight:size,pixelWidth:size,pixelHeight:size,viewWidth:size,viewHeight:size,scale:10,cx:size/2,base:size*.75};
  }
  function fallback(canvas,work){var g=canvas.getContext('2d'),s=canvas.width,p=work.profile,max=Math.max.apply(null,p.r),scale=Math.min(s*.64/p.h,s*.65/(max*2)),base=s*.83;g.fillStyle='#eae5dc';g.fillRect(0,0,s,s);g.fillStyle='#bfb9ac';g.beginPath();g.ellipse(s/2,base+3,max*scale*1.15,scale*.3,0,0,Math.PI*2);g.fill();g.beginPath();p.r.forEach(function(r,i){var x=s/2-r*scale,y=base-i/(p.r.length-1)*p.h*scale;if(!i)g.moveTo(x,y);else g.lineTo(x,y);});for(var i=p.r.length-1;i>=0;i--)g.lineTo(s/2+p.r[i]*scale,base-i/(p.r.length-1)*p.h*scale);g.closePath();var c=work.color,gradient=g.createLinearGradient(s*.2,0,s*.8,0);gradient.addColorStop(0,'rgb('+c.map(function(v){return Math.round(v*.65);}).join(',')+')');gradient.addColorStop(.4,'rgb('+c.join(',')+')');gradient.addColorStop(.65,'rgb('+c.map(function(v){return Math.round(v+(255-v)*.2);}).join(',')+')');gradient.addColorStop(1,'rgb('+c.map(function(v){return Math.round(v*.7);}).join(',')+')');g.fillStyle=gradient;g.fill();g.fillStyle='rgba(25,32,30,.35)';g.beginPath();g.ellipse(s/2,base-p.h*scale,p.r.at(-1)*scale,p.r.at(-1)*scale*.24,0,0,Math.PI*2);g.fill();}
  function drawWork(canvas,work,rotation){var d=drawingData(work,canvas.width,rotation),rendered=window.TodakPhoto&&TodakPhoto.available?TodakPhoto.render(d):null;if(rendered){canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);canvas.getContext('2d').drawImage(rendered,0,0,canvas.width,canvas.height);}else fallback(canvas,work);return !!rendered;}
@@ -3892,7 +3913,7 @@ document.addEventListener('pointercancel',function(){sheetOutsideTap=null;});
  var homeButton=document.createElement('button');homeButton.type='button';homeButton.className='bigBtn plain';homeButton.id='goCommunity';homeButton.innerHTML='<b>모두의 진열장 <small style="font-size:10px;color:#6b7763">미리보기</small></b><span>작품을 구경하고, 마음에 드는 모양에 도전해요</span>';el('goShelf').after(homeButton);homeButton.onclick=openGallery;
  var shelfButton=document.createElement('button');shelfButton.type='button';shelfButton.className='ghost';shelfButton.id='shelfCommunity';shelfButton.textContent='모두의 진열장 ↗';shelfButton.onclick=openGallery;el('drawer').querySelector('.shelfHead').after(shelfButton);
  var doneButton=document.createElement('button');doneButton.type='button';doneButton.className='ghost';doneButton.id='publishCurrent';doneButton.textContent='모두의 진열장에 올리기';doneButton.style.width='100%';doneButton.style.marginTop='10px';el('openCard').closest('.actions').after(doneButton);doneButton.onclick=function(){openPublish();};
- var oldItemFields=itemFields;itemFields=function(it){it=oldItemFields(it);compose(true);it.communityVisual={profileRounded:true,rimSoftness:st.rimSoftness||0,glazeId:st.glaze,surface:st.fx,finish:st.finish,dipDepth:st.dip?st.dipDepth:0,dipColor:byId(GLAZES,st.glaze2).c,overlay:fin.c.toDataURL('image/png'),carve:hasCarve?carve.c.toDataURL('image/png'):null};it.communitySource=st.target.indexOf('community:')===0?st.target.slice(10):null;it.communityScore=it.communitySource?score():null;return it;};
+ var oldItemFields=itemFields;itemFields=function(it){it=oldItemFields(it);compose(true);it.communityVisual={profileRounded:true,rimSoftness:st.rimSoftness||0,glazeId:st.glaze,surface:st.fx,finish:st.finish,dipAngle:st.dip?Number(st.dipAngle)||0:0,dipDepth:st.dip?st.dipDepth:0,dipColor:byId(GLAZES,st.glaze2).c,overlay:fin.c.toDataURL('image/png'),carve:hasCarve?carve.c.toDataURL('image/png'):null};it.communitySource=st.target.indexOf('community:')===0?st.target.slice(10):null;it.communityScore=it.communitySource?score():null;return it;};
  var oldSetStage=setStage;setStage=function(stage){oldSetStage(stage);var previous=el('cmResult');if(previous)previous.remove();if(stage!=='done'||st.target.indexOf('community:')!==0)return;var work=getWork(st.target.slice(10));if(!work)return;var box=document.createElement('div');box.id='cmResult';box.className='cm-result';box.innerHTML='<h4>'+esc(work.author)+'님의 모양에 도전했어요 · '+score()+'점</h4><div class="cm-result-pair"><div><img src="'+imageFor(work)+'" alt="원본 작품"><b>원본 · '+esc(work.name)+'</b></div><div><img src="'+thumbNow()+'" alt="내가 빚은 작품"><b>내가 빚은 도자기</b></div></div><button type="button" class="cm-ghost" style="width:100%" id="cmResultOrigin">원본과 함께 빚은 작품 보기 ↗</button>';el('publishCurrent').after(box);el('cmResultOrigin').onclick=function(){openGallery();showDetail(work);};};
 
 /* Walkable exhibition, weekly rankings and progression. Local preview only. */
@@ -4004,7 +4025,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  }
  function sample(a,t){var p=Math.max(0,Math.min(1,t))*(a.length-1),i=Math.min(a.length-2,Math.floor(p));return a[i]+(a[i+1]-a[i])*(p-i);}
  async function dataFor(item){var rs=item.full2&&item.full2.radii||item.shape&&item.shape.r,inner=item.full2&&item.full2.inner,h=item.shape&&item.shape.h;if(!Array.isArray(rs)||rs.length<2||!h||rs.some(function(v){return !Number.isFinite(v);}))throw Error('missing_geometry');rs=rs.slice();inner=Array.isArray(inner)&&inner.length>1?inner.slice():rs.map(function(r){return Math.max(0,r-.5);});var floor=item.full2&&Number.isFinite(item.full2.floor)?item.full2.floor:.8,visual=item.communityVisual||{},images=await Promise.all([visual.overlay,visual.carve,item.topPaint||visual.topPaint,item.bottomPaint||visual.bottomPaint,item.bottomCarve||visual.bottomCarve].map(function(url){return url?picture(url).catch(function(){return null;}):Promise.resolve(null);}));
-  return {key:'break-'+item.id,height:h,floor:floor,rAt:function(t){return sample(rs,t);},innerAt:function(t){return Math.max(0,Math.min(sample(inner,t),sample(rs,t)-.12));},color:item.c||[230,225,214],inside:item.c||[230,225,214],glazeId:visual.glazeId||'baekja',finish:visual.finish||'gloss',dipDepth:visual.dipDepth||0,dipColor:visual.dipColor||item.c||[230,225,214],overlay:images[0],carve:images[1],topOverlay:images[2],bottomOverlay:images[3],bottomCarve:images[4],topRadius:Math.max.apply(null,rs),rotation:visual.rotation||0};
+  return {key:'break-'+item.id,bottomTrim:item.full2&&item.full2.bottomTrim||item.bottomTrim||visual.bottomTrim||null,height:h,floor:floor,rAt:function(t){return sample(rs,t);},innerAt:function(t){return Math.max(0,Math.min(sample(inner,t),sample(rs,t)-.12));},color:item.c||[230,225,214],inside:item.c||[230,225,214],glazeId:visual.glazeId||'baekja',finish:visual.finish||'gloss',dipFrom:visual.dipFrom||'top',dipAngle:visual.dipAngle||0,dipDepth:visual.dipDepth||0,dipColor:visual.dipColor||item.c||[230,225,214],overlay:images[0],carve:images[1],topOverlay:images[2],bottomOverlay:images[3],bottomCarve:images[4],topRadius:Math.max.apply(null,rs),rotation:visual.rotation||0};
  }
  async function open(item){epoch++;var token=epoch;if(view)view.dispose();view=null;work=item;ready=false;busy=false;progress=null;pileThumb=null;pileSnapshot=records.slice();object={x:320,y:260,scale:1,angle:0};flight=null;seed=(Date.now()^Math.floor(Math.random()*2147483647))>>>0;$('breakClose').disabled=false;$('breakStatus').textContent='저장된 도자기의 입체 형태를 불러오고 있어요. 닫기는 언제든 가능해요.';dlg.showModal();queuePile();draw();try{if(!window.TodakPhoto||!TodakPhoto.createFracture){if(window.TodakLoad3D)await TodakLoad3D();}if(token!==epoch||!dlg.open)return;var data=await dataFor(item);if(token!==epoch||!dlg.open)return;if(!window.TodakPhoto||!TodakPhoto.createFracture)throw Error('no_3d');var made=TodakPhoto.createFracture(data,seed);if(!made)throw Error('no_3d');if(token!==epoch||!dlg.open){made.dispose();return;}view=made;pileThumb=view.pileImage();ready=true;$('breakStatus').textContent='도자기를 잡아 위쪽 벽으로 던져 보세요. 깨뜨리기 전에 닫으면 작품은 그대로 보관돼요.';draw();}catch(e){if(token!==epoch)return;$('breakStatus').textContent=e.message==='missing_geometry'?'이 작품에는 입체 형태 기록이 없어 깨뜨릴 수 없어요. 작품은 그대로 보관됩니다.':'이 기기에서는 입체 깨뜨리기를 불러오지 못했어요. 작품은 그대로 보관됩니다.';}}
  function impact(){if(!flight||flight.impactAt||!view||!work)return;flight.impactAt=performance.now();flight.hitY=object.y;flight.hitAngle=object.angle;progress=0;var token=epoch,item=work,record={id:item.id,t:Date.now(),thumb:pileThumb,seed:seed,name:item.name||item.full||'작품',version:2};
@@ -4110,7 +4131,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  function inTop(p){var l=topLayout(),dx=(p.x-l.x)/l.r,dy=(p.y-l.y)/l.r,r=Math.hypot(dx,dy),rows=topSurface(l),hit=rows[Math.min(rows.length-1,Math.floor(r*rows.length))];if(r>1||!hit)return null;return {x:(dx+1)*384,y:(dy+1)*384};}
  function topArtwork(l,rows){
   // Exclude wet top paint from the material key: only rebuild the vessel when its appearance changes.
-  var key=[topSurfaceKey,rot.toFixed(5),st.stage,st.glaze,st.glaze2,st.dip,st.dipDepth,st.fx,st.finish,st.customC,st.rimSoftness,texVer,!!(window.TodakPhoto&&TodakPhoto.available)].join('|');
+  var key=[topSurfaceKey,rot.toFixed(5),st.stage,st.glaze,st.glaze2,st.dip,st.dipDepth,st.dipAngle||0,st.dipFrom||'top',st.fx,st.finish,st.customC,st.rimSoftness,texVer,!!(window.TodakPhoto&&TodakPhoto.available)].join('|');
   if(key===topBaseKey&&topBase)return;
   topBaseKey=key;topBase=topBase||mk(768,768);var c=topBase.x;c.clearRect(0,0,768,768);
   insideClip=new Path2D();topClip=new Path2D();topClip.arc(384,384,384,0,TWO);
@@ -4462,7 +4483,7 @@ window.TodakDisplayAssets={shelf:{"wood": "data:image/jpeg;base64,/9j/4AAQSkZJRg
  $('viewMenu').addEventListener('toggle',function(){if(active&&current().id==='sound')route();});
  document.addEventListener('scroll',function(){if(active)route();},true);
  window.addEventListener('resize',function(){if(active)route();});
- var helpText={throw:'모양 잡기: 바깥 옆면을 좌우로 끌어요. 속·두께: 오른쪽 안쪽 벽을 조절해요. 매끈하게: 벽을 문질러 굴곡을 다듬어요. 입체/단면 보기로 확인하세요.',deco:'붓·도장·조각칼로 작품 위에 꾸며요. 색·크기·불투명도를 바꿀 수 있어요. 지우개와 되돌리기로 고치고, 좌우 화살표로 돌려 반대편도 꾸미세요.',glaze:'도구통에서 바탕 유약·붓칠를 고르고 유약 색과 불투명도, 유광/무광을 조절해요. 바탕붓에서 담그는 깊이와 표면 무늬를 정하세요.',fire:'불 세기를 고른 뒤 작품을 누르거나 가마로 끌어 넣어요. 굽기가 끝나고 100℃ 이하로 식으면 가마 문을 열어 꺼내세요.',done:'드래그로 도자기 이동, 좌우 화살표로 회전, 휠·두 손가락으로 배경 확대·축소. 도자기 크기와 배경은 따로 조절해요. 카드 저장·공유, 닮은 물건 검색과 비교 카드도 사용할 수 있어요.'};
+ var helpText={throw:'모양 잡기: 바깥 옆면을 좌우로 끌어요. 속·두께: 오른쪽 안쪽 벽을 조절해요. 매끈하게: 벽을 문질러 굴곡을 다듬어요. 입체/단면 보기로 확인하세요.',deco:'붓·도장·조각칼로 작품 위에 꾸며요. 색·크기·불투명도를 바꿀 수 있어요. 지우개와 되돌리기로 고치고, 좌우 화살표로 돌려 반대편도 꾸미세요.',glaze:'도구 목록에서 바탕 유약·붓칠를 고르고 유약 색과 불투명도, 유광/무광을 조절해요. 바탕붓에서 담그는 깊이와 표면 무늬를 정하세요.',fire:'불 세기를 고른 뒤 작품을 누르거나 가마로 끌어 넣어요. 굽기가 끝나고 100℃ 이하로 식으면 가마 문을 열어 꺼내세요.',done:'드래그로 도자기 이동, 좌우 화살표로 회전, 휠·두 손가락으로 배경 확대·축소. 도자기 크기와 배경은 따로 조절해요. 카드 저장·공유, 닮은 물건 검색과 비교 카드도 사용할 수 있어요.'};
  var helpButton=document.createElement('button');helpButton.type='button';helpButton.id='stageHelpButton';helpButton.className='ghost';helpButton.textContent='도움말';helpButton.setAttribute('aria-expanded','false');helpButton.setAttribute('aria-controls','stageBriefHelp');$('sheetTitle').after(helpButton);
  var helpBox=document.createElement('aside');helpBox.id='stageBriefHelp';helpBox.hidden=true;helpBox.innerHTML='<b id="stageBriefTitle"></b><p id="stageBriefText"></p><button type="button" class="ghost" id="stageHelpClose">닫기</button>';$('sheetBody').prepend(helpBox);
  function closeHelp(){helpBox.hidden=true;helpButton.setAttribute('aria-expanded','false');}

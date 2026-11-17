@@ -17,40 +17,28 @@ function noise(x,y){var n=Math.sin(x*127.1+y*311.7)*43758.5453;return n-Math.flo
 function tex(c,color){var slot=textureByCanvas.get(c),t=slot&&slot[color?'color':'data'];if(!t||t.userData.todakDisposed){t=new T.CanvasTexture(c);if(color)t.colorSpace=T.SRGBColorSpace;t.anisotropy=low?2:8;if(!slot){slot={};textureByCanvas.set(c,slot);}slot[color?'color':'data']=t;}textureOwners.set(t,(textureOwners.get(t)||0)+1);textures.push(t);return t;}
 
 function makeEnvironment(){
+  // One periodic HDR studio shared by every glaze and both viewing modes.
   var w=512,h=256,data=new Float32Array(w*h*4);
-  for(var y=0;y<h;y++)for(var x=0;x<w;x++){
-    var sky=.35+.48*Math.sin(Math.PI*y/h),a=(x/w-.32)/.13,b=(y/h-.37)/.24;
-    var soft=3.2*Math.exp(-a*a*2-b*b*2);
-    var rim=.7*Math.exp(-Math.pow((x/w-.79)/.035,8)-Math.pow((y/h-.42)/.21,8));
-    var i=(y*w+x)*4;data[i]=sky*.98+soft+rim;data[i+1]=sky*.95+soft*.97+rim;data[i+2]=sky*.89+soft*.9+rim*.96;data[i+3]=1;
-  }
-  var raw=new T.DataTexture(data,w,h,T.RGBAFormat,T.FloatType);raw.mapping=T.EquirectangularReflectionMapping;raw.needsUpdate=true;
-  var pm=new T.PMREMGenerator(renderer);environment=pm.fromEquirectangular(raw);scene.environment=environment.texture;
-  // Camera faces +Z: visible frontal reflections are at longitude U=.75.
-  // Preserve the original environment for matte clay and the shaded interior.
-  var glossy=new Float32Array(data);
-  for(var gy=0;gy<h;gy++)for(var gx=0;gx<w;gx++){
-    var u=gx/w,v=gy/h,panel=7.5*Math.exp(-Math.pow((u-.705)/.032,8)-Math.pow((v-.585)/.19,8)),fillPanel=2.1*Math.exp(-Math.pow((u-.855)/.018,8)-Math.pow((v-.56)/.17,8)),at=(gy*w+gx)*4;
-    for(var channel=0;channel<3;channel++)glossy[at+channel]=data[at+channel]*.65+panel*.65+fillPanel*.7;
-  }
-  var reflection=new T.DataTexture(glossy,w,h,T.RGBAFormat,T.FloatType);reflection.mapping=T.EquirectangularReflectionMapping;reflection.needsUpdate=true;glossEnvironment=pm.fromEquirectangular(reflection);raw.dispose();reflection.dispose();pm.dispose();
+  function panel(u,v,cx,cy,sx,sy){var dx=u-cx;dx-=Math.floor(dx+.5);return Math.exp(-Math.pow(dx/sx,4)-Math.pow((v-cy)/sy,4));}
+  for(var y=0;y<h;y++)for(var x=0;x<w;x++){var u=x/w,v=y/h,base=.16+.22*Math.sin(Math.PI*v),key=8*panel(u,v,.70,.50,.026,.44),fill=.85*panel(u,v,.86,.53,.075,.26),rim=1.5*panel(u,v,.26,.48,.07,.19),top=2.5*panel(u,v,.58,.78,.10,.065)+5.5*panel(u,v,.70,.18,.028,.12),i=(y*w+x)*4;data[i]=base+key+fill*.98+rim+top;data[i+1]=base+key*.995+fill+rim*.99+top;data[i+2]=base+key*.98+fill+rim*.98+top;data[i+3]=1;}
+  var raw=new T.DataTexture(data,w,h,T.RGBAFormat,T.FloatType);raw.mapping=T.EquirectangularReflectionMapping;raw.needsUpdate=true;var pm=new T.PMREMGenerator(renderer);environment=pm.fromEquirectangular(raw);glossEnvironment=environment;scene.environment=environment.texture;raw.dispose();pm.dispose();
 }
 function init(){
   if(renderer)return !lost;
   try{
     renderer=new T.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true,powerPreference:low?'low-power':'high-performance'});
-    renderer.setPixelRatio(1);renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;
+    renderer.setPixelRatio(1);renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.94;
     renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.VSMShadowMap;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;
     renderer.domElement.addEventListener('webglcontextlost',function(e){e.preventDefault();lost=true;});
     renderer.domElement.addEventListener('webglcontextrestored',function(){lost=false;signature='';});
     scene=new T.Scene();camera=new T.PerspectiveCamera(32,1,.1,500);pot=new T.Group();scene.add(pot);
-    scene.add(new T.HemisphereLight(0xfff5df,0x918274,.65));
-    var key=keyLight=new T.DirectionalLight(0xfff2de,2.1);key.position.set(-10,32,12);key.castShadow=true;key.shadow.blurSamples=12;
+    scene.add(new T.HemisphereLight(0xf7f5ef,0x9a9991,.28));
+    var key=keyLight=new T.DirectionalLight(0xfff7ed,1.9);key.position.set(-12,25,16);key.castShadow=true;key.shadow.blurSamples=12;
     key.shadow.mapSize.set(low?1024:2048,low?1024:2048);Object.assign(key.shadow.camera,{left:-30,right:30,top:35,bottom:-30,near:1,far:100});key.shadow.normalBias=.025;key.shadow.bias=-.00015;key.shadow.radius=5;scene.add(key);
-    var fill=new T.DirectionalLight(0xe4edff,.35);fill.position.set(18,12,-9);scene.add(fill);
+    var fill=new T.DirectionalLight(0xf0f4ff,.50);fill.position.set(12,17,-14);scene.add(fill);
     floor=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.MeshStandardMaterial({color:0xe4d9ca,roughness:.92}));floor.rotation.x=-Math.PI/2;floor.position.y=-.025;floor.receiveShadow=false;scene.add(floor);
-    var receiver=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.ShadowMaterial({opacity:.10}));receiver.rotation.x=-Math.PI/2;receiver.position.y=-.018;receiver.receiveShadow=true;scene.add(receiver);
-    var c=canvas(128,128),g=c.getContext('2d'),grad=g.createRadialGradient(64,64,0,64,64,64);grad.addColorStop(0,'rgba(30,24,17,.42)');grad.addColorStop(.45,'rgba(30,24,17,.14)');grad.addColorStop(1,'rgba(30,24,17,0)');g.fillStyle=grad;g.fillRect(0,0,128,128);
+    var receiver=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.ShadowMaterial({opacity:.11}));receiver.rotation.x=-Math.PI/2;receiver.position.y=-.018;receiver.receiveShadow=true;scene.add(receiver);
+    var c=canvas(128,128),g=c.getContext('2d'),grad=g.createRadialGradient(64,64,0,64,64,64);grad.addColorStop(0,'rgba(30,24,17,.42)');grad.addColorStop(.55,'rgba(30,24,17,.17)');grad.addColorStop(.78,'rgba(30,24,17,.10)');grad.addColorStop(1,'rgba(30,24,17,0)');g.fillStyle=grad;g.fillRect(0,0,128,128);
     var contact=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial({map:new T.CanvasTexture(c),transparent:true,depthWrite:false,opacity:.8}));contact.name='contact';contact.rotation.x=-Math.PI/2;contact.position.y=-.012;scene.add(contact);
     var wood=canvas(512,512),wx=wood.getContext('2d'),wi=wx.createImageData(512,512);
     for(var yy=0;yy<512;yy++)for(var xx=0;xx<512;xx++){var ii=(yy*512+xx)*4,v=3*Math.sin(yy*.22+Math.sin(xx*.013)*2)+(noise(xx,yy)-.5)*5;wi.data[ii]=204+v;wi.data[ii+1]=180+v;wi.data[ii+2]=147+v;wi.data[ii+3]=255;}wx.putImageData(wi,0,0);
@@ -95,8 +83,8 @@ function lru(map,key,make,dispose,limit){if(map.has(key)){var value=map.get(key)
 function releaseTextures(bundle){bundle.materials.forEach(function(m){m.dispose();});bundle.textures.forEach(function(t){var count=textureOwners.get(t)-1;if(count>0)textureOwners.set(t,count);else{textureOwners.delete(t);t.dispose();t.userData.todakDisposed=true;}});}
 function releaseCanvas(c){c.width=c.height=1;}
 function textureSignature(d){return [d.glazeId,d.surface,d.color.join(',')].join('|');}
-function geometrySignature(d){return [d.geometryKey||d.key,!!d.fracturePreview,!!d.carve,!!d.bottomCarve,d.carveDepth||.12,d.carveMode||''].join('|');}
-function materialSignature(d){return [d.materialKey||d.key,d.geometryKey||d.key,d.height,d.floor,!!d.topOverlay,!!d.bottomOverlay,!!d.overhead].join('|');}
+function geometrySignature(d){return [d.geometryKey||d.key,!!d.fracturePreview,!!d.carve,!!d.bottomCarve,!!d.topCarve,d.carveDepth||.12,d.carveMode||'',d.bottomTrim?d.bottomTrim.join(','):''].join('|');}
+function materialSignature(d){return [d.materialKey||d.key,d.geometryKey||d.key,d.height,d.floor,d.dipAngle||0,d.dipFrom||'top',!!d.topOverlay,!!d.topCarve,!!d.bottomOverlay,!!d.overhead].join('|');}
 function glazeMaps(d){return lru(glazeCache,textureSignature(d),function(){d=Object.assign({},d,{overlay:null});
 var size=low?512:1024,c=canvas(size,size),g=c.getContext('2d'),base=d.color;
   g.fillStyle='rgb('+base.join(',')+')';g.fillRect(0,0,size,size);
@@ -104,44 +92,79 @@ var size=low?512:1024,c=canvas(size,size),g=c.getContext('2d'),base=d.color;
   var angles=new Float64Array(size),sin2=new Float64Array(size),sin3=new Float64Array(size);for(var xx=0;xx<size;xx++){var a=xx/size*Math.PI*2;angles[xx]=a*3;sin2[xx]=Math.sin(a*2);sin3[xx]=Math.sin(a*3);}var depth=d.glazeId==='cobalt'?12:(d.glazeId==='cheongja'||d.glazeId==='mint'?5:1.8);
   for(var y=0;y<size;y++){var row23=Math.sin(y*.023)*2,fade=Math.max(0,Math.min(1,y/10,(size-1-y)/10));for(var x=0;x<size;x++){var i=(y*size+x)*4,n=noise(x,y),cloud=Math.sin(angles[x]+row23)*Math.sin(y*.017+sin2[x]*1.3),v=(n-.5)*3+Math.sin(y*.031+sin3[x])*.8+cloud*depth;v*=fade;if(n>.998)v-=15*fade;for(var k=0;k<3;k++)pix.data[i+k]=Math.max(0,Math.min(255,base[k]+v));}}
   g.putImageData(pix,0,0);
-  var surface=d.surface==='crackle'&&window.TodakCeramicSurface?TodakCeramicSurface.create(low?512:1024,d.surface):null;
-  if(surface){g.save();g.globalCompositeOperation='multiply';g.drawImage(surface.color,0,0,size,size);g.restore();}
+  var surface=d.surface==='crackle'&&window.TodakCeramicSurface?(TodakCeramicSurface.createStudio||TodakCeramicSurface.create)(low?512:1024,d.surface):null;
+  
   if(d.overlay)g.drawImage(d.overlay,0,0,size,size);
   // The underside receives the selected base glaze and the same finish as the outside.
   var bump=canvas(512,512),bg=bump.getContext('2d'),im=bg.createImageData(512,512);
   for(var j=0;j<512*512;j++){var xx=j%512,yy=j/512|0,edge=Math.max(0,Math.min(1,yy/12,(511-yy)/12)),vv=128+((noise(xx,yy)-.5)*12+Math.sin(yy*.65)*1.5)*edge;im.data[j*4]=im.data[j*4+1]=im.data[j*4+2]=vv;im.data[j*4+3]=255;}bg.putImageData(im,0,0);
   // Micro texture stays separate from the true carved geometry.
-  if(surface){bg.globalAlpha=1;bg.drawImage(surface.height,0,0,512,512);}
+  
   return {color:c,bump:bump,surface:surface};
 
 },function(m){/* Materials may still reference these canvases until their own LRU eviction. */},2);}
+var studioRoughnessCanvas=null;
+function studioRoughness(){if(studioRoughnessCanvas)return studioRoughnessCanvas;var c=studioRoughnessCanvas=canvas(128,128),x=c.getContext('2d'),p=x.createImageData(128,128);for(var y=0;y<128;y++)for(var i=0;i<128;i++){var at=(y*128+i)*4,v=246+(noise(i,y)-.5)*8;p.data[at]=p.data[at+1]=p.data[at+2]=v;p.data[at+3]=255;}x.putImageData(p,0,0);return c;}
 function buildMaterials(d){
-  textures=[];materials=[];var maps=glazeMaps(d),surface=maps.surface,color=maps.color;if(d.overlay){color=canvas(maps.color.width,maps.color.height);var colorContext=color.getContext('2d');colorContext.drawImage(maps.color,0,0);colorContext.drawImage(d.overlay,0,0,color.width,color.height);}var map=tex(color,true),micro=tex(maps.bump,false),gloss=d.finish==='gloss';
-  var outer=new T.MeshPhysicalMaterial({map:map,metalness:0,roughness:gloss?.2:.78,clearcoat:gloss?1:.04,clearcoatRoughness:gloss?.065:.6,ior:1.46,bumpMap:micro,bumpScale:gloss?.003:.012,envMap:gloss?glossEnvironment.texture:null,envMapIntensity:gloss?1.15:.45});
-  if(surface){outer.bumpScale=.025;outer.roughnessMap=tex(surface.roughness,false);outer.roughness=gloss?.48:.95;}
+  textures=[];materials=[];var angled=!!d.dipDepth&&(Math.abs(Number(d.dipAngle)||0)>.0001||d.dipFrom==='bottom');var maps=glazeMaps(d),surface=maps.surface,color=maps.color;if(d.overlay){color=canvas(maps.color.width,maps.color.height);var colorContext=color.getContext('2d');colorContext.drawImage(maps.color,0,0);colorContext.drawImage(d.overlay,0,0,color.width,color.height);}var map=tex(color,true),micro=tex(maps.bump,false),gloss=d.finish==='gloss';
+  var outer=new T.MeshPhysicalMaterial({map:map,metalness:0,roughness:gloss?.16:.74,roughnessMap:tex(studioRoughness(),false),clearcoat:gloss?1:.035,clearcoatRoughness:gloss?.045:.55,ior:1.47,bumpMap:micro,bumpScale:gloss?.003:.009,envMap:glossEnvironment.texture,envMapIntensity:gloss?1.05:.40});
+  if(surface){outer.bumpScale=.010;outer.roughness=gloss?.20:.86;}
   var inside=outer.clone(),innerCanvas=canvas(64,256),ix=innerCanvas.getContext('2d');
   // Occlusion increases below the opening, including the inside floor.
   for(var iy=0;iy<256;iy++){
-    var level=1-iy/255,depth=Math.max(0,Math.min(1,(1-level)*d.height/Math.max(.05,d.height-d.floor))),shade=.94-.2*Math.pow(depth,.8),innerColor=d.dipDepth&&iy<256*d.dipDepth?d.dipColor:d.inside;
+    var level=1-iy/255,depth=Math.max(0,Math.min(1,(1-level)*d.height/Math.max(.05,d.height-d.floor))),shade=1-.13*Math.pow(depth,.85),innerColor=!angled&&d.dipDepth&&iy<256*d.dipDepth?d.dipColor:d.inside;
     ix.fillStyle='rgb('+innerColor.map(function(channel){return Math.round(channel*shade);}).join(',')+')';ix.fillRect(0,iy,64,1);
   }
   if(surface){
-    var shaded=innerCanvas,innerSurface=canvas(512,512),isx=innerSurface.getContext('2d');isx.drawImage(shaded,0,0,512,512);isx.globalCompositeOperation='multiply';isx.drawImage(surface.color,0,0,512,512);isx.globalCompositeOperation='source-over';innerCanvas=innerSurface;ix=isx;
+
   }
-  if(d.topOverlay){
+  if(d.topOverlay||d.topCarve){
     innerCanvas=canvas(768,768);ix=innerCanvas.getContext('2d');
     ix.fillStyle='rgb('+d.inside.join(',')+')';ix.fillRect(0,0,768,768);
-    if(surface){ix.globalCompositeOperation='multiply';ix.drawImage(surface.color,0,0,768,768);ix.globalCompositeOperation='source-over';}
-    ix.save();ix.globalAlpha=d.topOpacity==null?.64:d.topOpacity;ix.drawImage(d.topOverlay,0,0,768,768);ix.restore();
+
+    ix.save();ix.globalAlpha=d.topOpacity==null?.64:d.topOpacity;if(d.topOverlay&&!angled)ix.drawImage(d.topOverlay,0,0,768,768);ix.restore();
   }
-  if(d.topOverlay){
+  if(d.topOverlay||d.topCarve){
     inside.onBeforeCompile=function(shader){
-      shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nvarying float todakInnerLevel;').replace('#include <begin_vertex>','#include <begin_vertex>\ntodakInnerLevel = position.y / '+Number(d.height).toFixed(5)+';');
-      shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying float todakInnerLevel;').replace('#include <opaque_fragment>','outgoingLight *= .87 - .43 * pow(clamp((1.0 - todakInnerLevel) * '+Number(d.height/Math.max(.05,d.height-d.floor)).toFixed(5)+', 0.0, 1.0), .7);\n#include <opaque_fragment>');
+      if(d.topCarve&&!d.topOverlay&&!angled){shader.uniforms.todakDipDepth={value:d.dipDepth||0};var base=new T.Color('rgb('+d.inside.join(',')+')'),dip=new T.Color('rgb('+d.dipColor.join(',')+')');shader.uniforms.todakDipRatio={value:new T.Vector3(dip.r/Math.max(.0001,base.r),dip.g/Math.max(.0001,base.g),dip.b/Math.max(.0001,base.b))};}
+      shader.uniforms.todakVesselHeight={value:d.height};shader.uniforms.todakInteriorDepth={value:d.height/Math.max(.05,d.height-d.floor)};
+      shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nuniform float todakVesselHeight;\nvarying float todakInnerLevel;').replace('#include <begin_vertex>','#include <begin_vertex>\ntodakInnerLevel = position.y / todakVesselHeight;');
+      shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nuniform float todakInteriorDepth;\nvarying float todakInnerLevel;').replace('#include <opaque_fragment>','outgoingLight *= 1.0 - .12 * pow(clamp((1.0 - todakInnerLevel) * todakInteriorDepth, 0.0, 1.0), .9);\n#include <opaque_fragment>');
+    if(d.topCarve&&!d.topOverlay&&!angled)shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nuniform float todakDipDepth;\nuniform vec3 todakDipRatio;').replace('#include <map_fragment>','#include <map_fragment>\ndiffuseColor.rgb*=mix(vec3(1.),todakDipRatio,step(1.-todakDipDepth,todakInnerLevel)*step(.00001,todakDipDepth));');
+    };inside.customProgramCacheKey=function(){return 'todak-studio-inner-v1';};
+  }
+  inside.map=tex(innerCanvas,true);inside.envMap=glossEnvironment.texture;inside.clearcoatRoughness=gloss?.055:.55;inside.roughness=surface?(gloss?.22:.90):(gloss?.19:.79);inside.envMapIntensity=gloss?1:.40;inside.clearcoat=gloss?1:.035;
+
+  if(d.topCarve){var cutCanvas=canvas(512,512),cutContext=cutCanvas.getContext('2d'),cutMask=canvas(512,512);cutMask.getContext('2d').drawImage(d.topCarve,0,0,512,512);var pixels=cutMask.getContext('2d').getImageData(0,0,512,512),heights=cutContext.createImageData(512,512);for(var i=0;i<pixels.data.length;i+=4){var h=128+(pixels.data[i]>127?1:-1)*pixels.data[i+3]/255*80;heights.data[i]=heights.data[i+1]=heights.data[i+2]=h;heights.data[i+3]=255;}cutMask.getContext('2d').putImageData(heights,0,0);cutContext.filter='blur(1.5px)';cutContext.drawImage(cutMask,0,0);inside.bumpMap=tex(cutCanvas,false);inside.bumpScale=.065;}
+  if(angled){
+    var priorDip=inside.onBeforeCompile,topPaint=d.topOverlay?tex(d.topOverlay,true):null;
+    inside.onBeforeCompile=function(shader){priorDip.call(this,shader);shader.uniforms.todakTiltPlane={value:new T.Vector3(d.height*(d.dipFrom==='bottom'?d.dipDepth:1-d.dipDepth),Math.tan((d.dipAngle||0)*Math.PI/180),d.height)};shader.uniforms.todakDipSign={value:d.dipFrom==='bottom'?-1:1};shader.uniforms.todakTiltFloor={value:d.floor};shader.uniforms.todakTiltColor={value:new T.Color().setRGB(d.dipColor[0]/255,d.dipColor[1]/255,d.dipColor[2]/255,T.SRGBColorSpace)};
+      shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nuniform vec3 todakTiltPlane;\nvarying vec3 todakDipPosition;').replace('#include <begin_vertex>','#include <begin_vertex>\ntodakDipPosition=position;');
+      var declarations='\nuniform vec3 todakTiltPlane;\nuniform float todakDipSign;\nuniform float todakTiltFloor;\nuniform vec3 todakTiltColor;\nvarying vec3 todakDipPosition;';
+      var dipCode='\nfloat todakDipCoverage=smoothstep(-.015,.015,(todakDipPosition.y-todakTiltPlane.x-todakTiltPlane.y*todakDipPosition.x)*todakDipSign);\n';
+      dipCode+=(d.topOverlay||d.topCarve)?'diffuseColor.rgb=mix(diffuseColor.rgb,todakTiltColor,todakDipCoverage);':'float todakDipShade=1.-.13*pow(clamp((1.-todakDipPosition.y/todakTiltPlane.z)*todakTiltPlane.z/max(.05,todakTiltPlane.z-todakTiltFloor),0.,1.),.85);diffuseColor.rgb=mix(diffuseColor.rgb,todakTiltColor*todakDipShade,todakDipCoverage);';
+      if(topPaint){shader.uniforms.todakTiltPaint={value:topPaint};shader.uniforms.todakTiltPaintOpacity={value:d.topOpacity==null?.64:d.topOpacity};declarations+='\nuniform sampler2D todakTiltPaint;\nuniform float todakTiltPaintOpacity;';dipCode+='\nvec4 todakTopPigment=texture2D(todakTiltPaint,vMapUv);diffuseColor.rgb=mix(diffuseColor.rgb,todakTopPigment.rgb,todakTopPigment.a*todakTiltPaintOpacity);';}
+      shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>'+declarations).replace('#include <map_fragment>','#include <map_fragment>'+dipCode);
     };
   }
-  inside.map=tex(innerCanvas,true);inside.envMap=gloss?glossEnvironment.texture:null;inside.clearcoatRoughness=gloss?.09:.6;inside.roughness=gloss?.23:.86;inside.envMapIntensity=gloss?.65:.24;inside.clearcoat=gloss?.85:.04;
+  // Project only the generated glaze network in local 3D space. Original paint
+  // UVs and all vertex buffers remain unchanged, including the interior floor.
+  if(surface){
+    var crackleColor=tex(surface.color,true),crackleRoughness=tex(surface.roughness,false);
+    crackleColor.wrapS=crackleColor.wrapT=crackleRoughness.wrapS=crackleRoughness.wrapT=T.RepeatWrapping;
+    function projectCrackle(material){var prior=material.onBeforeCompile;material.onBeforeCompile=function(shader){
+      prior.call(this,shader);shader.uniforms.todakCrackleColor={value:crackleColor};shader.uniforms.todakCrackleRoughness={value:crackleRoughness};
+      shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 todakGlazePosition;\nvarying vec3 todakGlazeNormal;').replace('#include <begin_vertex>','#include <begin_vertex>\ntodakGlazePosition=position;\ntodakGlazeNormal=normal;');
+      var declarations='\nvarying vec3 todakGlazePosition;\nvarying vec3 todakGlazeNormal;\nuniform sampler2D todakCrackleColor;\nuniform sampler2D todakCrackleRoughness;\nvec4 todakGlazeSample(sampler2D glaze){vec3 p=todakGlazePosition*.12;vec3 w=pow(abs(normalize(todakGlazeNormal)),vec3(4.));w/=max(.0001,w.x+w.y+w.z);return texture2D(glaze,p.yz)*w.x+texture2D(glaze,p.xz)*w.y+texture2D(glaze,p.xy)*w.z;}\n';
+      shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>'+declarations).replace('#include <map_fragment>','#include <map_fragment>\ndiffuseColor.rgb*=todakGlazeSample(todakCrackleColor).rgb;').replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor*=todakGlazeSample(todakCrackleRoughness).g;');
+    };}
+    projectCrackle(outer);projectCrackle(inside);
+  }
 
+  // The flat lip/sole should use its actual face normal; interpolating the
+  // adjacent inner/outer-wall normals creates dark alternating edge samples.
+  function studioEdge(material,inner){var prior=material.onBeforeCompile;material.onBeforeCompile=function(shader){prior.call(this,shader);shader.uniforms.todakEdgeHeight={value:d.height};shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nuniform float todakEdgeHeight;\nvarying float todakEdgeLevel;').replace('#include <begin_vertex>','#include <begin_vertex>\ntodakEdgeLevel=position.y/todakEdgeHeight;');shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying float todakEdgeLevel;').replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\nvec3 todakFaceNormal=normalize(cross(dFdx(vViewPosition),dFdy(vViewPosition)));\nif(todakEdgeLevel>.9998||todakEdgeLevel<.0002){normal=todakFaceNormal;nonPerturbedNormal=normal;}');};material.customProgramCacheKey=function(){return 'todak-studio-edge-v2-'+(inner&&(d.topOverlay||d.topCarve)?'painted-inner':'plain')+(inner&&d.topCarve&&!d.topOverlay?'-top-cut-dip':'')+(angled?'-dip-tilt-v1'+(d.topOverlay?'-paint':''):'')+(surface?'-crackle-v3':'');};}
+  studioEdge(outer,false);studioEdge(inside,true);
   // Closely spaced throwing ridges otherwise reflect the sharp studio panels as
   // broken, near-black rings. Broaden only those reflections, preserving every
   // profile sample, painted layer, carving and the gloss on smooth vessels.
@@ -154,16 +177,31 @@ function buildMaterials(d){
     }
     var softenOuter=Math.max(0,Math.min(1,(outerBend/63-.015)/.045));
     var softenInner=Math.max(0,Math.min(1,(innerBend/63-.015)/.045));
-    outer.roughness+=Math.max(0,.45-outer.roughness)*softenOuter;
-    outer.clearcoat+=(.25-outer.clearcoat)*softenOuter;
-    outer.clearcoatRoughness+=(.42-outer.clearcoatRoughness)*softenOuter;
-    outer.envMapIntensity+=(.6-outer.envMapIntensity)*softenOuter;
-    inside.roughness+=Math.max(0,.48-inside.roughness)*softenInner;
-    inside.clearcoat+=(.18-inside.clearcoat)*softenInner;
-    inside.clearcoatRoughness+=(.45-inside.clearcoatRoughness)*softenInner;
-    inside.envMapIntensity+=(.35-inside.envMapIntensity)*softenInner;
+    outer.roughness+=Math.max(0,.23-outer.roughness)*softenOuter;
+    outer.clearcoat+=(.85-outer.clearcoat)*softenOuter;
+    outer.clearcoatRoughness+=(.10-outer.clearcoatRoughness)*softenOuter;
+    outer.envMapIntensity+=(.85-outer.envMapIntensity)*softenOuter;
+    inside.roughness+=Math.max(0,.25-inside.roughness)*softenInner;
+    inside.clearcoat+=(.85-inside.clearcoat)*softenInner;
+    inside.clearcoatRoughness+=(.11-inside.clearcoatRoughness)*softenInner;
+    inside.envMapIntensity+=(.85-inside.envMapIntensity)*softenInner;
   }
-  var underside=outer.clone();underside.bumpMap=null;underside.bumpScale=0;underside.map=null;underside.color.setRGB(d.color[0]/255,d.color[1]/255,d.color[2]/255,T.SRGBColorSpace);if(d.bottomOverlay){var bc=canvas(768,768),bx=bc.getContext('2d');bx.fillStyle='rgb('+d.color.join(',')+')';bx.fillRect(0,0,768,768);bx.globalAlpha=d.bottomOpacity==null?.8:d.bottomOpacity;bx.drawImage(d.bottomOverlay,0,0,768,768);underside.map=tex(bc,true);underside.color.setHex(0xffffff);}materials.push(outer,inside,underside);
+  var underside=outer.clone();underside.bumpMap=null;underside.bumpScale=0;underside.map=null;var baseColor=d.dipFrom==='bottom'&&d.dipDepth&&!d.dipAngle?d.dipColor:d.color;underside.color.setRGB(baseColor[0]/255,baseColor[1]/255,baseColor[2]/255,T.SRGBColorSpace);if(d.bottomOverlay){var bc=canvas(768,768),bx=bc.getContext('2d');bx.fillStyle='rgb('+baseColor.join(',')+')';bx.fillRect(0,0,768,768);bx.globalAlpha=d.bottomOpacity==null?.8:d.bottomOpacity;bx.drawImage(d.bottomOverlay,0,0,768,768);underside.map=tex(bc,true);underside.color.setHex(0xffffff);}
+if(angled){
+ var solePaint=d.bottomOverlay?tex(d.bottomOverlay,true):null;
+ underside.onBeforeCompile=function(shader){
+  shader.uniforms.todakSolePlane={value:new T.Vector2(d.height*(d.dipFrom==='bottom'?d.dipDepth:1-d.dipDepth),Math.tan((d.dipAngle||0)*Math.PI/180))};
+  shader.uniforms.todakSoleSign={value:d.dipFrom==='bottom'?-1:1};
+  shader.uniforms.todakSoleBase={value:new T.Color().setRGB(d.color[0]/255,d.color[1]/255,d.color[2]/255,T.SRGBColorSpace)};
+  shader.uniforms.todakSoleDip={value:new T.Color().setRGB(d.dipColor[0]/255,d.dipColor[1]/255,d.dipColor[2]/255,T.SRGBColorSpace)};
+  shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 todakSolePosition;').replace('#include <begin_vertex>','#include <begin_vertex>\ntodakSolePosition=position;');
+  var decl='\nvarying vec3 todakSolePosition;\nuniform vec2 todakSolePlane;\nuniform float todakSoleSign;\nuniform vec3 todakSoleBase;\nuniform vec3 todakSoleDip;',code='\nfloat soleCoverage=smoothstep(-.015,.015,(todakSolePosition.y-todakSolePlane.x-todakSolePlane.y*todakSolePosition.x)*todakSoleSign);diffuseColor.rgb=mix(todakSoleBase,todakSoleDip,soleCoverage);';
+  if(solePaint){shader.uniforms.todakSolePaint={value:solePaint};shader.uniforms.todakSoleOpacity={value:d.bottomOpacity==null?.8:d.bottomOpacity};decl+='\nuniform sampler2D todakSolePaint;\nuniform float todakSoleOpacity;';code+='\nvec4 solePigment=texture2D(todakSolePaint,vMapUv);diffuseColor.rgb=mix(diffuseColor.rgb,solePigment.rgb,solePigment.a*todakSoleOpacity);';}
+  shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>'+decl).replace('#include <map_fragment>','#include <map_fragment>'+code);
+ };
+ underside.customProgramCacheKey=function(){return 'todak-sole-dip-v1'+(solePaint?'-paint':'');};
+}
+materials.push(outer,inside,underside);
   return {materials:materials,textures:textures};
 
 }
@@ -171,7 +209,8 @@ function buildGeometry(d){
   var carving=!!d.carve,fracture=!!d.fracturePreview,n=fracture?(carving?64:48):carving?(low?224:320):128,H=d.height,ro=d.rAt(1),ri=d.innerAt(1),hollow=H-d.floor>.05;
   // Tiny rounded edges avoid a grazing, razor-sharp material seam at rim and foot.
   var footBevel=Math.min(.045,H*.004,d.rAt(0)*.02),rimBevel=d.profileRounded?Math.max(.001,Math.min(.025,(ro-ri)*.25,H*.004)):hollow?Math.max(.001,Math.min(.045+(d.rimSoftness||0)*.16,(ro-ri)*.45,H*.018)):.02;
-  var points=[new T.Vector2(0,0)],baseR=Math.max(0,d.rAt(0)-footBevel),baseRows=d.bottomCarve?(fracture?12:low?80:128):1;for(var br=1;br<=baseRows;br++)points.push(new T.Vector2(baseR*br/baseRows,0));var outerStart=points.length-1;
+  function underside(t){var a=d.bottomTrim;if(!Array.isArray(a)||a.length<2)return 0;var p=Math.max(0,Math.min(1,t))*(a.length-1),i=Math.min(a.length-2,Math.floor(p));return Math.max(0,a[i]+(a[i+1]-a[i])*(p-i));}
+  var points=[new T.Vector2(0,underside(0))],baseR=Math.max(0,d.rAt(0)-footBevel),baseRows=(d.bottomCarve||d.bottomTrim)?(fracture?12:low?80:128):1;for(var br=1;br<=baseRows;br++)points.push(new T.Vector2(baseR*br/baseRows,underside(baseR*br/baseRows/Math.max(.001,d.rAt(0)))));var outerStart=points.length-1;
   points.push(new T.Vector2(d.rAt(0)-footBevel*.25,footBevel*.25));
   points.push(new T.Vector2(d.rAt(footBevel/H),footBevel));
   for(var a=1;a<n;a++){var outerY=H*a/n;if(outerY>footBevel&&outerY<H-rimBevel)points.push(new T.Vector2(d.rAt(a/n),outerY));}
@@ -186,7 +225,7 @@ function buildGeometry(d){
   for(var z=0;z<uv.count;z++){
     uv.setY(z,Math.max(0,Math.min(1,pos.getY(z)/H)));
     if((d.bottomOverlay||d.bottomCarve)&&z%points.length<=outerStart)uv.setXY(z,.5+pos.getX(z)/(2*d.rAt(0)),.5+pos.getZ(z)/(2*d.rAt(0)));
-    if(d.topOverlay&&z%points.length>outerEnd){var topR=d.topRadius||d.rAt(1);uv.setXY(z,.5+pos.getX(z)/(2*topR),.5+pos.getZ(z)/(2*topR));}
+    if((d.topOverlay||d.topCarve)&&z%points.length>outerEnd){var topR=d.topRadius||d.rAt(1);uv.setXY(z,.5+pos.getX(z)/(2*topR),.5+pos.getZ(z)/(2*topR));}
   }
   geo.clearGroups();var segs=segments,rows=points.length-1,indices=[[],[],[]],old=geo.index.array;
   for(var s=0;s<segs;s++)for(var row=0;row<rows;row++){
@@ -224,7 +263,7 @@ function rebuild(d){
  var m=lru(materialCache,materialSignature(d),function(){return buildMaterials(d);},releaseTextures,2);
  while(pot.children.length)pot.remove(pot.children[0]);materials=m.materials;textures=m.textures;
  var mesh=new T.Mesh(g.geometry,materials);mesh.castShadow=true;mesh.receiveShadow=false;mesh.userData.incision=g.incision;pot.add(mesh);
- var contact=scene.getObjectByName('contact'),r=d.rAt(0);contact.scale.set(r*2.8,r*2.8,1);if(activeGeometryKey!==geometrySignature(d))renderer.shadowMap.needsUpdate=true;activeGeometryKey=geometrySignature(d);
+ var contact=scene.getObjectByName('contact'),r=d.rAt(0);contact.scale.set(r*2.45,r*2.45,1);if(activeGeometryKey!==geometrySignature(d))renderer.shadowMap.needsUpdate=true;activeGeometryKey=geometrySignature(d);
 }
 function configure(d,width,height){
   var scale=d.scale,W=d.width,HC=d.canvasHeight; if(d.framed!==false){var radius=0;for(var f=0;f<=32;f++)radius=Math.max(radius,d.rAt(f/32));var VW=d.viewWidth||W,VH=d.viewHeight||HC;scale=Math.min(VH/(d.height*1.85),VW/(radius*3.8))*(d.zoom||1)*(d.objectScale||1);d=Object.assign({},d,{scale:scale,cx:VW*.5+(d.panX||0),base:VH*.52+d.height*scale*.43+(d.panY||0)});} var pitch=d.elevation==null?.32:Math.sin(d.elevation),cos=Math.sqrt(1-pitch*pitch),aim=(d.base-HC/2)/(scale*cos),x=(W/2-d.cx)/scale;
