@@ -153,7 +153,7 @@
  guidance.hidden=type!=='throw'||!challenge||!$('home').hidden;if(!guidance.hidden){var best={delta:0,t:.5};for(var i=5;i<95;i++){var t=i/100,delta=rAt(t)-T.f(t);if(Math.abs(delta)>Math.abs(best.delta))best={delta:delta,t:t};}guidance.textContent=locate?'표시된 부분을 천천히 매끈하게 다듬어요':Math.abs(best.delta)<.3?'목표선과 가까워졌어요':best.delta>0?'조금만 더 안쪽으로':'조금만 더 바깥쪽으로';var r=cv.getBoundingClientRect(),x=r.left+(CX+Math.min(rAt(best.t)*.55,5)*SV)*r.width/W,y=r.top+(BASE-best.t*st.height*SV)*r.height/HC;guidance.style.left=Math.max(340,Math.min(innerWidth-500,x))+'px';guidance.style.top=Math.max(170,Math.min(innerHeight-90,y))+'px';}
  historyUI();refreshColorPickers();window.TodakPolish?.updateMoves();}
  document.addEventListener('click',schedule);document.addEventListener('input',schedule);window.addEventListener('resize',schedule);var oldFire=fireUI;fireUI=function(){oldFire.apply(this,arguments);schedule();};
- window.TodakLayoutPreview={sync:sync,roughLocations:roughLocations,history:function(){var frames=[];undo.concat(redo,pending?[pending]:[]).forEach(function(s){['paint','carve','top','bottom','relief'].forEach(function(k){if(s[k])frames.push(s[k]);});});return{undo:undo.length,redo:redo.length,limit:maxHistory,imageBytes:TodakHistoryTiles.bytes(frames)};}};
+ window.TodakLayoutPreview={sync:sync,resetHistory:clearHistory,roughLocations:roughLocations,history:function(){var frames=[];undo.concat(redo,pending?[pending]:[]).forEach(function(s){['paint','carve','top','bottom','relief'].forEach(function(k){if(s[k])frames.push(s[k]);});});return{undo:undo.length,redo:redo.length,limit:maxHistory,imageBytes:TodakHistoryTiles.bytes(frames)};}};
  sync();
 })();
 
