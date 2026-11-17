@@ -13,7 +13,7 @@
  var lastStage='';function sync(){updateMoves();var touch=uiUsesSheet()||innerHeight<560;document.body.classList.toggle('ui-touch-controls',touch);var decoHost=touch?decoTouch:$('rackDeco'),glazeHost=touch?glazeTouch:$('potteryToolRack');if($('dtools').parentNode!==decoHost)decoHost.appendChild($('dtools'));if($('rackGlaze').parentNode!==glazeHost)glazeHost.appendChild($('rackGlaze'));decoTouch.hidden=glazeTouch.hidden=!touch;
   var T=TARGETS[st.target];
   $('ui-goal-info').hidden=true;$('ui-goal-dims').hidden=true;
-  $('modeChip').textContent=T?(T.master?'명장 도전 · ':'도전 · ')+T.name:'자유롭게 빚기';$('modeChip').title=$('modeChip').textContent;
+  $('modeChip').textContent=T?(T.master?'명장 도전 · ':T.personal?'내 작품 도전 · ':'도전 · ')+T.name:'자유롭게 빚기';$('modeChip').title=$('modeChip').textContent;
   result.hidden=!T;
   $('ui-result-360').checked=document.body.classList.contains('ui-inspecting');
   if(lastStage!==st.stage){if(st.stage==='done'){if(uiUsesSheet())$('sheet').style.setProperty('--mobile-sheet-height',Math.min(Math.max(innerHeight*.45,348),Math.max(220,innerHeight-220))+'px');$('sheetBody').scrollTop=0;}lastStage=st.stage;}

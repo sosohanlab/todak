@@ -14,6 +14,7 @@ const trimStart=html.indexOf('/* Optional leather-hard trimming.'),trimEnd=html.
 if(trimStart<0||trimEnd<0)throw Error('Missing retired-tool boundaries');
 html=html.slice(0,trimStart)+fs.readFileSync(path.join(sourceDir,'interior-depth-controls.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'fine-trimming.js'),'utf8')+'\n'+html.slice(trimEnd);
 html=html.replaceAll("['trim','sponge']","['sponge']");
+html=html.replaceAll('st.target?HMIN:1.2','st.target&&!TARGETS[st.target]?.personal?HMIN:1.2');
 html=html.replace("shapeTool('trim','깎아 만들기');",'');
 const scoreStart=html.indexOf('function roughnessSignal('),scoreEnd=html.indexOf('var ghostUntil=0;',scoreStart);
 if(scoreStart<0||scoreEnd<0)throw Error('Missing scoring boundaries');
@@ -131,7 +132,7 @@ required("$('goFree').addEventListener('click',function(e){if(complete)return;if
 required("var challengeBase=startChallenge;startChallenge=function(id){if(!complete){toast('첫 자유롭게 빚기 안내를 먼저 마쳐 주세요.');return;}return challengeBase(id);};", "var challengeBase=startChallenge;startChallenge=function(id){if(active)stopOptionalTutorial();return challengeBase(id);};");
 required('lockHome();window.TodakTutorial=',fs.readFileSync(path.join(sourceDir,'tutorial-sequence.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-behavior.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-presentation.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'tutorial-entry.js'),'utf8')+'\n'+fs.readFileSync(path.join(sourceDir,'grouped-tutorial.js'),'utf8')+'\n lockHome();window.TodakTutorial=');
 const modules=['history-tiles.js','studio-layout.js','responsive-layout.js','experience-polish.js','stage-navigation.js','card-dialog-layout.js','appearance-picker.js','workshop-simplification.js','shelf-cutouts.js','site-feedback-config.js','site-feedback.js'];
-modules.push('work-in-progress.js');
+modules.push('personal-challenges.js','work-in-progress.js');
 if(!production)modules.push('preview-scenes.js');
 const code=rule+modules.map(f=>fs.readFileSync(path.join(sourceDir,f),'utf8')).join('\n');
 html=html.replace(marker,code+'\n'+marker);

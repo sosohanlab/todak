@@ -43,6 +43,12 @@
   // Compare finish against the same wall thickness rather than penalising it as noise.
   var surfaceInner=ref.inner;if(!T.scoreProfile&&wallSamples.length){wallSamples.sort(function(a,b){return a-b;});var normalThickness=Math.round(clamp(wallSamples[Math.floor(wallSamples.length/2)],.1,3)*20)/20;if(!ref.surfaceInners[normalThickness])ref.surfaceInners[normalThickness]=ref.radii.map(function(_,i){return inset(ref.radii,T.h,i/(ref.n-1),normalThickness);});surfaceInner=ref.surfaceInners[normalThickness];}
   var innerStart=Math.ceil(s.floor/s.height*(s.inner.length-1))+1,roughSignal=Math.max(noise(s.radii,ref.radii,1),requiresHollow&&!solid?noise(s.inner,surfaceInner,innerStart):0),roughPenalty=Math.round(clamp((roughSignal-.003)*240,0,15)),surface=15-roughPenalty,moves=movePoints(T.n,used),quality=outline+height+inside+surface,total=Math.min(solid?59:100,quality+moves);
+  if(T.personal&&T.scoreProfile){
+   var innerMean=0,innerSq=0,innerMax=0,refFloor=T.scoreProfile.floor/T.h;
+   for(var k=0;k<=100;k++){var level=k/100,actual=level*s.height>=s.floor?g.inner(level):0,wanted=level*T.h>=T.scoreProfile.floor?ref.geometry.inner(level):0,delta=Math.max(0,Math.abs(actual-wanted)-.025);innerMean+=delta;innerSq+=delta*delta;innerMax=Math.max(innerMax,delta);}
+   innerMean/=101;inside=Math.round(15*clamp(1-(2.5*innerMean+1.25*Math.sqrt(innerSq/101)+.5*innerMax)/Math.max(.05,scale)-2*Math.abs(s.floor/s.height-refFloor),0,1));
+   solid=requiresHollow&&(g.inner(1)<Math.max(.005,ref.geometry.inner(1)*.1)||nominalDepth<need*.05);quality=outline+height+inside+surface;total=Math.min(solid?59:100,quality+moves);
+  }
   return Object.freeze({version:VERSION,valid:true,outline:outline,height:height,depth:inside,surface:surface,moves:moves,quality:quality,total:total,solid:solid,roughPenalty:roughPenalty,used:used,limit:T.n,remaining:Math.max(0,T.n-used),metrics:Object.freeze({meanError:mean,rmsError:rms,maxError:maximum,depthRatio:accessible,openness:openness,integrity:integrity})});
  }
  return Object.freeze({version:VERSION,weights:WEIGHTS,evaluate:evaluate,movePoints:movePoints,geometry:geometry});
