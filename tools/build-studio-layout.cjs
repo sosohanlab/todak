@@ -90,6 +90,9 @@ required('depthNeed:Math.max(.01,(work.profile.h-work.profile.floor)/work.profil
 required('refresh:refresh,surface:function(){return topSurface(topLayout());}', 'refresh:refresh,cancelGesture:function(commit){if(commit){var event={preventDefault:function(){},stopImmediatePropagation:function(){}};if(active!==null){event.pointerId=active;end(event);}if(bottomActive!==null){event.pointerId=bottomActive;bottomEnd(event);}return;}if(active!==null&&top)history.pop();if(bottomActive!==null)bottomHistory.pop();active=bottomActive=null;pendingTop=bottomPending=null;last=bottomLast=null;changed=bottomChanged=false;activeCursor.hidden=true;},surface:function(){return topSurface(topLayout());}');
 // Selecting an already hollow work must not silently reshape its inner wall.
 required('if(st.height-st.floor>.05){constrainInterior();return;}','if(st.height-st.floor>.05)return;');
+// Texture gap filling must stay inside the clay disc at this height. On narrow
+// stems and sharp feet, extending eight pixels upward otherwise paints the air.
+required('ys=prev<0?y:Math.max(prev+1,y-Math.ceil(8*o));','ys=prev<0?y:Math.max(prev+1,y-Math.ceil(8*o),Math.ceil(base-hy-r*TILT*c));');
 required('if(st.stage!=="deco"&&st.stage!=="done")return;','if(!["throw","deco","glaze","done"].includes(st.stage))return;');
 // Untranslated attributes must not re-trigger their own translation observer.
 required('if(v&&HAN.test(v)){n.setAttribute(a,T(v));}','if(v&&HAN.test(v)){var translated=T(v);if(translated!==v)n.setAttribute(a,translated);}');

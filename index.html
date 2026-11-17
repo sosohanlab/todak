@@ -1558,7 +1558,7 @@ function buildOverlay(){
       s=p<0.28?0.5+0.55*p/0.28:(p<0.62?1.05-0.19*(p-0.28)/0.34:0.86-0.42*(p-0.62)/0.38);
       R=fd[idx]*s; G=fd[idx+1]*s; B=fd[idx+2]*s;
       if(heat>0){R+=(GLOW[0]-R)*heat; G+=(GLOW[1]-G)*heat; B+=(GLOW[2]-B)*heat;}
-      ys=prev<0?y:Math.max(prev+1,y-Math.ceil(8*o));
+      ys=prev<0?y:Math.max(prev+1,y-Math.ceil(8*o),Math.ceil(base-hy-r*TILT*c));
       for(yy=ys;yy<=y;yy++){di=(yy*w+x)*4; data[di]=R; data[di+1]=G; data[di+2]=B; data[di+3]=al;}
     }
   }
