@@ -3804,7 +3804,7 @@ cv.addEventListener("wheel",function(e){
       if(!endpoint){var missing=new Error('not_configured');missing.searchCode='search_not_configured';throw missing;}
       var remembered=searchResultsCache.get(image),data=remembered&&Date.now()-remembered.at<600000?remembered.data:null;if(!data){var response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:image}),signal:controller.signal});try{data=await response.json();}catch(_){throw Error('unavailable');}if(!response.ok){var failure=new Error('unavailable');failure.searchCode=data.error;throw failure;}}if(epoch!==searchEpoch)return;
       if(!Array.isArray(data.matches))throw Error('invalid');
-      var matches=data.matches.filter(function(m){return m&&safeUrl(m.url)&&safeUrl(m.image)&&m.title;}).slice(0,8);
+      var matches=data.matches.filter(function(m){return m&&safeUrl(m.url)&&safeUrl(m.image)&&m.title;}).slice(0,4);
       $('searchStatus').textContent=matches.length?'사진을 닮은 검색 결과예요. 뜻밖의 물건도 함께 만나보세요.':'아직 닮은 물건을 찾지 못했어요. 사진의 각도를 바꿔 다시 찾아보세요.';
       if(searchResultsCache.size>=12)searchResultsCache.delete(searchResultsCache.keys().next().value);searchResultsCache.set(image,{data:data,at:Date.now()});
       $('searchContext').textContent=data.query_used?'연결된 서버에 이전 검색 조건이 남아 있어요. image-search 함수 업데이트가 필요해요.':'선택한 배경의 사진만으로 찾은 결과예요.';
