@@ -1,0 +1,509 @@
+/* The production controls stay mounted. This layer changes their presentation. */
+body.todak-renewal {
+  --ink: #292521;
+  --muted: #63584e;
+  --paper: #fffcf6;
+  --porcelain: #fffcf6;
+  --ui-soft: #f3ede3;
+  --line: #d9cdbf;
+  --cobalt: #2143a3;
+  --ui-shadow: 0 8px 28px #3925191a;
+  --body: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+
+.todak-renewal button { -webkit-tap-highlight-color: transparent; }
+.todak-renewal :is(button, input, summary, select, [tabindex]):focus-visible {
+  outline: 2px solid #2858ca;
+  outline-offset: 2px;
+}
+
+.todak-renewal #home {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: clamp(28px, 7dvh, 84px) clamp(25px, 7vw, 144px) 24px;
+  isolation: isolate;
+  overflow: auto;
+  background: #eab991;
+  backdrop-filter: none;
+}
+.renewal-home-scene, .renewal-home-scene img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 58% center;
+  pointer-events: none;
+}
+.renewal-home-scene { z-index: -2; position: fixed; }
+.todak-renewal #home::before,
+.todak-renewal #chSel::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+.todak-renewal #home::before {
+  background: linear-gradient(90deg, #fff4e5ee, #fff0ddad 28%, #fff2e145 45%, transparent 61%);
+}
+.todak-renewal #home .homeBox {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  align-self: stretch;
+  gap: 22px;
+  width: min(100%, 440px);
+  min-height: 0;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+.todak-renewal #home .homeIntro {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  justify-items: start;
+  gap: 5px 12px;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+.todak-renewal #home .homeMark {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+  width: 52px;
+  height: 52px;
+}
+.todak-renewal #home .homeTitle {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  font-family: var(--body);
+  color: var(--cobalt);
+  font-size: clamp(43px, 4.2vw, 68px);
+  font-weight: 850;
+  line-height: 1.05;
+  letter-spacing: -.07em;
+}
+.todak-renewal #home .homeEyebrow {
+  grid-column: 1/-1;
+  grid-row: 2;
+  margin: 9px 0 0;
+  color: #674225;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .025em;
+}
+.todak-renewal #home .homeSub {
+  grid-column: 1/-1;
+  margin: 2px 0 0;
+  font-size: clamp(15px, 1.2vw, 19px);
+  line-height: 1.58;
+  color: #463325;
+}
+.todak-renewal #home .homeSub br { display: none; }
+.todak-renewal #home .homeSub br::after { content: " "; }
+.todak-renewal #home .homeMenus {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  transform: none;
+}
+.todak-renewal #home .homeTutorialEntry {
+  grid-column: 1/-1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.todak-renewal #home #goTutorial,
+.todak-renewal #home .homeMenus > .bigBtn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+  padding: 11px 12px;
+  gap: 4px;
+  min-height: 68px;
+  color: var(--ink);
+  background: #fffaf3fa;
+  border: 1px solid #dbc2a6;
+  border-radius: 13px;
+  box-shadow: 0 4px 12px #50301012;
+  min-width: 0;
+  width: 100%;
+}
+.todak-renewal #home #goFree {
+  background: var(--cobalt);
+  color: white;
+  border-color: var(--cobalt);
+}
+.todak-renewal #home #goTutorial {
+  padding-left: 53px;
+  min-height: 61px;
+  color: var(--cobalt);
+}
+.todak-renewal #home #goTutorial .renewal-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+}
+.todak-renewal #home :is(#goShelf, #goMarket, #goChallenge) > .renewal-icon {
+  display: block;
+  width: 22px;
+  height: 22px;
+  margin-bottom: 1px;
+  object-fit: contain;
+}
+.todak-renewal #home #goFree::before {
+  content: "";
+  width: 22px;
+  height: 22px;
+  margin-bottom: 1px;
+  background: url("icon-192.png") center / 35px no-repeat;
+  filter: brightness(1.38) saturate(.78);
+  border-radius: 5px;
+}
+.todak-renewal #home .homeMenus > .bigBtn:hover,
+.todak-renewal #home #goTutorial:hover { border-color: var(--cobalt); }
+.todak-renewal #home #goFree:hover { background: #17378d; }
+.todak-renewal #home .homeMenus :is(.bigBtn, #goTutorial) b {
+  display: block;
+  max-width: 100%;
+  font-size: clamp(16px, 1.5vw, 20px);
+  font-family: var(--body);
+  font-weight: 750;
+  line-height: 1.3;
+  letter-spacing: -.04em;
+  white-space: normal;
+  word-break: keep-all;
+}
+.todak-renewal #home .homeMenus :is(.bigBtn, #goTutorial) > span {
+  max-width: 100%;
+  font-size: .82rem;
+  line-height: 1.42;
+  color: var(--muted);
+  word-break: keep-all;
+}
+.todak-renewal #home #goFree > span { color: #f1f4ff !important; }
+.todak-renewal #home #goMarket .communityState {
+  position: static;
+  margin: 0 0 0 4px;
+  padding: 1px 4px;
+  border-radius: 5px;
+  font-size: 10px;
+  vertical-align: middle;
+}
+.todak-renewal #home #goMarket .communityState::after { display: none; }
+.todak-renewal #home #goMarket > span { display: none; }
+.todak-renewal #home #homeClose {
+  grid-column: 1/-1;
+  width: 100%;
+  min-height: 43px;
+  margin: 0;
+  background: #e6edff;
+  color: #203f94;
+  border: 1px solid #a8b9e4;
+  border-radius: 10px;
+  font-size: .9rem;
+  font-weight: 750;
+}
+.todak-renewal #home .homeBottom { margin: auto 0 0; text-align: left; }
+.todak-renewal #home .homeFoot {
+  margin: 0;
+  color: #4e3928;
+  text-align: left;
+  font-size: .78rem;
+  line-height: 1.65;
+}
+.todak-renewal #home .homeFoot :is(button, a) { min-height: 36px; }
+.todak-renewal #home .home-shop { top: 14px; right: 18px; }
+.todak-renewal #home #homeFeedback { display: inline-flex; margin-inline: 0; }
+
+/* Header and work area share a baseline. Keep the canvas behind the controls. */
+.todak-renewal .ui-header {
+  left: max(10px, env(safe-area-inset-left));
+  right: max(10px, env(safe-area-inset-right));
+  border-radius: 15px;
+  background: #fffaf4;
+  border-color: #dbcbba;
+}
+.todak-renewal .ui-header .steps li {
+  border-radius: 8px;
+  background: transparent;
+  border-color: transparent;
+  font-size: .875rem;
+  font-weight: 650;
+}
+.todak-renewal .ui-header .steps li[aria-current=step] {
+  background: #e5ecfe !important;
+  border-color: #bdcbee !important;
+  color: #1b3f97 !important;
+  font-weight: 800;
+}
+.todak-renewal .ui-header .steps li::after { color: #8a7d70; }
+.todak-renewal .ui-header #homeBtn { font-family: var(--body); font-weight: 850; letter-spacing: -.07em; }
+.todak-renewal .ui-header #menuBtn .renewal-icon,
+.todak-renewal .ui-header #shelfBtn .renewal-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 5px;
+  vertical-align: -.15em;
+  object-fit: contain;
+}
+.todak-renewal .ui-header #shelfBtn:has(.renewal-icon)::before { display: none; }
+.todak-renewal #ui-work-info,
+.todak-renewal #ui-work-views,
+.todak-renewal #sheet {
+  background: #fffaf4;
+  border-color: #dbcbba;
+}
+.todak-renewal #ui-work-info { border-radius: 13px; }
+.todak-renewal #ui-work-info .ui-work-thumb { display: none; }
+.todak-renewal #ui-work-info .ui-work-copy { min-width: 0; }
+.todak-renewal #ui-work-info #modeChip { font-weight: 800; }
+.todak-renewal #ui-work-views button { font-weight: 680; }
+.todak-renewal #ui-work-views button[aria-pressed=true] {
+  background: #e4ecff !important;
+  color: #1b3f97 !important;
+}
+.todak-renewal #ui-work-views .rotationControls::before { display: none !important; }
+.todak-renewal.ui-tool-flow #ui-work-views .rotationControls button {
+  width: auto !important;
+  min-width: 35px !important;
+  padding: 0 6px !important;
+  color: var(--cobalt);
+  background: #f7f5ee !important;
+  border-color: #d8cabd !important;
+}
+.todak-renewal #sheet { border-radius: 15px !important; }
+.todak-renewal #sheet .sheetHead { padding-inline: 13px; background: transparent; }
+.todak-renewal #sheetTitle { color: #332820; font-family: var(--body); font-weight: 790; letter-spacing: -.035em; }
+.todak-renewal #sheetBody {
+  scrollbar-width: thin;
+  scrollbar-color: #b6a48f transparent;
+}
+.todak-renewal #sheetBody .field :is(.label, .rangehead) {
+  line-height: 1.4;
+  font-size: .875rem;
+}
+.todak-renewal #ui-tool-action {
+  min-height: 0;
+  padding: 7px 9px !important;
+  border-radius: 7px;
+  background: #f3ede3;
+  color: #554436;
+  font-size: .83rem !important;
+  line-height: 1.45;
+}
+.todak-renewal .ui-history button { border-radius: 8px; background: #fffcf6; }
+.todak-renewal .ui-history button:enabled:hover { border-color: var(--cobalt); }
+.todak-renewal #sheet .chip, .todak-renewal #sheet .ghost { border-radius: 9px; }
+.todak-renewal #sheet #tools .chip,
+.todak-renewal.ui-tool-flow #sheet #ui-touch-deco #dtools .rackTool,
+.todak-renewal.ui-tool-flow #sheet #ui-touch-glaze .rackTool {
+  gap: 3px;
+  min-height: 56px !important;
+  padding: 5px 3px !important;
+  border-radius: 9px !important;
+  background: #fcf6eb !important;
+  border: 1px solid #d9cdbf !important;
+  color: var(--ink) !important;
+  font-size: .875rem !important;
+  font-weight: 680;
+}
+.todak-renewal #sheet #tools .chip[aria-pressed=true],
+.todak-renewal.ui-tool-flow #sheet #ui-touch-deco #dtools .rackTool[aria-pressed=true],
+.todak-renewal.ui-tool-flow #sheet #ui-touch-glaze .rackTool[aria-pressed=true] {
+  background: #e5edff !important;
+  border-color: #6882cc !important;
+  color: #17398f !important;
+  box-shadow: inset 0 -2px #6882cc !important;
+}
+.todak-renewal #sheet #tools .renewal-tool-photo,
+.todak-renewal #sheet .rackTool .renewal-tool-photo {
+  display: block !important;
+  width: 31px !important;
+  height: 31px !important;
+  object-fit: contain;
+}
+.todak-renewal #sheet :is(.rackTool, #tools .chip):has(.renewal-tool-photo) svg { display: none !important; }
+.todak-renewal #sheet .rackTool .renewal-tool-photo[src$="tool-brush.webp"],
+.todak-renewal #sheet .rackTool .renewal-tool-photo[src$="tool-carve.webp"] { transform: rotate(19deg); }
+.todak-renewal #ui-tool-footer { border-top: 1px solid #e6dbcc; border-radius: 0 0 14px 14px; }
+.todak-renewal #bottomTrimControls:has(#trimBottom[aria-pressed=false]) > .tip { display: none; }
+.todak-renewal #trimControls { margin-block-start: 8px; }
+.renewal-trim-help { margin-top: 6px; font-size: .83rem; }
+.renewal-trim-help > summary { padding: 5px 0; cursor: pointer; }
+.todak-renewal #sheet #openSearch {
+  min-height: 42px;
+  border-radius: 9px;
+  background: #eaf0ff !important;
+  border: 1px solid #93a8e1 !important;
+  box-shadow: none !important;
+}
+.todak-renewal #tutorialCoach { border-color: #a8b9e4; box-shadow: var(--ui-shadow); }
+.todak-renewal #tutorialCoach p { font-size: .875rem; line-height: 1.5; }
+
+/* Challenge categories and modals. */
+.todak-renewal #chSel {
+  isolation: isolate;
+  background: #69503cba url("renewal-assets/home-wide.webp") center / cover no-repeat;
+}
+.todak-renewal #chSel::before { background: #47302075; }
+.todak-renewal :is(.chBox, .howBox, .drawerIn, dialog) {
+  background-color: #fffcf6;
+  border-color: #dbcdbb;
+}
+.todak-renewal :is(dialog, .overlay .howBox, .drawerIn) {
+  box-shadow: 0 18px 60px #39271933;
+  border-radius: 17px;
+}
+.todak-renewal dialog::backdrop { background: #32291e73; }
+.todak-renewal .chBox { width: min(900px, 100%); padding: clamp(14px, 3vw, 25px); border-radius: 17px; }
+.todak-renewal .chBox .shelfHead { margin-bottom: 12px; }
+.todak-renewal .chBox .shelfHead h2,
+.todak-renewal .howBox h2 { font-family: var(--body); font-weight: 800; letter-spacing: -.035em; }
+.renewal-challenge-tabs { display: flex; gap: 3px; background: #f2eade; border-radius: 10px; padding: 4px; margin-bottom: 14px; }
+.renewal-challenge-tabs button {
+  flex: 1;
+  min-height: 42px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: #514437;
+  font-weight: 700;
+  font-size: .92rem;
+}
+.renewal-challenge-tabs button[aria-selected=true] { color: #fff; background: var(--cobalt); }
+.todak-renewal #chSel .chRule { font-size: .9rem; line-height: 1.5; margin: 0 0 9px; }
+.todak-renewal #chSel .personal-builtin-heading,
+.todak-renewal #personalChallenges h3 { display: none; }
+.todak-renewal #personalChallenges { background: transparent; border: 0; padding: 0; margin: 0; }
+.todak-renewal #personalChallenges .personal-challenge-head { justify-content: flex-start; flex-wrap: wrap; gap: 7px; }
+.todak-renewal #chGrid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.todak-renewal #chGrid .chCard { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 4px; }
+.todak-renewal #chGrid .chCard canvas { max-height: 72px; width: auto; aspect-ratio: 168 / 200; }
+.todak-renewal #chGrid .chCard b { font: 700 .89rem/1.3 var(--body); text-align: center; word-break: keep-all; }
+.todak-renewal #chGrid .chCard .best { font-size: .74rem; min-height: 1em; text-align: center; }
+.todak-renewal #chRules { background: #44342670; backdrop-filter: blur(3px); z-index: 25; }
+.todak-renewal #chRules .howBox { width: min(100%, 390px); text-align: left; }
+.renewal-rules-model { width: 68px; height: 73px; object-fit: contain; justify-self: start; }
+.renewal-rules-count { display: inline-flex; gap: .2em; margin: 8px 0 0; padding: 5px 8px; background: #e8efff; color: #1b3f97; border-radius: 6px; font-weight: 750; font-size: .88rem; }
+.renewal-rules-summary { margin: 12px 0; font-size: .95rem; line-height: 1.5; color: var(--ink); }
+.renewal-rules-detail { margin: 9px 0; padding: 8px 10px; background: #f5efe4; border-radius: 8px; }
+.renewal-rules-detail > summary { cursor: pointer; padding-block: 5px; font-size: .87rem; font-weight: 690; }
+.todak-renewal #chRules .crLead:not(.renewal-rules-summary) { margin: 7px 0; font-size: .85rem; }
+.todak-renewal #chRules #crGo { width: 100%; min-height: 44px; margin-top: 8px; }
+.todak-renewal #chRules #crBlind { display: none; }
+.todak-renewal :is(.drawerIn, dialog) h2 { letter-spacing: -.035em; }
+.todak-renewal :is(.shelfHead, .feedback-head, .personal-challenge-head) button { min-height: 40px; }
+.todak-renewal :is(#drawer, #marketShop, #siteFeedback) h2 {
+  font-family: var(--body);
+  font-weight: 780;
+}
+.todak-renewal #marketShop .shop-intro {
+  margin: 0 0 12px;
+  color: var(--ink);
+  font: 600 .95rem/1.55 var(--body);
+}
+.todak-renewal #marketShop .shop-wallet > b { font-family: var(--body); font-weight: 800; }
+.todak-renewal #marketShop .shop-earn { margin-bottom: 14px; }
+.todak-renewal #drawer:has(#shelfEmpty:not([hidden])) .shelfSwipeHint { display: none; }
+.todak-renewal #drawer #shelfCommunity { flex-wrap: wrap; white-space: normal; }
+.todak-renewal #drawer .shelfToolbar > button { border-radius: 10px; }
+.todak-renewal #drawer #shelfEmpty { font-size: .9rem; }
+
+@media (min-width: 960px) {
+  body.todak-renewal[data-ui-layout=sidebar] { --ui-panel: clamp(290px, 24vw, 358px); }
+  .todak-renewal[data-ui-layout=sidebar] #sheet { right: 10px; }
+}
+@media (max-width: 959px) {
+  .todak-renewal .ui-header #steps { display: flex; gap: 2px; }
+  .todak-renewal .ui-header #steps li {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-height: 36px;
+    padding: 0 4px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+  .todak-renewal .ui-header #steps b { display: none; }
+  .todak-renewal .ui-header #steps li .ui-step-name {
+    display: block !important;
+    white-space: nowrap;
+    font-size: clamp(11px, 2.9vw, 14px);
+  }
+  html[lang=en] .todak-renewal .ui-header #steps li:not([aria-current=step]) .ui-step-name { display: none !important; }
+  html[lang=en] .todak-renewal .ui-header #steps li:not([aria-current=step]) b { display: inline; }
+}
+@media (max-width: 1023px) and (orientation: portrait) {
+  .todak-renewal #home { padding: clamp(27px, 6dvh, 60px) clamp(15px, 5vw, 38px) 16px; }
+  .todak-renewal #home .homeBox { width: min(100%, 445px); gap: 12px; }
+  .todak-renewal #home::before {
+    background: linear-gradient(180deg, #fff5e9df 0, #fff4e8c2 21%, transparent 55%, transparent 83%, #fce5cdb8 100%);
+  }
+  .renewal-home-scene img { object-position: 57% 55%; }
+}
+@media (max-width: 650px) {
+  .todak-renewal .ui-header { left: 6px; right: 6px; border-radius: 12px; }
+  .todak-renewal .ui-header .steps li { padding-inline: 2px !important; }
+  .todak-renewal .ui-header .steps li[aria-current=step] { border-radius: 7px !important; }
+  .todak-renewal .ui-header #menuBtn .renewal-icon,
+  .todak-renewal .ui-header-actions > #shelfBtn .renewal-icon { display: none; }
+  .todak-renewal[data-ui-layout=sheet] #sheet { border-radius: 16px 16px 0 0 !important; }
+  .todak-renewal #sheet #tools .chip,
+  .todak-renewal.ui-tool-flow #sheet #ui-touch-deco #dtools .rackTool,
+  .todak-renewal.ui-tool-flow #sheet #ui-touch-glaze .rackTool { min-height: 50px !important; }
+  .todak-renewal #sheet #tools .renewal-tool-photo,
+  .todak-renewal #sheet .rackTool .renewal-tool-photo { height: 22px !important; width: 25px !important; }
+  .todak-renewal #chGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 599px) and (orientation: portrait) {
+  .todak-renewal #home { padding: 18px 14px 12px; }
+  .todak-renewal #home .homeBox { max-width: 450px; width: 100%; margin-inline: auto; gap: 12px; }
+  .todak-renewal #home .homeIntro { gap: 4px 9px; }
+  .todak-renewal #home .homeMark { width: 38px; height: 38px; }
+  .todak-renewal #home .homeTitle { font-size: 39px; }
+  .todak-renewal #home .homeEyebrow { margin-top: 3px; font-size: 12px; }
+  .todak-renewal #home .homeSub { display: none; }
+  .todak-renewal #home #goTutorial { min-height: 52px; }
+  .todak-renewal #home .homeMenus > .bigBtn { min-height: 63px; padding: 8px; }
+  .todak-renewal #home :is(#goShelf, #goMarket, #goChallenge) > .renewal-icon,
+  .todak-renewal #home #goFree::before { display: none; }
+  .todak-renewal #home .homeMenus :is(.bigBtn, #goTutorial) > span { font-size: .78rem; }
+  .todak-renewal #home .homeFoot { font-size: .73rem; }
+  .todak-renewal #home .homeBottom { background: #fff5e6e5; border-radius: 8px; padding: 4px 8px; }
+  .renewal-home-scene img { object-position: 52% 64%; }
+}
+@media (max-height: 560px) and (orientation: landscape) {
+  .todak-renewal #home { padding: 14px 20px; }
+  .todak-renewal #home .homeBox { gap: 9px; }
+  .todak-renewal #home .homeMark { width: 36px; height: 36px; }
+  .todak-renewal #home .homeTitle { font-size: 40px; }
+  .todak-renewal #home .homeSub { display: none; }
+  .todak-renewal #home .homeMenus > .bigBtn { min-height: 54px; }
+  .todak-renewal #home .homeMenus .renewal-icon,
+  .todak-renewal #home #goFree::before { display: none; }
+}
