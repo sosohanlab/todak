@@ -843,19 +843,18 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 @keyframes appraisal-landing { 35% { transform:translate(2px,1px); } 60% { transform:translate(-2px,0); } }
 @keyframes appraisal-grade { 50% { filter:brightness(1.22); } }
 @media(prefers-reduced-motion:reduce) { [data-appraisal-reveal="stamping"] :is(.appraisal-card,.appraisal-seal,#appraisalGrade) { animation:none; } }
-.appraisal-actions { display:grid; margin:0 4px; }
-.appraisal-actions button { min-height:55px; padding:8px 14px; line-height:1.3; font-weight:800; border-radius:16px; }
-#searchDlg .appraisal-export { margin:10px 4px 0; padding:12px; border-radius:14px; background:#f0e7d9; }
-#searchDlg .appraisal-export p { margin:0; color:#604a38; font-size:13px; line-height:1.45; }
-#searchDlg .appraisal-export-controls { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
-#searchDlg .appraisal-export-controls:not([hidden]) > :is(a,button):not([hidden]) {
-  display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:6px 12px;
-  border:1px solid #d5bfaa; border-radius:12px; background:#fff; color:#213eaa; font-weight:750;
+.appraisal-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:0 4px; }
+.appraisal-actions > :is(a,button) {
+  display:inline-flex; align-items:center; justify-content:center; min-height:55px; padding:8px 14px;
+  box-sizing:border-box; text-align:center; text-decoration:none; line-height:1.3; font-weight:800; border-radius:16px;
 }
-#searchDlg .appraisal-export details { margin-top:8px; }
-#searchDlg .appraisal-export summary { cursor:pointer; color:#213eaa; font-size:13px; }
-#searchDlg .appraisal-export details p { margin-top:6px; }
-#searchDlg .appraisal-export details img { display:block; width:min(100%,360px); height:auto; margin:8px auto 0; border-radius:10px; }
+.appraisal-actions > :is(:disabled,[aria-disabled="true"]) { opacity:.58; cursor:default; }
+#searchDlg #appraisalExportStatus {
+  position:fixed; z-index:3; inset-inline:16px; bottom:max(16px,env(safe-area-inset-bottom));
+  width:max-content; max-width:calc(100% - 32px); box-sizing:border-box; margin:0 auto; padding:9px 14px;
+  border-radius:12px; background:#392517; color:#fff; font-size:13px; line-height:1.45; pointer-events:none;
+}
+#searchDlg #appraisalExportStatus:empty { opacity:0; }
 #searchDlg #appraisalDisclaimer { display:block; text-align:center; margin-top:9px; color:#775e4b; font-size:11px; }
 #searchDlg #searchStatus:empty { display:none; }
 @media (max-width:620px) {
@@ -870,7 +869,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
   .appraisal-seal b { font-size:16px; }
   .appraisal-lens { width:118px; }
   #searchDlg #appraisalIntro #searchImage { min-height:44px; padding:6px 14px; font-size:14px; }
-  .appraisal-actions button { min-height:44px; padding:6px 9px; font-size:13px; }
+  .appraisal-actions > :is(a,button) { min-height:44px; padding:6px 9px; font-size:13px; }
 }
 @media (min-width:621px) and (max-width:759px) {
   #searchDlg .appraisal-card { grid-template-columns:minmax(0,35%) minmax(0,1fr); }
@@ -1210,22 +1209,14 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
             </div>
           </div>
           <p class="appraisal-comment" id="appraisalComment"></p>
-          <div class="appraisal-actions"><button type="button" class="primary" id="saveAppraisal" aria-controls="appraisalExport" aria-expanded="false">감정서 저장 · 공유</button></div>
-          <section class="appraisal-export" id="appraisalExport" aria-label="감정서 저장 및 공유" hidden>
-            <p id="appraisalExportStatus" role="status"></p>
-            <div class="appraisal-export-controls" id="appraisalExportControls" hidden>
-              <a id="downloadAppraisal" download>PNG 저장</a>
-              <button type="button" id="shareAppraisal" hidden>공유하기</button>
-            </div>
-            <details id="appraisalExportDetails" hidden>
-              <summary id="appraisalExportSummary">이미지 열기</summary>
-              <p id="appraisalExportHelp">다운로드가 안 되면 이미지를 길게 누르거나 오른쪽 클릭해서 저장할 수 있어요.</p>
-              <img id="appraisalExportImage" alt="저장할 토닥 감정서">
-            </details>
-          </section>
+          <div class="appraisal-actions">
+            <a class="primary" id="saveAppraisal" download aria-disabled="true">감정서 저장</a>
+            <button type="button" class="ghost" id="shareAppraisal" disabled>공유하기</button>
+          </div>
           <small id="appraisalDisclaimer">재미로 보는 AI 감정이에요.</small>
         </article>
       </div>
+      <p id="appraisalExportStatus" role="status"></p>
     </div>
   </div>
 
@@ -4594,10 +4585,8 @@ cv.addEventListener("wheel",function(e){
   var controller=null, appraisalEpoch=0;
   var button=$('searchImage'), status=$('searchStatus'), card=$('imageMatches'), close=$('closeSearch');
   var dialog=$('searchDlg'), panel=dialog.querySelector('.searchIn'), loadingImage=$('appraisalLoadingImage');
-  var save=$('saveAppraisal'), exportSection=$('appraisalExport'), exportStatus=$('appraisalExportStatus');
-  var exportControls=$('appraisalExportControls'), exportDetails=$('appraisalExportDetails');
-  var download=$('downloadAppraisal'), share=$('shareAppraisal'), exportImage=$('appraisalExportImage');
-  var exportUrl=null, exportFile=null;
+  var save=$('saveAppraisal'), share=$('shareAppraisal'), exportStatus=$('appraisalExportStatus');
+  var exportUrl=null, exportFile=null, exportStatusTimer;
   var types={
     cup:['컵·잔','Cup'],bowl:['사발·면기','Bowl'],plate:['접시','Plate'],
     dish:['작은 종지','Small dish'],vase:['화병','Vase'],jar:['항아리·병','Jar or bottle'],object:['도자기 오브제','Ceramic object']
@@ -4624,21 +4613,16 @@ cv.addEventListener("wheel",function(e){
     $('appraisalScoreTitle').textContent=label('왜 이 등급?','Why this grade?');
     $('appraisalSealLabel').textContent=label('토닥 감정원','TODAK');
     $('appraisalSeal').textContent=label('감정필','APPRAISED');
-    save.textContent=label('감정서 저장 · 공유','Save or share');
-    exportSection.setAttribute('aria-label',label('감정서 저장 및 공유','Save or share the appraisal'));
-    download.textContent=label('PNG 저장','Save PNG');
+    save.textContent=label('감정서 저장','Save appraisal');
     share.textContent=label('공유하기','Share');
-    $('appraisalExportSummary').textContent=label('이미지 열기','View image');
-    $('appraisalExportHelp').textContent=label('다운로드가 안 되면 이미지를 길게 누르거나 오른쪽 클릭해서 저장할 수 있어요.','If the download does not start, touch and hold or right-click the image to save it.');
-    exportImage.alt=label('저장할 토닥 감정서','Todak appraisal ready to save');
     $('appraisalDisclaimer').textContent=label('재미로 보는 AI 감정이에요.','An AI appraisal for fun.');
   }
   function resetAppraisalExport(){
     if(exportUrl){URL.revokeObjectURL(exportUrl);exportUrl=null;}
     exportFile=null;
-    download.removeAttribute('href');exportImage.removeAttribute('src');
-    exportSection.hidden=exportControls.hidden=exportDetails.hidden=share.hidden=true;
-    exportDetails.open=false;save.disabled=false;save.setAttribute('aria-expanded','false');
+    save.removeAttribute('href');save.setAttribute('aria-disabled','true');
+    share.disabled=true;
+    clearTimeout(exportStatusTimer);
     exportStatus.textContent='';
   }
   function show(state){
@@ -4830,43 +4814,38 @@ cv.addEventListener("wheel",function(e){
     exportCanvas.getContext('2d').drawImage(canvas,0,0);
     return new Promise(function(resolve){exportCanvas.toBlob(resolve,'image/png');});
   }
-  save.addEventListener('click',async function(){
-    var epoch=appraisalEpoch;
-    exportSection.hidden=false;
-    save.setAttribute('aria-expanded','true');
-    exportSection.scrollIntoView({block:'nearest'});
-    if(exportUrl){download.focus({preventScroll:true});return;}
-    save.disabled=true;
-    exportStatus.textContent=label('감정서 이미지를 준비하고 있어요.','Preparing the appraisal image…');
+  function notifyAppraisalExport(message){
+    clearTimeout(exportStatusTimer);
+    exportStatus.textContent=message;
+    exportStatusTimer=setTimeout(function(){exportStatus.textContent='';},4500);
+  }
+  async function prepareAppraisalExport(epoch){
     try{
       var blob=await makeAppraisalPng($('searchPreview'));
       if(epoch!==appraisalEpoch)return;
       if(!blob)throw Error('export');
       var name=label('토닥-감정서.png','Todak-appraisal.png');
       exportUrl=URL.createObjectURL(blob);
-      download.href=exportImage.src=exportUrl;
-      download.download=name;
-      if(navigator.share&&navigator.canShare&&typeof File==='function'){
-        try{
-          var file=new File([blob],name,{type:blob.type});
-          if(navigator.canShare({files:[file]})){exportFile=file;share.hidden=false;}
-        }catch(_){}
-      }
-      exportControls.hidden=exportDetails.hidden=false;
-      exportStatus.textContent=label('감정서를 PNG로 저장할 수 있어요.','Your appraisal is ready to save as a PNG.');
-      if(!dialog.hidden)download.focus();
-    }catch(error){
-      if(epoch===appraisalEpoch)exportStatus.textContent=label('감정서 이미지를 만들지 못했어요. 다시 눌러 주세요.','Could not prepare the appraisal image. Try again.');
-    }finally{if(epoch===appraisalEpoch)save.disabled=false;}
-  });
+      save.href=exportUrl;
+      save.download=name;
+      save.removeAttribute('aria-disabled');
+      if(typeof File==='function')exportFile=new File([blob],name,{type:blob.type});
+      share.disabled=false;
+    }catch(_){
+      if(epoch===appraisalEpoch)notifyAppraisalExport(label('감정서 이미지를 준비하지 못했어요.','Could not prepare the appraisal image.'));
+    }
+  }
   share.addEventListener('click',async function(){
-    if(!exportFile)return;
     var epoch=appraisalEpoch;
-    try{await navigator.share({files:[exportFile]});}
-    catch(error){
+    clearTimeout(exportStatusTimer);
+    exportStatus.textContent='';
+    try{
+      var payload={files:[exportFile]};
+      if(!exportFile||typeof navigator.share!=='function'||(navigator.canShare&&!navigator.canShare(payload)))throw Error('share unavailable');
+      await navigator.share(payload);
+    }catch(error){
       if(epoch!==appraisalEpoch||error.name==='AbortError')return;
-      exportStatus.textContent=label('공유창을 열 수 없어요. PNG 저장을 이용해 주세요.','Sharing is unavailable here. You can still save the PNG.');
-      download.focus();
+      notifyAppraisalExport(label('이 브라우저에서는 공유창을 열 수 없어요. 감정서를 저장한 뒤 공유해 주세요.','Sharing is unavailable here. Save the appraisal to share it.'));
     }
   });
   async function requestAppraisal(){
@@ -4937,6 +4916,7 @@ cv.addEventListener("wheel",function(e){
       }else{show('result');appraisalStampSound();}
       panel.dataset.appraisalReveal='complete';
       card.removeAttribute('aria-busy');close.focus();
+      void prepareAppraisalExport(epoch);
     }catch(error){
       if(epoch!==appraisalEpoch)return;
       show('ready');close.focus();
