@@ -1286,14 +1286,18 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 <script src="config.js?v=2263970f3b2a"></script>
 
 <script src="ceramic-surface.js?v=5f3316bcf38c"></script>
-<script src="load-3d.js?v=0e6a486f6435"></script>
+<script src="load-3d.js?v=8e1f9cfb3cf1"></script>
 <script>
 
 (function(){
 "use strict";
 var N=56, W=360, HC=430, CX=180, BASE=366, CX0=180, BASE0=366, S0=11, TILT=0.26, TWO=6.283185307;
-var HMIN=3, HMAX=26, RMIN=1.2, RMAX=13.5, MINW=0.35; /* cm */
-function wallLimit(){return st.target?MINW:.025;} 
+var HMIN=3, HMAX=26, RMIN=1.2, RMAX=13.5, MINW=0.35, FREE_MIN_CLAY=.5; /* cm */
+function wallLimit(){return st.target?MINW:FREE_MIN_CLAY;}
+function minimumClayFloor(){
+  if(st.target)return .1;
+  return FREE_MIN_CLAY+Math.max(0,...(window.TodakBottomTrim?.profile()||[]));
+}
 var V=1, SV=S0; /* 화면 배율: 작은 작품은 크게 당겨 보여 준다 */
 var TOOLS={shape:{f:1.1,sm:0.05},thick:{f:1.1,sm:0.05},sponge:{f:1.6,sm:0}};
 var CLAY=[166,148,130], DRY=[186,170,152], RAW=[232,229,222], GLOW=[255,150,58];
@@ -1572,7 +1576,7 @@ function wallNormalThickness(radius,y){var closest=Infinity,step=st.height/(N-1)
 function constrainInterior(){for(var j=0;j<N;j++)st.inner[j]=clamp(st.inner[j],0,innerLimitAt(j/(N-1),wallLimit()));}
 function prepareInterior(){
  if(st.height-st.floor>.05)return;
- pushHist();var depth=Math.round((st.height-.1)*5)/10;st.floor=st.height-depth;st.inner=st.radii.map(function(r,j){return Math.min(.6,innerLimitAt(j/(N-1),wallLimit()));});markPreset(null);updateReadout();dirty=true;
+ pushHist();var depth=st.target?Math.round((st.height-.1)*5)/10:Math.max(0,st.height-minimumClayFloor());st.floor=st.height-depth;st.inner=st.radii.map(function(r,j){return Math.min(.6,innerLimitAt(j/(N-1),wallLimit()));});markPreset(null);updateReadout();dirty=true;
 }
 function heldProfileAt(values,t,cubic){var p=clamp(t,0,1)*(N-1),i=Math.min(Math.floor(p),N-1),f=p-i,a=values[Math.max(0,i-1)],b=values[i],c=values[Math.min(N-1,i+1)],d=values[Math.min(N-1,i+2)];return cubic?.5*((2*b)+(-a+c)*f+(2*a-5*b+4*c-d)*f*f+(-a+3*b-3*c+d)*f*f*f):b+(c-b)*f;}
 function shapeStartAllowed(x,t){
@@ -1615,8 +1619,12 @@ function touchClay(dt){
       // Symmetric, bounded surface relaxation: no one-sided clay removal.
       var next=previous[j]+.16*strength*k*((previous[Math.max(0,j-1)]+previous[j+1])/2-previous[j]);
       next=clamp(next,ptr.smoothBase[j]-.025,ptr.smoothBase[j]+.025);
-      if(inside){next=clamp(next,0,Math.max(previous[j],innerLimitAt(j/(N-1),.05)));st.inner[j]=next;}
-      else{next=Math.max(next,j*rowH>=st.floor?st.inner[j]+Math.min(.05,Math.max(0,previous[j]-st.inner[j])):.025);st.radii[j]=next;grooves[j]*=Math.exp(-dt*(.3+strength)/220);}
+      if(inside){next=clamp(next,0,Math.max(previous[j],innerLimitAt(j/(N-1),st.target?.05:FREE_MIN_CLAY)));st.inner[j]=next;}
+      else{
+        var minimum=st.target?.025:FREE_MIN_CLAY/2;
+        if(j*rowH>=st.floor)minimum=st.inner[j]+(st.target?.05:FREE_MIN_CLAY);
+        next=Math.max(next,Math.min(previous[j],minimum));st.radii[j]=next;grooves[j]*=Math.exp(-dt*(.3+strength)/220);
+      }
       moved+=Math.abs(next-previous[j]);ptr.contact=true;
     }
     if(lipContact){st.rimSoftness=Math.min(1,(st.rimSoftness||0)+dt*strength/900);ptr.contact=true;}
@@ -1642,7 +1650,8 @@ function touchClay(dt){
         var travel=row-ptr.shapeLastRow;
         var progress=Math.abs(travel)>.001?clamp((nearestRow-ptr.shapeLastRow)/travel,0,1):1;
         var localRadius=ptr.shapeLastRadius+(surfaceRadius-ptr.shapeLastRadius)*progress;
-        ptr.shapeTargets[j]=clamp(ptr.w0[j]+(localRadius-heldProfileAt(ptr.w0,nearestRow/(N-1),true))*weight,j<2?.10:.025,RMAX);
+        var minimum=st.target?(j<2?.10:.025):Math.min(ptr.w0[j],FREE_MIN_CLAY/2);
+        ptr.shapeTargets[j]=clamp(ptr.w0[j]+(localRadius-heldProfileAt(ptr.w0,nearestRow/(N-1),true))*weight,minimum,RMAX);
         ptr.shapeWeights[j]=weight;
       }
       var targetRadius=ptr.shapeTargets[j];
@@ -1852,10 +1861,20 @@ function clearDeco(){
 }
 
 /* ---------- 유약 효과용 그림판 ---------- */
+function fullDip(){return !!st.dip&&st.dipDepth>=1;}
+function dipPlane(){
+  if(!st.dip||fullDip())return null;
+  var below=st.dipFrom==='bottom',depth=st.dipDepth;
+  return {height:st.height*(below?depth:1-depth),slope:Math.tan((Number(st.dipAngle)||0)*Math.PI/180),sign:below?-1:1};
+}
+function dipCovers(plane,height,modelX){
+  return (height-plane.height-plane.slope*modelX)*plane.sign>=0;
+}
 function buildDip(){
   var angle=Number(st.dipAngle)||0;var key=st.dip+":"+st.dipDepth+":"+angle+(angle?":"+st.height+":"+st.radii.join(","):""); if(key===dipKey)return; dipKey=key;
   var c=dipM.x, x, y, base=(typeof st.dipDepth==="number"?st.dipDepth:(st.dip==="half"?0.5:0.2))*TH;
   c.clearRect(0,0,TW,TH); if(!st.dip)return;
+  if(fullDip()){c.fillStyle="#000";c.fillRect(0,0,TW,TH);return;}
   if(angle){var slope=Math.abs(Math.tan(angle*Math.PI/180)),offset=angle>0?.25:.75,cut=st.height*(1-base/TH);c.fillStyle="#000";for(var row=0;row<TH;row++){var level=1-row/(TH-1),span=slope*Math.max(.0001,rAt(level)),delta=(level*st.height-cut)/span;if(delta>=1){c.fillRect(0,row,TW,1);continue;}if(delta<=-1)continue;var edge=Math.acos(delta)/TWO,start=(edge+offset)%1,length=1-2*edge,end=start+length;c.fillRect(start*TW,row,Math.min(1,end)*TW-start*TW,1);if(end>1)c.fillRect(0,row,(end-1)*TW,1);}return;}
   c.fillStyle="#000"; c.beginPath(); c.moveTo(0,0);
   for(x=0;x<=TW;x+=4){
@@ -1966,7 +1985,7 @@ function reliefPreview(quick){
 }
 var quickTexture=null;
 function compose(geometryCarve,quick){
-  var ph=phase(), key=[ph,texVer,st.dip,st.dipDepth,st.dipAngle||0,st.glaze2,st.glaze,st.fx,(st.customC||"")+"",kilnSig()].join("|");
+  var ph=phase(), key=[ph,texVer,st.dip,st.dipDepth,st.dipAngle||0,st.dipFrom,st.glaze2,st.glaze,st.fx,(st.customC||"")+"",kilnSig()].join("|");
   if(quick&&!geometryCarve&&ph==="deco"){
     key+="|quick-texture";
     if(key===composeKey&&finalData)return false;
@@ -2076,12 +2095,14 @@ function stageColor(c){
 }
 // Clip each visible clay ring against the same object-space dipping plane as 3D.
 function tiltedDipDisc(x,y,rx,ry,worldY,fill){
+ if(fullDip()&&rx>0&&ry>0){disc(x,y,rx,ry,fill);return;}
  var angle=Number(st.dipAngle)||0,below=st.dipFrom==='bottom';if(!st.dip||rx<=0||ry<=0)return;if(!angle){if(below&&worldY<=st.height*st.dipDepth)disc(x,y,rx,ry,fill);return;}var slope=Math.tan(angle*Math.PI/180),side=slope>0?1:-1,edge=(worldY-st.height*(below?st.dipDepth:1-st.dipDepth))/(Math.abs(slope)*rx/SV);if(edge<=-1){if(below)disc(x,y,rx,ry,fill);return;}if(edge>=1){if(!below)disc(x,y,rx,ry,fill);return;}
  ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.translate(x,y);ctx.scale(rx,ry);var direction=Math.atan2(Math.sin(rot)*side,Math.cos(rot)*side);ctx.rotate(direction);ctx.beginPath();ctx.rect(below?edge:-2,-2,below?2-edge:edge+2,4);ctx.clip();ctx.rotate(-direction);ctx.fillStyle=fill;ctx.beginPath();ctx.arc(0,0,1,0,TWO);ctx.fill();ctx.restore();
 }
 // Reuse a small height image of the visible interior; shade the dipping plane once.
 var tiltedInteriorCache=null;
 function paintTiltedInterior(look,rin,topY,hpx,fpx){
+ if(fullDip())return;
  var angle=Number(st.dipAngle)||0,below=st.dipFrom==='bottom';if(!st.dip||(!angle&&!below)||!rin||TILT<=0)return;
  var x0=Math.max(0,Math.floor((CX-rin)*dpr)),y0=Math.max(0,Math.floor((topY-rin*TILT)*dpr)),w=Math.max(0,Math.min(cv.width,Math.ceil((CX+rin)*dpr)+2)-x0),h=Math.max(0,Math.min(cv.height,Math.ceil((topY+rin*TILT)*dpr)+2)-y0);if(!w||!h)return;var key=[SV,dpr,rin,w,h,st.height,st.floor,st.inner.join(','),CX*dpr-x0,topY*dpr-y0].join('|');
  if(!tiltedInteriorCache||tiltedInteriorCache.key!==key){
@@ -2100,7 +2121,7 @@ function currentLook(){
   if(st.stage==="deco")return {c:DRY,ci:DRY,gloss:false,rings:false};
   var c=stageColor(glaze().c);
   var glazed=st.stage==="glaze"||st.stage==="done"||(st.stage==="fire"&&fireU>0.8);
-  return {c:c,ci:st.dip&&!Number(st.dipAngle)&&st.dipFrom!=='bottom'?stageColor(byId(GLAZES,st.glaze2).c):c,
+  return {c:c,ci:fullDip()||st.dip&&!Number(st.dipAngle)&&st.dipFrom!=='bottom'?stageColor(byId(GLAZES,st.glaze2).c):c,
     gloss:glazed&&st.finish==="gloss",matte:glazed&&st.finish==="matte",rings:false};
 }
 /* ---------- 실사 보기: 스튜디오 조명 아래 놓인 모습을 점 하나하나 계산해 그린다 ---------- */
@@ -2191,7 +2212,7 @@ function drawPhoto(){
   }
   var key=[rot.toFixed(3),st.rimSoftness||0,SV.toFixed(2),texVer,st.glaze,(st.customC||"")+"",st.glaze2,st.dip,st.dipDepth,st.dipAngle||0,st.dipFrom||'top',st.fx,st.finish,dpr,st.height.toFixed(2),kilnSig(),W,HC,CX.toFixed(2),BASE.toFixed(2)].join("|");
   if(key!==pvKey){pvKey=key; renderPhotoBody();}
-  var gloss=st.finish==="gloss", ci=st.dip&&!Number(st.dipAngle)&&st.dipFrom!=='bottom'?byId(GLAZES,st.glaze2).c:glaze().c;
+  var gloss=st.finish==="gloss", ci=fullDip()||st.dip&&!Number(st.dipAngle)&&st.dipFrom!=='bottom'?byId(GLAZES,st.glaze2).c:glaze().c;
   var hpx=st.height*SV, rb=rAt(0)*SV, rm=0, i;
   for(i=0;i<N;i++){if(st.radii[i]>rm)rm=st.radii[i];}
   rm*=SV;
@@ -2356,7 +2377,7 @@ function draw(){
   var xt=spinning?wob*SV*sw:0, rt=rAt(1)*SV, topY=BASE-hpx;
   var topClay=ctx.createRadialGradient(-.3,-.2,0,0,0,1);topClay.addColorStop(0,css(look.ci,1.02,5));topClay.addColorStop(1,css(look.ci,.77));
   disc(CX+xt,topY,rt,rt*TILT,topClay);
-  if(st.dip&&(Number(st.dipAngle)||st.dipFrom==='bottom')){var dipC=stageColor(byId(GLAZES,st.glaze2).c),dipTop=ctx.createRadialGradient(-.3,-.2,0,0,0,1);dipTop.addColorStop(0,css(dipC,1.02,5));dipTop.addColorStop(1,css(dipC,.77));tiltedDipDisc(CX+xt,topY,rt,rt*TILT,st.height,dipTop);}
+  if(st.dip&&!fullDip()&&(Number(st.dipAngle)||st.dipFrom==='bottom')){var dipC=stageColor(byId(GLAZES,st.glaze2).c),dipTop=ctx.createRadialGradient(-.3,-.2,0,0,0,1);dipTop.addColorStop(0,css(dipC,1.02,5));dipTop.addColorStop(1,css(dipC,.77));tiltedDipDisc(CX+xt,topY,rt,rt*TILT,st.height,dipTop);}
   if(st.rimSoftness){ctx.save();ctx.beginPath();ctx.ellipse(CX+xt,topY+.8,Math.max(0,rt-1),Math.max(1,rt*TILT),0,0,Math.PI);ctx.strokeStyle='rgba(237,218,190,'+(.10+.20*st.rimSoftness)+')';ctx.lineWidth=1+st.rimSoftness*2;ctx.stroke();ctx.restore();}
   var hollow=st.height-st.floor;
   if(hollow>0.05){
@@ -2929,7 +2950,7 @@ $("presets").addEventListener("click",function(e){
 });
 document.querySelectorAll('[data-quick]').forEach(function(b){b.addEventListener('click',function(){document.querySelector('#tools [data-t="'+b.dataset.quick+'"]').click();});});
 $("tools").addEventListener("click",function(e){
-  var b=e.target.closest("button"); if(!b||b.id)return; tool=b.dataset.t; press("tools","t",tool); showTips();
+  var b=e.target.closest("button[data-t]"); if(!b||!TOOLS[b.dataset.t])return; tool=b.dataset.t; press("tools","t",tool); showTips();
   /* 두께 조절을 고르면 반으로 자른 모습이 저절로 켜지고, 다른 일을 고르면 꺼진다 */
   if(tool==="thick"){prepareInterior();if(!secOn){secAuto=true; setSec(true,true);}}
   else if(secAuto){secAuto=false; setSec(false,true);}
@@ -2964,7 +2985,7 @@ function sstep(a,b,t){t=clamp((t-a)/(b-a),0,1); return t*t*(3-2*t);}
 var TARGETS={
   cup:{name:"일자 컵",h:9.5,f:function(t){return 3.6+0.5*t;}},
   bowl:{name:"삿갓 면기",h:7.5,f:function(t){return 3.2+6.3*t;}},
-  plate:{name:"접시",h:3,f:function(t){return 6+6.5*Math.sqrt(t);}},
+  plate:{name:"접시",h:3.8,f:function(t){return 6.5+3.7*t;}},
   moon:{name:"달항아리",h:20,f:function(t){return 4.2+0.8*t+6.2*Math.pow(Math.max(0,Math.sin(Math.PI*t)),0.85);}},
   jubyeong:{name:"주병",h:20,f:function(t){return 2.6+4.4*Math.exp(-Math.pow(t-0.3,2)/0.05)+6*Math.max(0,t-0.92);}},
   maebyeong:{name:"매병",h:24,f:function(t){return 3.4+0.8*(1-t)+5.2*Math.exp(-Math.pow(t-0.72,2)/0.04)-1.9*sstep(0.88,1,t);}},
@@ -5410,12 +5431,12 @@ window.TodakDisplayAssets={shelf:{"wood": "renewal-assets/shelf-wood-two-tier.we
    if(!window.TodakPhoto&&window.TodakLoad3D&&!window.todakTopLoading){window.todakTopLoading=true;TodakLoad3D().then(function(){topBaseKey='';dirty=true;}).catch(function(){});}
    if(window.TodakPhoto&&TodakPhoto.available){var d=oldData(),look=currentLook();d=Object.assign({},d,{color:look.c,inside:look.c,dipColor:stageColor(byId(GLAZES,st.glaze2).c),key:d.key+'|clean-overhead|'+st.stage,topOverlay:null,overhead:true,transparent:true,width:768,canvasHeight:768,viewWidth:768,viewHeight:768,pixelWidth:768,pixelHeight:768,rotation:rot});var rendered=TodakPhoto.render(d);if(rendered){c.drawImage(rendered,0,0,768,768);material=true;}}
   }
-  if(!material){var im=c.createImageData(768,768),look=currentLook();compose();var fd=finalData;
+  if(!material){var im=c.createImageData(768,768),look=currentLook(),plane=dipPlane(),all=fullDip(),dipColor=stageColor(byId(GLAZES,st.glaze2).c),cs=Math.cos(rot),sn=Math.sin(rot);compose();var fd=finalData;
    for(var y=0;y<768;y++)for(var x=0;x<768;x++){
     var dx=(x-383.5)/384,dy=(y-383.5)/384,radius=Math.hypot(dx,dy);if(radius>1)continue;
     var row=rows[Math.min(rows.length-1,Math.floor(radius*rows.length))];if(!row)continue;
     var adjacentA=rows[Math.max(0,Math.floor(radius*rows.length)-2)]||row,adjacentB=rows[Math.min(rows.length-1,Math.floor(radius*rows.length)+2)]||row,gradient=(adjacentB.y-adjacentA.y)/Math.max(.001,l.cm*4/rows.length),normalLight=(.86+.22*gradient*(dx+dy)/Math.max(.01,radius))/Math.sqrt(1+gradient*gradient);var depth=(st.height-row.y)/Math.max(.1,st.height-st.floor),shade=(row.inside?.90-.25*depth:.78+.16*row.y/st.height)*clamp(.50+.55*normalLight,.48,1.12)*(1-.035*dx-.045*dy),base=row.inside?look.ci:look.c,at=(y*768+x)*4;
-    if(st.dip&&(Number(st.dipAngle)||st.dipFrom==='bottom')&&(row.inside||row.planar)){var modelX=l.cm*(dx*Math.cos(rot)+dy*Math.sin(rot));if(row.y>=st.height*(1-st.dipDepth)+Math.tan(st.dipAngle*Math.PI/180)*modelX)base=stageColor(byId(GLAZES,st.glaze2).c);}
+    if(st.dip&&(row.inside||row.planar))base=all||plane&&dipCovers(plane,row.y,l.cm*(dx*cs+dy*sn))?dipColor:look.c;
     var u=(Math.atan2(dx,dy)+rot)/TWO;u-=Math.floor(u);var tx=Math.min(TW-1,Math.floor(u*TW)),ty=Math.min(TH-1,Math.floor((1-row.y/st.height)*TH)),src=(ty*TW+tx)*4,alpha=!row.inside&&!row.planar&&fd?fd[src+3]/255:0;
     for(var channel=0;channel<3;channel++)im.data[at+channel]=(base[channel]*(1-alpha)+(fd?fd[src+channel]:0)*alpha)*shade;
     im.data[at+3]=Math.min(255,(1-radius)*768*255);
@@ -5479,9 +5500,12 @@ window.TodakDisplayAssets={shelf:{"wood": "renewal-assets/shelf-wood-two-tier.we
   if(dt==='erase'){bottomCarve.x.clearRect(0,0,768,768);bottomCarve.x.drawImage(bottomCutStart.c,0,0);bottomCarve.x.save();bottomCarve.x.globalCompositeOperation='destination-out';bottomCarve.x.drawImage(bottomInk.c,0,0);bottomCarve.x.restore();}
   if(dt==='carve'||dt==='erase')bottomReliefVersion++;bottomChanged=true;bottomLast=h;bottomVersion++;dirty=true;
  }
- function bottomImage(){loadBottom();var look=currentLook(),key=[look.c.join(','),bottomReliefVersion,st.stage,st.height,st.radii.join(',')].join('|');if(key!==bottomKey){bottomKey=key;bottomBase=bottomBase||mk(768,768);var out=bottomBase.x.createImageData(768,768),mask=bottomCarve.x.getImageData(0,0,768,768).data,model=TodakBottom.surface(st.radii,st.height);
+ function bottomImage(){loadBottom();var look=currentLook(),plane=dipPlane(),all=fullDip(),dipColor=stageColor(byId(GLAZES,st.glaze2).c),key=[look.c.join(','),bottomReliefVersion,st.stage,st.height,st.radii.join(','),all,plane?.height,plane?.slope,plane?.sign,dipColor.join(','),plane?.slope?rot.toFixed(4):0].join('|');if(key!==bottomKey){bottomKey=key;bottomBase=bottomBase||mk(768,768);var out=bottomBase.x.createImageData(768,768),mask=bottomCarve.x.getImageData(0,0,768,768).data,model=TodakBottom.surface(st.radii,st.height),cs=Math.cos(rot),sn=Math.sin(rot);
   function relief(x,y){var a=(Math.max(0,Math.min(767,y))*768+Math.max(0,Math.min(767,x)))*4;return (mask[a]>127?1:-1)*mask[a+3]/255;}
-  for(var y=0;y<768;y++)for(var x=0;x<768;x++){var dx=(x-383.5)/384,dy=(y-383.5)/384,r=Math.hypot(dx,dy);if(r>1)continue;var bx=Math.round(384+dx/model.fraction*384),by=Math.round(384+dy/model.fraction*384),slope=r<model.fraction?(relief(bx+2,by)-relief(bx-2,by)+relief(bx,by+2)-relief(bx,by-2))*.16:0,shade=TodakBottom.shade(model,r,dx,dy)+slope,at=(y*768+x)*4;for(var j=0;j<3;j++)out.data[at+j]=look.c[j]*shade;out.data[at+3]=Math.min(255,(1-r)*768*255);}bottomBase.x.putImageData(out,0,0);}
+  for(var y=0;y<768;y++)for(var x=0;x<768;x++){var dx=(x-383.5)/384,dy=(y-383.5)/384,r=Math.hypot(dx,dy);if(r>1)continue;var bx=Math.round(384+dx/model.fraction*384),by=Math.round(384+dy/model.fraction*384),slope=r<model.fraction?(relief(bx+2,by)-relief(bx-2,by)+relief(bx,by+2)-relief(bx,by-2))*.16:0,shade=TodakBottom.shade(model,r,dx,dy)+slope,at=(y*768+x)*4;
+   var height=model.rows[Math.min(model.rows.length-1,Math.floor(r*model.rows.length))]||0;
+   var color=all||plane&&dipCovers(plane,height,model.max*(dx*cs-dy*sn))?dipColor:look.c;
+   for(var j=0;j<3;j++)out.data[at+j]=color[j]*shade;out.data[at+3]=Math.min(255,(1-r)*768*255);}bottomBase.x.putImageData(out,0,0);}
   return bottomBase.c;
  }
  function drawBottom(){if(bottomPending){var p=bottomPending;bottomPending=null;bottomStroke(p,false);}var l=bottomLayout(),foot=l.r*l.fraction;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,HC);drawScene();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.drawImage(bottomImage(),l.x-l.r,l.y-l.r,l.r*2,l.r*2);ctx.save();ctx.beginPath();ctx.arc(l.x,l.y,foot,0,TWO);ctx.clip();ctx.globalAlpha=pigmentOpacity();ctx.drawImage(bottomPaint.c,l.x-foot,l.y-foot,foot*2,foot*2);ctx.restore();}
@@ -6436,9 +6460,9 @@ var stopOptionalTutorial;
  var depthGesture=false;
  $('cavityDepth').addEventListener('pointerdown',function(){pushHist();depthGesture=true;});
  $('cavityDepth').addEventListener('keydown',function(e){if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown'].includes(e.key)&&!e.repeat){pushHist();depthGesture=true;}});
- $('cavityDepth').addEventListener('input',function(){if(!depthGesture){pushHist();depthGesture=true;}var wanted=clamp(Number(this.value),0,Math.max(0,st.height-.1));st.floor=st.height-wanted;markPreset(null);ptr.w0=null;dirty=true;updateReadout();syncDepth();});
+ $('cavityDepth').addEventListener('input',function(){if(!depthGesture){pushHist();depthGesture=true;}var wanted=clamp(Number(this.value),0,Math.max(0,st.height-minimumClayFloor()));st.floor=st.height-wanted;markPreset(null);ptr.w0=null;dirty=true;updateReadout();syncDepth();});
  ['change','pointerup','pointercancel','keyup'].forEach(function(type){$('cavityDepth').addEventListener(type,function(){depthGesture=false;});});
- function syncDepth(){depth.hidden=tool!=='thick';$('cavityDepth').max=Math.max(0,st.height-.1).toFixed(1);$('cavityDepth').value=Math.max(0,st.height-st.floor).toFixed(1);$('cavityDepthValue').textContent=Math.max(0,st.height-st.floor).toFixed(1)+'cm · 아래 '+st.floor.toFixed(1)+'cm는 채운 흙';}
+ function syncDepth(){depth.hidden=tool!=='thick';$('cavityDepth').max=(Math.floor(Math.max(0,st.height-minimumClayFloor())*10+1e-8)/10).toFixed(1);$('cavityDepth').value=Math.max(0,st.height-st.floor).toFixed(1);$('cavityDepthValue').textContent=Math.max(0,st.height-st.floor).toFixed(1)+'cm · 아래 '+st.floor.toFixed(1)+'cm는 채운 흙';}
  var readout=updateReadout;updateReadout=function(){readout();syncDepth();};var tips=showTips;showTips=function(){tips();syncDepth();};var fresh=freshClay;freshClay=function(){fresh();syncDepth();};var stage=setStage;setStage=function(s){stage(s);syncDepth();};syncDepth();
 })();
 
@@ -6475,6 +6499,10 @@ var stopOptionalTutorial;
   if(ptr.surfaceAnchorT==null&&!secOn){ptr.surfaceAnchorT=t;ptr.surfaceAnchorY=y;}
   return true;
  }
+ function bladeArea(x,width){
+  var plateau=width*.75, taper=Math.max(0,Math.abs(x)-plateau);
+  return Math.sign(x)*(Math.abs(x)-taper*taper/(2*(width-plateau)));
+ }
  function trim(){
   ptr.contact=false;ptr.maxD=0;
   if(ptr.waitingForClay)return 0;
@@ -6493,10 +6521,10 @@ var stopOptionalTutorial;
   var travel=Math.max(0,-dx)+Math.abs(dy)*.3;if(travel<.00001)return 0;
   var setting=settings(),width=setting.widthMm/20,rowH=st.height/(N-1),samples=Math.max(1,Math.min(512,Math.ceil(Math.abs(dy)/Math.max(.025,width/4)))),beforeProfile=st.radii.slice(),moved=0;
   for(var j=0;j<N;j++){
-   // Integrate the rounded edge over each profile row so a thin blade cannot fall between rows.
-   var weight=0;for(var sample=0;sample<samples;sample++){var level=lastT+(t-lastT)*(sample+.5)/samples,offset=j*rowH-level*st.height,a=Math.max(-width,offset-rowH/2),b=Math.min(width,offset+rowH/2);if(b>a)weight+=((b-a)/2+width/(2*Math.PI)*(Math.sin(Math.PI*b/width)-Math.sin(Math.PI*a/width)))/Math.min(rowH,width)/samples;}if(!weight)continue;
-   var before=beforeProfile[j],minimum=.12;
-   if(j*rowH>=st.floor&&st.height-st.floor>.05){var a=Math.max(0,j-1),b=Math.min(N-1,j+1),slope=(beforeProfile[b]-beforeProfile[a])/Math.max(rowH,(b-a)*rowH);minimum=Math.max(minimum,st.inner[j]+.08*Math.sqrt(1+slope*slope));}
+   // Measure the overlap with the flat blade and the small taper at each end.
+   var weight=0;for(var sample=0;sample<samples;sample++){var level=lastT+(t-lastT)*(sample+.5)/samples,offset=j*rowH-level*st.height,a=Math.max(-width,offset-rowH/2),b=Math.min(width,offset+rowH/2);if(b>a)weight+=(bladeArea(b,width)-bladeArea(a,width))/Math.min(rowH,width*1.75)/samples;}if(!weight)continue;
+   var before=beforeProfile[j],minimum=st.target?.12:FREE_MIN_CLAY/2;
+   if(j*rowH>=st.floor&&st.height-st.floor>.05){var a=Math.max(0,j-1),b=Math.min(N-1,j+1),slope=(beforeProfile[b]-beforeProfile[a])/Math.max(rowH,(b-a)*rowH);minimum=Math.max(minimum,st.inner[j]+(st.target?.08:FREE_MIN_CLAY)*Math.sqrt(1+slope*slope));}
    var next=Math.min(before,Math.max(minimum,before-travel*setting.gain*weight)),cut=before-next;
    if(cut>1e-9){st.radii[j]=next;grooves[j]=Math.max(0,grooves[j]-cut);moved+=cut;ptr.maxD=Math.max(ptr.maxD,cut);}
   }
@@ -6509,7 +6537,7 @@ var stopOptionalTutorial;
  cv.addEventListener('pointermove',function(){if(st.stage==='throw'&&tool==='trim'&&ptr.down&&ptr.decided)trim();});
  ['pointerup','pointercancel','lostpointercapture'].forEach(function(event){cv.addEventListener(event,function(){stroke=null;});});
  $('tools').addEventListener('click',function(){stroke=null;});
- window.TodakFineTrimming={limits:function(){return{maximumGain:1/3,minimumRadiusCm:.12};},settings:settings};
+ window.TodakFineTrimming={limits:function(){return{maximumGain:1/3,minimumRadiusCm:st.target?.12:FREE_MIN_CLAY/2};},settings:settings};
  showTips();
 })();
 
@@ -6822,7 +6850,7 @@ function uiUsesSheet(){return window.TodakReferenceLayout?.stackedWorkspace()??(
  var historyChallenge=startChallenge;startChallenge=function(){var result=historyChallenge.apply(this,arguments);clearHistory();return result;};
  var oldReadout=updateReadout;updateReadout=function(){oldReadout.apply(this,arguments);schedule();};var oldTips=showTips;showTips=function(){oldTips.apply(this,arguments);schedule();};
  var raf=0;function schedule(){if(!raf)raf=requestAnimationFrame(function(){raf=0;sync();});}
- function sync(){var challenge=!!TARGETS[st.target],type=st.stage,T=TARGETS[st.target],o=classify();document.body.dataset.uiStage=type;document.body.dataset.uiTool=tool;$('sheet').dataset.uiStage=type;$('sheetTitle').textContent={throw:'빚기 도구',deco:'꾸미기 도구',glaze:'유약',fire:fstep==='prep'?'굽기':'불 때는 중',done:'완성'}[type];pieceName.textContent=o.full;$('ui-goal-info').hidden=!challenge;$('ui-goal-switch').hidden=type!=='throw'||(!challenge&&!freeReferenceTarget());goal.querySelector('input').disabled=challenge&&!!st.blind;info.querySelector('.ui-score-row').hidden=type!=='throw'||!challenge;$('ui-rough-row').hidden=type!=='throw'||!challenge||roughPts()===0;$('ui-live-score').textContent=st.blind?'?점':score()+'점';$('ui-moves').textContent='모양 잡기 '+touchLeft()+'번 남음';remaining.textContent=challenge?touchLeft()+'번 남음':'';formButton.disabled=challenge&&touchLeft()===0;$('ui-moves').classList.toggle('empty',challenge&&touchLeft()===0);$('ui-rough-text').textContent='표면 거침 −'+roughPts()+'점';$('ui-rough-locate').setAttribute('aria-pressed',String(locate));
+ function sync(){var challenge=!!TARGETS[st.target],type=st.stage,T=TARGETS[st.target],o=classify();document.body.dataset.uiStage=type;document.body.dataset.uiTool=tool;$('sheet').dataset.uiStage=type;if(!window.TodakToolFlow||!['throw','deco','glaze'].includes(type))$('sheetTitle').textContent={throw:'빚기 도구',deco:'꾸미기 도구',glaze:'유약',fire:fstep==='prep'?'굽기':'불 때는 중',done:'완성'}[type];pieceName.textContent=o.full;$('ui-goal-info').hidden=!challenge;$('ui-goal-switch').hidden=type!=='throw'||(!challenge&&!freeReferenceTarget());goal.querySelector('input').disabled=challenge&&!!st.blind;info.querySelector('.ui-score-row').hidden=type!=='throw'||!challenge;$('ui-rough-row').hidden=type!=='throw'||!challenge||roughPts()===0;$('ui-live-score').textContent=st.blind?'?점':score()+'점';$('ui-moves').textContent='모양 잡기 '+touchLeft()+'번 남음';remaining.textContent=challenge?touchLeft()+'번 남음':'';formButton.disabled=challenge&&touchLeft()===0;$('ui-moves').classList.toggle('empty',challenge&&touchLeft()===0);$('ui-rough-text').textContent='표면 거침 −'+roughPts()+'점';$('ui-rough-locate').setAttribute('aria-pressed',String(locate));
  $('ui-diameter').textContent=o.D+' cm';$('ui-height').textContent=o.H+' cm';$('ui-depth').textContent=Math.max(0,st.height-st.floor).toFixed(1)+' cm';var min=Infinity;for(var i=1;i<N;i++)if(i/(N-1)*st.height>=st.floor)min=Math.min(min,wallNormalThickness(st.inner[i],i/(N-1)*st.height));$('ui-wall').textContent=Number.isFinite(min)?(min*10).toFixed(0)+' mm':'속을 파 주세요';$('ui-wall').classList.toggle('danger',min<.45);$('ui-base').textContent=(st.floor*10).toFixed(0)+' mm';$('ui-wall-measure').hidden=$('ui-base-measure').hidden=tool!=='thick';
  rule.hidden=type!=='throw'||!challenge;views.hidden=type==='fire';document.querySelector('.viewDock').hidden=type!=='throw';$('ui-tool-footer').hidden=type==='fire';$('openCard').hidden=type!=='done';$('nextBtn').hidden=type==='fire';$('chRestart').hidden=type!=='throw'||!challenge;$('chQuit').hidden=true;$('dClear').hidden=type!=='deco';$('backThrow').hidden=type!=='deco';$('backDeco').hidden=type!=='glaze';$('nextAlt').hidden=type!=='done'||!challenge;
  $('chRestart').textContent='다시 도전하기';$('dClear').textContent='모두 지우기';$('backThrow').textContent='다시 빚기';$('ui-fire-start').hidden=type!=='fire'||!['prep','loaded','ready'].includes(fstep);$('ui-fire-start').textContent=fstep==='ready'?'가마 문 열기 →':fstep==='loaded'?'문 닫고 굽기 →':'가마에 넣고 굽기';fireField.hidden=type==='fire'&&fstep!=='prep';if(type==='glaze'&&!(window.TodakTutorial&&TodakTutorial.state().active&&['glazeBase','glazeGroup'].includes(TodakTutorial.state().id))&&![$('rackGlazeBase'),$('rackGlazeBrush')].some(function(b){return b.getAttribute('aria-pressed')==='true';}))$('rackGlazeBase').click();
@@ -7518,8 +7546,8 @@ function freeReferenceTarget(){
  input.addEventListener('input',function(){begin();st.dipAngle=clamp(Number(this.value)||0,-60,60);if(!st.dip)st.dip='custom';$('dipAngleOut').textContent=st.dipAngle+'°';dipKey=composeKey=pvKey=ovKey='';dirty=cardDirty=true;});
  ['change','pointerup','pointercancel','keyup','blur'].forEach(function(type){input.addEventListener(type,function(){setTimeout(finish,0);});});
  var sync=syncControls;syncControls=function(){var result=sync.apply(this,arguments);direction.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.dipFrom===(st.dipFrom==='bottom'?'bottom':'top')));});input.value=Number(st.dipAngle)||0;$('dipAngleOut').textContent=input.value+'°';return result;};
- var dip=buildDip;buildDip=function(){if(st.dipFrom!=='bottom'||!st.dip)return dip();var depth=st.dipDepth,key=['below',depth,st.dipAngle||0,st.height,st.radii.join(',')].join('|');if(dipKey===key)return;try{st.dipDepth=1-depth;dip();}finally{st.dipDepth=depth;}var c=dipM.x;c.save();c.globalCompositeOperation='xor';c.fillStyle='#000';c.fillRect(0,0,TW,TH);c.restore();dipKey=key;};
- var photo=photoData;photoData=function(){var d=photo();d.dipFrom=st.dipFrom==='bottom'?'bottom':'top';d.key+='|dip-from:'+d.dipFrom;d.materialKey+='|dip-from:'+d.dipFrom;return d;};
+ var dip=buildDip;buildDip=function(){if(st.dipFrom!=='bottom'||!st.dip||fullDip())return dip();var depth=st.dipDepth,key=['below',depth,st.dipAngle||0,st.height,st.radii.join(',')].join('|');if(dipKey===key)return;try{st.dipDepth=1-depth;dip();}finally{st.dipDepth=depth;}var c=dipM.x;c.save();c.globalCompositeOperation='xor';c.fillStyle='#000';c.fillRect(0,0,TW,TH);c.restore();dipKey=key;};
+ var photo=photoData;photoData=function(){var d=photo();d.dipFrom=st.dipFrom==='bottom'?'bottom':'top';if(fullDip())d.dipAngle=0;d.key+='|dip-from:'+d.dipFrom;d.materialKey+='|dip-from:'+d.dipFrom;return d;};
  var fields=itemFields;itemFields=function(it){it=fields(it);if(it.communityVisual)it.communityVisual.dipFrom=st.dipFrom==='bottom'?'bottom':'top';return it;};
  syncControls();
 })();
@@ -7529,15 +7557,15 @@ function freeReferenceTarget(){
  'use strict';
  var count=65,active=null,activeTouch=false,last=null,previewLast=null,previewTimer=0,cutting=false,cachedSource=null,cachedShape='',cachedProfile=null;
  function sample(a,t){if(!Array.isArray(a)||a.length<2)return 0;var x=clamp(t,0,1)*(a.length-1),i=Math.min(a.length-2,Math.floor(x));return a[i]+(a[i+1]-a[i])*(x-i);}
- function limit(t){var radius=rAt(0)*t,top=st.height;for(var i=0;i<=240;i++){var y=st.height*i/240;if(radius>rAt(i/240)+.0001||y>=st.floor&&radius<innerAt(i/240)){top=y;break;}}return Math.max(0,Math.min(.7,top-.12,st.floor-.12));}
- function profile(){var shape=[st.height,st.floor,st.radii.join(','),st.inner.join(',')].join('|');if(cachedSource===st.bottomTrim&&cachedShape===shape)return cachedProfile;cachedSource=st.bottomTrim;cachedShape=shape;cachedProfile=null;if(!Array.isArray(st.bottomTrim)||st.bottomTrim.length!==count)return null;var a=st.bottomTrim.map(function(v,i){return i>=count-2?0:clamp(Number(v)||0,0,limit(i/(count-1)));});cachedProfile=a.some(function(v){return v>.000001;})?a:null;return cachedProfile;}
+ function limit(t,minimum=.12){var radius=rAt(0)*t,top=st.height;for(var i=0;i<=240;i++){var y=st.height*i/240;if(radius>rAt(i/240)+.0001||y>=st.floor&&radius<innerAt(i/240)){top=y;break;}}return Math.max(0,Math.min(.7,top-minimum,st.floor-minimum));}
+ function profile(){var shape=[st.height,st.floor,st.radii.join(','),st.inner.join(',')].join('|');if(cachedSource===st.bottomTrim&&cachedShape===shape)return cachedProfile;cachedSource=st.bottomTrim;cachedShape=shape;cachedProfile=null;if(!Array.isArray(st.bottomTrim)||st.bottomTrim.length!==count)return null;var a=st.bottomTrim.map(function(v,i){return i>=count-2?0:clamp(Number(v)||0,0,limit(i/(count-1),.12));});cachedProfile=a.some(function(v){return v>.000001;})?a:null;return cachedProfile;}
  var panel=document.createElement('div');panel.id='bottomTrimControls';panel.className='field';panel.innerHTML='<span class="label">깎을 곳</span><div class="chips"><button type="button" class="chip" id="trimSide" aria-pressed="true">옆면</button><button type="button" class="chip" id="trimBottom" aria-pressed="false">밑바닥</button></div><p class="tip">밑바닥은 작품을 뒤집어 깎아요. 바깥 테두리를 남기고 가운데를 문질러 파내 굽을 만들 수 있어요.</p>';$('trimControls').before(panel);
  function enabled(){return st.stage==='throw'&&tool==='trim'&&cutting;}
  function sync(){panel.hidden=st.stage!=='throw'||tool!=='trim';$('trimSide').setAttribute('aria-pressed',String(!cutting));$('trimBottom').setAttribute('aria-pressed',String(cutting));}
  $('trimSide').onclick=function(){cutting=false;active=null;dirty=true;sync();};$('trimBottom').onclick=function(){cutting=true;active=null;dirty=true;sync();};
  function hit(e){var p=cv.getBoundingClientRect(),l=TodakWheel.bottomLayout(),x=(e.clientX-p.left)*W/p.width,y=(e.clientY-p.top-(e.pointerType==='touch'?60:0))*HC/p.height,r=Math.hypot(x-l.x,y-l.y)/l.r*l.cm/l.fraction;return {x:x,y:y,r:r};}
  function cut(p){var R=rAt(0);if(!last){last=p;return;}var l=TodakWheel.bottomLayout(),travel=Math.hypot(p.x-last.x,p.y-last.y)/l.r*l.cm/l.fraction;last=p;if(travel<.0001||p.r>R-.12)return;var a=profile()||Array(count).fill(0),width=Number($('trimWidth').value)/20,gain=Number($('trimStrength').value)/300,changed=false;
-  for(var i=0;i<count-2;i++){var radius=R*i/(count-1),dist=Math.abs(radius-p.r);if(dist>width*2.2)continue;var next=Math.min(limit(i/(count-1)),a[i]+travel*gain*Math.exp(-dist*dist/(width*width*1.4)));if(next>a[i]+.0000001){a[i]=next;changed=true;}}
+  for(var i=0;i<count-2;i++){var radius=R*i/(count-1),dist=Math.abs(radius-p.r);if(dist>width*2.2)continue;var next=Math.min(limit(i/(count-1),st.target?.12:FREE_MIN_CLAY),a[i]+travel*gain*Math.exp(-dist*dist/(width*width*1.4)));if(next>a[i]+.0000001){a[i]=next;changed=true;}}
   if(changed){st.bottomTrim=a;dirty=cardDirty=true;texVer++;window.dispatchEvent(new CustomEvent('todak-bottom-trimmed'));}
  }
  cv.addEventListener('pointerdown',function(e){
@@ -7826,7 +7854,7 @@ if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
   trigger.addEventListener("click",function(){notice.showModal();});
 })();
 </script>
-<script src="home-shelf.js?v=577de20d92b5"></script>
+<script src="home-shelf.js?v=a015d3ddf2e1"></script>
 <script src="tutorial-preview.js?v=4d44224958ca"></script>
 <script>
 (() => {

@@ -117,7 +117,7 @@ var size=low?512:1024,c=canvas(size,size),g=c.getContext('2d'),base=d.color;
 var studioRoughnessCanvas=null;
 function studioRoughness(){if(studioRoughnessCanvas)return studioRoughnessCanvas;var c=studioRoughnessCanvas=canvas(128,128),x=c.getContext('2d'),p=x.createImageData(128,128);for(var y=0;y<128;y++)for(var i=0;i<128;i++){var at=(y*128+i)*4,v=246+(noise(i,y)-.5)*8;p.data[at]=p.data[at+1]=p.data[at+2]=v;p.data[at+3]=255;}x.putImageData(p,0,0);return c;}
 function buildMaterials(d){
-  textures=[];materials=[];var angled=!!d.dipDepth&&(Math.abs(Number(d.dipAngle)||0)>.0001||d.dipFrom==='bottom');var maps=glazeMaps(d),surface=maps.surface,color=maps.color;if(d.overlay){color=canvas(maps.color.width,maps.color.height);var colorContext=color.getContext('2d');colorContext.drawImage(maps.color,0,0);colorContext.drawImage(d.overlay,0,0,color.width,color.height);}var map=tex(color,true),micro=tex(maps.bump,false),gloss=d.finish==='gloss';
+  textures=[];materials=[];var fullDip=d.dipDepth>=1,angled=!fullDip&&!!d.dipDepth&&(Math.abs(Number(d.dipAngle)||0)>.0001||d.dipFrom==='bottom');var maps=glazeMaps(d),surface=maps.surface,color=maps.color;if(d.overlay){color=canvas(maps.color.width,maps.color.height);var colorContext=color.getContext('2d');colorContext.drawImage(maps.color,0,0);colorContext.drawImage(d.overlay,0,0,color.width,color.height);}var map=tex(color,true),micro=tex(maps.bump,false),gloss=d.finish==='gloss';
   // Satin matte has a broad reflection from the fired glaze and a fine clay texture.
   var outer=new T.MeshPhysicalMaterial({map:map,metalness:0,roughness:gloss?.19:.55,roughnessMap:tex(studioRoughness(),false),clearcoat:gloss?.88:.14,clearcoatRoughness:gloss?.07:.34,ior:1.47,bumpMap:micro,bumpScale:gloss?.002:.0045,envMap:glossEnvironment.texture,envMapIntensity:gloss?1.02:.53});
   if(surface){outer.bumpScale=gloss?.010:.006;outer.roughness=gloss?.20:.63;}
@@ -132,18 +132,18 @@ function buildMaterials(d){
   }
   if(d.topOverlay||d.topCarve){
     innerCanvas=canvas(768,768);ix=innerCanvas.getContext('2d');
-    ix.fillStyle='rgb('+d.inside.join(',')+')';ix.fillRect(0,0,768,768);
+    ix.fillStyle='rgb('+(fullDip?d.dipColor:d.inside).join(',')+')';ix.fillRect(0,0,768,768);
 
     ix.save();ix.globalAlpha=d.topOpacity==null?.64:d.topOpacity;if(d.topOverlay&&!angled)ix.drawImage(d.topOverlay,0,0,768,768);ix.restore();
   }
   if(d.topOverlay||d.topCarve){
     inside.onBeforeCompile=function(shader){
-      if(d.topCarve&&!d.topOverlay&&!angled){shader.uniforms.todakDipDepth={value:d.dipDepth||0};var base=new T.Color('rgb('+d.inside.join(',')+')'),dip=new T.Color('rgb('+d.dipColor.join(',')+')');shader.uniforms.todakDipRatio={value:new T.Vector3(dip.r/Math.max(.0001,base.r),dip.g/Math.max(.0001,base.g),dip.b/Math.max(.0001,base.b))};}
+      if(d.topCarve&&!d.topOverlay&&!angled&&!fullDip){shader.uniforms.todakDipDepth={value:d.dipDepth||0};var base=new T.Color('rgb('+d.inside.join(',')+')'),dip=new T.Color('rgb('+d.dipColor.join(',')+')');shader.uniforms.todakDipRatio={value:new T.Vector3(dip.r/Math.max(.0001,base.r),dip.g/Math.max(.0001,base.g),dip.b/Math.max(.0001,base.b))};}
       shader.uniforms.todakVesselHeight={value:d.height};shader.uniforms.todakInteriorDepth={value:d.height/Math.max(.05,d.height-d.floor)};
       shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nuniform float todakVesselHeight;\nvarying float todakInnerLevel;').replace('#include <begin_vertex>','#include <begin_vertex>\ntodakInnerLevel = position.y / todakVesselHeight;');
       shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nuniform float todakInteriorDepth;\nvarying float todakInnerLevel;').replace('#include <opaque_fragment>','outgoingLight *= 1.0 - .12 * pow(clamp((1.0 - todakInnerLevel) * todakInteriorDepth, 0.0, 1.0), .9);\n#include <opaque_fragment>');
-    if(d.topCarve&&!d.topOverlay&&!angled)shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nuniform float todakDipDepth;\nuniform vec3 todakDipRatio;').replace('#include <map_fragment>','#include <map_fragment>\ndiffuseColor.rgb*=mix(vec3(1.),todakDipRatio,step(1.-todakDipDepth,todakInnerLevel)*step(.00001,todakDipDepth));');
-    };inside.customProgramCacheKey=function(){return 'todak-studio-inner-v1';};
+    if(d.topCarve&&!d.topOverlay&&!angled&&!fullDip)shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nuniform float todakDipDepth;\nuniform vec3 todakDipRatio;').replace('#include <map_fragment>','#include <map_fragment>\ndiffuseColor.rgb*=mix(vec3(1.),todakDipRatio,step(1.-todakDipDepth,todakInnerLevel)*step(.00001,todakDipDepth));');
+    };inside.customProgramCacheKey=function(){return 'todak-studio-inner-v1'+(d.topCarve&&!d.topOverlay&&!angled&&!fullDip?'-horizontal-dip':'');};
   }
   inside.map=tex(innerCanvas,true);inside.clearcoatRoughness=gloss?.067:.38;
   inside.roughness=surface?(gloss?.22:.67):(gloss?.18:.60);
@@ -217,7 +217,7 @@ function buildMaterials(d){
     inside.clearcoatRoughness+=(.11-inside.clearcoatRoughness)*softenInner;
     inside.envMapIntensity+=(.85-inside.envMapIntensity)*softenInner;
   }
-  var underside=outer.clone();underside.bumpMap=null;underside.bumpScale=0;underside.map=null;var baseColor=d.dipFrom==='bottom'&&d.dipDepth&&!d.dipAngle?d.dipColor:d.color;underside.color.setRGB(baseColor[0]/255,baseColor[1]/255,baseColor[2]/255,T.SRGBColorSpace);if(d.bottomOverlay){var bc=canvas(768,768),bx=bc.getContext('2d');bx.fillStyle='rgb('+baseColor.join(',')+')';bx.fillRect(0,0,768,768);bx.globalAlpha=d.bottomOpacity==null?.8:d.bottomOpacity;bx.drawImage(d.bottomOverlay,0,0,768,768);underside.map=tex(bc,true);underside.color.setHex(0xffffff);}
+  var underside=outer.clone();underside.bumpMap=null;underside.bumpScale=0;underside.map=null;var baseColor=fullDip||d.dipFrom==='bottom'&&d.dipDepth&&!d.dipAngle?d.dipColor:d.color;underside.color.setRGB(baseColor[0]/255,baseColor[1]/255,baseColor[2]/255,T.SRGBColorSpace);if(d.bottomOverlay){var bc=canvas(768,768),bx=bc.getContext('2d');bx.fillStyle='rgb('+baseColor.join(',')+')';bx.fillRect(0,0,768,768);bx.globalAlpha=d.bottomOpacity==null?.8:d.bottomOpacity;bx.drawImage(d.bottomOverlay,0,0,768,768);underside.map=tex(bc,true);underside.color.setHex(0xffffff);}
 if(angled){
  var solePaint=d.bottomOverlay?tex(d.bottomOverlay,true):null;
  underside.onBeforeCompile=function(shader){

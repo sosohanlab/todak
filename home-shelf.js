@@ -457,7 +457,7 @@
     const [start, end, rails, [wheelX, wheelY, wheelWidth]] = geometry;
     const center = x + wheelX * width * scale;
     const base = y + wheelY * height * scale;
-    const size = Math.min(wheelWidth * width * scale * .82, innerWidth * .63, 380);
+    const size = Math.min(wheelWidth * width * scale * .92, innerWidth * .70, 425);
     wheel.style.left = center + 'px';
     wheel.style.top = base + 'px';
     wheel.style.setProperty('--home-wheel-size', size + 'px');
