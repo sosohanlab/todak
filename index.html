@@ -4674,7 +4674,7 @@ cv.addEventListener("wheel",function(e){
     cup:['컵·잔','Cup'],bowl:['사발·면기','Bowl'],plate:['접시','Plate'],
     dish:['작은 종지','Small dish'],vase:['화병','Vase'],jar:['항아리·병','Jar or bottle'],object:['도자기 오브제','Ceramic object']
   };
-  var appraisalVersion=3;
+  var appraisalVersion=4;
   var grades=[
     {id:'treasure',ko:'국보급',en:'National treasure',minimum:92,range:[1000000,1500000]},
     {id:'fine',ko:'명품',en:'Masterpiece',minimum:83,range:[400000,950000]},
@@ -4732,6 +4732,44 @@ cv.addEventListener("wheel",function(e){
     for(var remaining=bits>>>0;remaining;remaining&=remaining-1)count++;
     return count;
   }
+  var decorationSample;
+  function decorationSurface(layers,wrap){
+    if(!layers.some(Boolean))return null;
+    var size=64,sample=decorationSample||(decorationSample=mk(size,size,true));
+    var ctx=sample.x;
+    ctx.clearRect(0,0,size,size);
+    layers.forEach(function(layer){if(layer)ctx.drawImage(layer.c,0,0,size,size);});
+    var pixels=ctx.getImageData(0,0,size,size).data,marks=0,connected=0,colors=0;
+    for(var y=0;y<size;y++)for(var x=0;x<size;x++){
+      var at=(y*size+x)*4;
+      if(pixels[at+3]<12)continue;
+      marks++;
+      var neighbours=0,similar=false;
+      for(var dy=-1;dy<=1;dy++)for(var dx=-1;dx<=1;dx++){
+        if(!dx&&!dy||y+dy<0||y+dy>=size)continue;
+        var nx=x+dx;
+        if(wrap)nx=(nx+size)%size;
+        if(nx<0||nx>=size)continue;
+        var near=((y+dy)*size+nx)*4;
+        if(pixels[near+3]<12)continue;
+        neighbours++;
+        if(Math.abs(pixels[at]-pixels[near])+Math.abs(pixels[at+1]-pixels[near+1])+Math.abs(pixels[at+2]-pixels[near+2])<=90)similar=true;
+      }
+      if(neighbours>=2)connected++;
+      if(similar)colors++;
+    }
+    return marks?40+60*(.8*connected+.2*colors)/marks:null;
+  }
+  function decorationScore(){
+    var wheel=window.TodakWheel;
+    var surfaces=[
+      decorationSurface([hasPaint?paint:null,hasCarve?carve:null],true),
+      decorationSurface([st.topPaint?wheel?.layer:null,st.topCarve?wheel?.topRelief:null],false),
+      decorationSurface([st.bottomPaint?wheel?.bottomLayer:null,st.bottomCarve?wheel?.bottomRelief:null],false)
+    ].filter(function(score){return score!==null;});
+    // Average the decorated surfaces instead of adding points for each tool or surface.
+    return surfaces.length?surfaces.reduce(function(sum,score){return sum+score;},0)/surfaces.length:26;
+  }
   function assessAppraisal(){
     var kind=appraisalType(classify().n), profile=st.radii;
     var thickness=[], bends=[];
@@ -4750,12 +4788,9 @@ cv.addEventListener("wheel",function(e){
     var shape=match?Math.min(match.solid?55:100,matchScore)-12*(1-wallIntegrity):
       25+30*wallBalance+27*evenness+18*wallIntegrity;
     var smooth=15+45*evenness+Math.min(40,appraisalBitCount(st.appraisalSmooth)*5);
-    var under=!!(st.bottomPaint||st.bottomCarve), inside=!!(st.topPaint||st.topCarve);
-    var glazeZones=appraisalBitCount(st.appraisalGlaze);
-    var decorating=20+(hasPaint?20:0)+(hasCarve?18:0)+(inside?14:0)+(under?14:0)+Math.min(14,glazeZones*2);
     var firingDeduction={crack:18,stuck:14,run:8,pinhole:5}[st.kiln?.type]||0;
-    var evenGlaze=55+(st.dip?10:0)+Math.min(35,glazeZones*3)-firingDeduction;
-    var values=[shape,smooth,decorating,evenGlaze].map(function(value){return Math.round(clamp(value,0,100));});
+    var evenGlaze=55+30*clamp((smooth-60)/40,0,1)-firingDeduction;
+    var values=[shape,smooth,decorationScore(),evenGlaze].map(function(value){return Math.round(clamp(value,0,100));});
     var total=(42*values[0]+23*values[1]+20*values[2]+15*values[3])/100;
     var tierIndex=grades.findIndex(function(tier){return total>=tier.minimum;});
     var grade=grades[tierIndex],ceiling=tierIndex===0?100:grades[tierIndex-1].minimum;
