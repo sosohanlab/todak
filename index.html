@@ -11,7 +11,7 @@
 <link rel="preload" as="style" href="reference-layout.css?v=887f063d5092">
 <link rel="preload" as="style" href="reference-fidelity.css?v=78a629446bc5">
 <link rel="preload" as="script" href="renewal.js?v=4476c9dda374">
-<link rel="preload" as="script" href="reference-layout.js?v=a11e68a58132">
+<link rel="preload" as="script" href="reference-layout.js?v=c099d3f4a5c8">
 <title>토닥 · 온라인 도자기 공방</title>
 <meta name="description" content="화면에서 도자기를 빚고, 꾸미고, 가마에 구워 보는 공방 놀이. 본을 따라 빚는 도전도 있어요.">
 <meta property="og:title" content="토닥 · 온라인 도자기 공방">
@@ -2439,7 +2439,7 @@ function draw(){
   if(throwing&&tool==="shape"&&!(ptr.down&&ptr.mode!=="pull")){
     var hp=handlePos(), act=ptr.down&&ptr.mode==="pull";
     ctx.strokeStyle="rgba(31,63,168,.55)"; ctx.lineWidth=1.5; ctx.setLineDash([3,3]);
-    ctx.beginPath(); ctx.moveTo(hp.x+(hp.x<CX?17:-17),hp.y); ctx.lineTo(CX+(hp.x<CX?-1:1)*rAt(1)*SV,hp.y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(hp.x,hp.y); ctx.lineTo(hp.rimX,hp.rimY); ctx.stroke(); ctx.setLineDash([]);
     ctx.fillStyle=act?"#17307F":"#1F3FA8";
     ctx.beginPath(); ctx.arc(hp.x,hp.y,act?19:17,0,TWO); ctx.fill();
     ctx.strokeStyle="#fff"; ctx.lineWidth=2; ctx.stroke();
@@ -2529,14 +2529,18 @@ var sculptTouchId=null,sculptTouchLift=60,trimTouchCanStart;
 function usesRaisedSculptPoint(){
   return st.stage==='throw'&&(tool==='shape'||tool==='thick'&&secOn||tool==='trim'&&!window.TodakBottomTrim?.active());
 }
+var heightHandleTouch=matchMedia('(pointer: coarse)');
 function handlePos(){
-  var rt=st.radii[N-1]*SV;
-  return {x:Math.min(W-22,CX+rt+30),y:BASE-st.height*SV};
+  var rt=rAt(1)*SV,rimX=CX+rt,rimY=BASE-st.height*SV;
+  var touch=innerWidth<600||heightHandleTouch.matches,unit=W/(cv.clientWidth||W);
+  var x=Math.min(W-(touch?49*unit:22),rimX+30),y=rimY;
+  if(touch&&x<rimX+18*unit)y=Math.max(42*unit,rimY-rt*TILT-27*unit);
+  return {x:x,y:y,rimX:rimX,rimY:rimY,hitRadius:touch?34*unit:30};
 }
 function onHeightHandle(x,y){
   if(tool!=='shape')return false;
   var handle=handlePos(),dx=x-handle.x,dy=y-handle.y;
-  return dx*dx+dy*dy<30*30;
+  return dx*dx+dy*dy<handle.hitRadius*handle.hitRadius;
 }
 function pos(e,startSculpt){
   ptr.brushPressure=brushPressure(e);
@@ -3811,7 +3815,7 @@ function appendChallengeBadge(readout){
 
 /* ---------- 처음 화면, 도전 고르기 (도전은 따로 들어간다) ---------- */
 var CH_ORDER=["cup","bowl","plate","moon","jubyeong","maebyeong","janggu","gourd","goblet","trumpet"];
-var CH_LV={cup:1,bowl:1,plate:1,moon:2,jubyeong:2,maebyeong:2,janggu:3,gourd:3,goblet:3,trumpet:3};
+var CH_LV={cup:1,bowl:1,plate:3,moon:2,jubyeong:2,maebyeong:2,janggu:3,gourd:3,goblet:3,trumpet:3};
 function freshClay(){
   st.challengeRun=null;
   st.appraisalSmooth=0;st.appraisalGlaze=0;
@@ -7858,7 +7862,7 @@ renderShelf=function(){
 /* Built-in shaping challenges share one clock across all sculpting tools. */
 (function(){
  const levels={
-   easy:{ko:'쉬움',en:'Easy',seconds:240,preview:12},
+   easy:{ko:'쉬움',en:'Easy',seconds:200,preview:12},
    normal:{ko:'보통',en:'Normal',seconds:180,preview:8},
    hard:{ko:'어려움',en:'Hard',seconds:120,preview:5}
  };
@@ -7928,7 +7932,7 @@ renderShelf=function(){
    Array.from(grid.querySelectorAll('.chCard')).forEach((card,index)=>{
      if(index>=CH_ORDER.length)return;
      const id=CH_ORDER[index],kind=mode(),best=card.querySelector('.best');
-     card.dataset.runTarget=id;card.classList.remove('master');card.querySelector('i').remove();
+     card.dataset.runTarget=id;card.classList.remove('master');if(id!=='plate')card.querySelector('i').remove();
      const record=Math.max(0,...Object.keys(levels).map(level=>store.best[keyFor(id,kind,level)]||0));
      const old=store.best[bestKey(id,kind==='memory')];
      best.toggleAttribute('data-unplayed',!record&&old==null);
@@ -8082,7 +8086,7 @@ if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
 <script src="migration/transfer-core.js?v=fb1718e4f591"></script>
 <script src="migration/domain-transfer.js?v=2c957daad9b7"></script>
 <script src="renewal.js?v=4476c9dda374"></script>
-<script src="reference-layout.js?v=a11e68a58132"></script>
+<script src="reference-layout.js?v=c099d3f4a5c8"></script>
 <dialog id="privacyNotice" aria-labelledby="privacyNoticeTitle">
   <header>
     <h2 id="privacyNoticeTitle" data-keep>개인정보 안내</h2>

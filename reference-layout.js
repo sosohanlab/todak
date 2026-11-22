@@ -318,7 +318,8 @@
       const filled = stars.textContent.length;
       stars.dataset.refStars = '';
       const remaining = make('span', 'ref-star-rest');
-      remaining.textContent = '★'.repeat(Math.max(0, 4 - filled));
+      const maximum = stars.closest('[data-run-target]') ? 3 : 4;
+      remaining.textContent = '★'.repeat(Math.max(0, maximum - filled));
       remaining.setAttribute('aria-hidden', 'true');
       stars.append(remaining);
     }
@@ -346,10 +347,12 @@
   customShape.setAttribute('aria-disabled', 'true');
   function syncFreeCards() {
     [...freeBuiltins.querySelectorAll('.free-reference-card')].forEach((card, index) => {
-      const level = index <= 2 ? 'easy' : [3, 4, 5, 8].includes(index) ? 'medium' : 'hard';
+      const plate = card.dataset.reference === 'plate';
+      const level = index <= 2 && !plate ? 'easy' : [3, 4, 5, 8].includes(index) ? 'medium' : 'hard';
       const caption = card.querySelector('small');
       caption.dataset.level = level;
-      caption.textContent = { easy: label('쉬움', 'Easy'), medium: label('보통', 'Medium'), hard: label('어려움', 'Hard') }[level];
+      caption.textContent = plate ? label('어려움 · ★★★', 'Hard · ★★★')
+        : { easy: label('쉬움', 'Easy'), medium: label('보통', 'Medium'), hard: label('어려움', 'Hard') }[level];
     });
     if (!freeBuiltins.contains(customShape)) freeBuiltins.append(customShape);
     const hasPersonal = !!freePersonal.querySelector('button');
