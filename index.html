@@ -2307,7 +2307,24 @@ function draw(){
   var cutR=throwing&&secOn;
   {
   ctx.beginPath();
-  for(y=0;y<=hpx;y+=1.5){t=y/hpx;r=rAt(t)*SV;xo=spinning?wob*SV*t*sw:0;ctx.moveTo(CX+xo+r,BASE-y);ctx.ellipse(CX+xo,BASE-y,r,r*TILT,0,0,TWO);ctx.closePath();}
+  var previousRadius=0, previousX=0, previousY=0, sliceStep=1.5;
+  for(y=0;y<=hpx;y=Math.min(hpx,y+sliceStep)){
+    t=y/hpx;r=rAt(t)*SV;xo=spinning?wob*SV*t*sw:0;
+    var sliceX=CX+xo, sliceY=BASE-y;
+    ctx.moveTo(sliceX+r,sliceY);
+    ctx.ellipse(sliceX,sliceY,r,r*TILT,0,0,TWO);
+    ctx.closePath();
+    // Connect narrow slices whose ellipses may not overlap on screen.
+    if(y>0&&2*Math.min(r,previousRadius)*TILT<previousY-sliceY){
+      ctx.moveTo(previousX-previousRadius,previousY);
+      ctx.lineTo(sliceX-r,sliceY);
+      ctx.lineTo(sliceX+r,sliceY);
+      ctx.lineTo(previousX+previousRadius,previousY);
+      ctx.closePath();
+    }
+    if(y===hpx)break;
+    previousRadius=r;previousX=sliceX;previousY=sliceY;
+  }
   // One opaque union avoids the false concentric seams between stacked discs.
   ctx.fillStyle=g1;ctx.fill();
   ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -2365,7 +2382,7 @@ function draw(){
   }
   ctx.setTransform(dpr,0,0,dpr,0,0);
 
-  if(st.stage==="glaze"&&look.gloss){
+  if(st.stage==="glaze"&&look.gloss&&rt>1){
     ctx.save();ctx.lineWidth=1.3;ctx.lineCap="round";for(var rimPart=0;rimPart<32;rimPart++){var fade=Math.pow(Math.sin(Math.PI*(rimPart+.5)/32),2)*.38;ctx.strokeStyle="rgba(255,255,255,"+fade+")";ctx.beginPath();ctx.ellipse(CX,topY,rt-1,Math.max(1,rt*TILT-1),0,Math.PI*(.55+.43*rimPart/32),Math.PI*(.55+.43*(rimPart+1)/32));ctx.stroke();}ctx.restore();
   }else if(st.stage==="glaze"&&look.matte&&rt>1){
     var rimLight=ctx.createLinearGradient(CX-rt,0,CX,0);
