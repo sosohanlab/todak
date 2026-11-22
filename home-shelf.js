@@ -113,7 +113,7 @@
   function paintWheel() {
     const start = performance.now();
     const result = window.TodakPhoto?.renderWheel({
-      ...wheelModel, rotation, transparent: true, elevation: .32, objectScale: 1.3, fastPreview: true
+      ...wheelModel, rotation, transparent: true, elevation: .32, objectScale: 1.3, fastPreview: true, lighting: 'workshop'
     }, wheelCanvas.width);
     if (!result || !wheelContext) return false;
     const size = wheelCanvas.width;

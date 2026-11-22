@@ -4349,13 +4349,13 @@ body.todak-reference.ref-editing #sheet #stampMore[aria-expanded=true] {
   cursor: pointer;
 }
 .home-showcase-turn [hidden], .home-showcase-turn[hidden] { display: none; }
-.home-showcase-turn:has(canvas:not([hidden]))::before {
+.home-showcase-turn::before {
   content: '';
   position: absolute;
-  inset-inline: 20%;
-  bottom: -1%;
-  height: 7%;
-  background: radial-gradient(ellipse, #492d2440, transparent 70%);
+  inset-inline: 19% 12%;
+  bottom: -1.5%;
+  height: 8%;
+  background: radial-gradient(ellipse, #62422d55, #70492e1c 48%, transparent 72%);
   pointer-events: none;
 }
 .home-showcase-turn img,
@@ -4366,7 +4366,7 @@ body.todak-reference.ref-editing #sheet #stampMore[aria-expanded=true] {
   translate: -50% 0;
   pointer-events: none;
 }
-.home-showcase-turn img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
+.home-showcase-turn img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; filter: sepia(.12); }
 .home-showcase-turn canvas {
   width: var(--home-wheel-size);
   bottom: calc(var(--home-wheel-size) * -1 * var(--home-wheel-base, 0));

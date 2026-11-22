@@ -10,6 +10,7 @@ window.TodakBackdrop=function(color,mode){
 var T=window.THREE;
 if(!T){window.TodakPhoto={available:false};return;}
 var renderer,scene,camera,pot,floor,environment,signature='',materials=[],textures=[],lost=false;
+var hemisphere,keyLight,fillLight;
 var woodTexture,room,cyclorama,glossEnvironment;
 var viewportSize=new T.Vector2();
 var low=matchMedia('(pointer:coarse)').matches;
@@ -43,10 +44,11 @@ function init(deferEnvironment){
     renderer.domElement.addEventListener('webglcontextlost',function(e){e.preventDefault();lost=true;});
     renderer.domElement.addEventListener('webglcontextrestored',function(){lost=false;signature='';});
     scene=new T.Scene();camera=new T.PerspectiveCamera(32,1,.1,500);pot=new T.Group();scene.add(pot);
-    scene.add(new T.HemisphereLight(0xf7f5ef,0x9a9991,.28));
+    hemisphere=new T.HemisphereLight(0xf7f5ef,0x9a9991,.28);scene.add(hemisphere);
     var key=new T.DirectionalLight(0xfff7ed,1.9);key.position.set(-12,25,16);key.castShadow=true;key.shadow.blurSamples=12;
     key.shadow.mapSize.set(low?1024:2048,low?1024:2048);Object.assign(key.shadow.camera,{left:-30,right:30,top:35,bottom:-30,near:1,far:100});key.shadow.normalBias=.025;key.shadow.bias=-.00015;key.shadow.radius=8;scene.add(key);
     var fill=new T.DirectionalLight(0xf0f4ff,.50);fill.position.set(12,17,-14);scene.add(fill);
+    keyLight=key;fillLight=fill;
     floor=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.MeshStandardMaterial({color:0xe4d9ca,roughness:.92}));floor.rotation.x=-Math.PI/2;floor.position.y=-.025;floor.receiveShadow=false;scene.add(floor);
     var receiver=new T.Mesh(new T.PlaneGeometry(2000,2000),new T.ShadowMaterial({opacity:.11}));receiver.rotation.x=-Math.PI/2;receiver.position.y=-.018;receiver.receiveShadow=true;scene.add(receiver);
     var c=canvas(128,128),g=c.getContext('2d'),grad=g.createRadialGradient(64,64,0,64,64,64);grad.addColorStop(0,'rgba(30,24,17,.42)');grad.addColorStop(.55,'rgba(30,24,17,.17)');grad.addColorStop(.78,'rgba(30,24,17,.10)');grad.addColorStop(1,'rgba(30,24,17,0)');g.fillStyle=grad;g.fillRect(0,0,128,128);
@@ -389,13 +391,26 @@ function exportFraming(d,size,aspect){
 }
 function renderLive(data){
  if(!init()||lost)return null;
+ var workshop=data.lighting==='workshop';
  try{
   var key=geometrySignature(data)+'|'+materialSignature(data);
   if(signature!==key){rebuild(data);signature=key;}
+  if(workshop){
+   hemisphere.color.setHex(0xffedda);hemisphere.groundColor.setHex(0xbc9479);hemisphere.intensity=.34;
+   keyLight.color.setHex(0xffdfb5);keyLight.position.set(-22,25,16);keyLight.intensity=2.1;
+   fillLight.color.setHex(0xffead6);fillLight.intensity=.32;
+  }
   // Animated canvases copy this frame immediately, so they can skip the photo cache.
   configure(data,data.pixelWidth,data.pixelHeight);
   return renderer.domElement;
  }catch(error){console.warn('토닥 실시간 렌더링 오류',error);return null;}
+ finally{
+  if(workshop){
+   hemisphere.color.setHex(0xf7f5ef);hemisphere.groundColor.setHex(0x9a9991);hemisphere.intensity=.28;
+   keyLight.color.setHex(0xfff7ed);keyLight.position.set(-12,25,16);keyLight.intensity=1.9;
+   fillLight.color.setHex(0xf0f4ff);fillLight.intensity=.50;
+  }
+ }
 }
 function renderWheel(d,size){
  return renderLive(exportFraming(d,size));
@@ -437,7 +452,28 @@ window.TodakPhoto.createFracture=function(d,seed){
 
  var renderSize=new T.Vector2();
  function render(width,height,t,cameraOverride){if(disposed)return null;pose(t);var active=cameraOverride||cam;active.aspect=width/height;if(active.isPerspectiveCamera)active.updateProjectionMatrix();var shadows=renderer.shadowMap.enabled;renderer.shadowMap.enabled=false;renderer.setClearColor(0,0);if(renderer.getPixelRatio()!==1)renderer.setPixelRatio(1);renderer.getSize(renderSize);if(renderSize.x!==width||renderSize.y!==height)renderer.setSize(width,height,false);try{renderer.render(world,active);}finally{renderer.shadowMap.enabled=shadows;}return renderer.domElement;}
- function pileImage(){var pc=new T.OrthographicCamera(-radius*2.2,radius*2.2,radius*1.5,-radius*1.5,.1,Math.max(200,d.height*20));pc.position.set(0,radius*4+5,radius*4+5);pc.lookAt(0,.1,0);var out=canvas(180,120),cx=out.getContext('2d');cx.drawImage(render(180,120,1,pc),0,0);pose(null);return out.toDataURL('image/png');}
+ function pileImage(){
+   var distance=4*Math.max(radius,d.height)+5;
+   var pc=new T.OrthographicCamera(-1,1,1,-1,.1,distance*3);
+   pc.position.set(0,distance,distance);pc.lookAt(0,.1,0);pc.updateMatrixWorld(true);
+   pose(1);root.updateMatrixWorld(true);
+   var frame=new T.Box3(),corner=new T.Vector3(),cameraSpace=new T.Matrix4();
+   parts.forEach(function(part){
+     var box=part.mesh.geometry.boundingBox;
+     cameraSpace.multiplyMatrices(pc.matrixWorldInverse,part.mesh.matrixWorld);
+     for(var i=0;i<8;i++){
+       corner.set(i&1?box.max.x:box.min.x,i&2?box.max.y:box.min.y,i&4?box.max.z:box.min.z);
+       frame.expandByPoint(corner.applyMatrix4(cameraSpace));
+     }
+   });
+   var out=canvas(240,160),cx=out.getContext('2d'),aspect=out.width/out.height;
+   var center=frame.getCenter(new T.Vector3()),size=frame.getSize(new T.Vector3());
+   var halfWidth=Math.max(size.x,size.y*aspect)*.56,halfHeight=halfWidth/aspect;
+   pc.left=center.x-halfWidth;pc.right=center.x+halfWidth;
+   pc.bottom=center.y-halfHeight;pc.top=center.y+halfHeight;pc.updateProjectionMatrix();
+   try{cx.drawImage(render(out.width,out.height,1,pc),0,0);return out.toDataURL('image/png');}
+   finally{pose(null);}
+ }
  return {render:render,pileImage:pileImage,parts:parts,stats:{sourceTriangles:triangles,shards:parts.length},dispose:function(){if(disposed)return;disposed=true;original.dispose();parts.forEach(function(p){p.mesh.geometry.dispose();});mats.forEach(function(m){m.dispose();});ownedTextures.forEach(function(t){t.dispose();});}};
 };
 })();
