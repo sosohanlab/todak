@@ -2985,7 +2985,7 @@ function sstep(a,b,t){t=clamp((t-a)/(b-a),0,1); return t*t*(3-2*t);}
 var TARGETS={
   cup:{name:"일자 컵",h:9.5,f:function(t){return 3.6+0.5*t;}},
   bowl:{name:"삿갓 면기",h:7.5,f:function(t){return 3.2+6.3*t;}},
-  plate:{name:"접시",h:3.8,f:function(t){return 6.5+3.7*t;}},
+  plate:{name:"접시",h:3,f:function(t){return 6.8+.65*sstep(.12,.27,t)+5.35*t*t;}},
   moon:{name:"달항아리",h:20,f:function(t){return 4.2+0.8*t+6.2*Math.pow(Math.max(0,Math.sin(Math.PI*t)),0.85);}},
   jubyeong:{name:"주병",h:20,f:function(t){return 2.6+4.4*Math.exp(-Math.pow(t-0.3,2)/0.05)+6*Math.max(0,t-0.92);}},
   maebyeong:{name:"매병",h:24,f:function(t){return 3.4+0.8*(1-t)+5.2*Math.exp(-Math.pow(t-0.72,2)/0.04)-1.9*sstep(0.88,1,t);}},
