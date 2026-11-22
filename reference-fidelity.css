@@ -3623,12 +3623,17 @@ body.todak-reference.ref-editing #sheet :is(#trimControls, #cavityDepthControls)
   margin: 0 0 2px;
 }
 body.todak-reference.ref-editing #sheet #cavityDepthControls label {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 3px 8px;
+  display: block;
 }
-body.todak-reference.ref-editing #sheet #cavityDepthControls p { display: none; }
+body.todak-reference.ref-editing #sheet #cavityDepthControls {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+body.todak-reference #refToolDock[data-orientation=vertical] .ref-dock-history {
+  order: 1;
+  padding-block-start: 6px;
+}
 body.todak-reference.ref-editing #sheet #p-deco:has(#f-stamp:not([hidden])) :is(#f-stamp, #f-size, #f-pig, #f-opacity) {
   display: grid;
   grid-template-columns: minmax(72px, .39fr) minmax(0, 1fr);
@@ -6060,3 +6065,41 @@ body.todak-reference #searchDlg:where(:not(.appraisal-dialog)) #closeSearch:wher
     white-space: nowrap;
   }
 }
+body.todak-reference #chSel #tmode {
+  justify-self: center;
+  align-self: center;
+  width: fit-content;
+  margin-inline: auto;
+  background: #fff;
+}
+body.todak-reference #chSel #tmode button[aria-pressed=true] {
+  background: var(--ref-blue);
+  color: #fff;
+}
+.todak-reference #chSel #chGrid[data-run-mode=memory] [data-run-target] canvas { visibility: hidden; }
+.todak-reference #ui-live-score[hidden] { display: none !important; }
+.todak-reference #chRules[data-run-rules] :is(.ref-rule-summary,.ref-rule-warnings,.renewal-rules-detail) { display: none; }
+#challengeCurrentRules { margin: 8px 0; line-height: 1.55; }
+.challenge-run-dialog {
+  box-sizing: border-box;
+  width: min(420px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  padding: clamp(16px, 4vw, 24px);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--paper);
+  color: var(--ink);
+}
+.challenge-run-dialog::backdrop { background: #392c2169; }
+.challenge-run-dialog [hidden] { display: none !important; }
+.challenge-run-dialog header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.challenge-run-dialog h2 { margin: 0; font-size: 1.25rem; }
+#challengeRunClose { width: 36px; min-height: 36px; padding: 0; border-radius: 50%; font-size: 20px; }
+#challengeRunModel { display:block; margin: 6px auto; }
+#challengeRunLevels { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+#challengeRunLevels button { flex:1 0 auto; min-height: 40px; }
+#challengeRunLevels button[aria-pressed=true] { background: var(--cobalt); color: white; border-color: var(--cobalt); }
+#challengeRunText { margin: 12px 0; font-size: .9rem; line-height: 1.55; }
+#challengeRunActions { display: flex; flex-wrap: wrap; gap: 8px; }
+#challengeRunActions button { flex: 1 1 auto; min-height: 44px; }

@@ -120,9 +120,7 @@
   });
   const toolbar = make('div', 'ref-toolbar');
   toolbar.setAttribute('aria-label', label('보기와 단계 이동', 'View and next stage'));
-  const topHistory = make('div', 'ref-top-history');
   header.append(toolbar);
-  toolbar.append(topHistory);
 
   const dock = make('nav', 'ref-dock');
   const directTouch = matchMedia('(hover: none) and (pointer: coarse)');
@@ -212,7 +210,7 @@
   window.addEventListener('resize', alignFeedbackInvitation);
   home.querySelector('.homeSub').textContent = label('흙을 토닥토닥, 빚고 꾸미고 구워요', 'Pat, shape, decorate and fire your clay.');
   id('goFree').querySelector(':scope > span').textContent = label('무너질 걱정 없이', 'Clay won’t collapse');
-  id('goChallenge').querySelector(':scope > span').textContent = label('본을 따라 · 횟수 제한', 'Match a model · Limited moves');
+  id('goChallenge').querySelector(':scope > span').textContent = label('시간제한 · 외워서 빚기', 'Timed · From memory');
   function syncHomeEntry() {
     const tutorial = window.TodakTutorial?.state();
     const resume = !id('homeClose').hidden;
@@ -277,7 +275,9 @@
   const undo = id('ui-undo');
   const redo = id('ui-redo');
   undo.setAttribute('aria-label', label('되돌리기', 'Undo'));
-  redo.setAttribute('aria-label', label('다시 실행', 'Redo'));
+  redo.setAttribute('aria-label', label('다시하기', 'Redo'));
+  undo.title = undo.getAttribute('aria-label');
+  redo.title = redo.getAttribute('aria-label');
   undo.dataset.refLabel = label('되돌리기', 'Undo');
   const goalSwitch = id('ui-goal-switch');
   const goalUnavailable = make('label', 'ref-empty-goal');
@@ -292,7 +292,7 @@
   pickerHead.querySelector('h2').textContent = label('도전하기', 'Challenge');
   id('chBack').textContent = '×';
   id('chBack').setAttribute('aria-label', label('도전 목록 닫기', 'Close challenge list'));
-  id('chBack').before(id('tmode'));
+  pickerHead.after(id('tmode'));
   id('tmode').querySelector('[data-bm="1"]').textContent = label('외워서 · 5초만 보여요', 'From memory · 5 seconds');
   const pickerIntro = picker.querySelector('.chRule');
   const pickerLabel = document.createElement('b');
@@ -571,9 +571,8 @@
       if (key === step && editing) beforeIfMoved(dockTools, group);
       else if (group.previousSibling !== slots[key]) slots[key].after(group);
     }
-    if (editing) beforeIfMoved(horizontalDock ? dockHistory : topHistory, history);
-    topHistory.hidden = !editing || horizontalDock || challengeSculpt;
-    dockHistory.hidden = !horizontalDock || challengeSculpt;
+    if (editing) beforeIfMoved(dockHistory, history);
+    dockHistory.hidden = !editing;
     dock.dataset.stage = step;
     dock.toggleAttribute('data-challenge-sculpt', challengeSculpt);
     const throwAgain = step === 'throw';
@@ -742,7 +741,7 @@
   document.head.append(style);
   const fidelity = make('link', '');
   fidelity.rel = 'stylesheet';
-  fidelity.href = 'reference-fidelity.css?v=e737f54561c6';
+  fidelity.href = 'reference-fidelity.css?v=e43351ac17ab';
   fidelity.onload = () => window.TodakResponsive.refresh();
   document.head.append(fidelity);
   document.body.classList.add('todak-reference');
