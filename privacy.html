@@ -24,6 +24,7 @@
     th { background: #f2e9dc; }
     a { color: #213eaa; text-underline-offset: .18em; }
     a:focus-visible { outline: 2px solid #213eaa; outline-offset: 3px; }
+    .policy-links { display: flex; align-items: center; gap: 16px; }
     .home { display: inline-flex; align-items: center; min-height: 44px; margin-bottom: .3rem; }
     @media (max-width: 599px), (hover: none) and (pointer: coarse) and (max-width: 1700px) {
       body { font-size: 15px; }
@@ -46,7 +47,10 @@
 </head>
 <body>
   <main>
-    <a class="home" href="./">토닥 홈으로</a>
+    <nav class="policy-links" aria-label="개인정보 처리방침 탐색">
+      <a class="home" href="./">토닥 홈으로</a>
+      <a href="./privacy-en.html" lang="en" hreflang="en">English</a>
+    </nav>
     <article class="policy" aria-labelledby="policy-title">
       <h1 id="policy-title">개인정보 처리방침</h1>
       <p>토닥(TODAK)은 서비스 제공과 개선에 필요한 정보만 처리하며, 이용자의 정보를 안전하게 관리하기 위해 노력합니다.</p>
@@ -66,7 +70,7 @@
         <ul>
           <li><strong>작품 정보:</strong> 이용자의 브라우저에 저장되며, 브라우저 데이터를 삭제하면 사라질 수 있습니다.</li>
           <li><strong>의견 및 첨부 이미지:</strong> 접수일로부터 최대 3개월간 보관 후 삭제합니다.</li>
-          <li><strong>요청 제한:</strong> IP 변환값은 마지막 접수 또는 허용된 검색 후 48시간을 기준으로 삭제합니다.</li>
+          <li><strong>요청 제한:</strong> IP 변환값은 마지막 접수 후 48시간을 기준으로 삭제합니다.</li>
           <li><strong>홈 조회수:</strong> 날짜별 합계를 통계로 보관합니다.</li>
         </ul>
         <p>보관 기간이 끝나거나 더 이상 필요하지 않은 정보는 삭제합니다. 법령에 따른 보존 의무가 있는 경우는 예외로 합니다.</p>

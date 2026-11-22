@@ -266,6 +266,9 @@ body.todak-reference .ref-toolbar #ui-work-views #resetPhoto {
   color: #312319;
   font: 830 17px/1.2 var(--body);
 }
+html[lang=en] .todak-reference.ref-firing #sheet:has(#fs-prep:not([hidden])) #sheetTitle::before {
+  content: "Ready to fire?";
+}
 .todak-reference.ref-firing #sheetBody { display: block !important; padding: 10px 18px 15px; }
 .todak-reference.ref-firing #sheet:has(#fs-prep:not([hidden])) #fs-prep p { display: none; }
 .todak-reference.ref-firing #sheet #ui-fire-start { width: 100%; min-height: 43px; border-radius: 12px; }

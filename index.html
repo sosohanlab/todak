@@ -9,9 +9,9 @@
 <link rel="preload" as="image" href="renewal-assets/home-wheel-mobile.webp?v=8ebe34845837" media="(orientation: portrait) and (width < 600px)" fetchpriority="high">
 <link rel="preload" as="style" href="renewal.css?v=4399c89be0e0">
 <link rel="preload" as="style" href="reference-layout.css?v=887f063d5092">
-<link rel="preload" as="style" href="reference-fidelity.css?v=2519c3947400">
+<link rel="preload" as="style" href="reference-fidelity.css?v=ba416b22459c">
 <link rel="preload" as="script" href="renewal.js?v=4476c9dda374">
-<link rel="preload" as="script" href="reference-layout.js?v=e4b47693296e">
+<link rel="preload" as="script" href="reference-layout.js?v=9564db759c75">
 <title>토닥 · 온라인 도자기 공방</title>
 <meta name="description" content="화면에서 도자기를 빚고, 꾸미고, 가마에 구워 보는 공방 놀이. 본을 따라 빚는 도전도 있어요.">
 <meta property="og:title" content="토닥 · 온라인 도자기 공방">
@@ -93,12 +93,180 @@ let initialSharedChallenge=takeSharedChallenge();
   }
   function name(c){var e=exact(c); return e!=null?e:words(c);}
   function exact(c){
+    if(Object.hasOwn(D,c))return D[c];
     var nums=[], key=c.replace(/\d+(\.\d+)?/g,function(m){nums.push(m); return "#";}), e=D[key], i=0;
     if(e==null)return null;
     return e.replace(/#/g,function(){return nums[i++];});
   }
   Object.assign(D,{"원하는 색 고르기":"Choose a color","색상 코드 입력 (선택)":"Color code (optional)","물감 직접 고르기":"Custom paint color","바탕색 직접 고르기":"Custom base color","붓 유약 직접 고르기":"Custom brush glaze","덧입힐 색 직접 고르기":"Custom dip color","속 완성도":"Interior quality","횟수 점수":"Moves","남은 횟수":"Moves left","속이 막혔거나 너무 좁으면 최대 59점":"Closed or nearly closed interiors are capped at 59"});
+  Object.assign(D,{
+    '토닥':'Todak', '내 진열장':'My showcase', '도전하기':'Take a challenge', '자유롭게 빚기':'Free sculpting',
+    '공방 꾸미기':'Decorate your studio', '✦ 공방 꾸미기':'✦ Decorate your studio', '홈 화면에 추가':'Add to Home Screen',
+    "사파리 아래쪽 공유 버튼을 누르고 '홈 화면에 추가'를 골라요.":"Tap Share in Safari, then choose Add to Home Screen.",
+    "브라우저 메뉴(⋮)에서 '홈 화면에 추가' 또는 '앱 설치'를 골라요.":"Choose Add to Home Screen or Install app from your browser menu (⋮).",
+    '도자기 공방':'Pottery studio', '공방의 물레 위에 놓인 도자기':'Pottery on the studio wheel', '조작판':'Work controls',
+    '도구 설정 접기':'Collapse tool settings', '제작 도구 설정':'Studio tool settings',
+    '도구창 높이 · 위아래로 끌어 조절':'Tool panel height · drag to resize', '작품 정보 접기':'Collapse artwork details',
+    '내 진열장 닫기':'Close my showcase', '완성한 작품 진열장':'Showcase of finished pieces',
+    '피드백 남기기':'Leave feedback', '피드백 창 닫기':'Close feedback',
+    '남겨주신 의견과 첨부 이미지는 공개되지 않으며, 운영자만 확인할 수 있어요.':'Only the studio operator can see your feedback and attachments.',
+    '서비스 개선을 위해 최대 3개월간 보관한 후 삭제해요.':'We keep them for up to three months to improve Todak, then delete them.',
+    '어떤 의견인가요?':'What kind of feedback is this?', '개선 제안':'Suggestion', '오류 제보':'Bug report',
+    '기타 의견':'Other feedback', '내용':'Message', '5자 이상 적어 주세요':'Enter at least 5 characters.',
+    '이미지 첨부 (선택 · 1장)':'Attach an image (optional · 1 image)', 'png·jpg·webP·10MB 이하':'PNG, JPG or WebP · up to 10 MB',
+    '사용하면서 느낀 점이나 바라는 점을 적어 주세요.':'Tell us what worked or what you would like to see.',
+    '의견 보내기':'Send feedback', '보내는 중…':'Sending…',
+    '본 없이 자유롭게 빚기':'Sculpt freely without a reference', '전체':'Whole', '단면':'Cross-section', '도자기 보기':'Pottery view',
+    '모양 잡기':'Shape', '도움말':'Help', '손끝 크기':'Fingertip size', '좁게':'Narrow', '보통':'Medium', '넓게':'Wide',
+    '깎기':'Trim', '깎을 곳':'Trim area', '옆면':'Side', '밑바닥':'Bottom',
+    '날 두께':'Blade thickness', '깎는 강도':'Trimming strength', '속·두께':'Interior & thickness',
+    '속 깊이':'Interior depth', '아래 #cm는 채운 흙':'Bottom # cm is solid clay', '크게':'Large',
+    '옆모습':'Side', '윗모습':'Top', '옆모습으로 보기':'Side view', '윗모습으로 보기':'Top view', '밑바닥으로 보기':'Bottom view',
+    '도자기 회전':'Rotate pottery', '돌리기':'Rotate', '초승달':'Crescent', '색상 불투명도':'Color opacity',
+    '무늬의 높이':'Pattern relief', '음각 · 파내기':'Carve inward', '파내기':'Carve inward',
+    '양각 · 돋우기':'Raise the pattern', '바탕 유약':'Base glaze', '붓칠':'Brush glaze',
+    '가마에 넣고 굽기':'Load and fire', '완성 작품 보기':'Finished artwork view',
+    '완성 사진 배경 선택':'Choose a photo background', '도자기 작게':'Make pottery smaller', '도자기 크게':'Make pottery larger',
+    '카드 만들기':'Make a card', '나의 도자기':'My pottery', '한 줄 메모 추가':'Add a short note', '한 줄 메모 (선택)':'Short note (optional)',
+    '작품 카드 미리보기':'Artwork card preview', '예: 아침 요거트 볼, 반지 보관함':'Example: Breakfast bowl or ring dish',
+    '배경':'Background', '누르면 바로 바뀌어요':'Tap to preview the change', '스튜디오 색상 변경':'Change studio color',
+    '부드러운 스튜디오':'Soft studio', '햇살 드는 창가':'Sunlit window', '고요한 갤러리':'Quiet gallery', '나뭇잎 그림자':'Leaf shadows',
+    '초록빛 석재 받침':'Green stone pedestal', '햇살 속 원목 책상':'Sunlit wooden desk', '따뜻한 아치 조명':'Warm arch lighting', '햇살 비치는 리넨':'Sunlit linen',
+    '+ 더 열기':'+ Show more', '사용하기':'Use', '✓ 사용 중':'✓ In use', '사진 배경':'Photo background', '색상 변경':'Change color',
+    '작품 완성 +#P':'Finish a piece +# P', '도전 #점↑ +#P':'Challenge #+ pts +# P', '#점↑ +#P':'#+ pts +# P',
+    '포인트 안내':'About points', '작품 보상 #건':'# artwork rewards',
+    '도전 점수에 따른 보너스는 작품 완성 보상에 더해져요.':'Challenge bonuses are added to the reward for finishing a piece.',
+    '실제 결제 없이 플레이로 모으는 포인트예요.':'You earn points by playing. No payment is needed.',
+    '꾸미기 상점 닫기':'Close the studio shop', '꾸미기 종류':'Decoration categories',
+    '옆선 40점 · 높이 20점 · 속 완성도 15점 · 안팎 매끈함 15점 · 남은 횟수 10점으로 평가해요. 모양 잡기 2번까지는 횟수 점수 10점, 이후에는 남은 비율로 계산해요. 속이 막혔거나 너무 좁으면 최대 59점이에요. 유약 색이나 가마의 우연은 점수에 영향이 없어요.':'Scoring: outline (40), height (20), interior (15), inside and outside finish (15), and moves left (10). You earn all 10 move points if you use no more than two shaping moves. After that, the points depend on how many moves are left. A closed or very narrow opening caps the score at 59. Glaze color and firing effects do not affect the score.'
+  });
+  Object.assign(D,{
+    '첨부할 이미지 미리보기':'Attachment preview', '이미지 삭제':'Remove image',
+    '10MB 이하의 PNG·JPG·WebP 이미지를 골라 주세요.':'Choose a PNG, JPG, or WebP image up to 10 MB.',
+    '빚기 도구 익히기':'Learn the sculpting tools', '조작방법':'Controls', '직접 해보기':'Try it', '튜토리얼 건너뛰기':'Skip tutorial',
+    '휠·두 손가락으로 확대·축소해요.':'Zoom with the scroll wheel or pinch with two fingers.',
+    '꾸미기·유약은 좌우 버튼으로 돌려요.':'Use the arrows to rotate the piece while decorating or glazing.',
+    '↔ 끌기':'↔ Drag', '누르기':'Tap', '문지르기':'Rub', '그리기':'Draw',
+    '옆면을 좌우로 끌어 보세요':'Drag the side left or right', '끌면 굴곡이 생겨요.':'Dragging shapes the curve.',
+    '오른쪽 안쪽 벽을 끌어 보세요':'Drag the inner wall on the right', '벽 두께를 조절할 수 있어요.':'This adjusts the wall thickness.',
+    '바깥 벽을 조금씩 깎아 보세요':'Trim a little from the outer wall', '도구를 안쪽으로 천천히 밀어요.':'Slowly push the tool inward.',
+    '겉면을 가볍게 문질러 보세요':'Gently rub the outside', '작은 굴곡과 물레 자국을 정리해요.':'This smooths small bumps and wheel marks.',
+    '오른쪽 안쪽 벽을 문질러 보세요':'Rub the inner wall on the right', '안쪽 표면을 매끈하게 다듬어요.':'This smooths the inside surface.',
+    '작품 위에 선을 그려 보세요':'Draw a line on your piece', '원하는 무늬를 자유롭게 그려요.':'Draw any pattern you like.',
+    '작품 위에 띠를 그려 보세요':'Draw a band around the piece', '같은 높이로 한 바퀴 이어져요.':'The band goes all the way around at the same height.',
+    '도자기를 눌러 도장을 찍어 보세요':'Tap the pottery to stamp it', '고른 모양이 작품에 찍혀요.':'The design you chose appears on the clay.',
+    '작품 위에 무늬를 새겨 보세요':'Carve a pattern into your piece', '문지른 자리에 홈이 생겨요.':'A groove follows the tool.',
+    '도자기에 선을 그려 보세요':'Draw a line on the clay', '흙 위로 솟은 무늬가 생겨요.':'This raises a pattern above the surface.',
+    '작품 위를 끌어 띠를 새겨 보세요':'Drag to carve a band', '둘레를 따라 홈이 이어져요.':'The groove runs around the piece.',
+    '원하는 부분에 유약을 칠해 보세요':'Brush glaze wherever you like', '원하는 만큼 더 칠할 수 있어요.':'Add more glaze if you like.',
+    '작품을 눌러 가마에 넣어 주세요':'Tap the piece to load the kiln', '가마 문을 닫으면 굽기가 시작돼요.':'Firing starts when the kiln door closes.',
+    '단면을 눌러 보세요':'Select Cross-section', '안쪽 벽의 두께를 볼 수 있어요.':'You can see how thick the inner wall is.',
+    '전체를 눌러 보세요':'Select Whole', '다듬은 전체 모양을 확인해요.':'Look at the overall shape you refined.',
+    '도장을 골라 보세요':'Choose a stamp', '꽃·잎 등 원하는 모양을 찍을 수 있어요.':'Stamp a flower, a leaf, or another design.',
+    '화살표를 눌러 돌려 보세요':'Use the arrows to rotate', '반대편도 꾸밀 수 있어요.':'You can decorate the other side too.',
+    '바탕 유약을 선택해 주세요':'Select Base glaze', '작품 전체에 입힐 유약을 골라요.':'Choose a glaze for the entire piece.',
+    '원하는 유약 색을 골라 보세요':'Choose a glaze color', '직접 색상과 코드를 고를 수도 있어요.':'You can also choose a custom color or enter a color code.',
+    '반짝임을 골라 보세요':'Choose a finish', '유광과 무광의 느낌을 비교해요.':'Compare the glossy and matte finishes.',
+    '붓칠을 선택해 주세요':'Select Brush glaze', '원하는 부분에 유약을 칠할 수 있어요.':'Brush glaze onto the areas you choose.',
+    '불투명도를 움직여 보세요':'Move the opacity slider', '낮출수록 바탕이 비쳐 보여요.':'Lower opacity lets more of the base coat show through.',
+    '바탕 유약으로 돌아가 주세요':'Return to Base glaze', '칠한 무늬는 그대로 유지돼요.':'Your painted design stays in place.',
+    '담그는 깊이를 움직여 보세요':'Adjust the dip depth', '담그기를 켜고 슬라이더로 범위를 조절해요.':'Turn on dipping and use the slider to control the area.',
+    '표면 무늬를 골라 보세요':'Choose a surface effect', '원하는 질감을 비교해 보세요.':'Compare the textures.',
+    '불 세기를 골라 보세요':'Choose a firing temperature', '선택한 불로 작품을 구워요.':'This is the temperature used to fire your piece.',
+    '가마 문을 열어 주세요':'Open the kiln door', '식은 작품을 꺼내 볼 수 있어요.':'Take out the piece once it has cooled.',
+    '완성된 작품을 살펴보세요':'Look at your finished piece', '사진이 준비되면 작품을 직접 돌려볼 수 있어요.':'Once the photo is ready, you can rotate the piece.',
+    '작품을 직접 돌려 보세요':'Rotate your piece', '끌거나 회전 화살표를 눌러요.':'Drag or use the rotation arrows.',
+    '사진 속 작품 크기를 바꿔 보세요':'Resize the piece in the photo', '− / 슬라이더 / ＋ 중 편한 방법을 사용해요.':'Use −, +, or the slider.',
+    '완성 사진 배경을 골라 보세요':'Choose a background for the photo', '작품에 어울리는 배경을 찾아요.':'Find a background that suits your piece.',
+    '작품 이름을 적어 주세요':'Give your piece a name', '이름을 적고 용도 칸으로 이동하거나 저장을 눌러요.':'Enter a name, then add a use or select Save.',
+    '어디에 쓸 작품인가요?':'What will you use it for?', '찻잔·반지 보관함처럼 적어 보세요.':'Try something like “teacup” or “ring dish.”',
+    '작품 카드를 저장해 보세요':'Save your artwork card', '이미지로 저장하거나 공유할 수 있어요.':'You can save it as an image or share it.',
+    '닫기를 눌러 작품으로 돌아가세요':'Select Close to return to your piece', '작품은 내 진열장에도 남아 있어요.':'Your piece is also in My showcase.',
+    '감정 맡기기를 눌러 보세요':'Select Get an appraisal', '이때 가상 도자기 이미지와 작품 종류, 게임 등급이 OpenAI로 전송돼요.':'This sends the pottery image, type, and game grade to OpenAI.',
+    '감정서를 받지 않아도 이어갈 수 있어요.':'You can continue without an appraisal.', '홈으로 돌아가 볼까요?':'Ready to return home?',
+    '홈에서 언제든 다시 연습할 수 있어요.':'You can practice again from the home page at any time.',
+    '도구 설정을 열어 주세요':'Open tool settings', '선택한 도구를 누르면 설정을 열 수 있어요.':'Tap the selected tool to open its settings.',
+    '표시된 곳을 직접 조작해 보세요.':'Try the highlighted control.',
+    '굵기를 조절해요':'Adjust the brush width', '오늘의 작품':'Today’s piece',
+    '담그기':'Dip glaze', '담가서 덧입히기·표면 무늬':'Dip glaze and surface effects',
+    '붓 유약 색':'Brush glaze color', '유약 불투명도':'Glaze opacity', '붓 굵기':'Brush width',
+    '불편·오류 제보':'Report a problem', '의견을 5자 이상 적어 주세요.':'Enter at least 5 characters of feedback.',
+    '이미지를 첨부했어요.':'Image attached.', '이미지를 읽지 못했어요. 다른 이미지를 골라 주세요.':'We could not read that image. Choose a different one.',
+    '지금은 보낼 수 없어요. 잠시 후 다시 시도해 주세요.':'Feedback is unavailable right now. Try again shortly.',
+    '원본 사진은 작품을 열어 확인할 수 있어요.':'Open the piece to see its original photo.'
+  });
+  Object.assign(D,{
+    "모양 잡기 · 컵의 전체 모양을 잡아요": "Shape the cup", "모양 잡기는 넓게 밀고 당겨 큰 곡선을 만들어요. 컵 안내선을 보며 옆면을 조절해 보세요. 손끝 크기로 한 번에 닿는 범위를 바꿔요.": "Push or pull the side to make broad curves. Match the cup outline and adjust fingertip size to change how much clay you move.",
+    "모양 잡기 · ↕ 손잡이로 키를 바꿔요": "Adjust the height", "입구 옆 ↕ 손잡이를 위아래로 끌어 컵 안내선의 높이에 맞춰 보세요.": "Drag the ↕ handle beside the rim to match the height of the cup outline.",
+    "깎기 · 날 두께를 조절해요": "Adjust the blade width", "깎기는 전체 모양을 잡은 뒤 작은 굴곡이나 굽을 세밀하게 다듬는 도구예요. 먼저 날 두께를 조절해 보세요.": "Use Trim to refine small curves or the foot. Start by adjusting the blade width.",
+    "깎기 · 깎는 강도를 조절해요": "Adjust trimming strength", "오른쪽으로 갈수록 더 깎여요. 최대 강도도 모양 잡기보다 약하므로 조금씩 다듬을 수 있어요.": "Move the slider right to remove more clay with each pass.",
+    "깎기 · 원하는 작은 모양을 다듬어요": "Refine a small area", "날이 닿는 좁은 곳의 흙만 덜어내요. 가만히 누르거나 바깥으로 당기면 깎이지 않아요.": "Push the blade inward to remove clay where it touches. Holding still or pulling outward leaves the clay in place.",
+    "속·두께 · 속 깊이를 바꿔요": "Adjust the interior depth", "슬라이더를 왼쪽으로 줄이면 바닥이 두꺼워지고, 오른쪽으로 늘리면 깊어져요. 바깥 모양은 유지돼요.": "Move left for a thicker base or right for a deeper interior. The outside stays the same.",
+    "속·두께 · 안쪽 벽을 좌우로 끌어요": "Drag the inner wall", "단면의 오른쪽 안쪽 벽을 잡아요. 바깥으로 벌리면 얇아지고 안으로 좁히면 두꺼워져요.": "In Cross-section view, grab the wall on the right. Drag outward to make it thinner or inward to make it thicker.",
+    "매끈하게 · 바깥벽을 문질러요": "Smooth the outer wall", "상단에서 전체 보기를 고르고, 도자기 바깥면을 가볍게 문질러 보세요.": "Choose Whole view and gently rub the outside.",
+    "매끈하게 · 안쪽 벽도 다듬어요": "Smooth the inner wall", "상단에서 단면 보기를 고르고, 오른쪽 안쪽 벽을 문질러 보세요.": "Choose Cross-section and gently rub the inner wall on the right.",
+    "붓 · 굵기를 조절해요": "Adjust the brush width", "붓 아래에서 색과 불투명도도 고를 수 있어요. 먼저 굵기 슬라이더를 움직여 보세요.": "Move the width slider. You can choose brush color and opacity here too.",
+    "붓 · 작품 위에 선을 그려요": "Draw a line on your piece", "누른 채 끌어 자유롭게 그려 보세요. 한 바퀴 띠를 고르면 같은 높이로 둘레를 따라 이어져요.": "Drag to draw freely, or use the band option to draw all the way around at the same height.",
+    "도장 · 찍을 모양을 골라요": "Choose a stamp", "꽃·잎·별 등 원하는 모양을 눌러 보세요. 크기와 색도 아래에서 바꿀 수 있어요.": "Select a flower, leaf, star, or another stamp. You can also change its size and color.",
+    "도장 · 작품을 눌러 찍어요": "Stamp the piece", "선택한 도장 모양을 표시된 곳에 찍어 보세요.": "Tap the highlighted spot to apply your selected stamp.",
+    "조각칼 · 음각으로 홈을 새겨요": "Carve a groove", "음각·파내기를 고른 뒤 작품 위를 끌어요. 들어간 홈이 생겨요.": "Select Carve inward and drag across the clay to make a groove.",
+    "조각칼 · 양각으로 무늬를 올려요": "Raise a pattern", "양각·돋우기를 고른 뒤 작품 위를 끌어요. 솟은 무늬가 생겨요.": "Select Raise the pattern and drag across the clay to make a raised design.",
+    "지우개 · 그린 무늬를 지워요": "Erase a design", "방금 꾸민 곳을 문질러 보세요. 굵기를 키우면 넓게 지울 수 있어요.": "Rub the decorated area. Increase the width to erase more at once.",
+    "오른쪽 돌리기 버튼을 눌러요": "Rotate the piece to the right", "화면 위 오른쪽의 강조된 회전 버튼을 누르면 작품이 돌아가요. 뒷면도 보고 꾸밀 수 있어요.": "Use the highlighted arrow to see and decorate the back.",
+    "위에서 보고 꾸밀 수도 있어요": "Decorate from the top", "위를 누르면 입구와 안쪽을 내려다봐요. 윗면에서도 붓·도장·조각칼을 쓸 수 있어요.": "Select Top to see the opening and interior. You can also paint, stamp, or carve from here.",
+    "밑바닥도 꾸밀 수 있어요": "Decorate the bottom", "밑바닥을 눌러 보세요. 이름이나 표시를 넣을 때도 사용할 수 있어요.": "Select Bottom to add a name or mark beneath your piece.",
+    "옆면으로 돌아와요": "Return to the side view", "옆면을 누르면 원래 시점으로 돌아와요. 실수하면 되돌리기·다시하기를 사용해요.": "Select Side. Use Undo or Redo to revisit an edit.",
+    "바탕 유약 · 전체 색을 골라요": "Choose a base glaze", "바탕색 칠하기를 고른 뒤 색을 누르면 작품 전체에 입혀져요. 원하는 색을 직접 고를 수도 있어요.": "Select Base glaze and choose a color for the whole piece, or pick a custom color.",
+    "유광·무광을 골라 보세요": "Choose glossy or matte", "유광은 빛이 반사되고, 무광은 부드럽게 퍼져요. 원하는 느낌을 눌러 보세요.": "Glossy glaze reflects light. Matte glaze softens the reflection. Choose the look you prefer.",
+    "담그기 · 다른 색을 덧입혀요": "Dip the piece in a second color", "담그기를 켜고 위에서·아래에서 중 방향을 골라요. 깊이와 기울기로 색이 입혀질 범위를 바꿀 수 있어요.": "Turn on Dip glaze and choose a direction. Set the depth and angle to control coverage.",
+    "담그기 · 덧입힐 색을 골라요": "Choose a dip color", "고른 방향에서 담근 부분에 덧입힐 색이에요. 직접 색을 고를 수도 있어요.": "This color coats the dipped area. You can also choose a custom color.",
+    "담그기 · 깊이로 범위를 바꿔요": "Adjust the dip depth", "슬라이더를 움직여 색이 어디까지 입혀지는지 확인해 보세요.": "Move the slider to see how much of the piece the second color covers.",
+    "담그기 · 기울기도 바꿀 수 있어요": "Adjust the dip angle", "기울기 슬라이더를 움직여 경계선을 비스듬하게 만들어 보세요. 0°에서는 수평이에요.": "Move the angle slider to tilt the boundary. At 0° it is level.",
+    "표면 무늬 · 없음·점박이·잔금": "Choose a surface effect", "점박이는 작은 점, 잔금은 유약의 가는 균열을 표현해요. 하나를 골라 보세요.": "Speckles add small dots. Crackle shows fine lines in the glaze.",
+    "붓 유약 · 부분에 칠할 색을 골라요": "Choose a brush glaze color", "붓으로 유약 칠하기를 고르고 색을 골라요. 전체 색 위에 직접 칠한 부분만 더해져요.": "Select Brush glaze and choose a color. The glaze goes only where you paint.",
+    "붓 유약 · 불투명도를 조절해요": "Adjust glaze opacity", "낮출수록 바탕이 비쳐요. 0%에서는 칠해지지 않으니 조금 올려 두세요.": "Lower opacity lets more of the base show. Set it above 0% to apply glaze.",
+    "붓 유약 · 붓 굵기를 조절해요": "Adjust the glaze brush width", "가늘게 선을 그리거나 넓게 칠할 수 있어요. 슬라이더를 움직여 보세요.": "Move the slider to draw a fine line or cover a wider area.",
+    "붓 유약 · 원하는 곳을 칠해요": "Brush glaze on the piece", "작품 위를 누른 채 끌어 보세요. 붓이 닿은 부분에만 유약이 입혀져요.": "Drag over the areas to glaze. The color applies where the brush touches.",
+    "완성 사진 · 작품 크기를 바꿔요": "Resize the piece in the photo", "상단의 − 또는 ＋를 눌러 작품 크기를 바꿔 보세요.": "Use − or + at the top to change the size of the piece.",
+    "완성 사진 · 작품을 옮겨요": "Move the piece in the photo", "작품을 누른 채 끌어 크기를 유지하면서 위치를 바꿔요.": "Drag the piece to reposition it while keeping its size.",
+    "완성 사진 · 배경을 골라요": "Choose a photo background", "배경 카드 하나를 누르면 완성 사진에 바로 적용돼요.": "Select a background card to apply it to the photo.",
+    "360° 감상 · 작품을 돌려 봐요": "Rotate the piece in 360° view", "360° 감상을 켜고 작품을 끌어 보세요. 위·아래·뒤쪽까지 돌려 볼 수 있어요.": "Switch to 360° and drag to see above, below, or behind the piece.",
+    "완성 사진으로 돌아와요": "Return to the photo", "같은 스위치를 다시 눌러 사진으로 돌아와요. 여기서 카드로 저장를 열 수 있어요.": "Use the same toggle to switch back to the photo. You can save a card from there."
+  });
+  Object.assign(D,{
+    '의견을 보내주셔서 고마워요. 더 나은 토닥을 만드는 데 참고할게요.':'Thanks for your feedback. It helps us improve Todak.',
+    '잠시 후 다시 보내 주세요. 작성한 내용은 그대로 남아 있어요.':'Try again in a moment. Your draft is still here.',
+    '보내지 못했어요. 잠시 후 다시 시도해 주세요. 작성한 내용은 그대로 남아 있어요.':'We couldn’t send your feedback. Try again shortly. Your draft is still here.',
+    '기본 원목 진열장':'Wood showcase', '원목 유리 진열장':'Wood and glass showcase', '유리 전시 진열장':'Glass display case',
+    '아치 갤러리 진열장':'Arched gallery showcase', '처음 시작하는 나만의 진열장이에요.':'Your first showcase.',
+    '작품을 감싸는 투명한 유리와 원목 프레임.':'Clear glass around the artwork, with a wooden frame.',
+    '은은한 조명과 석재 받침대로 더 특별하게.':'Soft lighting and stone pedestals.',
+    '조명과 전시 받침대가 있는 아치형 진열장이에요.':'An arched showcase with lighting and display stands.',
+    '기본 촬영 배경. 따뜻한 회벽과 부드러운 빛.':'The default photo background, with a warm plaster wall and soft lighting.',
+    '원목 테이블 위로 오후 햇살이 들어와요.':'Afternoon light falls across a wooden table.',
+    '깊은 초록 벽과 석재 받침대의 작은 전시.':'A small exhibit with deep green walls and stone pedestals.',
+    '없는 상품':'Item unavailable', '포인트가 #P 부족해요.':'You need # more points.', '설정을 저장하지 못했어요.':'Could not save settings.',
+    '체험 포인트 받음':'Trial points received', '체험 포인트 받기':'Get trial points', '보유 중':'Owned', '해금하기':'Unlock',
+    '구매했어요. 보유한 항목에서 선택할 수 있어요.':'Unlocked. You can select it from your owned items.', '적용했어요.':'Applied.',
+    '작품 완성! #P를 모았어요.':'Piece finished! You earned # points.', '진열장 꾸미기':'Decorate the showcase',
+    '선반을 좌우로 밀어 작품을 크게 둘러보세요.':'Swipe the shelf to see larger views of your pieces.',
+    '이 모양으로':'With this shape', '다시 빚기':'Sculpt again', '자세히 보기':'View details',
+    '이름 없는 그릇':'Untitled pottery', '정말 이 작품을 깨뜨릴까요?':'Break this piece?',
+    '깨뜨린 작품은 복구할 수 없고 조각은 남아요.':'Breaking is permanent. The fragments will remain.',
+    '작품':'Artwork', '삭제하기':'Delete', '도자기를 잡고 위쪽 벽으로 빠르게 던져 주세요.':'Grab the piece and toss it quickly toward the upper wall.',
+    '저장한 작업 확인 중…':'Looking for saved work…', '튜토리얼로 돌아가기':'Return to tutorial', '하던 작업 이어하기':'Continue your work',
+    '기존 작품 가져오기':'Import earlier work', '주소가 바뀌었어요':'The address has changed',
+    '이전에 작품을 만든 기기와 브라우저에서 한 번만 가져오면 돼요. 새 주소에서 만든 작품도 함께 보관해요.':'Import once using the device and browser where you made your earlier pieces. Pieces made at the new address will also be kept.',
+    '붓으로 유약 칠하기를 골라 주세요':'Select Brush glaze', '바탕색 칠하기를 골라 주세요':'Select Base glaze',
+    '먼저 담그기를 켜 주세요':'Turn on Dip glaze first', '상단의 단면을 눌러 주세요':'Select Cross-section at the top',
+    '상단의 전체를 눌러 주세요':'Select Whole at the top', '안내선':'Guide', '안내선 표시':'Show guide',
+    '처음 빚기 진행':'Beginner tutorial progress',
+    '컵 안내선을 보며 옆면을 좌우로 끌어 전체 모양을 잡아요.':'Follow the cup outline as you drag the side left or right.'
+  });
+  var phaseNames={'빚기':'Shape','꾸미기':'Decorate','유약':'Glaze','굽기':'Fire','완성':'Finish'};
   var RX=[
+    [/^(\d+)\s*(빚기|꾸미기|유약|굽기|완성)( 단계로 이동)?$/,function(m){return m[3]?'Go to step '+m[1]+': '+phaseNames[m[2]]:'Step '+m[1]+': '+phaseNames[m[2]];}],
+    [/^(.+) (\d+)포인트$/,function(m){return one(m[1])+' · '+m[2]+' points';}],
     [/^(.+) 닮음 (\d+)%$/,function(m){return cap(name(m[1]))+" match "+m[2]+"%";}],
     [/^⚠ 흔들려요: (.+)$/,function(m){return "⚠ Wobbling: "+one(m[1]);}],
     [/^(.+) \(외워서\)$/,function(m){return cap(name(m[1]))+" (from memory)";}],
@@ -136,7 +304,7 @@ let initialSharedChallenge=takeSharedChallenge();
       if(HAN.test(n.nodeValue)&&!skip(n)){var t=T(n.nodeValue); if(t!==n.nodeValue){n.nodeValue=t;}}
     }else if(n.nodeType===1){
       if(skip(n))return;
-      ["placeholder","aria-label","title"].forEach(function(a){var v=n.getAttribute&&n.getAttribute(a); if(v&&HAN.test(v)){var translated=T(v);if(translated!==v)n.setAttribute(a,translated);}});
+      ["placeholder","aria-label","title","alt"].forEach(function(a){var v=n.getAttribute&&n.getAttribute(a); if(v&&HAN.test(v)){var translated=T(v);if(translated!==v)n.setAttribute(a,translated);}});
       for(var c=n.firstChild;c;c=c.nextSibling){fix(c);}
     }
   }
@@ -154,7 +322,7 @@ let initialSharedChallenge=takeSharedChallenge();
         else if(m.type==="attributes"){var v=m.target.getAttribute(m.attributeName); if(v&&HAN.test(v)&&!skip(m.target)){var translated=T(v);if(translated!==v)m.target.setAttribute(m.attributeName,translated);}}
         else{for(var j=0;j<m.addedNodes.length;j++){fix(m.addedNodes[j]);}}
       }
-    }).observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["placeholder","aria-label","title"]});
+    }).observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["placeholder","aria-label","title","alt"]});
     /* 한국 쇼핑몰 링크는 영어 화면에서 숨긴다 */
     var shop=document.getElementById("lNaver"); if(shop&&shop.closest("details")){shop.closest("details").hidden=true;}
   });
@@ -6960,7 +7128,7 @@ window.TODAK_FEEDBACK_CONFIG={
  close.onclick=function(){if(!busy)dialog.close();};dialog.addEventListener('cancel',function(e){if(busy)e.preventDefault();});dialog.addEventListener('click',function(e){var r=dialog.getBoundingClientRect();if(!busy&&e.target===dialog&&(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom))dialog.close();});
  message.addEventListener('input',function(){message.setCustomValidity('');count.value=message.value.length.toLocaleString('ko-KR')+' / 2,000';});
  form.addEventListener('submit',async function(e){
-  e.preventDefault();if(busy||imageBusy)return;var text=message.value.trim();if(text.length<5){message.setCustomValidity('의견을 5자 이상 적어 주세요.');message.reportValidity();return;}
+  e.preventDefault();if(busy||imageBusy)return;var text=message.value.trim();if(text.length<5){message.setCustomValidity(window.TODAK_T?.('의견을 5자 이상 적어 주세요.')||'의견을 5자 이상 적어 주세요.');message.reportValidity();return;}
   var config=window.TODAK_FEEDBACK_CONFIG;if(!config?.endpoint||!config.publicKey){status.textContent='지금은 보낼 수 없어요. 잠시 후 다시 시도해 주세요.';return;}
   var draft=JSON.stringify([category.value,text,attachment]);if(!requestId||draft!==lastDraft){requestId=uuid();lastDraft=draft;}
   busy=true;send.disabled=close.disabled=imageInput.disabled=document.getElementById('feedbackImageRemove').disabled=true;send.textContent='보내는 중…';status.textContent='';status.className='';
@@ -7254,6 +7422,7 @@ function freeReferenceTarget(){
  var style=document.createElement('style');style.textContent=`
  body.ui-tool-flow #ui-work-views #sheetViewBar::before{display:none}
  body.ui-tool-flow #ui-work-views .rotationControls::before{content:'돌리기';color:var(--ink);font-size:10px;font-weight:700;white-space:nowrap}
+ html[lang=en] body.ui-tool-flow #ui-work-views .rotationControls::before{content:'Rotate'}
  body.ui-tool-flow #ui-work-views .rotationControls{gap:3px!important}
  body.ui-tool-flow #ui-work-views .rotationControls button{display:flex;align-items:center;justify-content:center;gap:4px;font-size:22px!important;line-height:1!important;width:74px!important;min-width:74px!important;height:36px!important;padding:0 4px!important;border:1px solid var(--cobalt)!important;background:#e8edff!important;color:var(--cobalt)!important}.rotation-name{font-size:11px;font-weight:700}@media(max-width:959px){body.ui-tool-flow #ui-work-views .rotationControls button{width:34px!important;min-width:34px!important}.rotation-name{display:none}}
  body.ui-tool-flow #ui-work-views #sheetViewBar button{height:34px!important;min-height:34px!important;padding:4px 6px!important;font-weight:700!important;border:1px solid var(--line)!important;font-size:12px!important}
@@ -7566,7 +7735,7 @@ if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
 <script src="migration/transfer-core.js?v=fb1718e4f591"></script>
 <script src="migration/domain-transfer.js?v=2c957daad9b7"></script>
 <script src="renewal.js?v=4476c9dda374"></script>
-<script src="reference-layout.js?v=e4b47693296e"></script>
+<script src="reference-layout.js?v=9564db759c75"></script>
 <dialog id="privacyNotice" aria-labelledby="privacyNoticeTitle">
   <header>
     <h2 id="privacyNoticeTitle" data-keep>개인정보 안내</h2>
@@ -7582,11 +7751,11 @@ if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
   </div>
   <div lang="en" data-privacy-copy hidden>
     <p>No sign-in is needed. Your work and progress stay in this browser and do not sync across devices.</p>
-    <p><strong>Analytics</strong><br>We analyze visits, screen interactions and clicks to improve Todak. This may involve cookies.</p>
+    <p><strong>Home page views</strong><br>We count how many times the home page opens each day, without analytics cookies or visitor identifiers.</p>
     <p><strong>Feedback</strong><br>We use your feedback and attachments to improve Todak. We keep them for up to three months from receipt, then delete them.</p>
-    <p><strong>Image search</strong><br>If you search for similar pottery, an image of your work is sent to an external search service.</p>
+    <p><strong>AI pottery appraisal</strong><br>If you request an appraisal, Todak sends one image of your virtual pottery, its type, and its game grade to OpenAI to generate an appraisal comment.</p>
     <p>See the privacy policy for details.</p>
-    <p><a href="privacy.html">Read the privacy policy (Korean)</a></p>
+    <p><a href="privacy-en.html">Read the privacy policy</a></p>
   </div>
 </dialog>
 <script>
