@@ -3855,14 +3855,13 @@ function renderChSel(){
   var grid=$("chGrid"); grid.textContent="";
   press("tmode","bm",st.blind?1:0);
   CH_ORDER.forEach(function(id){
-    var T=TARGETS[id], b=document.createElement("button"), cnv=document.createElement("canvas"), nm=document.createElement("b"), stars=document.createElement("i"), n=document.createElement("small"), best=document.createElement("small");
+    var T=TARGETS[id], b=document.createElement("button"), cnv=document.createElement("canvas"), nm=document.createElement("b"), stars=document.createElement("i"), best=document.createElement("small");
     b.type="button"; b.className="chCard"; cnv.width=168; cnv.height=200; miniOutline(cnv,T);
     nm.textContent=T.name; stars.textContent="★★★".slice(0,CH_LV[id]); stars.setAttribute("aria-label","어려움 "+CH_LV[id]+"단계");
-    n.textContent="모양 잡기 "+T.n+"번";
     var bv=store.best[bestKey(id,st.blind)];
     var previousKey=id+(st.blind?"_b":"");var oldBest=store.best[previousKey+"_v2"]!=null?store.best[previousKey+"_v2"]:store.best[previousKey];
     best.className="best"; best.toggleAttribute("data-unplayed",bv==null&&oldBest==null); best.textContent=bv!=null?("내 최고 "+bv+"점"):(oldBest!=null?"이전 기준 "+oldBest+"점 · 새 기록에 도전":"아직 안 해 봤어요");
-    b.appendChild(cnv); b.appendChild(nm); b.appendChild(stars); b.appendChild(n); b.appendChild(best);
+    b.appendChild(cnv); b.appendChild(nm); b.appendChild(stars); b.appendChild(best);
     b.addEventListener("click",function(){startChallenge(id);});
     grid.appendChild(b);
   });
@@ -7935,8 +7934,8 @@ renderShelf=function(){
    tabs.querySelector('[data-bm="1"]').textContent=label('외워서','From memory');
    $('chSel').querySelector('.chRule').textContent=label('모양을 고른 뒤 난이도를 선택해요.','Pick a shape, then choose a difficulty.');
    grid.querySelector('.chSep')?.remove();grid.dataset.runMode=mode();
-   Array.from(grid.querySelectorAll('.chCard')).forEach((card,index)=>{
-     if(index>=CH_ORDER.length)return;
+   const shapeCards=Array.from(grid.querySelectorAll('.chCard')).slice(0,CH_ORDER.length);
+   shapeCards.forEach((card,index)=>{
      const id=CH_ORDER[index],kind=mode(),best=card.querySelector('.best');
      card.dataset.runTarget=id;card.classList.remove('master');
      const record=Math.max(0,...Object.keys(levels).map(level=>store.best[keyFor(id,kind,level)]||0));
@@ -7944,6 +7943,8 @@ renderShelf=function(){
      best.toggleAttribute('data-unplayed',!record&&old==null);
      best.textContent=record?label('내 최고 '+record+'점','Best '+record+' pts'):old!=null?label('이전 기록 '+old+'점','Previous best '+old+' pts'):label('아직 안 해 봤어요','Unplayed');
    });
+   shapeCards.sort((a,b)=>CH_LV[a.dataset.runTarget]-CH_LV[b.dataset.runTarget]);
+   grid.append(...shapeCards);
  };
  grid.addEventListener('click',event=>{
    const card=event.target.closest('[data-run-target]');
