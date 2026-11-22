@@ -157,6 +157,7 @@
   const homeShelf = id('goShelf');
   const homeFeedback = id('homeFeedback');
   const feedbackEntry = homeFeedback.closest('.feedback-home-entry');
+  const feedbackInvitation = id('feedbackInvitation');
   const homeFooter = home.querySelector('.homeFoot');
   const homeTutorial = id('goTutorial');
   const homeLinks = make('nav', 'ref-home-links');
@@ -178,25 +179,37 @@
   home.append(utility);
   homeFeedback.textContent = label('피드백 남기기', 'Leave feedback');
   const shelfLinks = make('div', 'ref-home-shelf-links');
-  shelfLinks.append(homeShelf, homeFeedback);
+  feedbackEntry.append(homeFeedback, feedbackInvitation);
+  shelfLinks.append(homeShelf, feedbackEntry);
   homeLinks.append(shelfLinks, id('goMarket'));
   const tutorialEntry = home.querySelector('.homeTutorialEntry');
   const homeActions = make('div', 'ref-home-actions');
   tutorialEntry.before(homeActions);
   homeActions.append(tutorialEntry, homeLinks);
   const saveNote = id('footSave');
-  const analyticsNote = id('footStat');
   const footerNote = make('p', 'ref-footer-note');
   const footerLinks = make('nav', 'ref-footer-links');
   footerLinks.setAttribute('aria-label', label('사이트 안내', 'Site information'));
   saveNote.textContent = label('로그인 없이 바로 써요. 구운 작품은 이 기기에만 저장돼요.', 'No sign-in needed. Fired work is saved on this device.');
-  analyticsNote.textContent = label(' 쿠키 없이 홈 조회수만 집계해요.', ' We count homepage views without analytics cookies.');
   id('footCopyright').textContent = label('© 2026 토닥', '© 2026 Todak');
-  footerNote.append(saveNote, analyticsNote);
+  footerNote.append(saveNote);
   footerLinks.append(...['footCopyright', 'privacyNoticeOpen', 'addHome', 'langBtn', 'contactA'].map(id));
   homeFooter.classList.add('ref-home-footer');
-  homeFooter.replaceChildren(id('feedbackInvitation'), footerNote, footerLinks);
-  feedbackEntry.remove();
+  homeFooter.replaceChildren(footerNote, footerLinks);
+  function alignFeedbackInvitation() {
+    if (feedbackInvitation.hidden || home.hidden) return;
+    const anchor = feedbackEntry.getBoundingClientRect();
+    const width = feedbackInvitation.offsetWidth;
+    const edge = 12;
+    const center = anchor.left + anchor.width / 2;
+    const left = Math.max(edge, Math.min(center - width / 2, document.documentElement.clientWidth - edge - width));
+    feedbackInvitation.style.left = `${left - anchor.left}px`;
+    feedbackInvitation.style.setProperty('--feedback-tail', `${center - left}px`);
+  }
+  const feedbackLayout = new ResizeObserver(alignFeedbackInvitation);
+  feedbackLayout.observe(feedbackInvitation);
+  feedbackLayout.observe(feedbackEntry);
+  window.addEventListener('resize', alignFeedbackInvitation);
   home.querySelector('.homeSub').textContent = label('흙을 토닥토닥, 빚고 꾸미고 구워요', 'Pat, shape, decorate and fire your clay.');
   id('goFree').querySelector(':scope > span').textContent = label('무너질 걱정 없이', 'Clay won’t collapse');
   id('goChallenge').querySelector(':scope > span').textContent = label('본을 따라 · 횟수 제한', 'Match a model · Limited moves');
@@ -216,6 +229,7 @@
     }
     id('tutorialEntryDescription').textContent = label('컵 하나를 빚으며 도구를 익혀요', 'Make a cup and learn the tools');
     homeTutorial.setAttribute('aria-label', title.textContent.replace(/NEW$/, ''));
+    alignFeedbackInvitation();
   }
   new MutationObserver(syncHomeEntry).observe(id('homeClose'), { attributes: true, attributeFilter: ['hidden'] });
   new MutationObserver(syncHomeEntry).observe(home, { attributes: true, attributeFilter: ['hidden'] });
@@ -728,7 +742,7 @@
   document.head.append(style);
   const fidelity = make('link', '');
   fidelity.rel = 'stylesheet';
-  fidelity.href = 'reference-fidelity.css?v=ba416b22459c';
+  fidelity.href = 'reference-fidelity.css?v=e737f54561c6';
   fidelity.onload = () => window.TodakResponsive.refresh();
   document.head.append(fidelity);
   document.body.classList.add('todak-reference');

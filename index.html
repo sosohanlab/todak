@@ -9,9 +9,9 @@
 <link rel="preload" as="image" href="renewal-assets/home-wheel-mobile.webp?v=8ebe34845837" media="(orientation: portrait) and (width < 600px)" fetchpriority="high">
 <link rel="preload" as="style" href="renewal.css?v=4399c89be0e0">
 <link rel="preload" as="style" href="reference-layout.css?v=887f063d5092">
-<link rel="preload" as="style" href="reference-fidelity.css?v=ba416b22459c">
+<link rel="preload" as="style" href="reference-fidelity.css?v=e737f54561c6">
 <link rel="preload" as="script" href="renewal.js?v=4476c9dda374">
-<link rel="preload" as="script" href="reference-layout.js?v=9564db759c75">
+<link rel="preload" as="script" href="reference-layout.js?v=a56daa142fd0">
 <title>토닥 · 온라인 도자기 공방</title>
 <meta name="description" content="화면에서 도자기를 빚고, 꾸미고, 가마에 구워 보는 공방 놀이. 본을 따라 빚는 도전도 있어요.">
 <meta property="og:title" content="토닥 · 온라인 도자기 공방">
@@ -108,7 +108,8 @@ let initialSharedChallenge=takeSharedChallenge();
     '도구 설정 접기':'Collapse tool settings', '제작 도구 설정':'Studio tool settings',
     '도구창 높이 · 위아래로 끌어 조절':'Tool panel height · drag to resize', '작품 정보 접기':'Collapse artwork details',
     '내 진열장 닫기':'Close my showcase', '완성한 작품 진열장':'Showcase of finished pieces',
-    '피드백 남기기':'Leave feedback', '피드백 창 닫기':'Close feedback',
+    '피드백 남기기':'Leave feedback', '피드백 창 닫기':'Close feedback', '피드백 안내 닫기':'Dismiss feedback invitation',
+    '개선했으면 하는 점이나 불편했던 부분이 있다면 피드백을 남겨 주세요.':'Tell us what could be better or what got in your way.',
     '남겨주신 의견과 첨부 이미지는 공개되지 않으며, 운영자만 확인할 수 있어요.':'Only the studio operator can see your feedback and attachments.',
     '서비스 개선을 위해 최대 3개월간 보관한 후 삭제해요.':'We keep them for up to three months to improve Todak, then delete them.',
     '어떤 의견인가요?':'What kind of feedback is this?', '개선 제안':'Suggestion', '오류 제보':'Bug report',
@@ -402,7 +403,6 @@ h1{font-family:var(--display);font-weight:700;font-size:24px;line-height:1;margi
 .toast.on{opacity:1}
 .shelf-legacy-notice{position:fixed;inset:auto 12px max(16px,env(safe-area-inset-bottom)) 12px;z-index:1000;display:flex;align-items:center;gap:12px;max-width:460px;margin-inline:auto;padding:10px 12px;border:1px solid #d3c5b5;border-radius:12px;background:#fff8ec;color:#292117;box-shadow:0 4px 18px #291f1830;font:500 15px/1.45 system-ui,sans-serif}
 .shelf-legacy-notice button{margin-inline-start:auto;flex:none;white-space:nowrap;padding:8px;min-height:44px}
-@media(max-width:600px) and (min-height:500px){body:has(#home:not([hidden]) #feedbackInvitation:not([hidden])) .shelf-legacy-notice{bottom:calc(190px + env(safe-area-inset-bottom, 0px))}}
 
 /* ---------- 조작판: 화면 아래 가운데에 놓인 작은 도구 상자. 평소엔 도구 한 줄만 보이고, 펼치면 나머지가 나온다 ---------- */
 .sheet{
@@ -843,9 +843,19 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 @keyframes appraisal-landing { 35% { transform:translate(2px,1px); } 60% { transform:translate(-2px,0); } }
 @keyframes appraisal-grade { 50% { filter:brightness(1.22); } }
 @media(prefers-reduced-motion:reduce) { [data-appraisal-reveal="stamping"] :is(.appraisal-card,.appraisal-seal,#appraisalGrade) { animation:none; } }
-.appraisal-actions { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:9px; margin:0 4px; }
+.appraisal-actions { display:grid; margin:0 4px; }
 .appraisal-actions button { min-height:55px; padding:8px 14px; line-height:1.3; font-weight:800; border-radius:16px; }
-.appraisal-actions #retryAppraisal { border-radius:999px; background:#fff; }
+#searchDlg .appraisal-export { margin:10px 4px 0; padding:12px; border-radius:14px; background:#f0e7d9; }
+#searchDlg .appraisal-export p { margin:0; color:#604a38; font-size:13px; line-height:1.45; }
+#searchDlg .appraisal-export-controls { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+#searchDlg .appraisal-export-controls:not([hidden]) > :is(a,button):not([hidden]) {
+  display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:6px 12px;
+  border:1px solid #d5bfaa; border-radius:12px; background:#fff; color:#213eaa; font-weight:750;
+}
+#searchDlg .appraisal-export details { margin-top:8px; }
+#searchDlg .appraisal-export summary { cursor:pointer; color:#213eaa; font-size:13px; }
+#searchDlg .appraisal-export details p { margin-top:6px; }
+#searchDlg .appraisal-export details img { display:block; width:min(100%,360px); height:auto; margin:8px auto 0; border-radius:10px; }
 #searchDlg #appraisalDisclaimer { display:block; text-align:center; margin-top:9px; color:#775e4b; font-size:11px; }
 #searchDlg #searchStatus:empty { display:none; }
 @media (max-width:620px) {
@@ -1129,7 +1139,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
       <button type="button" class="bigBtn alt" id="goChallenge"><b>도전하기</b><span>본을 따라 빚어요. 횟수 제한이 있고, 두께 0.5cm 이하면 무너져요.</span></button>
       <button type="button" class="bigBtn plain" id="goShelf"><b>내 진열장</b><span id="homeShelfN">구운 작품 0점</span></button>
       <button type="button" class="ghost" id="homeClose" hidden>하던 작업으로 돌아가기</button>
-      <div class="homeFoot"><span id="footSave">로그인 없이 바로 써요. 구운 작품은 이 기기에만 저장돼요.</span><span id="footStat"> 쿠키 없이 홈 조회수만 집계해요.</span><br>
+      <div class="homeFoot"><span id="footSave">로그인 없이 바로 써요. 구운 작품은 이 기기에만 저장돼요.</span><br>
         <span id="footCopyright">© 2026 토닥</span><a id="contactA" target="_blank" rel="noopener" hidden>문의</a><button type="button" id="addHome" hidden>홈 화면에 추가</button><button type="button" id="privacyNoticeOpen">개인정보 안내</button><button type="button" id="langBtn" data-keep>English</button></div>
       <p class="homeFoot" id="addHomeTip" hidden></p>
     </div>
@@ -1200,7 +1210,19 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
             </div>
           </div>
           <p class="appraisal-comment" id="appraisalComment"></p>
-          <div class="appraisal-actions"><button type="button" class="primary" id="saveAppraisal">감정서 저장 · 공유</button><button type="button" class="ghost" id="retryAppraisal">다시 감정받기</button></div>
+          <div class="appraisal-actions"><button type="button" class="primary" id="saveAppraisal" aria-controls="appraisalExport" aria-expanded="false">감정서 저장 · 공유</button></div>
+          <section class="appraisal-export" id="appraisalExport" aria-label="감정서 저장 및 공유" hidden>
+            <p id="appraisalExportStatus" role="status"></p>
+            <div class="appraisal-export-controls" id="appraisalExportControls" hidden>
+              <a id="downloadAppraisal" download>PNG 저장</a>
+              <button type="button" id="shareAppraisal" hidden>공유하기</button>
+            </div>
+            <details id="appraisalExportDetails" hidden>
+              <summary id="appraisalExportSummary">이미지 열기</summary>
+              <p id="appraisalExportHelp">다운로드가 안 되면 이미지를 길게 누르거나 오른쪽 클릭해서 저장할 수 있어요.</p>
+              <img id="appraisalExportImage" alt="저장할 토닥 감정서">
+            </details>
+          </section>
           <small id="appraisalDisclaimer">재미로 보는 AI 감정이에요.</small>
         </article>
       </div>
@@ -4569,9 +4591,13 @@ cv.addEventListener("wheel",function(e){
 })();
 /* Finished-photo controls and AI pottery appraisal. */
 (function(){
-  var controller=null, appraisalEpoch=0, previousAngle;
+  var controller=null, appraisalEpoch=0;
   var button=$('searchImage'), status=$('searchStatus'), card=$('imageMatches'), close=$('closeSearch');
   var dialog=$('searchDlg'), panel=dialog.querySelector('.searchIn'), loadingImage=$('appraisalLoadingImage');
+  var save=$('saveAppraisal'), exportSection=$('appraisalExport'), exportStatus=$('appraisalExportStatus');
+  var exportControls=$('appraisalExportControls'), exportDetails=$('appraisalExportDetails');
+  var download=$('downloadAppraisal'), share=$('shareAppraisal'), exportImage=$('appraisalExportImage');
+  var exportUrl=null, exportFile=null;
   var types={
     cup:['컵·잔','Cup'],bowl:['사발·면기','Bowl'],plate:['접시','Plate'],
     dish:['작은 종지','Small dish'],vase:['화병','Vase'],jar:['항아리·병','Jar or bottle'],object:['도자기 오브제','Ceramic object']
@@ -4598,9 +4624,22 @@ cv.addEventListener("wheel",function(e){
     $('appraisalScoreTitle').textContent=label('왜 이 등급?','Why this grade?');
     $('appraisalSealLabel').textContent=label('토닥 감정원','TODAK');
     $('appraisalSeal').textContent=label('감정필','APPRAISED');
-    $('saveAppraisal').textContent=label('감정서 저장 · 공유','Save or share');
-    $('retryAppraisal').textContent=label('다시 감정받기','Appraise again');
+    save.textContent=label('감정서 저장 · 공유','Save or share');
+    exportSection.setAttribute('aria-label',label('감정서 저장 및 공유','Save or share the appraisal'));
+    download.textContent=label('PNG 저장','Save PNG');
+    share.textContent=label('공유하기','Share');
+    $('appraisalExportSummary').textContent=label('이미지 열기','View image');
+    $('appraisalExportHelp').textContent=label('다운로드가 안 되면 이미지를 길게 누르거나 오른쪽 클릭해서 저장할 수 있어요.','If the download does not start, touch and hold or right-click the image to save it.');
+    exportImage.alt=label('저장할 토닥 감정서','Todak appraisal ready to save');
     $('appraisalDisclaimer').textContent=label('재미로 보는 AI 감정이에요.','An AI appraisal for fun.');
+  }
+  function resetAppraisalExport(){
+    if(exportUrl){URL.revokeObjectURL(exportUrl);exportUrl=null;}
+    exportFile=null;
+    download.removeAttribute('href');exportImage.removeAttribute('src');
+    exportSection.hidden=exportControls.hidden=exportDetails.hidden=share.hidden=true;
+    exportDetails.open=false;save.disabled=false;save.setAttribute('aria-expanded','false');
+    exportStatus.textContent='';
   }
   function show(state){
     panel.dataset.appraisalState=state;
@@ -4698,7 +4737,7 @@ cv.addEventListener("wheel",function(e){
   $('resetPhoto').addEventListener('click',function(){if(window.TodakRealPhoto)TodakRealPhoto.live();Z=1;CX=CX0;BASE=BASE0;SV=S0*V;rot=rotTarget=0;dirty=cardDirty=true;});
   window.resetPotteryAppraisal=function(){
     appraisalEpoch++;controller?.abort();controller=null;
-    previousAngle=undefined;
+    resetAppraisalExport();
     loadingImage.hidden=true;loadingImage.removeAttribute('src');
     $('searchPreview').removeAttribute('src');status.textContent='';button.disabled=false;show('ready');
   };
@@ -4707,7 +4746,7 @@ cv.addEventListener("wheel",function(e){
   $('openSearch').addEventListener('click',openSearch);$('closeSearch').addEventListener('click',closeSearch);
   $('searchDlg').addEventListener('click',function(e){if(e.target===this)closeSearch();});
   document.addEventListener('keydown',function(e){if($('searchDlg').hidden)return;if(e.key==='Escape'){e.preventDefault();closeSearch();}else if(e.key==='Tab'){
-    var controls=Array.from(dialog.querySelectorAll('button:not([disabled])')).filter(function(el){return !el.closest('[hidden]')&&getComputedStyle(el).visibility==='visible';});
+    var controls=Array.from(dialog.querySelectorAll('button:not([disabled]),a[href],summary')).filter(function(el){return !el.closest('[hidden]')&&getComputedStyle(el).visibility==='visible';});
     var first=controls[0],last=controls[controls.length-1];
     if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
   }});
@@ -4739,80 +4778,103 @@ cv.addEventListener("wheel",function(e){
   });
   var previousStage=setStage;
   setStage=function(stage){$('searchDlg').hidden=true;if(stage!=='done'||controller)window.resetPotteryAppraisal();previousStage(stage);};
-  $('retryAppraisal').addEventListener('click',requestAppraisal);
   button.addEventListener('click',requestAppraisal);
-  $('saveAppraisal').addEventListener('click',async function(){
-    var save=this, photo=$('searchPreview');
-    if(!photo.naturalWidth)return;
+  async function makeAppraisalPng(photo){
+    if(!photo.naturalWidth)await photo.decode();
+    var canvas=document.createElement('canvas');
+    canvas.width=900;canvas.height=3200;
+    var ctx=canvas.getContext('2d');
+    ctx.textBaseline='top';
+    ctx.fillStyle='#faf4ea';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='#392517';ctx.font='bold 50px serif';
+    ctx.textAlign='center';ctx.fillText($('searchHeading').textContent,450,46);
+    ctx.textAlign='left';
+    ctx.strokeStyle='#dcc5ab';ctx.lineWidth=2;
+    ctx.drawImage(photo,270,153,360,360);
+    ctx.save();
+    ctx.translate(611,495);ctx.rotate(-Math.PI/12);
+    ctx.globalAlpha=.86;ctx.globalCompositeOperation='multiply';ctx.strokeStyle='#a83126';ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(0,0,48,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.arc(0,0,42,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='#b64035';ctx.textAlign='center';
+    ctx.font='bold 13px serif';ctx.fillText($('appraisalSealLabel').textContent,0,-17,73);
+    ctx.font='bold 22px serif';ctx.fillText($('appraisalSeal').textContent,0,-1,73);
+    ctx.restore();
+    var y=544;
+    function line(text,font,color,step){
+      ctx.font=font;ctx.fillStyle=color;
+      var part='';
+      for(var char of text){
+        if(part&&ctx.measureText(part+char).width>724){ctx.fillText(part,88,y);y+=step;part='';}
+        part+=char;
+      }
+      if(part){ctx.fillText(part,88,y);y+=step;}
+    }
+    function field(key,value,font,color,step){
+      line($(key).textContent,'bold 23px sans-serif','#775e4b',33);
+      line(value,font,color,step);y+=14;
+    }
+    field('appraisalWorkLabel',$('appraisalWork').textContent,'bold 34px sans-serif','#392517',42);
+    field('appraisalStyleLabel',$('appraisalStyle').textContent,'bold 35px serif','#28685c',43);
+    line($('appraisalGrade').textContent,'bold 26px sans-serif','#503929',38);
+    field('appraisalPriceLabel',$('appraisalPrice').textContent,'bold 51px sans-serif','#213eaa',59);
+    line($('appraisalBuns').textContent,'bold 25px sans-serif','#503929',36);
+    line($('appraisalScoreTitle').textContent,'bold 23px sans-serif','#503929',32);
+    line(Array.from($('appraisalScores').children,function(item){return item.textContent;}).join(' · '),'23px sans-serif','#503929',33);
+    y+=24;
+    line($('appraisalComment').textContent,'bold 31px sans-serif','#392517',43);
+    line($('appraisalDisclaimer').textContent,'21px sans-serif','#775e4b',30);
+    ctx.strokeRect(39,123,822,y-109);ctx.strokeRect(46,130,808,y-123);
+    var exportCanvas=document.createElement('canvas');
+    exportCanvas.width=900;exportCanvas.height=y+48;
+    exportCanvas.getContext('2d').drawImage(canvas,0,0);
+    return new Promise(function(resolve){exportCanvas.toBlob(resolve,'image/png');});
+  }
+  save.addEventListener('click',async function(){
+    var epoch=appraisalEpoch;
+    exportSection.hidden=false;
+    save.setAttribute('aria-expanded','true');
+    exportSection.scrollIntoView({block:'nearest'});
+    if(exportUrl){download.focus({preventScroll:true});return;}
     save.disabled=true;
+    exportStatus.textContent=label('감정서 이미지를 준비하고 있어요.','Preparing the appraisal image…');
     try{
-      var canvas=document.createElement('canvas');
-      canvas.width=900;canvas.height=3200;
-      var ctx=canvas.getContext('2d');
-      ctx.textBaseline='top';
-      ctx.fillStyle='#faf4ea';ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.fillStyle='#392517';ctx.font='bold 50px serif';
-      ctx.textAlign='center';ctx.fillText($('searchHeading').textContent,450,46);
-      ctx.textAlign='left';
-      ctx.strokeStyle='#dcc5ab';ctx.lineWidth=2;
-      ctx.drawImage(photo,270,153,360,360);
-      ctx.save();
-      ctx.translate(611,495);ctx.rotate(-Math.PI/12);
-      ctx.globalAlpha=.86;ctx.globalCompositeOperation='multiply';ctx.strokeStyle='#a83126';ctx.lineWidth=3;
-      ctx.beginPath();ctx.arc(0,0,48,0,Math.PI*2);ctx.stroke();
-      ctx.beginPath();ctx.arc(0,0,42,0,Math.PI*2);ctx.stroke();
-      ctx.fillStyle='#b64035';ctx.textAlign='center';
-      ctx.font='bold 13px serif';ctx.fillText($('appraisalSealLabel').textContent,0,-17,73);
-      ctx.font='bold 22px serif';ctx.fillText($('appraisalSeal').textContent,0,-1,73);
-      ctx.restore();
-      var y=544;
-      function line(text,font,color,step){
-        ctx.font=font;ctx.fillStyle=color;
-        var part='';
-        for(var char of text){
-          if(part&&ctx.measureText(part+char).width>724){ctx.fillText(part,88,y);y+=step;part='';}
-          part+=char;
-        }
-        if(part){ctx.fillText(part,88,y);y+=step;}
-      }
-      function field(key,value,font,color,step){
-        line($(key).textContent,'bold 23px sans-serif','#775e4b',33);
-        line(value,font,color,step);y+=14;
-      }
-      field('appraisalWorkLabel',$('appraisalWork').textContent,'bold 34px sans-serif','#392517',42);
-      field('appraisalStyleLabel',$('appraisalStyle').textContent,'bold 35px serif','#28685c',43);
-      line($('appraisalGrade').textContent,'bold 26px sans-serif','#503929',38);
-      field('appraisalPriceLabel',$('appraisalPrice').textContent,'bold 51px sans-serif','#213eaa',59);
-      line($('appraisalBuns').textContent,'bold 25px sans-serif','#503929',36);
-      line($('appraisalScoreTitle').textContent,'bold 23px sans-serif','#503929',32);
-      line(Array.from($('appraisalScores').children,function(item){return item.textContent;}).join(' · '),'23px sans-serif','#503929',33);
-      y+=24;
-      line($('appraisalComment').textContent,'bold 31px sans-serif','#392517',43);
-      line($('appraisalDisclaimer').textContent,'21px sans-serif','#775e4b',30);
-      ctx.strokeRect(39,123,822,y-109);ctx.strokeRect(46,130,808,y-123);
-      var exportCanvas=document.createElement('canvas');
-      exportCanvas.width=900;exportCanvas.height=y+48;
-      exportCanvas.getContext('2d').drawImage(canvas,0,0);
-      var blob=await new Promise(function(resolve){exportCanvas.toBlob(resolve,'image/png');});
+      var blob=await makeAppraisalPng($('searchPreview'));
+      if(epoch!==appraisalEpoch)return;
       if(!blob)throw Error('export');
       var name=label('토닥-감정서.png','Todak-appraisal.png');
-      var file=new File([blob],name,{type:blob.type});
-      if(navigator.share&&navigator.canShare?.({files:[file]})){
-        try{await navigator.share({files:[file]});return;}
-        catch(error){if(error.name==='AbortError')return;}
+      exportUrl=URL.createObjectURL(blob);
+      download.href=exportImage.src=exportUrl;
+      download.download=name;
+      if(navigator.share&&navigator.canShare&&typeof File==='function'){
+        try{
+          var file=new File([blob],name,{type:blob.type});
+          if(navigator.canShare({files:[file]})){exportFile=file;share.hidden=false;}
+        }catch(_){}
       }
-      var url=URL.createObjectURL(blob),link=document.createElement('a');
-      link.href=url;link.download=name;document.body.append(link);link.click();link.remove();
-      setTimeout(function(){URL.revokeObjectURL(url);},30000);
+      exportControls.hidden=exportDetails.hidden=false;
+      exportStatus.textContent=label('감정서를 PNG로 저장할 수 있어요.','Your appraisal is ready to save as a PNG.');
+      if(!dialog.hidden)download.focus();
     }catch(error){
-      status.textContent=label('감정서를 저장하지 못했어요. 다시 시도해 주세요.','Could not save the appraisal. Try again.');
-    }finally{save.disabled=false;}
+      if(epoch===appraisalEpoch)exportStatus.textContent=label('감정서 이미지를 만들지 못했어요. 다시 눌러 주세요.','Could not prepare the appraisal image. Try again.');
+    }finally{if(epoch===appraisalEpoch)save.disabled=false;}
+  });
+  share.addEventListener('click',async function(){
+    if(!exportFile)return;
+    var epoch=appraisalEpoch;
+    try{await navigator.share({files:[exportFile]});}
+    catch(error){
+      if(epoch!==appraisalEpoch||error.name==='AbortError')return;
+      exportStatus.textContent=label('공유창을 열 수 없어요. PNG 저장을 이용해 주세요.','Sharing is unavailable here. You can still save the PNG.');
+      download.focus();
+    }
   });
   async function requestAppraisal(){
     var endpoint=window.TODAK_CONFIG?.appraisalEndpoint;
     if(!endpoint){status.textContent=label('AI 감정 연결을 준비 중이에요.','AI appraisal is getting ready.');return;}
     if(controller)return;
     var epoch=++appraisalEpoch;
+    resetAppraisalExport();
     var item=curItem();
     var workName=st.name||item?.name||label('나의 도자기','My pottery');
     var assessment=item?.appraisal?.version===1?item.appraisal:assessAppraisal();
@@ -4833,12 +4895,11 @@ cv.addEventListener("wheel",function(e){
       if(epoch!==appraisalEpoch)return;
       if(controller.signal.aborted)throw Error('unavailable');
       loadingImage.src=image;loadingImage.hidden=false;
-      var response=await fetch(endpoint,{method:'POST',credentials:'omit',referrerPolicy:'no-referrer',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:image,language:window.TODAK_LANG==='en'?'en':'ko',previousAngle:previousAngle,kind:assessment.kind,grade:assessment.grade}),signal:controller.signal});
+      var response=await fetch(endpoint,{method:'POST',credentials:'omit',referrerPolicy:'no-referrer',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:image,language:window.TODAK_LANG==='en'?'en':'ko',kind:assessment.kind,grade:assessment.grade}),signal:controller.signal});
       var data=await response.json();
       if(epoch!==appraisalEpoch)return;
       if(!response.ok)throw Error(data.error||'unavailable');
       if(typeof data.comment!=='string'||!data.comment.trim())throw Error('unavailable');
-      if(Number.isInteger(data.angle))previousAngle=data.angle;
       clearTimeout(timeout);
       if(motion)await appraisalPause(Math.max(0,3000-(performance.now()-began)),signal);
       $('searchPreview').src=image;
@@ -7735,7 +7796,7 @@ if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
 <script src="migration/transfer-core.js?v=fb1718e4f591"></script>
 <script src="migration/domain-transfer.js?v=2c957daad9b7"></script>
 <script src="renewal.js?v=4476c9dda374"></script>
-<script src="reference-layout.js?v=9564db759c75"></script>
+<script src="reference-layout.js?v=a56daa142fd0"></script>
 <dialog id="privacyNotice" aria-labelledby="privacyNoticeTitle">
   <header>
     <h2 id="privacyNoticeTitle" data-keep>개인정보 안내</h2>

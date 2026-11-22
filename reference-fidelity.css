@@ -994,13 +994,32 @@ html[lang=en] .todak-reference.ref-firing #sheet:has(#fs-prep:not([hidden])) #sh
   word-break: keep-all;
 }
 .todak-reference #home .ref-home-footer #footSave { display: inline; margin: 0; }
-.todak-reference #home .ref-home-footer #feedbackInvitation {
-  margin: 0;
-  background: transparent;
-  border: 0;
-  box-shadow: none;
+.todak-reference #home .ref-home-shelf-links .feedback-home-entry {
+  position: relative;
+  display: inline-flex;
+  width: auto;
+  flex: 0 0 auto;
 }
-.todak-reference #home .ref-home-footer #feedbackInvitation::after { content: none; }
+.todak-reference #home .feedback-home-entry #feedbackInvitation {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + 9px);
+  width: min(260px, calc(100vw - 24px));
+  margin: 0;
+  background: #fff8ed;
+  border-color: #dec9b0;
+  box-shadow: var(--ref-shadow);
+  pointer-events: auto;
+}
+.todak-reference #home .feedback-home-entry #feedbackInvitation::after {
+  top: -6px;
+  bottom: auto;
+  left: calc(var(--feedback-tail, 50%) - 5px);
+  background: #fff8ed;
+  border: 0;
+  border-top: 1px solid #dec9b0;
+  border-left: 1px solid #dec9b0;
+}
 .todak-reference #home .ref-footer-links {
   display: flex;
   flex-wrap: wrap;
@@ -1396,8 +1415,8 @@ html[lang=en] .todak-reference.ref-firing #sheet:has(#fs-prep:not([hidden])) #sh
 .todak-reference #home .ref-home-links { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .todak-reference #home .ref-home-shelf-links { display: flex; align-items: center; gap: 6px; }
 .todak-reference #home { --ref-home-link-size: 12px; }
-.todak-reference #home :is(.ref-home-links button, .homeTutorialEntry #goTutorial) { min-height: 35px; }
-.todak-reference #home .ref-home-links button {
+.todak-reference #home :is(.ref-home-links button:where(:not(#feedbackInvitationClose)), .homeTutorialEntry #goTutorial) { min-height: 35px; }
+.todak-reference #home .ref-home-links button:where(:not(#feedbackInvitationClose)) {
   position: static;
   padding: 5px 10px;
   width: auto;
@@ -1531,7 +1550,7 @@ body.todak-reference #tutorialCoach #tutorialSkip { display: block !important; }
   .todak-reference .ref-toolbar .ref-rotation button { width: 26px; height: 28px; }
   .todak-reference .ref-toolbar .ref-rotation { gap: 2px; }
   .todak-reference.ref-finished .ref-toolbar { column-gap: 3px; }
-  .todak-reference #home .ref-home-links button { padding-inline: 8px; }
+  .todak-reference #home .ref-home-links button:where(:not(#feedbackInvitationClose)) { padding-inline: 8px; }
 }
 @media (max-width: 359px) {
   .todak-reference.ref-finished .ref-toolbar .ref-rotation button { width: 24px; }
