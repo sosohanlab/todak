@@ -317,9 +317,9 @@
     for (const stars of challengeGrid.querySelectorAll('.chCard i:not([data-ref-stars])')) {
       const filled = stars.textContent.length;
       stars.dataset.refStars = '';
+      if (stars.closest('[data-run-target]')) continue;
       const remaining = make('span', 'ref-star-rest');
-      const maximum = stars.closest('[data-run-target]') ? 3 : 4;
-      remaining.textContent = '★'.repeat(Math.max(0, maximum - filled));
+      remaining.textContent = '★'.repeat(Math.max(0, 4 - filled));
       remaining.setAttribute('aria-hidden', 'true');
       stars.append(remaining);
     }

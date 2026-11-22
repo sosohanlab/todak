@@ -11,7 +11,7 @@
 <link rel="preload" as="style" href="reference-layout.css?v=887f063d5092">
 <link rel="preload" as="style" href="reference-fidelity.css?v=78a629446bc5">
 <link rel="preload" as="script" href="renewal.js?v=4476c9dda374">
-<link rel="preload" as="script" href="reference-layout.js?v=c099d3f4a5c8">
+<link rel="preload" as="script" href="reference-layout.js?v=7c7381e51285">
 <title>토닥 · 온라인 도자기 공방</title>
 <meta name="description" content="화면에서 도자기를 빚고, 꾸미고, 가마에 구워 보는 공방 놀이. 본을 따라 빚는 도전도 있어요.">
 <meta property="og:title" content="토닥 · 온라인 도자기 공방">
@@ -7862,18 +7862,17 @@ renderShelf=function(){
 /* Built-in shaping challenges share one clock across all sculpting tools. */
 (function(){
  const levels={
-   easy:{ko:'쉬움',en:'Easy',seconds:200,preview:12},
-   normal:{ko:'보통',en:'Normal',seconds:180,preview:8},
-   hard:{ko:'어려움',en:'Hard',seconds:120,preview:5}
+   easy:{ko:'쉬움',en:'Easy',seconds:165,preview:12},
+   normal:{ko:'보통',en:'Normal',seconds:135,preview:8},
+   hard:{ko:'어려움',en:'Hard',seconds:105,preview:5}
  };
  const label=(ko,en)=>window.TODAK_LANG==='en'?en:ko;
  const tabs=$('tmode'), rules=$('chRules'), grid=$('chGrid');
  const mode=()=>blindPref?'memory':'timed';
- const shortTimes={easy:165,normal:135,hard:105};
  const timing=(id,difficulty,kind)=>{
    const level=levels[difficulty];
    if(kind==='memory')return level.preview;
-   const seconds=CH_LV[id]===1?shortTimes[difficulty]:level.seconds;
+   const seconds=level.seconds+20*((CH_LV[id]||1)-1);
    return seconds+(matchMedia('(pointer: coarse)').matches?20:0);
  };
  const timeText=seconds=>Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');
@@ -7939,7 +7938,7 @@ renderShelf=function(){
    Array.from(grid.querySelectorAll('.chCard')).forEach((card,index)=>{
      if(index>=CH_ORDER.length)return;
      const id=CH_ORDER[index],kind=mode(),best=card.querySelector('.best');
-     card.dataset.runTarget=id;card.classList.remove('master');if(id!=='plate')card.querySelector('i').remove();
+     card.dataset.runTarget=id;card.classList.remove('master');
      const record=Math.max(0,...Object.keys(levels).map(level=>store.best[keyFor(id,kind,level)]||0));
      const old=store.best[bestKey(id,kind==='memory')];
      best.toggleAttribute('data-unplayed',!record&&old==null);
@@ -8093,7 +8092,7 @@ if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
 <script src="migration/transfer-core.js?v=fb1718e4f591"></script>
 <script src="migration/domain-transfer.js?v=2c957daad9b7"></script>
 <script src="renewal.js?v=4476c9dda374"></script>
-<script src="reference-layout.js?v=c099d3f4a5c8"></script>
+<script src="reference-layout.js?v=7c7381e51285"></script>
 <dialog id="privacyNotice" aria-labelledby="privacyNoticeTitle">
   <header>
     <h2 id="privacyNoticeTitle" data-keep>개인정보 안내</h2>
