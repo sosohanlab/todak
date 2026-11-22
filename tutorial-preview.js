@@ -88,7 +88,8 @@
     dialog.toggleAttribute('data-touch-clip', touchClip);
     const nameOnDisk = touchClip ? name + '-touch' : name;
     const version = name === 'thick' ? '?v=outward-wall' : name === 'controls' ? '?v=2' : '';
-    sample.src = asset + nameOnDisk + (playing ? '-demo' : '-still') + '.webp' + version;
+    const languagePath = english && !touchClip ? 'en/' : '';
+    sample.src = asset + languagePath + nameOnDisk + (playing ? '-demo' : '-still') + '.webp' + version;
     mediaToggle.textContent = playing ? 'Ⅱ' : '▶';
     mediaToggle.setAttribute('aria-label', playing ? text('시연 일시정지', 'Pause demonstration') : text('시연 재생', 'Play demonstration'));
   }
