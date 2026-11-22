@@ -9,9 +9,9 @@
 <link rel="preload" as="image" href="renewal-assets/home-wheel-mobile.webp?v=8ebe34845837" media="(orientation: portrait) and (width < 600px)" fetchpriority="high">
 <link rel="preload" as="style" href="renewal.css?v=4399c89be0e0">
 <link rel="preload" as="style" href="reference-layout.css?v=887f063d5092">
-<link rel="preload" as="style" href="reference-fidelity.css?v=e43351ac17ab">
+<link rel="preload" as="style" href="reference-fidelity.css?v=78a629446bc5">
 <link rel="preload" as="script" href="renewal.js?v=4476c9dda374">
-<link rel="preload" as="script" href="reference-layout.js?v=d77d5b7b6e2e">
+<link rel="preload" as="script" href="reference-layout.js?v=a11e68a58132">
 <title>토닥 · 온라인 도자기 공방</title>
 <meta name="description" content="화면에서 도자기를 빚고, 꾸미고, 가마에 구워 보는 공방 놀이. 본을 따라 빚는 도전도 있어요.">
 <meta property="og:title" content="토닥 · 온라인 도자기 공방">
@@ -3825,7 +3825,13 @@ function closeOverlays(){
   window.TodakToolImages?.activate(st.stage);
 }
 function startFree(createModel){st.creatingChallengeModel=createModel===true;st.target=""; setSec(false); freshClay(); closeOverlays(); startSculpting();}
-function startChallenge(id){st.creatingChallengeModel=false;st.target=id; freshClay(); closeOverlays(); syncControls(); startSculpting();}
+function preparePlateClay(){
+  var foot=TARGETS.plate.f(0);
+  st.radii=st.radii.map(function(_,i){return foot-.55*i/(N-1);});
+  st.height=st.floor=TARGETS.plate.h+.5;
+  dirty=true;
+}
+function startChallenge(id){st.creatingChallengeModel=false;st.target=id; freshClay();if(id==='plate')preparePlateClay();closeOverlays();syncControls();startSculpting();}
 function showHome(canClose){
   document.documentElement.removeAttribute("data-todak-workshop");
   $("homeShelfN").textContent="구운 작품 "+store.items.length+"점";
@@ -7354,7 +7360,7 @@ function freeReferenceTarget(){
  'use strict';
  var dialog=document.createElement('dialog');dialog.id='freeReferenceDialog';dialog.setAttribute('aria-labelledby','freeReferenceTitle');dialog.innerHTML='<header><h2 id="freeReferenceTitle">어떻게 빚을까요?</h2><button type="button" class="ghost" id="freeReferenceClose">닫기</button></header><p>본 없이 만들거나, 참고할 형태의 안내선을 보며 빚어요. 점수와 횟수 제한은 없어요.</p><button type="button" class="primary" id="freeReferenceNone">본 없이 자유롭게 빚기</button><h3>형태를 보며 빚기</h3><div id="freeReferenceBuiltins" class="free-reference-grid"></div><h3>내가 만든 형태</h3><div id="freeReferencePersonal" class="free-reference-grid"></div>';document.body.append(dialog);
  function refresh(){sync();updateReadout();dirty=true;}
- function select(id){var T=TARGETS[id];if(!T)return;var reference={id:id,name:T.name,h:T.h,r:Array.from({length:N},function(_,i){return T.f(i/(N-1));})};startFree();st.freeReference=reference;st.freeReferenceVisible=true;dialog.close();refresh();}
+ function select(id){var T=TARGETS[id];if(!T)return;var reference={id:id,name:T.name,h:T.h,r:Array.from({length:N},function(_,i){return T.f(i/(N-1));})};startFree();if(id==='plate')preparePlateClay();st.freeReference=reference;st.freeReferenceVisible=true;dialog.close();refresh();}
  function card(host,id){var T=TARGETS[id];if(!T)return;var b=document.createElement('button');b.type='button';b.className='free-reference-card';b.dataset.reference=id;var canvas=document.createElement('canvas');canvas.width=84;canvas.height=90;canvas.setAttribute('aria-hidden','true');miniOutline(canvas,T);var name=document.createElement('b');name.textContent=T.name;var size=document.createElement('small');size.textContent='높이 '+T.h.toFixed(1)+'cm';b.append(canvas,name,size);b.onclick=function(){select(id);};host.append(b);}
  async function open(){
   if(dialog.open)return;
@@ -8076,7 +8082,7 @@ if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
 <script src="migration/transfer-core.js?v=fb1718e4f591"></script>
 <script src="migration/domain-transfer.js?v=2c957daad9b7"></script>
 <script src="renewal.js?v=4476c9dda374"></script>
-<script src="reference-layout.js?v=d77d5b7b6e2e"></script>
+<script src="reference-layout.js?v=a11e68a58132"></script>
 <dialog id="privacyNotice" aria-labelledby="privacyNoticeTitle">
   <header>
     <h2 id="privacyNoticeTitle" data-keep>개인정보 안내</h2>

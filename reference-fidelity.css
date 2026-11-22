@@ -900,7 +900,6 @@ html[lang=en] .todak-reference.ref-firing #sheet:has(#fs-prep:not([hidden])) #sh
   .todak-reference #personalChallengeImportDialog { --dialog-h: 272; }
   .todak-reference #refLessonCard { --dialog-w: 370; --dialog-h: 444; }
   .todak-reference #chSel .shelfHead { flex-wrap: wrap; gap: 7px; }
-  .todak-reference #chSel #tmode { order: 2; }
   .todak-reference #chRules .ref-rule-summary > p { min-height: 90px; font-size: .81rem; }
   .todak-reference #chRules #crGo { min-height: 52px; }
 }
@@ -1237,7 +1236,6 @@ html[lang=en] .todak-reference.ref-firing #sheet:has(#fs-prep:not([hidden])) #sh
   .todak-reference #freeReferenceTitle { font-size: 19px; }
   .todak-reference #chSel #chBack,
   .todak-reference #freeReferenceClose { width: 38px; height: 38px; }
-  .todak-reference #chSel #tmode { grid-column: 1 / -1; justify-self: start; margin: -2px 0 0 9px; }
   .todak-reference #chSel #tmode button { min-height: 32px; font-size: 13px; padding-inline: 15px; }
   .todak-reference #chSel .chRule { margin: 0 0 8px; font-size: 12px; }
   .todak-reference #chSel .chRule b { font-size: 14px; }
@@ -6033,7 +6031,6 @@ body.todak-reference #searchDlg:where(:not(.appraisal-dialog)) #closeSearch:wher
     column-gap: 8px;
     row-gap: 3px;
   }
-  body.todak-reference #chSel #tmode { grid-column: 1 / -1; justify-self: start; order: 2; margin-inline: 0; }
   body.todak-reference #chSel [data-unplayed] { display: none; }
   body.todak-reference #freeReferenceBuiltins .free-reference-card {
     justify-content: flex-start;
