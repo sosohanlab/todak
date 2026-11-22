@@ -56,7 +56,7 @@
         <h3>도자기 제작 및 저장</h3>
         <p>토닥은 회원가입 없이 이용할 수 있어요. 만든 작품과 작업 기록은 이용자의 브라우저에 저장되며, 다른 기기와 자동으로 연결되지 않습니다.</p>
         <h3>의견 보내기</h3>
-        <p>이용자가 남긴 의견과 첨부 이미지, 접수번호, 페이지 경로, 화면 크기 등의 정보를 오류 확인과 서비스 개선에 사용합니다. 반복 요청을 제한하기 위해 접속 IP를 변환한 값을 사용할 수 있습니다.</p>
+        <p>이용자가 남긴 의견과 첨부 이미지, 접수번호, 페이지 경로, 화면 크기 등의 정보를 오류 확인과 서비스 개선에 사용합니다. 의견과 첨부는 Supabase의 비공개 저장소에 저장하며 운영자만 확인합니다. 반복 요청을 제한하기 위해 접속 IP를 변환한 값을 사용할 수 있습니다.</p>
         <h3>이미지 검색</h3>
         <p>'닮은 도자기 찾기'를 이용하면 작품 이미지가 외부 이미지 검색 서비스로 전송됩니다.</p>
         <h3>홈 조회수</h3>
@@ -83,8 +83,6 @@
           <thead><tr><th scope="col">받는 곳 · 국가 · 연락처</th><th scope="col">전송 항목 · 시기와 방법</th><th scope="col">목적 · 보관 기간</th></tr></thead>
           <tbody>
             <tr><td><a href="https://supabase.com/privacy">Supabase</a><br>호주(저장 DB)<br><a href="mailto:privacy@supabase.com">privacy@supabase.com</a></td><td>의견, 첨부 이미지, 접수번호, 페이지 경로, 화면 크기 및 요청 제한 정보. 의견 제출 또는 이미지 검색 요청 시 HTTPS로 전송</td><td>의견 접수·오류 확인 및 요청 제한. 의견·첨부 최대 3개월, IP 변환값 48시간</td></tr>
-            <tr><td><a href="https://formsubmit.co/documentation">FormSubmit</a><br>처리 국가 확인 중<br><a href="mailto:support@formsubmit.co">support@formsubmit.co</a></td><td>의견, 첨부 이미지, 접수번호, 페이지 경로, 화면 크기. 의견을 제출하면 서버에서 HTTPS로 전송</td><td>운영자에게 의견 전달. 제출 기록 30일</td></tr>
-            <tr><td><a href="https://policies.google.com/privacy?hl=ko">Google LLC (Gmail)</a><br>처리 국가 확인 중<br><a href="https://support.google.com/policies/contact/general_privacy_form">개인정보 문의</a></td><td>의견, 첨부 이미지, 접수번호, 페이지 경로, 화면 크기. FormSubmit이 운영자 이메일로 전달</td><td>운영자 의견 확인. 이메일 사본 보관 상한 3개월</td></tr>
             <tr><td><a href="https://serpapi.com/legal">SerpApi, LLC</a><br>미국<br><a href="mailto:privacy@serpapi.com">privacy@serpapi.com</a></td><td>작품 이미지. 이미지 검색을 요청하면 서버에서 HTTPS로 전송</td><td>닮은 도자기 검색. 업로드 이미지 최대 30일</td></tr>
           </tbody>
         </table>
