@@ -26,15 +26,26 @@
 <meta name="apple-mobile-web-app-title" content="토닥">
 <meta name="theme-color" content="#1F3FA8">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' aria-hidden='true'%3E%3Crect width='64' height='64' rx='14' fill='%231F3FA8'/%3E%3Cg transform='translate(6.4 7.4) scale(.8)'%3E%3Cpath d='M25 15h14v4c9 3 14 10 14 18 0 9-5 15-13 17H24c-8-2-13-8-13-17 0-8 5-15 14-18z' fill='%23F6F8F5'/%3E%3Cpath d='M46.9 13.1l1-5.9M49.5 14.5l4.3-4.3M50.9 17.1l5.9-1' fill='none' stroke='%23F6F8F5' stroke-width='3' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E">
-<script type="text/javascript">
-if(["todak.sosohanlab.com","sosohanlab.github.io"].includes(location.hostname)){
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "zbuhjg2kso");
-    document.addEventListener("DOMContentLoaded",function(){var f=document.getElementById("footStat"); if(f){f.hidden=false;}});
-}
+<script>
+(() => {
+  if (location.origin !== "https://todak.sosohanlab.com" ||
+      !["/", "/index.html"].includes(location.pathname)) return;
+  const count = () => {
+    fetch("https://bdyqynoybwwvmnxizcrl.supabase.co/functions/v1/home-pageview", {
+      method: "POST",
+      credentials: "omit",
+      referrerPolicy: "no-referrer",
+      keepalive: true,
+    }).catch(() => {});
+  };
+  addEventListener("load", () => {
+    if (document.prerendering) {
+      document.addEventListener("prerenderingchange", count, { once: true });
+    } else {
+      setTimeout(count, 0);
+    }
+  }, { once: true });
+})();
 </script>
 <script>
 /* 영어 화면: 브라우저 언어가 한국어가 아니면 영어로 보여 준다. 첫 화면 아래 버튼으로 바꿀 수 있다 */
@@ -532,7 +543,6 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 <link rel="stylesheet" href="trimming.css?v=e60d0b0f0e54">
 <script src="saved-work-viewer.js?v=cca75dd4456e"></script><script src="bottom-view.js?v=d969d4859280"></script><link rel="stylesheet" href="mobile-sheet.css?v=eea383aeb901">
 <link rel="stylesheet" href="studio-layout.css?v=379bde7a1f84"><link rel="stylesheet" href="responsive-layout.css?v=291cd59192d9"><link rel="stylesheet" href="experience-polish.css?v=3b0c29e5c43c"><link rel="stylesheet" href="site-feedback.css?v=f15c860043ef"><link rel="stylesheet" href="tutorial-presentation.css?v=8f259deec3e5">
-<script src="channel-attribution.js?v=c815a8b33fc1"></script>
 </head>
 <body>
 <main class="app">
@@ -795,7 +805,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
       <button type="button" class="bigBtn alt" id="goChallenge"><b>도전하기</b><span>본을 따라 빚어요. 횟수 제한이 있고, 두께 0.5cm 이하면 무너져요.</span></button>
       <button type="button" class="bigBtn plain" id="goShelf"><b>내 진열장</b><span id="homeShelfN">구운 작품 0점</span></button>
       <button type="button" class="ghost" id="homeClose" hidden>하던 작업으로 돌아가기</button>
-      <p class="homeFoot"><span id="footSave">로그인 없이 바로 써요. 구운 작품은 이 기기에만 저장돼요.</span><span id="footStat" hidden> 더 나은 사이트를 위해 방문 통계를 수집해요.</span><br>
+      <p class="homeFoot"><span id="footSave">로그인 없이 바로 써요. 구운 작품은 이 기기에만 저장돼요.</span><span> 쿠키 없이 홈 조회수만 집계해요.</span><br>
         © 2026 토닥<a id="contactA" target="_blank" rel="noopener" hidden>문의</a><button type="button" id="addHome" hidden>홈 화면에 추가</button><button type="button" id="langBtn" data-keep>English</button></p>
       <p class="homeFoot" id="addHomeTip" hidden></p>
     </div>
