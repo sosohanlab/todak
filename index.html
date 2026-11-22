@@ -7869,7 +7869,13 @@ renderShelf=function(){
  const label=(ko,en)=>window.TODAK_LANG==='en'?en:ko;
  const tabs=$('tmode'), rules=$('chRules'), grid=$('chGrid');
  const mode=()=>blindPref?'memory':'timed';
- const timing=(level,kind)=>kind==='memory'?level.preview:level.seconds+(matchMedia('(pointer: coarse)').matches?20:0);
+ const shortTimes={easy:165,normal:135,hard:105};
+ const timing=(id,difficulty,kind)=>{
+   const level=levels[difficulty];
+   if(kind==='memory')return level.preview;
+   const seconds=CH_LV[id]===1?shortTimes[difficulty]:level.seconds;
+   return seconds+(matchMedia('(pointer: coarse)').matches?20:0);
+ };
  const timeText=seconds=>Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');
  const keyFor=(id,kind,level)=>id+'_'+kind+'_'+level+'_v1';
  const dialog=document.createElement('dialog');
@@ -7878,6 +7884,7 @@ renderShelf=function(){
  document.body.append(dialog);
  const title=$('challengeRunTitle'),setup=$('challengeRunSetup'),choices=$('challengeRunLevels'),note=$('challengeRunText'),actions=$('challengeRunActions');
  $('challengeRunClose').setAttribute('aria-label',label('닫기','Close'));
+ $('challengeRunClose').onclick=()=>dialog.close();
  choices.setAttribute('aria-label',label('난이도','Difficulty'));
  function action(name,fn,primary){
    const button=document.createElement('button');
@@ -7898,7 +7905,7 @@ renderShelf=function(){
    const buttons=Object.keys(levels).map(key=>{
      const level=levels[key],button=document.createElement('button');
      button.type='button';button.className='chip';button.dataset.difficulty=key;
-     button.textContent=label(level.ko,level.en)+' · '+(kind==='memory'?label(timing(level,kind)+'초',timing(level,kind)+'s'):timeText(timing(level,kind)));
+     button.textContent=label(level.ko,level.en)+' · '+(kind==='memory'?label(timing(id,key,kind)+'초',timing(id,key,kind)+'s'):timeText(timing(id,key,kind)));
      button.onclick=()=>{difficulty=key;select();};
      return button;
    });
@@ -7906,14 +7913,14 @@ renderShelf=function(){
    function select(){
      buttons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.difficulty===difficulty)));
      const level=levels[difficulty];
-     note.textContent=rulesText({mode:kind,preview:level.preview,limitMs:timing(level,kind)*1000});
+     note.textContent=rulesText({mode:kind,preview:level.preview,limitMs:timing(id,difficulty,kind)*1000});
    }
    select();action(label('시작하기','Start'),()=>startRun(id,kind,difficulty),true).id='challengeStartRun';
    showDialog();
  }
  function startRun(id,kind,difficulty){
    if(dialog.open)dialog.close();
-   const level=levels[difficulty],limitMs=timing(level,kind)*1000;
+   const level=levels[difficulty],limitMs=timing(id,difficulty,kind)*1000;
    startChallenge(id);
    st.blind=kind==='memory';
    st.challengeRun={target:id,mode:kind,difficulty,preview:level.preview,limitMs,remainingMs:limitMs,gestures:0,result:null};
