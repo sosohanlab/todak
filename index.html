@@ -4674,12 +4674,13 @@ cv.addEventListener("wheel",function(e){
     cup:['컵·잔','Cup'],bowl:['사발·면기','Bowl'],plate:['접시','Plate'],
     dish:['작은 종지','Small dish'],vase:['화병','Vase'],jar:['항아리·병','Jar or bottle'],object:['도자기 오브제','Ceramic object']
   };
+  var appraisalVersion=2;
   var grades=[
-    {id:'treasure',ko:'국보급',en:'National treasure',minimum:90,range:[3200000,4200000]},
-    {id:'fine',ko:'명품',en:'Masterpiece',minimum:78,range:[1800000,2600000]},
-    {id:'rare',ko:'귀한 물건',en:'Rare',minimum:64,range:[700000,1350000]},
-    {id:'common',ko:'일반',en:'Common',minimum:42,range:[200000,580000]},
-    {id:'starter',ko:'꽝',en:'First attempt',minimum:0,range:[50000,180000]}
+    {id:'treasure',ko:'국보급',en:'National treasure',minimum:92,range:[1000000,1500000]},
+    {id:'fine',ko:'명품',en:'Masterpiece',minimum:83,range:[400000,950000]},
+    {id:'rare',ko:'귀한 물건',en:'Rare',minimum:70,range:[100000,350000]},
+    {id:'common',ko:'일반',en:'Common',minimum:45,range:[20000,90000]},
+    {id:'starter',ko:'꽝',en:'First attempt',minimum:0,range:[1000,15000]}
   ];
   var scoreLabels=[['모양','Shape'],['매끄러움','Smoothness'],['꾸미기','Decoration'],['유약','Glaze']];
   function label(ko,en){return window.TODAK_LANG==='en'?en:ko;}
@@ -4742,29 +4743,35 @@ cv.addEventListener("wheel",function(e){
     var evenness=1-clamp(mean(bends)/.055,0,1);
     var wall=mean(thickness);
     var variation=mean(thickness.map(function(value){return Math.abs(value-wall);}));
-    var wallBalance=thickness.length?1-clamp(variation/Math.max(.2,wall)*1.9,0,1):evenness;
+    var wallBalance=thickness.length?1-clamp(variation/Math.max(.2,wall)*2.7,0,1):evenness;
+    var wallIntegrity=thickness.length?mean(thickness.map(function(value){return clamp(value/.5,0,1);})):0;
     var match=scoreBreakdown();
     var matchScore=match?(match.outline+match.height+match.depth)*100/75:0;
-    var shape=match?Math.min(match.solid?60:100,matchScore):35+40*wallBalance+25*evenness;
-    var smooth=25+45*evenness+Math.min(30,appraisalBitCount(st.appraisalSmooth)*6);
+    var shape=match?Math.min(match.solid?55:100,matchScore)-12*(1-wallIntegrity):
+      25+30*wallBalance+27*evenness+18*wallIntegrity;
+    var smooth=15+45*evenness+Math.min(40,appraisalBitCount(st.appraisalSmooth)*5);
     var under=!!(st.bottomPaint||st.bottomCarve), inside=!!(st.topPaint||st.topCarve);
-    var glazeZones=appraisalBitCount(st.appraisalGlaze), brush=glazeZones>0;
-    var decorating=32+(hasPaint?22:0)+(hasCarve?18:0)+(inside?10:0)+(under?16:0)+(brush?12:0);
-    var evenGlaze=72+(st.dip?12:0)+Math.min(16,glazeZones*2);
+    var glazeZones=appraisalBitCount(st.appraisalGlaze);
+    var decorating=20+(hasPaint?20:0)+(hasCarve?18:0)+(inside?14:0)+(under?14:0)+Math.min(14,glazeZones*2);
+    var firingDeduction={crack:18,stuck:14,run:8,pinhole:5}[st.kiln?.type]||0;
+    var evenGlaze=55+(st.dip?10:0)+Math.min(35,glazeZones*3)-firingDeduction;
     var values=[shape,smooth,decorating,evenGlaze].map(function(value){return Math.round(clamp(value,0,100));});
     var total=(42*values[0]+23*values[1]+20*values[2]+15*values[3])/100;
-    var grade=grades.find(function(tier){return total>=tier.minimum;});
-    // Keep the small price variation stable across retries and revisits.
+    var tierIndex=grades.findIndex(function(tier){return total>=tier.minimum;});
+    var grade=grades[tierIndex],ceiling=tierIndex===0?100:grades[tierIndex-1].minimum;
+    var position=(total-grade.minimum)/(ceiling-grade.minimum);
+    // Score sets the price within a tier; a little stable variation keeps it playful.
     var seed=JSON.stringify([st.height,st.floor,profile,st.inner,st.glaze,st.glaze2,st.dipDepth,values]);
     var hash=2166136261;
     for(var char of seed)hash=Math.imul(hash^char.charCodeAt(0),16777619);
-    var price=grade.range[0]+((hash>>>0)%(1+(grade.range[1]-grade.range[0])/500))*500;
-    return {version:1,kind:kind,grade:grade.id,price:price,values:values};
+    var priceVariation=(hash>>>0)/4294967295;
+    var price=grade.range[0]+Math.round((grade.range[1]-grade.range[0])*(.9*position+.1*priceVariation)/500)*500;
+    return {version:appraisalVersion,kind:kind,grade:grade.id,price:price,values:values};
   }
   var collectAppraisalItem=itemFields;
   itemFields=function(item){
     var work=collectAppraisalItem(item);
-    if(!work.appraisal?.version&&st.stage==='done')work.appraisal=assessAppraisal();
+    if(work.appraisal?.version!==appraisalVersion&&st.stage==='done')work.appraisal=assessAppraisal();
     return work;
   };
   function appraisalStars(values){
@@ -4939,7 +4946,7 @@ cv.addEventListener("wheel",function(e){
     resetAppraisalExport();
     var item=curItem();
     var workName=st.name||item?.name||label('나의 도자기','My pottery');
-    var assessment=item?.appraisal?.version===1?item.appraisal:assessAppraisal();
+    var assessment=item?.appraisal?.version===appraisalVersion?item.appraisal:assessAppraisal();
     var motion=!matchMedia('(prefers-reduced-motion: reduce)').matches;
     var began=performance.now(), cueTimers=[], timeout, rollTimer;
     $('appraisalLoadingTitle').textContent=label('음…','Hmm…');
