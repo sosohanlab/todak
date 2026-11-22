@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>개인정보 처리방침 · 토닥</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #faf4e8; color: #3c2b20; font: 16px/1.65 system-ui, sans-serif; overflow-wrap: anywhere; }
+    main { width: min(45rem, 100% - 2rem); margin: clamp(1.5rem, 6vw, 4rem) auto; }
+    .policy { background: #fffaf3; border: 1px solid #ded1bf; border-radius: 1.25rem; padding: clamp(1rem, 4vw, 2rem); }
+    h1, h2, h3 { line-height: 1.35; word-break: keep-all; }
+    h1 { color: #213eaa; font-size: clamp(1.75rem, 5vw, 2.25rem); margin: .25rem 0 .75rem; }
+    h2 { font-size: 1.22rem; margin: 0 0 .65rem; }
+    h3 { font-size: 1rem; margin: 0 0 .25rem; }
+    p, ul { margin: 0 0 .65rem; }
+    p + h3 { margin-top: 1rem; }
+    ul { padding-inline-start: 1.3rem; }
+    li + li { margin-top: .35rem; }
+    section { border-top: 1px solid #e6dacb; padding-top: 1.15rem; margin-top: 1.15rem; }
+    table { width: 100%; border-collapse: collapse; margin: .8rem 0; }
+    th, td { border: 1px solid #ded1bf; padding: .5rem .65rem; text-align: start; vertical-align: top; }
+    th { background: #f2e9dc; }
+    a { color: #213eaa; text-underline-offset: .18em; }
+    a:focus-visible { outline: 2px solid #213eaa; outline-offset: 3px; }
+    .home { display: inline-flex; align-items: center; min-height: 44px; margin-bottom: .3rem; }
+    @media (max-width: 599px), (hover: none) and (pointer: coarse) and (max-width: 1700px) {
+      body { font-size: 15px; }
+      h1 { font-size: 18px; }
+      h2 { font-size: 16px; }
+      h3 { font-size: 15px; }
+    }
+    @media (max-width: 599px), (max-width: 959px) and (max-height: 479px) and (orientation: landscape) and (pointer: coarse) {
+      body { font-size: 14px; }
+      .policy-table { overflow-x: auto; margin-block: .8rem; }
+      .policy-table:focus-visible { outline: 2px solid #213eaa; outline-offset: 2px; }
+      .policy-table table { min-width: 42rem; margin: 0; table-layout: fixed; line-height: 1.4; }
+      .policy-table th, .policy-table td { padding: .4rem .6rem; }
+      .policy-table th:nth-child(1) { width: 12rem; }
+      .policy-table th:nth-child(2) { width: 16rem; }
+      .policy-table th:nth-child(3) { width: 14rem; }
+      .policy-table td:first-child { white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="home" href="../">토닥 홈으로</a>
+    <article class="policy" aria-labelledby="policy-title">
+      <h1 id="policy-title">개인정보 처리방침</h1>
+      <p>토닥(TODAK)은 서비스 제공과 개선에 필요한 정보만 처리하며, 이용자의 정보를 안전하게 관리하기 위해 노력합니다.</p>
+
+      <section>
+        <h2>1. 어떤 정보를 이용하나요?</h2>
+        <h3>도자기 제작 및 저장</h3>
+        <p>토닥은 회원가입 없이 이용할 수 있어요. 만든 작품과 작업 기록은 이용자의 브라우저에 저장되며, 다른 기기와 자동으로 연결되지 않습니다.</p>
+        <h3>의견 보내기</h3>
+        <p>이용자가 남긴 의견과 첨부 이미지, 접수번호, 페이지 경로, 화면 크기 등의 정보를 오류 확인과 서비스 개선에 사용합니다. 반복 요청을 제한하기 위해 접속 IP를 변환한 값을 사용할 수 있습니다.</p>
+        <h3>이미지 검색</h3>
+        <p>'닮은 도자기 찾기'를 이용하면 작품 이미지가 외부 이미지 검색 서비스로 전송됩니다.</p>
+        <h3>홈 조회수</h3>
+        <p>홈이 열린 횟수만 한국 시간 기준으로 날짜별 집계합니다. 홈을 열면 Supabase에 HTTPS로 집계 요청을 보내며, 쿠키와 방문자 식별자는 보내지 않습니다.</p>
+      </section>
+
+      <section>
+        <h2>2. 얼마나 보관하나요?</h2>
+        <ul>
+          <li><strong>작품 정보:</strong> 이용자의 브라우저에 저장되며, 브라우저 데이터를 삭제하면 사라질 수 있습니다.</li>
+          <li><strong>의견 및 첨부 이미지:</strong> 접수일로부터 최대 3개월간 보관 후 삭제합니다.</li>
+          <li><strong>요청 제한:</strong> IP 변환값은 마지막 접수 또는 허용된 검색 후 48시간을 기준으로 삭제합니다.</li>
+          <li><strong>이미지 검색:</strong> SerpApi는 업로드 이미지를 최대 30일간 보관한다고 안내합니다.</li>
+          <li><strong>홈 조회수:</strong> 날짜별 합계를 통계로 보관합니다.</li>
+        </ul>
+        <p>보관 기간이 끝나거나 더 이상 필요하지 않은 정보는 삭제합니다. 법령에 따른 보존 의무가 있는 경우는 예외로 합니다.</p>
+      </section>
+
+      <section>
+        <h2 id="external-services">3. 외부 서비스 이용</h2>
+        <p>토닥은 의견 접수, 이미지 검색 및 서비스 개선을 위해 다음 서비스로 정보를 전송합니다.</p>
+        <div class="policy-table" role="region" aria-labelledby="external-services" tabindex="0">
+        <table aria-labelledby="external-services">
+          <thead><tr><th scope="col">받는 곳 · 국가 · 연락처</th><th scope="col">전송 항목 · 시기와 방법</th><th scope="col">목적 · 보관 기간</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://supabase.com/privacy">Supabase</a><br>호주(저장 DB)<br><a href="mailto:privacy@supabase.com">privacy@supabase.com</a></td><td>의견, 첨부 이미지, 접수번호, 페이지 경로, 화면 크기 및 요청 제한 정보. 의견 제출 또는 이미지 검색 요청 시 HTTPS로 전송</td><td>의견 접수·오류 확인 및 요청 제한. 의견·첨부 최대 3개월, IP 변환값 48시간</td></tr>
+            <tr><td><a href="https://formsubmit.co/documentation">FormSubmit</a><br>처리 국가 확인 중<br><a href="mailto:support@formsubmit.co">support@formsubmit.co</a></td><td>의견, 첨부 이미지, 접수번호, 페이지 경로, 화면 크기. 의견을 제출하면 서버에서 HTTPS로 전송</td><td>운영자에게 의견 전달. 제출 기록 30일</td></tr>
+            <tr><td><a href="https://policies.google.com/privacy?hl=ko">Google LLC (Gmail)</a><br>처리 국가 확인 중<br><a href="https://support.google.com/policies/contact/general_privacy_form">개인정보 문의</a></td><td>의견, 첨부 이미지, 접수번호, 페이지 경로, 화면 크기. FormSubmit이 운영자 이메일로 전달</td><td>운영자 의견 확인. 이메일 사본 보관 상한 3개월</td></tr>
+            <tr><td><a href="https://serpapi.com/legal">SerpApi, LLC</a><br>미국<br><a href="mailto:privacy@serpapi.com">privacy@serpapi.com</a></td><td>작품 이미지. 이미지 검색을 요청하면 서버에서 HTTPS로 전송</td><td>닮은 도자기 검색. 업로드 이미지 최대 30일</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>의견 보내기와 이미지 검색을 이용하지 않으면 해당 전송을 거부할 수 있습니다. 거부해도 작품 제작과 저장은 이용할 수 있습니다.</p>
+      </section>
+
+      <section>
+        <h2>4. 홈 조회수와 브라우저 저장</h2>
+        <p>조회수 집계에는 분석 쿠키를 사용하지 않습니다. 토닥은 작품과 설정을 유지하기 위해 브라우저의 저장 공간을 사용합니다.</p>
+      </section>
+
+      <section>
+        <h2>5. 개인정보 관련 문의</h2>
+        <p>이용자는 개인정보의 열람, 정정, 삭제 및 처리정지를 요청할 수 있습니다.</p>
+        <p>관련 문의는 아래 이메일로 보내주세요.</p>
+        <p><strong>개인정보 문의:</strong> <a href="mailto:sosohanlab08@gmail.com">sosohanlab08@gmail.com</a></p>
+        <p><strong>시행일:</strong> <time datetime="2026-11-22">2026년 11월 22일</time></p>
+      </section>
+    </article>
+  </main>
+</body>
+</html>
+
