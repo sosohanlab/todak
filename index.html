@@ -4674,13 +4674,13 @@ cv.addEventListener("wheel",function(e){
     cup:['컵·잔','Cup'],bowl:['사발·면기','Bowl'],plate:['접시','Plate'],
     dish:['작은 종지','Small dish'],vase:['화병','Vase'],jar:['항아리·병','Jar or bottle'],object:['도자기 오브제','Ceramic object']
   };
-  var appraisalVersion=2;
+  var appraisalVersion=3;
   var grades=[
     {id:'treasure',ko:'국보급',en:'National treasure',minimum:92,range:[1000000,1500000]},
     {id:'fine',ko:'명품',en:'Masterpiece',minimum:83,range:[400000,950000]},
     {id:'rare',ko:'귀한 물건',en:'Rare',minimum:70,range:[100000,350000]},
     {id:'common',ko:'일반',en:'Common',minimum:45,range:[20000,90000]},
-    {id:'starter',ko:'꽝',en:'First attempt',minimum:0,range:[1000,15000]}
+    {id:'starter',ko:'꽝',en:'First attempt',minimum:0,range:[1000,9500]}
   ];
   var scoreLabels=[['모양','Shape'],['매끄러움','Smoothness'],['꾸미기','Decoration'],['유약','Glaze']];
   function label(ko,en){return window.TODAK_LANG==='en'?en:ko;}
