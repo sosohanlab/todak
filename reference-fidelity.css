@@ -935,7 +935,8 @@ html[lang=en] .todak-reference.ref-firing #sheet:has(#fs-prep:not([hidden])) #sh
   left: 11px;
   width: 38px;
   height: 38px;
-  padding: 8px;
+  padding: 6px;
+  object-fit: contain;
   background: transparent;
   filter: brightness(0) invert(1)
     drop-shadow(-.35px -.35px 0 #fff)

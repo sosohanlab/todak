@@ -744,7 +744,7 @@
   document.head.append(style);
   const fidelity = make('link', '');
   fidelity.rel = 'stylesheet';
-  fidelity.href = 'reference-fidelity.css?v=265ac07781cc';
+  fidelity.href = 'reference-fidelity.css?v=94d7918418c8';
   fidelity.onload = () => window.TodakResponsive.refresh();
   document.head.append(fidelity);
   document.body.classList.add('todak-reference');
