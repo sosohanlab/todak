@@ -6,6 +6,56 @@
 <meta charset="utf-8"><script>window.todakBootAt=performance.now();</script>
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+html[data-todak-boot] body { visibility: hidden; }
+html[data-todak-boot]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: #eab991 url("renewal-assets/home-wheel-desktop.webp") 58% center / cover no-repeat;
+  pointer-events: none;
+}
+@media (min-width: 600px) and (max-width: 1100px) and (min-height: 600px),
+       (pointer: coarse) and (min-width: 600px) and (min-height: 600px) and (max-width: 1700px) {
+  html[data-todak-boot]::before {
+    background-image: url("renewal-assets/home-wheel-tablet.webp");
+    background-position: 54% 76%;
+  }
+}
+@media (orientation: portrait) and (width < 600px) {
+  html[data-todak-boot]::before {
+    background-image: url("renewal-assets/home-wheel-mobile.webp?v=8ebe34845837");
+    background-position: 52% top;
+  }
+}
+</style>
+<script>
+(() => {
+  const root = document.documentElement;
+  root.setAttribute("data-todak-boot", "");
+  const styles = /\/(renewal|reference-layout|reference-fidelity)\.css$/;
+  const finished = new WeakSet();
+  const record = (event) => {
+    if (event.target instanceof HTMLLinkElement) finished.add(event.target);
+  };
+  document.addEventListener("load", record, true);
+  document.addEventListener("error", record, true);
+  document.addEventListener("DOMContentLoaded", async () => {
+    const links = [...document.querySelectorAll('link[rel="stylesheet"]')]
+      .filter(link => styles.test(new URL(link.href).pathname));
+    await Promise.all(links.map(link => {
+      if (link.sheet || finished.has(link)) return;
+      return new Promise(resolve => {
+        link.addEventListener("load", resolve, { once: true });
+        link.addEventListener("error", resolve, { once: true });
+      });
+    }));
+    document.removeEventListener("load", record, true);
+    document.removeEventListener("error", record, true);
+    requestAnimationFrame(() => root.removeAttribute("data-todak-boot"));
+  }, { once: true });
+})();
+</script>
 <link rel="preload" as="image" href="renewal-assets/home-wheel-mobile.webp?v=8ebe34845837" media="(orientation: portrait) and (width < 600px)" fetchpriority="high">
 <link rel="preload" as="style" href="renewal.css?v=4399c89be0e0">
 <link rel="preload" as="style" href="reference-layout.css?v=887f063d5092">
