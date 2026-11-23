@@ -11,7 +11,7 @@
 
   function artwork(target, name, className) {
     const img = document.createElement('img');
-    if (className === 'renewal-tool-photo') img.loading = 'lazy';
+    if (name !== 'icon-tap') img.loading = 'lazy';
     img.src = 'renewal-assets/' + name + '.webp';
     img.alt = '';
     img.className = className;
@@ -20,11 +20,15 @@
   }
 
   const home = byId('home');
-  const homeScene = document.createElement('picture');
-  homeScene.className = 'renewal-home-scene';
-  homeScene.innerHTML = '<source media="(orientation: portrait) and (width < 600px)" srcset="renewal-assets/home-wheel-mobile.webp?v=8ebe34845837">' +
-    '<source media="(min-width: 600px) and (max-width: 1100px) and (min-height: 600px), (pointer: coarse) and (min-width: 600px) and (min-height: 600px) and (max-width: 1700px)" srcset="renewal-assets/home-wheel-tablet.webp">' +
-    '<img src="renewal-assets/home-wheel-desktop.webp" alt="" fetchpriority="high">';
+  let homeScene = byId('homeScene');
+  if (!homeScene) {
+    // Older cached HTML may still load this script during a deployment.
+    homeScene = document.createElement('picture');
+    homeScene.className = 'renewal-home-scene';
+    homeScene.innerHTML = '<source media="(orientation: portrait) and (width < 600px)" srcset="renewal-assets/home-wheel-mobile.webp?v=8ebe34845837">' +
+      '<source media="(min-width: 600px) and (max-width: 1100px) and (min-height: 600px), (pointer: coarse) and (min-width: 600px) and (min-height: 600px) and (max-width: 1700px)" srcset="renewal-assets/home-wheel-tablet.webp">' +
+      '<img src="renewal-assets/home-wheel-desktop.webp" alt="" fetchpriority="high">';
+  }
   home.prepend(homeScene);
 
   const homeMenu = home.querySelector('.homeMenus');

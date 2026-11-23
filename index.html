@@ -7,26 +7,28 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
+body > #homeScene { display: none; }
+html[data-todak-boot] { background: #eab991; }
 html[data-todak-boot] body { visibility: hidden; }
-html[data-todak-boot]::before {
-  content: "";
+html[data-todak-boot] #homeScene {
+  display: block;
+  visibility: visible;
   position: fixed;
   inset: 0;
-  background: #eab991 url("renewal-assets/home-wheel-desktop.webp") 58% center / cover no-repeat;
   pointer-events: none;
+  z-index: 1;
 }
-@media (min-width: 600px) and (max-width: 1100px) and (min-height: 600px),
-       (pointer: coarse) and (min-width: 600px) and (min-height: 600px) and (max-width: 1700px) {
-  html[data-todak-boot]::before {
-    background-image: url("renewal-assets/home-wheel-tablet.webp");
-    background-position: 54% 76%;
-  }
+html[data-todak-boot] #homeScene img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 58% center;
 }
 @media (orientation: portrait) and (width < 600px) {
-  html[data-todak-boot]::before {
-    background-image: url("renewal-assets/home-wheel-mobile.webp?v=8ebe34845837");
-    background-position: 52% top;
-  }
+  html[data-todak-boot] #homeScene img { object-position: 52% top; }
+}
+@media (orientation: portrait) and (min-width: 600px) and (max-width: 1100px) {
+  html[data-todak-boot] #homeScene img { object-position: 54% 76%; }
 }
 </style>
 <script>
@@ -60,8 +62,11 @@ html[data-todak-boot]::before {
 <link rel="preload" as="style" href="renewal.css?v=4399c89be0e0">
 <link rel="preload" as="style" href="reference-layout.css?v=887f063d5092">
 <link rel="preload" as="style" href="reference-fidelity.css?v=94d7918418c8">
-<link rel="preload" as="script" href="renewal.js?v=4476c9dda374">
+<link rel="preload" as="script" href="renewal.js?v=049c79bc75dd">
 <link rel="preload" as="script" href="reference-layout.js?v=05355fbb3d37">
+<link rel="preload" as="script" href="photo-backgrounds.js?v=c6369af1a5d0">
+<link rel="preload" as="script" href="tool-images.js?v=877579dbf474">
+<link rel="preload" as="style" href="experience-polish.css?v=215f90244496">
 <title>토닥 · 온라인 도자기 공방</title>
 <meta name="description" content="화면에서 도자기를 빚고, 꾸미고, 가마에 구워 보는 공방 놀이. 본을 따라 빚는 도전도 있어요.">
 <meta property="og:title" content="토닥 · 온라인 도자기 공방">
@@ -928,6 +933,11 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 </style>
 </head>
 <body>
+  <picture id="homeScene" class="renewal-home-scene">
+    <source media="(orientation: portrait) and (width < 600px)" srcset="renewal-assets/home-wheel-mobile.webp?v=8ebe34845837">
+    <source media="(min-width: 600px) and (max-width: 1100px) and (min-height: 600px), (pointer: coarse) and (min-width: 600px) and (min-height: 600px) and (max-width: 1700px)" srcset="renewal-assets/home-wheel-tablet.webp">
+    <img src="renewal-assets/home-wheel-desktop.webp" alt="" fetchpriority="high">
+  </picture>
 <main class="app">
   <section class="stage" id="stage" data-stage="throw" aria-label="도자기 공방">
     <canvas id="cv" width="360" height="430" role="img" aria-label="공방의 물레 위에 놓인 도자기"></canvas>
@@ -1526,7 +1536,7 @@ function shapeOf(){
     nd=dlt>0?1:-1; if(dir&&nd!==dir)bumps++; dir=nd;
   }
   var vol=0, depth=Math.max(0,st.height-st.floor), steps=160;
-  for(i=0;i<steps;i++){var y=st.floor+depth*(i+0.5)/steps, radius=innerAt(y/st.height);vol+=Math.PI*radius*radius*depth/steps;}
+  for(i=0;depth>0&&i<steps;i++){var y=st.floor+depth*(i+0.5)/steps, radius=innerAt(y/st.height);vol+=Math.PI*radius*radius*depth/steps;}
   return {rB:rB,rTop:rTop,rUp:rAt(0.8),rMax:rMax,
     belly:midMax>Math.max(rB,rTop)*1.12, waist:midMin<Math.min(rB,rTop)*0.86,
     flare:rTop>rB*1.25, taper:rTop<rB*0.85, ribbed:bumps>=6,
@@ -1610,19 +1620,50 @@ function updateReadout(){
 }
 
 /* ---------- 빚기: 바깥 밀기 / 속 파기·넓히기 ---------- */
-var insetCache={signature:'',values:{}};
+var insetCache={height:0,radii:[],values:{}};
 function innerLimitAt(t,thickness){
- var key=st.height+'|'+st.radii.join(',');if(key!==insetCache.signature){insetCache={signature:key,values:{}};}
+ var radii=st.radii;
+ if(st.height!==insetCache.height||radii.some(function(value,index){return value!==insetCache.radii[index];})){
+  insetCache={height:st.height,radii:radii.slice(),values:{}};
+ }
  var values=insetCache.values[thickness];
- if(!values){values=[];var step=st.height/(N-1);for(var sample=0;sample<=256;sample++){
-  var y=st.height*sample/256,limit=rAt(sample/256)-thickness;
-  for(var seg=0;seg<N-1;seg++){var ya=seg*step,yb=ya+step,lo=Math.max(ya,y-thickness),hi=Math.min(yb,y+thickness);if(lo>hi)continue;
-   var slope=(st.radii[seg+1]-st.radii[seg])/step,at=clamp(y-slope*thickness/Math.sqrt(1+slope*slope),lo,hi),candidate=st.radii[seg]+slope*(at-ya)-Math.sqrt(Math.max(0,thickness*thickness-(at-y)*(at-y)));limit=Math.min(limit,candidate);
-  }values.push(Math.max(0,limit));
- }insetCache.values[thickness]=values;}
+ if(!values){
+  values=[];var step=st.height/(N-1);
+  var slopes=radii.slice(1).map(function(radius,index){return (radius-radii[index])/step;});
+  var shifts=slopes.map(function(slope){return slope*thickness/Math.sqrt(1+slope*slope);});
+  for(var sample=0;sample<=256;sample++){
+   var y=st.height*sample/256,limit=rAt(sample/256)-thickness;
+   // Only segments within a thickness of this height can limit the cavity here.
+   var first=Math.max(0,Math.floor((y-thickness)/step)-1);
+   var last=Math.min(N-2,Math.floor((y+thickness)/step)+1);
+   for(var seg=first;seg<=last;seg++){
+    var ya=seg*step,lo=Math.max(ya,y-thickness),hi=Math.min(ya+step,y+thickness);
+    if(lo>hi)continue;
+    var at=clamp(y-shifts[seg],lo,hi);
+    var candidate=radii[seg]+slopes[seg]*(at-ya)-Math.sqrt(Math.max(0,thickness*thickness-(at-y)*(at-y)));
+    limit=Math.min(limit,candidate);
+   }
+   values.push(Math.max(0,limit));
+  }
+  insetCache.values[thickness]=values;
+ }
  var f=clamp(t,0,1)*256,a=Math.min(255,Math.floor(f));return values[a]+(values[a+1]-values[a])*(f-a);
 }
-function wallNormalThickness(radius,y){var closest=Infinity,step=st.height/(N-1);for(var i=0;i<N-1;i++){var ax=st.radii[i],ay=i*step,dx=st.radii[i+1]-ax,dy=step,u=clamp(((radius-ax)*dx+(y-ay)*dy)/(dx*dx+dy*dy),0,1);closest=Math.min(closest,Math.hypot(radius-ax-u*dx,y-ay-u*dy));}return closest;}
+function wallNormalThickness(radius,y){
+ var step=st.height/(N-1),row=clamp(Math.floor(y/step),0,N-2);
+ var best=Infinity,bestX=Infinity,bestY=0;
+ for(var direction of [-1,1]){
+  for(var i=row+(direction>0?1:0);i>=0&&i<N-1;i+=direction){
+   var ay=i*step,gap=direction<0?y-ay-step:ay-y;
+   if(gap>0&&gap*gap>best)break;
+   var offsetX=radius-st.radii[i],offsetY=y-ay,dx=st.radii[i+1]-st.radii[i];
+   var u=clamp((offsetX*dx+offsetY*step)/(dx*dx+step*step),0,1);
+   var x=offsetX-u*dx,deltaY=offsetY-u*step,distance=x*x+deltaY*deltaY;
+   if(distance<best){best=distance;bestX=x;bestY=deltaY;}
+  }
+ }
+ return Math.hypot(bestX,bestY);
+}
 function constrainInterior(){for(var j=0;j<N;j++)st.inner[j]=clamp(st.inner[j],0,innerLimitAt(j/(N-1),wallLimit()));}
 function maximumCavityDepth(){
  return Math.floor(Math.max(0,st.height-minimumClayFloor())*10+1e-8)/10;
@@ -1746,6 +1787,7 @@ function touchClay(dt){
   return moved;
 }
 
+var nextSculptReadout=0,sculptReadoutPending=false;
 function sculptStep(dt,ts){
   var moved=0;
   if(ptr.down&&ptr.decided&&!ptr.waitingForClay&&st.stage==="throw"){
@@ -1766,7 +1808,10 @@ function sculptStep(dt,ts){
           drops.push({x:ptr.x,y:ptr.y,vx:side*(0.6+Math.random()*1.8),vy:-0.4-Math.random()*1.6,life:1});
         }
         if(ts-lastVib>70&&navigator.vibrate){try{navigator.vibrate(5);}catch(_){ } lastVib=ts;}
-        markPreset(null); updateReadout();
+        if(!sculptReadoutPending||ts>=nextSculptReadout){
+          markPreset(null);updateReadout();nextSculptReadout=ts+90;
+        }
+        sculptReadoutPending=true;
       }
     }
   }else{ptr.contact=false;}
@@ -2526,7 +2571,7 @@ function frame(ts){
 
   var dt=lastT?Math.min(ts-lastT,50):16; lastT=ts;
   if(!ptr.down){
-    if(dirty||fitWasHeld||fitStage!==st.stage||ts>=nextFitAt){
+    if(fitWasHeld||fitStage!==st.stage||ts>=nextFitAt||(dirty&&st.stage!=="throw")){
       fitTarget=fitV();
       fitStage=st.stage;
       nextFitAt=ts+120;
@@ -2753,7 +2798,8 @@ function endDrag(e){
   if(nPts()<2)pinch=null;
   if(st.stage==="throw"&&ptr.down&&!ptr.changed&&Math.abs(st.height-ptr.h0)<0.01){hist.pop();}
   else if(st.stage==="throw"&&ptr.down&&st.target&&!activeChallengeRun()&&(tool==="shape"||ptr.mode==="pull")){st.touches=(st.touches||0)+1; updateReadout();}
-  if(ptr.paint){updateReadout();}
+  if(ptr.paint||sculptReadoutPending){updateReadout();}
+  sculptReadoutPending=false;
   if(st.stage==="done"&&ptr.rotating){cardDirty=true;}
   sculptTouchId=null;
   ptr.waitingForClay=false;
@@ -3425,9 +3471,23 @@ function buildScene(){
   c.strokeStyle='#58493620';c.lineWidth=.6;for(var y=tableY+54;y<HC+my;y+=94){c.beginPath();c.moveTo(-mx,y);c.lineTo(W+mx,y+2);c.stroke();}
   c.setTransform(1,0,0,1,0,0);
 }
+var workshopBackdrop;
 function drawScene(){
-  // Keep the supplied workshop composition visible instead of cropping it into the overscan buffer.
-  if(window.TodakBackgrounds&&TodakBackgrounds.ready('wheel')){ctx.setTransform(dpr,0,0,dpr,0,0);TodakBackgrounds.draw(ctx,W,HC,'wheel');ctx.setTransform(1,0,0,1,0,0);return;}
+  // Keep the workshop image at its display size so pointer movement can reuse it.
+  if(window.TodakBackgrounds&&TodakBackgrounds.ready('wheel')){
+    if(!workshopBackdrop)workshopBackdrop=mk(1,1);
+    var image=workshopBackdrop.c,layout=innerWidth>=960?2:innerWidth>=600?1:0;
+    if(image.width!==cv.width||image.height!==cv.height||workshopBackdrop.layout!==layout||
+       workshopBackdrop.width!==W||workshopBackdrop.height!==HC){
+      image.width=cv.width;image.height=cv.height;
+      workshopBackdrop.x.setTransform(dpr,0,0,dpr,0,0);
+      TodakBackgrounds.draw(workshopBackdrop.x,W,HC,'wheel');
+      workshopBackdrop.layout=layout;workshopBackdrop.width=W;workshopBackdrop.height=HC;
+    }
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.drawImage(image,0,0);
+    return;
+  }
   buildScene();var f=SV/S0,mx=W*BGM,my=HC*BGM;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='#ded9cd';ctx.fillRect(0,0,W,HC);ctx.imageSmoothingEnabled=true;ctx.drawImage(bg.c,CX-(CX0+mx)*f,BASE-(BASE0+my)*f,(W+2*mx)*f,(HC+2*my)*f);ctx.setTransform(1,0,0,1,0,0);
 }
 window.addEventListener('todak-photo-background-ready',function(event){if(event.detail==='wheel')dirty=true;});
@@ -7042,7 +7102,7 @@ function uiUsesSheet(){return window.TodakReferenceLayout?.stackedWorkspace()??(
  var oldReadout=updateReadout;updateReadout=function(){oldReadout.apply(this,arguments);schedule();};var oldTips=showTips;showTips=function(){oldTips.apply(this,arguments);schedule();};
  var raf=0;function schedule(){if(!raf)raf=requestAnimationFrame(function(){raf=0;sync();});}
  function sync(){var challenge=!!TARGETS[st.target],type=st.stage,T=TARGETS[st.target],o=classify();document.body.dataset.uiStage=type;document.body.dataset.uiTool=tool;$('sheet').dataset.uiStage=type;if(!window.TodakToolFlow||!['throw','deco','glaze'].includes(type))$('sheetTitle').textContent={throw:'빚기 도구',deco:'꾸미기 도구',glaze:'유약',fire:fstep==='prep'?'굽기':'불 때는 중',done:'완성'}[type];pieceName.textContent=o.full;$('ui-goal-info').hidden=!challenge;$('ui-goal-switch').hidden=type!=='throw'||(!challenge&&!freeReferenceTarget());goal.querySelector('input').disabled=challenge&&!!st.blind;var run=activeChallengeRun();info.querySelector('.ui-score-row').hidden=type!=='throw'||!challenge;$('ui-rough-row').hidden=true;$('ui-live-score').hidden=true;remaining.textContent=challenge&&!run?touchLeft()+'번 남음':'';formButton.disabled=challenge&&touchLeft()===0;$('ui-moves').classList.toggle('empty',challenge&&touchLeft()===0);$('ui-rough-locate').setAttribute('aria-pressed',String(locate));
- $('ui-diameter').textContent=o.D+' cm';$('ui-height').textContent=o.H+' cm';$('ui-depth').textContent=Math.max(0,st.height-st.floor).toFixed(1)+' cm';var min=Infinity;for(var i=1;i<N;i++)if(i/(N-1)*st.height>=st.floor)min=Math.min(min,wallNormalThickness(st.inner[i],i/(N-1)*st.height));$('ui-wall').textContent=Number.isFinite(min)?(min*10).toFixed(0)+' mm':'속을 파 주세요';$('ui-wall').classList.toggle('danger',min<.45);$('ui-base').textContent=(st.floor*10).toFixed(0)+' mm';$('ui-wall-measure').hidden=$('ui-base-measure').hidden=tool!=='thick';
+ $('ui-diameter').textContent=o.D+' cm';$('ui-height').textContent=o.H+' cm';$('ui-depth').textContent=Math.max(0,st.height-st.floor).toFixed(1)+' cm';var min=Infinity;if(type==='throw'&&tool==='thick'){for(var i=1;i<N;i++)if(i/(N-1)*st.height>=st.floor)min=Math.min(min,wallNormalThickness(st.inner[i],i/(N-1)*st.height));}$('ui-wall').textContent=Number.isFinite(min)?(min*10).toFixed(0)+' mm':'속을 파 주세요';$('ui-wall').classList.toggle('danger',min<.45);$('ui-base').textContent=(st.floor*10).toFixed(0)+' mm';$('ui-wall-measure').hidden=$('ui-base-measure').hidden=tool!=='thick';
  rule.hidden=type!=='throw'||!challenge;views.hidden=type==='fire';document.querySelector('.viewDock').hidden=type!=='throw';$('ui-tool-footer').hidden=type==='fire';$('openCard').hidden=type!=='done';$('nextBtn').hidden=type==='fire';$('chRestart').hidden=type!=='throw'||!challenge;$('chQuit').hidden=true;$('dClear').hidden=type!=='deco';$('backThrow').hidden=type!=='deco';$('backDeco').hidden=type!=='glaze';$('nextAlt').hidden=type!=='done'||!challenge;
  $('chRestart').textContent='다시 도전하기';$('dClear').textContent='모두 지우기';$('backThrow').textContent='다시 빚기';$('ui-fire-start').hidden=type!=='fire'||!['prep','loaded','ready'].includes(fstep);$('ui-fire-start').textContent=fstep==='ready'?'가마 문 열기 →':fstep==='loaded'?'문 닫고 굽기 →':'가마에 넣고 굽기';fireField.hidden=type==='fire'&&fstep!=='prep';if(type==='glaze'&&!(window.TodakTutorial&&TodakTutorial.state().active&&['glazeBase','glazeGroup'].includes(TodakTutorial.state().id))&&![$('rackGlazeBase'),$('rackGlazeBrush')].some(function(b){return b.getAttribute('aria-pressed')==='true';}))$('rackGlazeBase').click();
  handChoices.querySelectorAll('button').forEach(function(b,i){if(i===2)b.textContent=tool==='thick'?'크게':'넓게';b.setAttribute('aria-pressed',String(handSizeChoice(Number($('hsize').value))===i));});
@@ -8238,7 +8298,7 @@ if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
 
 <script src="migration/transfer-core.js?v=fb1718e4f591"></script>
 <script src="migration/domain-transfer.js?v=2c957daad9b7"></script>
-<script src="renewal.js?v=4476c9dda374"></script>
+<script src="renewal.js?v=049c79bc75dd"></script>
 <script src="reference-layout.js?v=05355fbb3d37"></script>
 <dialog id="privacyNotice" aria-labelledby="privacyNoticeTitle">
   <header>
@@ -8274,6 +8334,14 @@ if(hot&&hot.ready){hot.ready(start);}else{start((hot&&hot.data)||{});}
 </script>
 <script src="home-shelf.js?v=b8a440fea6d6"></script>
 <script src="tutorial-preview.js?v=4d44224958ca"></script>
+<script>
+for(const id of ["goFree","goChallenge"]){
+  document.getElementById(id).addEventListener("click",()=>{
+    window.TodakBackgrounds?.ready("wheel");
+    window.TodakToolImages?.activate("throw");
+  },{once:true});
+}
+</script>
 <script>
 (() => {
   const selectDialog=document.createElement('dialog');
