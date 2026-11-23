@@ -819,7 +819,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 .appraisal-copy > strong { display:block; font-size:19px; line-height:1.35; }
 #appraisalStyle { color:#28685c; font-family:var(--display); font-size:clamp(17px,2.6vw,23px); }
 #appraisalPrice { color:#213eaa; font-size:clamp(25px,4.3vw,36px); font-weight:850; font-variant-numeric:tabular-nums; }
-#appraisalBuns { font-size:14px; color:#63462f; font-weight:750; }
+#appraisalPriceComparison { font-size:14px; color:#63462f; font-weight:750; }
 #appraisalGrade { display:inline-flex; align-items:center; gap:5px; margin-top:10px; padding:3px 10px; border-radius:999px; font-size:13px; font-weight:800; background:#eee6da; color:#5f452e; }
 #appraisalGrade[data-grade="starter"] { background:#f4e3d8; color:#8b4635; }
 #appraisalGrade[data-grade="rare"] { background:#e2f1e9; color:#245d4d; }
@@ -834,7 +834,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 .appraisal-seal span { font-size:12px; font-weight:700; }
 .appraisal-seal b { font-size:21px; }
 .appraisal-comment { margin:12px 4px 16px; padding:12px 15px; border-radius:13px; background:#f1e7db; font-size:clamp(16px,3.8vw,20px); font-weight:800; color:#503929; word-break:keep-all; overflow-wrap:anywhere; }
-[data-appraisal-reveal="rolling"] :is(.appraisal-seal,#appraisalGrade,#appraisalBuns,.appraisal-comment,.appraisal-actions,.appraisal-score-label,.appraisal-scores,#appraisalDisclaimer),
+[data-appraisal-reveal="rolling"] :is(.appraisal-seal,#appraisalGrade,#appraisalPriceComparison,.appraisal-comment,.appraisal-actions,.appraisal-score-label,.appraisal-scores,#appraisalDisclaimer),
 [data-appraisal-reveal="stamping"] :is(.appraisal-comment,.appraisal-actions,#appraisalDisclaimer) { visibility:hidden; }
 [data-appraisal-reveal="stamping"] .appraisal-seal { animation:appraisal-stamp .28s ease-out both; }
 [data-appraisal-reveal="stamping"] .appraisal-card { animation:appraisal-landing .28s ease-out both; }
@@ -1203,7 +1203,7 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
               <p id="appraisalStyleLabel">감정 결과</p><strong id="appraisalStyle"></strong>
               <span id="appraisalGrade"></span>
               <p id="appraisalPriceLabel">가상 추정가</p><strong id="appraisalPrice"></strong>
-              <div id="appraisalBuns"></div>
+              <div id="appraisalPriceComparison"></div>
               <div class="appraisal-score-label" id="appraisalScoreTitle">왜 이 등급?</div>
               <ul class="appraisal-scores" id="appraisalScores" aria-labelledby="appraisalScoreTitle"></ul>
             </div>
@@ -4684,6 +4684,32 @@ cv.addEventListener("wheel",function(e){
   ];
   var scoreLabels=[['모양','Shape'],['매끄러움','Smoothness'],['꾸미기','Decoration'],['유약','Glaze']];
   function label(ko,en){return window.TODAK_LANG==='en'?en:ko;}
+  // Fixed prices are just a playful yardstick.
+  var appraisalFood=[
+    {won:500,ko:'붕어빵',unit:'개',en:'bungeoppang',plural:'bungeoppang'},
+    {won:1000,ko:'약과',unit:'개',en:'yakgwa',plural:'yakgwa'},
+    {won:1500,ko:'버터떡',unit:'개',en:'butter rice cake',plural:'butter rice cakes'},
+    {won:3000,ko:'소금빵',unit:'개',en:'salt bread roll',plural:'salt bread rolls'},
+    {won:3500,ko:'말차 모찌',unit:'개',en:'matcha mochi',plural:'matcha mochi'},
+    {won:4500,ko:'우베 크림빵',unit:'개',en:'ube cream bun',plural:'ube cream buns'},
+    {won:10000,ko:'국밥',unit:'그릇',en:'bowl of gukbap',plural:'bowls of gukbap'}
+  ];
+  function appraisalHash(seed){
+    var hash=2166136261;
+    for(var char of seed)hash=Math.imul(hash^char.charCodeAt(0),16777619);
+    return hash>>>0;
+  }
+  function appraisalPriceComparison(assessment,workId,locale){
+    var eligible=appraisalFood.filter(function(food){return food.won<=assessment.price;});
+    var seed=workId||JSON.stringify([assessment.kind,assessment.price,assessment.values]);
+    var food=eligible[appraisalHash(seed)%eligible.length];
+    var count=Math.round(assessment.price/food.won);
+    var number=new Intl.NumberFormat(locale).format(count);
+    var approx=assessment.price%food.won!==0;
+    var ko=food.ko+' '+(approx?'약 ':'')+number+food.unit+' 값';
+    var en=(approx?'About ':'')+number+' '+(count===1?food.en:food.plural);
+    return label(ko,en);
+  }
   function uiText(){
     $('appraisalEntryLabel').textContent=label('이 그릇 얼마일까?','What’s this piece worth?');
     close.setAttribute('aria-label',label('감정 창 닫기','Close appraisal'));
@@ -4797,9 +4823,7 @@ cv.addEventListener("wheel",function(e){
     var position=(total-grade.minimum)/(ceiling-grade.minimum);
     // Score sets the price within a tier; a little stable variation keeps it playful.
     var seed=JSON.stringify([st.height,st.floor,profile,st.inner,st.glaze,st.glaze2,st.dipDepth,values]);
-    var hash=2166136261;
-    for(var char of seed)hash=Math.imul(hash^char.charCodeAt(0),16777619);
-    var priceVariation=(hash>>>0)/4294967295;
+    var priceVariation=appraisalHash(seed)/4294967295;
     var price=grade.range[0]+Math.round((grade.range[1]-grade.range[0])*(.9*position+.1*priceVariation)/500)*500;
     return {version:appraisalVersion,kind:kind,grade:grade.id,price:price,values:values};
   }
@@ -4927,7 +4951,7 @@ cv.addEventListener("wheel",function(e){
     field('appraisalStyleLabel',$('appraisalStyle').textContent,'bold 35px serif','#28685c',43);
     line($('appraisalGrade').textContent,'bold 26px sans-serif','#503929',38);
     field('appraisalPriceLabel',$('appraisalPrice').textContent,'bold 51px sans-serif','#213eaa',59);
-    line($('appraisalBuns').textContent,'bold 25px sans-serif','#503929',36);
+    line($('appraisalPriceComparison').textContent,'bold 25px sans-serif','#503929',36);
     line($('appraisalScoreTitle').textContent,'bold 23px sans-serif','#503929',32);
     line(Array.from($('appraisalScores').children,function(item){return item.textContent;}).join(' · '),'23px sans-serif','#503929',33);
     y+=24;
@@ -5015,8 +5039,7 @@ cv.addEventListener("wheel",function(e){
       var grade=grades.find(function(tier){return tier.id===assessment.grade;});
       $('appraisalGrade').dataset.grade=grade.id;
       $('appraisalGrade').textContent=label(grade.ko,grade.en);
-      var buns=new Intl.NumberFormat(locale).format(assessment.price/500);
-      $('appraisalBuns').textContent=label('붕어빵 '+buns+'개 값',buns+' bungeoppang at ₩500 each');
+      $('appraisalPriceComparison').textContent=appraisalPriceComparison(assessment,item?.id||st.curId,locale);
       $('appraisalComment').textContent=data.comment;
       $('appraisalScores').replaceChildren(...appraisalStars(assessment.values).map(function(stat){
         var row=document.createElement('li'),stars=document.createElement('span');
