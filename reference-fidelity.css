@@ -936,8 +936,10 @@ html[lang=en] .todak-reference.ref-firing #sheet:has(#fs-prep:not([hidden])) #sh
   width: 38px;
   height: 38px;
   padding: 8px;
-  border-radius: 11px;
-  background: #e3eafd;
+  background: transparent;
+  filter: brightness(0) invert(1)
+    drop-shadow(-.35px -.35px 0 #fff)
+    drop-shadow(.35px .35px 0 #fff);
   opacity: 1;
 }
 .todak-reference #home[data-ref-visit=first] #goTutorial > span { display: block; font-size: .68rem; }
