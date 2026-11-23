@@ -4685,14 +4685,23 @@ cv.addEventListener("wheel",function(e){
   var scoreLabels=[['모양','Shape'],['매끄러움','Smoothness'],['꾸미기','Decoration'],['유약','Glaze']];
   function label(ko,en){return window.TODAK_LANG==='en'?en:ko;}
   // Fixed prices are just a playful yardstick.
-  var appraisalFood=[
+  var appraisalComparisons=[
     {won:500,ko:'붕어빵',unit:'개',en:'bungeoppang',plural:'bungeoppang'},
     {won:1000,ko:'약과',unit:'개',en:'yakgwa',plural:'yakgwa'},
     {won:1500,ko:'버터떡',unit:'개',en:'butter rice cake',plural:'butter rice cakes'},
     {won:3000,ko:'소금빵',unit:'개',en:'salt bread roll',plural:'salt bread rolls'},
     {won:3500,ko:'말차 모찌',unit:'개',en:'matcha mochi',plural:'matcha mochi'},
     {won:4500,ko:'우베 크림빵',unit:'개',en:'ube cream bun',plural:'ube cream buns'},
-    {won:10000,ko:'국밥',unit:'그릇',en:'bowl of gukbap',plural:'bowls of gukbap'}
+    {won:10000,ko:'국밥',unit:'그릇',en:'bowl of gukbap',plural:'bowls of gukbap'},
+    {won:500,ko:'코인노래방',unit:'곡',en:'coin karaoke song',plural:'coin karaoke songs'},
+    {won:1000,ko:'인형뽑기',unit:'판',en:'claw machine try',plural:'claw machine tries'},
+    {won:2000,ko:'고양이 간식 캔',unit:'개',en:'can of cat treats',plural:'cans of cat treats'},
+    {won:3000,ko:'목욕탕 고무 오리',unit:'마리',en:'rubber duck',plural:'rubber ducks'},
+    {won:5000,ko:'네 컷 사진',unit:'장',en:'photo booth strip',plural:'photo booth strips'},
+    {won:6000,ko:'비 오는 날 편의점 우산',unit:'개',en:'convenience store umbrella',plural:'convenience store umbrellas'},
+    {won:9000,ko:'목욕탕 입장권',unit:'장',en:'bathhouse ticket',plural:'bathhouse tickets'},
+    {won:20000,ko:'오리 보트 탑승권',unit:'장',en:'pedal boat ticket',plural:'pedal boat tickets'},
+    {won:50000,ko:'놀이공원 자유이용권',unit:'장',en:'theme park pass',plural:'theme park passes'}
   ];
   function appraisalHash(seed){
     var hash=2166136261;
@@ -4700,14 +4709,14 @@ cv.addEventListener("wheel",function(e){
     return hash>>>0;
   }
   function appraisalPriceComparison(assessment,workId,locale){
-    var eligible=appraisalFood.filter(function(food){return food.won<=assessment.price;});
+    var eligible=appraisalComparisons.filter(function(entry){return entry.won<=assessment.price;});
     var seed=workId||JSON.stringify([assessment.kind,assessment.price,assessment.values]);
-    var food=eligible[appraisalHash(seed)%eligible.length];
-    var count=Math.round(assessment.price/food.won);
+    var comparison=eligible[appraisalHash(seed)%eligible.length];
+    var count=Math.round(assessment.price/comparison.won);
     var number=new Intl.NumberFormat(locale).format(count);
-    var approx=assessment.price%food.won!==0;
-    var ko=food.ko+' '+(approx?'약 ':'')+number+food.unit+' 값';
-    var en=(approx?'About ':'')+number+' '+(count===1?food.en:food.plural);
+    var approx=assessment.price%comparison.won!==0;
+    var ko=comparison.ko+' '+(approx?'약 ':'')+number+comparison.unit+' 값';
+    var en=(approx?'About ':'')+number+' '+(count===1?comparison.en:comparison.plural);
     return label(ko,en);
   }
   function uiText(){
