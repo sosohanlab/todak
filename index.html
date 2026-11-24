@@ -160,6 +160,8 @@ let initialSharedChallenge=takeSharedChallenge();
     "사파리 아래쪽 공유 버튼을 누르고 '홈 화면에 추가'를 골라요.":"Tap Share in Safari, then choose Add to Home Screen.",
     "브라우저 메뉴(⋮)에서 '홈 화면에 추가' 또는 '앱 설치'를 골라요.":"Choose Add to Home Screen or Install app from your browser menu (⋮).",
     '도자기 공방':'Pottery studio', '공방의 물레 위에 놓인 도자기':'Pottery on the studio wheel', '조작판':'Work controls',
+    '도장 회전':'Stamp rotation', '정밀 그리기':'Precision drawing',
+    '켜면 손가락 위에 보이는 점을 따라 그려져요.':'When on, paint follows the dot above your finger.',
     '도구 설정 접기':'Collapse tool settings', '제작 도구 설정':'Studio tool settings',
     '도구창 높이 · 위아래로 끌어 조절':'Tool panel height · drag to resize', '작품 정보 접기':'Collapse artwork details',
     '내 진열장 닫기':'Close my showcase', '완성한 작품 진열장':'Showcase of finished pieces',
@@ -817,6 +819,11 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
 
 
 <link rel="stylesheet" href="wheel-freedom.css?v=738a91417d95">
+<style>
+#activeToolCursor[data-tool="precision-brush"]{width:20px;height:20px;z-index:18;transform:translate(-50%,-50%);filter:none}
+#activeToolCursor[data-tool="precision-brush"] svg{stroke:#fff9ee;stroke-width:2;filter:drop-shadow(0 0 1px #203e9d)}
+#activeToolCursor[data-tool="precision-brush"] circle{fill:#2749ac;stroke:none}
+</style>
 
 
 
@@ -1051,6 +1058,14 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
           </div>
         </div>
         <div hidden><input type="range" id="zoom" min="1" max="3" step="0.05" value="1"><output id="zoomOut"></output></div>
+        <div class="field" id="f-stamp-rotation" hidden>
+          <div class="rangehead"><label class="label" for="stampRotation">도장 회전</label><output id="stampRotationOut" for="stampRotation">0°</output></div>
+          <input type="range" id="stampRotation" min="-180" max="180" step="1" value="0">
+        </div>
+        <div class="field" id="f-precision-brush" hidden>
+          <button type="button" class="chip" id="precisionBrush" aria-pressed="false" aria-describedby="precisionBrushTip">정밀 그리기</button>
+          <p class="tip" id="precisionBrushTip">켜면 손가락 위에 보이는 점을 따라 그려져요.</p>
+        </div>
         <div class="field" id="f-ring">
           <span class="label">긋는 법</span>
           <div class="chips" id="ring">
@@ -1414,6 +1429,8 @@ var dpr=1, spin=0, rot=0, rotTarget=0, fireStart=0, fireU=0, dirty=true, lastT=0
 var wob=0, wet=0, inten=0, lastVib=0, touched=false, tool="shape";
 var dTool="brush", dPig="blue", dColor=[122,63,160], dStamp="flower", dRing=false;
 var dOpacity=1,opacityStroke=null,opacityBase=null;
+var stampRotation=0, precisionBrushOn=false;
+var precisionBrushLift=44;
 var dSizeV={brush:0.35,carve:0.35,erase:0.4,stamp:0.4,move:0.35};
 var photoScene="studio";
 var Z=1, photoOn=true; /* 꾸미기 확대 배율, 완성 화면 실사 보기 */
@@ -1928,10 +1945,21 @@ function dab(u,v,size,ring,fromU,fromV){
   }
 }
 var STAMP_PATHS={"flower": "M0 -9 C4 -15 11 -9 7 -4 C16 -4 14 6 6 6 C9 15 -1 18 -4 9 C-12 15 -18 6 -9 2 C-18 -5 -7 -14 0 -9 Z M-2 -2 a3 3 0 1 0 0 6 a3 3 0 1 0 0 -6", "leaf": "M0 -17 Q22 0 0 17 Q-22 0 0 -17 Z M0 -10 L0 12 M0 2 L7 -4 M0 7 L-7 0", "star": "M0 -17 L4 -5 L17 -5 L7 3 L11 16 L0 8 L-11 16 L-7 3 L-17 -5 L-4 -5 Z", "wave": "M-17 -8 Q-9 -17 0 -8 T17 -8 M-17 1 Q-9 -8 0 1 T17 1 M-17 10 Q-9 1 0 10 T17 10", "dots": "M-11 0 a3 3 0 1 0 .01 0 M0 0 a3 3 0 1 0 .01 0 M11 0 a3 3 0 1 0 .01 0", "sun": "M0 -8 a8 8 0 1 0 .01 0 M0 -18 V-13 M0 13 V18 M-18 0 H-13 M13 0 H18 M-13 -13 L-9 -9 M9 9 L13 13 M13 -13 L9 -9 M-9 9 L-13 13", "moon": "M7 -16 C-19 -14 -19 14 7 16 C-4 8 -4 -8 7 -16 Z", "sprig": "M0 17 V-16 M0 -8 Q-14 -18 -12 -5 Q-5 1 0 -1 M0 3 Q14 -8 12 4 Q5 10 0 10", "arch": "M-17 14 V0 A17 17 0 0 1 17 0 V14 M-10 14 V0 A10 10 0 0 1 10 0 V14 M-3 14 V0 A3 3 0 0 1 3 0 V14", "diamond": "M0 -17 L12 0 L0 17 L-12 0 Z M0 -7 L5 0 L0 7 L-5 0 Z"};
+var stampPaths=new Map();
+function strokeStamp(c,x,y,sx,sy){
+ var path=stampPaths.get(dStamp);
+ if(!path){path=new Path2D(STAMP_PATHS[dStamp]||STAMP_PATHS.flower);stampPaths.set(dStamp,path);}
+ c.save();
+ c.translate(x,y);c.scale(sx/20,sy/20);c.rotate(stampRotation*Math.PI/180);
+ c.lineWidth=2.6;c.lineCap='round';c.lineJoin='round';
+ c.stroke(path);
+ c.restore();
+}
 function stampAt(u,v){
  var size=curSize(),sx=TW/(TWO*rAt(v)),sy=TH/st.height,c=paint.x;
- var path=new Path2D(STAMP_PATHS[dStamp]||STAMP_PATHS.flower);
- for(var k=-1;k<=1;k++){c.save();c.globalAlpha=dOpacity;c.translate(u*TW+k*TW,(1-v)*TH);c.scale(sx*size/20,sy*size/20);c.strokeStyle=css(pigColor());c.lineWidth=2.6;c.lineCap='round';c.lineJoin='round';c.stroke(path);c.restore();}
+ c.save();c.globalAlpha=dOpacity;c.strokeStyle=css(pigColor());
+ for(var k=-1;k<=1;k++)strokeStamp(c,(u+k)*TW,(1-v)*TH,sx*size,sy*size);
+ c.restore();
 }
 function applyDeco(hit,first){
   if((dTool==="brush"||dTool==="stamp")&&dOpacity<=0){ptr.last=hit;return;}
@@ -2637,10 +2665,13 @@ function onHeightHandle(x,y){
   var handle=handlePos(),dx=x-handle.x,dy=y-handle.y;
   return dx*dx+dy*dy<handle.hitRadius*handle.hitRadius;
 }
+function usesPrecisionBrush(e){
+  return precisionBrushOn&&e.pointerType==='touch'&&st.stage==='deco'&&dTool==='brush'&&!dRing;
+}
 function pos(e,startSculpt){
   ptr.brushPressure=brushPressure(e);
   var rect=cv.getBoundingClientRect();
-  ptr.x=(e.clientX-rect.left)*W/rect.width; ptr.y=(e.clientY-rect.top)*HC/rect.height;
+  ptr.x=(e.clientX-rect.left)*W/rect.width; ptr.y=(e.clientY-rect.top-(usesPrecisionBrush(e)?precisionBrushLift:0))*HC/rect.height;
   if(startSculpt&&e.pointerType==='touch'&&e.isPrimary&&usesRaisedSculptPoint()){
     sculptTouchId=onHeightHandle(ptr.x,ptr.y)?null:e.pointerId;
     sculptTouchLift=60;
@@ -2987,6 +3018,8 @@ function syncControls(){
   $("glazeCustom").classList.toggle("on",st.glaze==="custom");
   sizeUI();
   $("f-stamp").hidden=(dTool!=="stamp");
+  $("f-stamp-rotation").hidden=(dTool!=="stamp");
+  $("f-precision-brush").hidden=dTool!=="brush"||dRing||!matchMedia("(any-pointer: coarse)").matches;
   $("f-ring").hidden=(dTool==="stamp"||dTool==="move"||dTool==="erase");
   showTips();
 }
@@ -3020,6 +3053,14 @@ pick("dtools",function(d){dTool=d.d;});
 pick("pigs",function(d){dPig=d.pg;});
 $("paintOpacity").addEventListener("input",function(){dOpacity=clamp(Number(this.value)/100,0,1);$("paintOpacityOut").textContent=this.value+"%";});
 $("dsize").addEventListener("input",function(){dSizeV[dTool]=Number(this.value)/100; sizeUI();});
+$("stampRotation").addEventListener("input",function(){
+  stampRotation=Number(this.value);
+  $("stampRotationOut").textContent=stampRotation+"°";
+});
+$("precisionBrush").addEventListener("click",function(){
+  precisionBrushOn=!precisionBrushOn;
+  this.setAttribute("aria-pressed",String(precisionBrushOn));
+});
 $("zoom").addEventListener("input",function(){setZoom(Number(this.value),CX0,BASE0-150);});
 $("viewToggle").addEventListener("click",function(){
   if(window.TodakRealPhoto)TodakRealPhoto.select("wheel");else{photoOn=false;dirty=true;}
@@ -5731,9 +5772,9 @@ window.TodakDisplayAssets={shelf:{"wood": "renewal-assets/shelf-wood-two-tier.we
  var visited={};
  function paintTop(p,first){if(paintTopCut(p,first))return;var h=inTop(p);if(!h){last=null;return;}if(st.stage==='glaze'&&Number($('glazeOpacity').value)>0)st.appraisalGlaze=(st.appraisalGlaze||0)|(1<<16);var erase=st.stage==='deco'&&dTool==='erase',c=erase?topLayer.x:strokeInk.x,l=topLayout(),size=(st.stage==='glaze'?Number($('glazeBrushSize').value):curSize())/l.cm*384,erase=st.stage==='deco'&&dTool==='erase';c.save();c.globalCompositeOperation=erase?'destination-out':'source-over';c.fillStyle=c.strokeStyle=css(brushColor());c.lineCap=c.lineJoin='round';c.lineWidth=size*2;
  if(st.stage==='glaze'&&checks){var cell=76.8,col=Math.floor(h.x/cell),row=Math.floor(h.y/cell),key=col+','+row;if(!visited[key]){c.fillRect(col*cell,row*cell,cell+.5,cell+.5);visited[key]=true;}}
- else if(st.stage==='deco'&&dTool==='stamp'){if(first){c.translate(h.x,h.y);c.scale(size/20,size/20);c.lineWidth=2.6;c.stroke(new Path2D(STAMP_PATHS[dStamp]||STAMP_PATHS.flower));}}
+ else if(st.stage==='deco'&&dTool==='stamp'){if(first)strokeStamp(c,h.x,h.y,size,size);}
  else if(st.stage==='deco'&&dRing){var radius=Math.hypot(h.x-384,h.y-384);c.beginPath();c.arc(384,384,radius,0,TWO);c.stroke();}
- else if(!erase){if(first)topBrushPaths=[];if(!last||!topBrushPaths.length)topBrushPaths.push([]);var path=topBrushPaths[topBrushPaths.length-1];var point=brushPoint(h.x,h.y,size,size,ptr.brushPressure),tail=path[path.length-1];if(tail&&Math.hypot(tail.x-h.x,tail.y-h.y)<1)path[path.length-1]=point;else path.push(point);if(path.length>512){path=path.filter(function(_,i){return i%2===0||i===path.length-1;});topBrushPaths[topBrushPaths.length-1]=path;}c.clearRect(0,0,768,768);topBrushPaths.forEach(function(points){brushStroke(c,points);});}
+ else if(!erase){if(!last||!topBrushPaths.length)topBrushPaths.push([]);var path=topBrushPaths[topBrushPaths.length-1];var point=brushPoint(h.x,h.y,size,size,ptr.brushPressure),tail=path[path.length-1];if(tail&&Math.hypot(tail.x-h.x,tail.y-h.y)<1)path[path.length-1]=point;else path.push(point);if(path.length>512){path=path.filter(function(_,i){return i%2===0||i===path.length-1;});topBrushPaths[topBrushPaths.length-1]=path;}c.clearRect(0,0,768,768);topBrushPaths.forEach(function(points){brushStroke(c,points);});}
  else {c.beginPath();c.moveTo(last?last.x:h.x,last?last.y:h.y);c.lineTo(h.x,h.y);c.stroke();c.beginPath();c.arc(h.x,h.y,size,0,TWO);c.fill();var ec=strokeInk.x;ec.strokeStyle=ec.fillStyle='#fff';ec.lineWidth=size*2;ec.lineCap='round';ec.beginPath();ec.moveTo(last?last.x:h.x,last?last.y:h.y);ec.lineTo(h.x,h.y);ec.stroke();ec.beginPath();ec.arc(h.x,h.y,size,0,TWO);ec.fill();}
  c.restore();if(erase){var cut=strokeInk.x;cut.save();cut.strokeStyle=cut.fillStyle='#fff';cut.lineWidth=size*2;cut.lineCap=cut.lineJoin='round';cut.beginPath();cut.moveTo(last?last.x:h.x,last?last.y:h.y);cut.lineTo(h.x,h.y);cut.stroke();cut.beginPath();cut.arc(h.x,h.y,size,0,TWO);cut.fill();cut.restore();eraseTopCut();}if(!erase){topLayer.x.clearRect(0,0,768,768);topLayer.x.drawImage(strokeBase.c,0,0);topLayer.x.save();topLayer.x.globalAlpha=st.stage==='glaze'?Number($('glazeOpacity').value)/100:dOpacity;topLayer.x.drawImage(strokeInk.c,0,0);topLayer.x.restore();}changed=true;last=h;topVersion++;dirty=true;}
  function paintSide(p,first){var hit=hitSurface(p.x,p.y);if(!hit){ptr.last=null;return;}if(Number($('glazeOpacity').value)>0){changed=true;var zone=Math.min(3,Math.floor(hit.u*4))+4*Math.min(3,Math.floor(hit.v*4));st.appraisalGlaze=(st.appraisalGlaze||0)|(1<<zone);}var saved={t:dTool,p:dPig,c:dColor,s:dSizeV.brush,o:dOpacity,r:dRing};dTool='brush';dPig='custom';dColor=brushColor();dOpacity=Number($('glazeOpacity').value)/100;dRing=false;dSizeV.brush=Math.log(Number($('glazeBrushSize').value)/RANGE.brush[0])/Math.log(RANGE.brush[1]/RANGE.brush[0]);if(checks){var col=Math.floor(hit.u*16),row=Math.floor((1-hit.v)*12),key=col+','+row;if(!visited[key]){paint.x.save();paint.x.globalAlpha=dOpacity;paint.x.fillStyle=css(dColor);paint.x.fillRect(col*TW/16,row*TH/12,TW/16+.5,TH/12+.5);paint.x.restore();visited[key]=true;hasPaint=true;texVer++;dirty=true;}}else applyDeco(hit,first||!ptr.last);dTool=saved.t;dPig=saved.p;dColor=saved.c;dSizeV.brush=saved.s;dOpacity=saved.o;dRing=saved.r;}
@@ -5747,7 +5788,7 @@ window.TodakDisplayAssets={shelf:{"wood": "renewal-assets/shelf-wood-two-tier.we
  function bottomHit(p){return TodakBottom.hit(p.x,p.y,bottomLayout());}
  function bottomStroke(p,first){var h=bottomHit(p);if(!h){bottomLast=null;return;}if(st.stage==='glaze'&&Number($('glazeOpacity').value)>0)st.appraisalGlaze=(st.appraisalGlaze||0)|(1<<17);var dt=st.stage==='glaze'?'brush':dTool;if(dt==='move')return;var size=dt==='brush'&&st.stage==='glaze'?Number($('glazeBrushSize').value):curSize(),radius=size/bottomLayout().cm*384,c=bottomInk.x;
   c.save();c.fillStyle=c.strokeStyle=dt==='carve'?(dCarveMode==='raised'?'#fff':'#000'):dt==='erase'?'#fff':css(brushColor());c.lineCap=c.lineJoin='round';c.lineWidth=radius*2;
-  if(dt==='stamp'){if(first){c.translate(h.x,h.y);c.scale(radius/20,radius/20);c.lineWidth=2.6;c.stroke(new Path2D(STAMP_PATHS[dStamp]||STAMP_PATHS.flower));}}
+  if(dt==='stamp'){if(first)strokeStamp(c,h.x,h.y,radius,radius);}
   else if(st.stage==='deco'&&dRing&&dt!=='erase'){c.clearRect(0,0,768,768);c.beginPath();c.arc(384,384,Math.hypot(h.x-384,h.y-384),0,TWO);c.stroke();}
   else if(dt==='brush'){if(!bottomLast||!bottomPaths.length)bottomPaths.push([]);var points=bottomPaths[bottomPaths.length-1];points.push(brushPoint(h.x,h.y,radius,radius,ptr.brushPressure));if(points.length>512)bottomPaths[bottomPaths.length-1]=points.filter(function(_,i){return i%2===0||i===points.length-1;});c.clearRect(0,0,768,768);bottomPaths.forEach(function(path){brushStroke(c,path);});}
   else {c.beginPath();c.moveTo(bottomLast?bottomLast.x:h.x,bottomLast?bottomLast.y:h.y);c.lineTo(h.x,h.y);c.stroke();c.beginPath();c.arc(h.x,h.y,radius,0,TWO);c.fill();}
@@ -5771,7 +5812,7 @@ window.TodakDisplayAssets={shelf:{"wood": "renewal-assets/shelf-wood-two-tier.we
  ['deco','glaze'].forEach(function(s){var b=document.createElement('button');b.id='wheelBottom-'+s;b.type='button';b.className='chip';b.textContent='밑바닥 꾸미기';b.setAttribute('aria-pressed','false');$('wheelView-'+s).querySelector('.chips').insertBefore(b,$('topUndo-'+s));b.onclick=function(){bottom=true;top=false;loadBottom();refresh();dirty=true;};});
 
  function handles(){if(bottom)return false;return st.stage==='deco'&&top||st.stage==='glaze'&&glazeBrush;}
- cv.addEventListener('pointerdown',function(e){if(!handles()||e.button>0)return;toolPreview(e);e.preventDefault();e.stopImmediatePropagation();if(st.stage==='deco'&&dTool==='move'){toast('윗면은 고정된 시점이에요. 옆면 보기에서 돌릴 수 있어요.');return;}if(active!==null)return;loadTop();active=e.pointerId;pendingTop=null;changed=false;last=null;ptr.last=null;visited={};remember();topCutStart.x.clearRect(0,0,768,768);topCutStart.x.drawImage(topCarve.c,0,0);strokeBase.x.clearRect(0,0,768,768);strokeBase.x.drawImage(topLayer.c,0,0);strokeInk.x.clearRect(0,0,768,768);cv.setPointerCapture(e.pointerId);pos(e);var p={x:ptr.x,y:ptr.y};if(top)paintTop(p,true);else paintSide(p,true);},true);
+ cv.addEventListener('pointerdown',function(e){if(!handles()||e.button>0)return;toolPreview(e);e.preventDefault();e.stopImmediatePropagation();if(st.stage==='deco'&&dTool==='move'){toast('윗면은 고정된 시점이에요. 옆면 보기에서 돌릴 수 있어요.');return;}if(active!==null)return;loadTop();active=e.pointerId;pendingTop=null;changed=false;last=null;ptr.last=null;visited={};topBrushPaths=[];remember();topCutStart.x.clearRect(0,0,768,768);topCutStart.x.drawImage(topCarve.c,0,0);strokeBase.x.clearRect(0,0,768,768);strokeBase.x.drawImage(topLayer.c,0,0);strokeInk.x.clearRect(0,0,768,768);cv.setPointerCapture(e.pointerId);pos(e);var p={x:ptr.x,y:ptr.y};if(top)paintTop(p,true);else paintSide(p,true);},true);
  cv.addEventListener('pointermove',function(e){if(active!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();toolPreview(e);pos(e);var p={x:ptr.x,y:ptr.y};if(top){pendingTop=p;dirty=true;}else paintSide(p,false);},true);
  function end(e){if(active!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();if(pendingTop){var pending=pendingTop;pendingTop=null;paintTop(pending,false);}active=null;activeCursor.hidden=true;last=null;ptr.last=null;if(st.stage==='glaze'&&changed&&Number($('glazeOpacity').value)>0)window.dispatchEvent(new CustomEvent('todak-glaze-painted'));if(top&&changed){commitOuterTop();commitTop();}else if(top){history.pop();}else {texVer++;dirty=cardDirty=true;}}
  cv.addEventListener('pointerup',end,true);cv.addEventListener('pointercancel',end,true);cv.addEventListener('lostpointercapture',end,true);
@@ -5806,7 +5847,16 @@ window.TodakDisplayAssets={shelf:{"wood": "renewal-assets/shelf-wood-two-tier.we
  shapeTool('sponge','매끈하게');
  // Physical tool preview follows contact only; shaping never draws a hand.
  var activeCursor=document.createElement('div');activeCursor.id='activeToolCursor';activeCursor.hidden=true;activeCursor.setAttribute('aria-hidden','true');document.body.appendChild(activeCursor);
- function toolPreview(e){var chosen=st.stage==='deco'?dTool:st.stage==='glaze'&&glazeBrush?'glazeBrush':st.stage==='throw'&&tool==='sponge'?'sponge':null;if(!chosen||(!symbols[chosen]&&chosen!=='glazeBrush'&&chosen!=='sponge')){activeCursor.hidden=true;return;}if(activeCursor.dataset.tool!==chosen){activeCursor.dataset.tool=chosen;activeCursor.innerHTML=toolMarkup(chosen);}activeCursor.hidden=false;activeCursor.style.left=e.clientX+'px';activeCursor.style.top=e.clientY+'px';}
+ function toolPreview(e){
+  var precision=usesPrecisionBrush(e);
+  var chosen=st.stage==='deco'?(precision?'precision-brush':dTool):st.stage==='glaze'&&glazeBrush?'glazeBrush':st.stage==='throw'&&tool==='sponge'?'sponge':null;
+  if(!chosen||(!precision&&!symbols[chosen]&&chosen!=='glazeBrush'&&chosen!=='sponge')){activeCursor.hidden=true;return;}
+  if(activeCursor.dataset.tool!==chosen){
+   activeCursor.dataset.tool=chosen;
+   activeCursor.innerHTML=precision?'<svg viewBox="0 0 20 20"><path d="M10 1v5m0 8v5M1 10h5m8 0h5"/><circle cx="10" cy="10" r="3"/></svg>':toolMarkup(chosen);
+  }
+  activeCursor.hidden=false;activeCursor.style.left=e.clientX+'px';activeCursor.style.top=(e.clientY-(precision?precisionBrushLift:0))+'px';
+ }
  cv.addEventListener('pointerdown',toolPreview,true);cv.addEventListener('pointermove',function(e){if(e.buttons)toolPreview(e);else activeCursor.hidden=true;},true);
  ['pointerup','pointercancel','pointerleave','lostpointercapture'].forEach(function(event){cv.addEventListener(event,function(){activeCursor.hidden=true;},true);});
  var toolName=document.createElement('output');toolName.id='rackToolName';toolName.setAttribute('aria-live','polite');toolName.setAttribute('role','tooltip');document.body.appendChild(toolName);document.addEventListener('scroll',function(){toolName.hidden=true;},true);
@@ -7067,6 +7117,7 @@ function uiUsesSheet(){return window.TodakReferenceLayout?.stackedWorkspace()??(
   if(e.target!==cv||e.pointerType!=='touch'||!['throw','deco','glaze'].includes(st.stage))return;
   touchPoints.set(e.pointerId,touchPosition(e));if(touchPoints.size<2&&!touchNavigation){touchStartPoint=touchPosition(e);touchTravel=0;return;}
   if(!touchNavigation){
+   $('activeToolCursor').hidden=true;
    touchNavigation=true;var gesture=historyGesture,snapshot=gesture&&gesture.initial,hasStroke=touchTravel>6||(st.stage==='throw'&&tool==='trim'&&ptr.changed);if(historyTimer!==null)clearInterval(historyTimer);historyTimer=null;
    window.TodakWheel?.cancelGesture(hasStroke);
    if(hasStroke){endDrag();endHistoryGesture();}
@@ -7751,7 +7802,7 @@ function freeReferenceTarget(){
  function refresh(){
   frame=0;var editable=['throw','deco','glaze'].includes(st.stage),key=st.stage==='throw'?tool:st.stage==='deco'?dTool:$('rackGlazeBrush').getAttribute('aria-pressed')==='true'?'glazeBrush':'base';
   cue.hidden=!editable;if(!editable)return;var row=st.stage==='throw'?$('tools'):st.stage==='deco'?$('ui-touch-deco'):$('ui-touch-glaze');var anchor=window.TodakReferenceLayout?.cueAnchor(row)||row;if(anchor.nextSibling!==cue)anchor.after(cue);
-  var text=descriptions[key]||descriptions.shape;if(last!==key){cue.textContent=text[1];if(st.stage==='deco'){var orders={brush:['f-pig','f-size','f-opacity','f-ring','f-stamp','f-carve-mode'],stamp:['f-stamp','f-size','f-pig','f-opacity','f-ring','f-carve-mode'],carve:['f-carve-mode','f-size','f-ring','f-pig','f-opacity','f-stamp'],erase:['f-size','f-pig','f-opacity','f-ring','f-stamp','f-carve-mode']},anchor=cue;(orders[key]||orders.brush).forEach(function(id){var field=$(id);anchor.after(field);anchor=field;});}last=key;}$('sheetTitle').textContent=text[0];
+  var text=descriptions[key]||descriptions.shape;if(last!==key){cue.textContent=text[1];if(st.stage==='deco'){var orders={brush:['f-pig','f-size','f-opacity','f-precision-brush','f-ring','f-stamp','f-carve-mode'],stamp:['f-stamp','f-size','f-stamp-rotation','f-pig','f-opacity','f-ring','f-carve-mode'],carve:['f-carve-mode','f-size','f-ring','f-pig','f-opacity','f-stamp'],erase:['f-size','f-pig','f-opacity','f-ring','f-stamp','f-carve-mode']},anchor=cue;(orders[key]||orders.brush).forEach(function(id){var field=$(id);anchor.after(field);anchor=field;});}last=key;}$('sheetTitle').textContent=text[0];
  }
  function schedule(){if(!frame)frame=requestAnimationFrame(refresh);}
  // A selected tool stays selected when pressed again; colour controls do not vanish.
@@ -7909,9 +7960,9 @@ window.TodakViewLayout=function(max,opening){
   var color=sizeRange?(k==='brush'||k==='stamp'?css(pigColor()):k==='glaze'?'var(--ref-blue)':null):null;
   path.style.fill=color&&k!=='stamp'?'color-mix(in srgb,'+ color +' 46%,transparent)':'';
   stamp.style.stroke=color||'';
-  stamp.setAttribute('d',k==='stamp'?(STAMP_PATHS[dStamp]||STAMP_PATHS.flower):'');stamp.setAttribute('transform','translate('+cx+' '+cy+') scale('+(rx/20)+' '+(ry/20)+')');
+  stamp.setAttribute('d',k==='stamp'?(STAMP_PATHS[dStamp]||STAMP_PATHS.flower):'');stamp.setAttribute('transform','translate('+cx+' '+cy+') scale('+(rx/20)+' '+(ry/20)+') rotate('+stampRotation+')');
  }
- function locate(e){var b=cv.getBoundingClientRect();point={x:(e.clientX-b.left)*W/b.width,y:(e.clientY-b.top)*HC/b.height};}
+ function locate(e){var b=cv.getBoundingClientRect();point={x:(e.clientX-b.left)*W/b.width,y:(e.clientY-b.top-(usesPrecisionBrush(e)?precisionBrushLift:0))*HC/b.height};}
  function track(e){preview=false;sizeRange=null;clearTimeout(timer);locate(e);render();}
  cv.addEventListener('pointerdown',function(e){held=e.pointerId;track(e);});
  cv.addEventListener('pointermove',function(e){if(e.pointerType==='touch'&&held!==e.pointerId)return;track(e);});
@@ -7919,8 +7970,8 @@ window.TodakViewLayout=function(max,opening){
  document.addEventListener('pointercancel',clear,true);
  cv.addEventListener('pointerleave',function(){if(!sizeRange)clear();});window.addEventListener('blur',clear);
  document.addEventListener('input',function(e){
-  var range=e.target;if(!['dsize','glazeBrushSize','hsize','trimWidth'].includes(range.id))return;
-  sizeRange=['dsize','glazeBrushSize'].includes(range.id)?range:null;
+  var range=e.target;if(!['dsize','stampRotation','glazeBrushSize','hsize','trimWidth'].includes(range.id))return;
+  sizeRange=['dsize','stampRotation','glazeBrushSize'].includes(range.id)?range:null;
   point=null;preview=true;render();clearTimeout(timer);timer=setTimeout(clear,2200);
  });
  document.addEventListener('click',function(e){if(e.target.closest('#tools,#dtools,#ui-touch-deco,#ui-touch-glaze,#sheetViewBar,#homeBtn'))clear();});
