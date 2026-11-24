@@ -161,7 +161,7 @@ let initialSharedChallenge=takeSharedChallenge();
     "브라우저 메뉴(⋮)에서 '홈 화면에 추가' 또는 '앱 설치'를 골라요.":"Choose Add to Home Screen or Install app from your browser menu (⋮).",
     '도자기 공방':'Pottery studio', '공방의 물레 위에 놓인 도자기':'Pottery on the studio wheel', '조작판':'Work controls',
     '도장 회전':'Stamp rotation', '정밀 그리기':'Precision drawing',
-    '켜면 손가락 위에 보이는 점을 따라 그려져요.':'When on, paint follows the dot above your finger.',
+    '손가락 위의 파란 점을 따라 그려요.':'Paint follows the blue dot above your finger.',
     '도구 설정 접기':'Collapse tool settings', '제작 도구 설정':'Studio tool settings',
     '도구창 높이 · 위아래로 끌어 조절':'Tool panel height · drag to resize', '작품 정보 접기':'Collapse artwork details',
     '내 진열장 닫기':'Close my showcase', '완성한 작품 진열장':'Showcase of finished pieces',
@@ -1063,8 +1063,8 @@ input#title,input#purpose{width:100%;box-sizing:border-box;border:1px solid #c7c
           <input type="range" id="stampRotation" min="-180" max="180" step="1" value="0">
         </div>
         <div class="field" id="f-precision-brush" hidden>
-          <button type="button" class="chip" id="precisionBrush" aria-pressed="false" aria-describedby="precisionBrushTip">정밀 그리기</button>
-          <p class="tip" id="precisionBrushTip">켜면 손가락 위에 보이는 점을 따라 그려져요.</p>
+          <button type="button" class="chip" id="precisionBrush" aria-pressed="true" aria-describedby="precisionBrushTip">정밀 그리기</button>
+          <p class="tip" id="precisionBrushTip">손가락 위의 파란 점을 따라 그려요.</p>
         </div>
         <div class="field" id="f-ring">
           <span class="label">긋는 법</span>
@@ -1429,7 +1429,7 @@ var dpr=1, spin=0, rot=0, rotTarget=0, fireStart=0, fireU=0, dirty=true, lastT=0
 var wob=0, wet=0, inten=0, lastVib=0, touched=false, tool="shape";
 var dTool="brush", dPig="blue", dColor=[122,63,160], dStamp="flower", dRing=false;
 var dOpacity=1,opacityStroke=null,opacityBase=null;
-var stampRotation=0, precisionBrushOn=false;
+var stampRotation=0, precisionBrushOn=true;
 var precisionBrushLift=44;
 var dSizeV={brush:0.35,carve:0.35,erase:0.4,stamp:0.4,move:0.35};
 var photoScene="studio";
@@ -6501,6 +6501,7 @@ var mobileText={
    x=r.left+px*r.width/Math.max(1,W);y=r.top+py*r.height/Math.max(1,HC);kind=['stamp','load'].indexOf(current().id)>=0?'tap':['smooth','smoothInner'].indexOf(current().id)>=0?'rub':['brush','glazePaint','raised'].indexOf(current().id)>=0?'circle':current().id==='shape'?'shape':'drag';
   }
   if(!clip&&gesture&&target===intendedTarget()){kind=gesture.motion;if(target===cv&&Number.isFinite(gesture.x)){x=r.left+gesture.x*r.width/Math.max(1,W);y=r.top+gesture.y*r.height/Math.max(1,HC);}else if(kind==='range'){x=r.left+12+(r.width-24)*(Number(target.value)-Number(target.min))/(Number(target.max)-Number(target.min));y=r.top+r.height/2;}}
+  if(!clip&&target===cv&&current().id==='brush'&&precisionBrushOn&&!dRing&&matchMedia('(pointer: coarse)').matches)y+=precisionBrushLift;
   if(loading){var canvasBox=cv.getBoundingClientRect(),piece=pieceView();x=canvasBox.left+(CX+piece.x+rAt(.5)*SV*piece.s)*canvasBox.width/W;y=canvasBox.top+(BASE+piece.y-st.height*SV*piece.s*.45)*canvasBox.height/HC;kind='tap';}
   hand.hidden=false;hand.dataset.motion=kind;hand.dataset.targetKind=clip?'scroll':target===cv||loading?'vessel':'control';hand.dataset.action=loading?'누르기':info[2]||'누르기';
   if(hand.dataset.targetKind==='control'){var range=target.matches('input[type=range]');if(range){var travel=Math.min(16,r.width*.19);hand.dataset.motion='range';hand.style.setProperty('--tutorial-hand-travel',travel+'px');hand.style.left=Math.round(clamp(x-12,r.left+travel,Math.max(r.left+travel,r.right-24-travel)))+'px';hand.style.top=Math.max(4,Math.round(y-24))+'px';}else{hand.dataset.motion='tap';hand.style.left=Math.round(clamp(x-17,6,innerWidth-46))+'px';hand.style.top=Math.round(clamp(y-17,6,innerHeight-48))+'px';}}else{hand.style.left=clamp(x-8,8,innerWidth-48)+'px';hand.style.top=clamp(y-8,8,innerHeight-84)+'px';}
