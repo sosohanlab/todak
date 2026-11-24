@@ -4743,6 +4743,10 @@ function handControlUI(){var el=$('hsize');if(!el)return;var v=Number(el.value)/
   function show(){
     var T=TARGETS[st.target]; if(!T)return;
     $("crName").textContent=T.name; $("crN").textContent=T.n;
+    if(!activeChallengeRun()){
+      $("chRules").removeAttribute('data-run-rules');
+      if($("challengeCurrentRules"))$("challengeCurrentRules").hidden=true;
+    }
     $("crBlind").hidden=!st.blind; $("crMaster").hidden=!T.master;
     $("chRules").hidden=false; $("crGo").focus();
   }
@@ -8128,8 +8132,10 @@ renderShelf=function(){
    startChallenge(id);
    st.blind=kind==='memory';
    st.challengeRun={target:id,mode:kind,difficulty,preview:level.preview,limitMs,remainingMs:limitMs,gestures:0,result:null};
-   rules.hidden=true;
    if(window.TodakReferenceLayout?.toolSettings())setSheet(false);
+   showRules();
+   rules.hidden=false;
+   $('crGo').focus();
    last=performance.now();editingPointer=null;syncControls();updateReadout();
    window.TodakResponsive?.refresh();refresh();dirty=true;
  }
@@ -8160,13 +8166,17 @@ renderShelf=function(){
  const originalGhost=ghostOn;
  ghostOn=function(){
    const run=activeChallengeRun();
-   return run?.mode==='memory'?run.remainingMs>0&&$('ui-goal-switch').querySelector('input').checked:originalGhost();
+   return run?.mode==='memory'?rules.hidden&&run.remainingMs>0&&$('ui-goal-switch').querySelector('input').checked:originalGhost();
  };
  const runRules=document.createElement('p');runRules.id='challengeCurrentRules';runRules.hidden=true;$('crName').after(runRules);
  function showRules(){
    const run=activeChallengeRun();
    rules.toggleAttribute('data-run-rules',!!run);runRules.hidden=!run;
-   if(run)runRules.textContent=rulesText(run);
+   if(run){
+     $('crName').textContent=TARGETS[run.target].name;
+     const collapseWarning=label('벽이 너무 얇거나 옆으로 너무 벌리면 흙이 무너질 수 있어요.','Clay can collapse if the walls get too thin or flare out too far.');
+     runRules.textContent=collapseWarning+' '+rulesText(run);
+   }
  }
  $('chRulesBtn').addEventListener('click',showRules);
  $('crGo').addEventListener('click',()=>{last=performance.now();});
